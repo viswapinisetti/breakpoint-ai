@@ -370,6 +370,8 @@ all challenges passed deterministic validation
 | Executable validators: 5 subjects | ✅ (v0.2 §12.4) |
 | Investigation tools: scratchpad, calculator, formulas | ✅ (§37, §39) |
 | Alembic migrations + schema-drift guard | ✅ |
+| Pytest suite, 2,282 cases, selective runs + coverage | ✅ |
+| CI on every push and PR (GitHub Actions) | ✅ |
 | Mobile tab layout | ✅ (§38) |
 | Accessibility: keyboard, ARIA, non-colour-only state | ✅ (§107) |
 | **Challenge Studio**: generate, review, edit, publish | ✅ (§11.1) |
@@ -527,8 +529,45 @@ Use `--dry-run` to see the model-call count before spending anything.
 
 ## Testing
 
+Everything runs under pytest, and CI (`.github/workflows/ci.yml`) gates every
+push and pull request on it.
+
 ```bash
 cd backend
+./.venv/Scripts/python.exe -m pip install -r requirements-dev.txt
+
+./.venv/Scripts/python.exe -m pytest                  # everything (2,282 cases)
+./.venv/Scripts/python.exe -m pytest -m "not lint"    # the merge gate, without style warnings
+./.venv/Scripts/python.exe -m pytest --cov=app        # with coverage
+```
+
+Content is **one case per challenge**, so an author can run only theirs
+without waiting for the rest — about two seconds:
+
+```bash
+./.venv/Scripts/python.exe -m pytest tests/test_content.py -k apt-pct-001
+./.venv/Scripts/python.exe -m pytest tests/test_content.py -k aptitude
+```
+
+The student journey is sequential by nature — a judgment depends on the
+attempt before it — so it runs once and reports each of its ~106 assertions as
+its own case:
+
+```bash
+./.venv/Scripts/python.exe -m pytest tests/test_e2e.py -k leak
+```
+
+Two suites are native pytest (`tests/test_content.py`, `tests/test_e2e.py`).
+The rest run as subprocesses from `tests/test_suites.py`, which is what keeps
+their database isolation: each asserts on absolute state ("the review queue
+starts empty"), so each needs its own process and its own throwaway database.
+Converting one means moving it to its own `test_<name>.py` and removing its
+entry from `SUITES`; `test_every_suite_script_is_covered` fails if a suite
+script ends up wired to nothing.
+
+The scripts still run standalone, unchanged:
+
+```bash
 ./.venv/Scripts/python.exe -m scripts.validate_content   # content integrity (incl. topic registry)
 ./.venv/Scripts/python.exe -m scripts.topics_report      # topic coverage report
 ./.venv/Scripts/python.exe -m scripts.e2e_test           # student loop

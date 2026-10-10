@@ -1,0 +1,6 @@
+# Test and development dependencies. Runtime deps are in requirements.txt;
+# nothing here is imported by app/, so a deployment never installs it.
+-r requirements.txt
+
+pytest==9.1.1
+pytest-cov==7.1.0

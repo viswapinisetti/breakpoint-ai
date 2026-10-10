@@ -26,15 +26,29 @@ import tempfile
 from pathlib import Path
 
 
+PREFIX = "bp-test-db-"
+
+
 def use_temp_database() -> Path:
-    """Point the app at a fresh SQLite file, removed when the process exits."""
+    """Point the app at a fresh SQLite file, removed when the process exits.
+
+    Idempotent: under pytest the root conftest calls this before collection,
+    and a suite module imported afterwards calls it again at import time. The
+    second call reuses the first database rather than silently stranding it,
+    so the whole pytest process shares one throwaway file. Run standalone,
+    each script still gets its own.
+    """
+    existing = os.environ.get("BREAKPOINT_DATABASE_URL", "")
+    if PREFIX in existing:
+        return Path(existing.removeprefix("sqlite:///"))
+
     if "app.config" in sys.modules:
         raise RuntimeError(
             "app.config is already imported, so the database URL is fixed. "
             "Call use_temp_database() before any `app` import."
         )
 
-    directory = Path(tempfile.mkdtemp(prefix="bp-test-db-"))
+    directory = Path(tempfile.mkdtemp(prefix=PREFIX))
     path = directory / "breakpoint.db"
     os.environ["BREAKPOINT_DATABASE_URL"] = f"sqlite:///{path}"
     atexit.register(shutil.rmtree, directory, True)

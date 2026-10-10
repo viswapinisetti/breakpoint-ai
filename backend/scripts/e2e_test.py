@@ -44,8 +44,23 @@ _RUN = uuid4().hex[:8]
 HDR = {"X-Student-Id": f"e2e-student-{_RUN}", "X-Student-Name": "E2E Student"}
 failures: list[str] = []
 
+# Every check in journey order, as (phase, label, passed, detail). The pytest
+# wrapper in tests/test_e2e.py runs the journey once and turns each entry into
+# a separately named test case, so a failure names the step rather than the
+# whole suite. Running this script directly ignores it.
+results: list[tuple[str, str, bool, str]] = []
+_phase = "start"
+
+
+def phase(name: str) -> None:
+    """Mark the section that subsequent checks belong to."""
+    global _phase
+    _phase = name
+    print(f"\n[{name}]")
+
 
 def check(label: str, condition: bool, detail: str = "") -> None:
+    results.append((_phase, label, bool(condition), str(detail)))
     if condition:
         print(f"  ok   {label}")
     else:
@@ -55,12 +70,12 @@ def check(label: str, condition: bool, detail: str = "") -> None:
 
 def main() -> int:
     with TestClient(app) as client:
-        print("\n[health]")
+        phase("health")
         health = client.get("/api/health").json()
         check("health ok", health["status"] == "ok")
         print(f"       ai_configured={health['ai_configured']}")
 
-        print("\n[catalog]")
+        phase("catalog")
         subjects = client.get("/api/subjects", headers=HDR).json()
         check("19 subjects exposed", len(subjects) == 19, f"got {len(subjects)}")
         apt = next(s for s in subjects if s["key"] == "aptitude")
@@ -82,7 +97,7 @@ def main() -> int:
             next(s for s in subjects if s["key"] == "mlops")["challenge_count"] >= 3,
         )
 
-        print("\n[topic registry]")
+        phase("topic registry")
         from app.subjects.topics import REGISTRY  # noqa: E402
 
         check(
@@ -138,7 +153,7 @@ def main() -> int:
             == apt["topics"],
         )
 
-        print("\n[leak check - the most important test]")
+        phase("leak check - the most important test")
         started = client.post(
             "/api/challenges/apt-pct-001/start", headers=HDR
         ).json()
@@ -167,13 +182,13 @@ def main() -> int:
 
         attempt_id = started["attempt_id"]
 
-        print("\n[hints]")
+        phase("hints")
         h1 = client.post(f"/api/attempts/{attempt_id}/hint", headers=HDR).json()
         check("hint 1 is attention-level", h1["kind"] == "attention")
         check("hint 1 does not name the step", "step 3" not in h1["text"].lower())
         check("hints remaining tracked", h1["hints_remaining"] == 4)
 
-        print("\n[judge]")
+        phase("judge")
         judged = client.post(
             f"/api/attempts/{attempt_id}/judge",
             headers=HDR,
@@ -201,7 +216,7 @@ def main() -> int:
         )
         check("re-judging blocked", rejudge.status_code == 409)
 
-        print("\n[evidence - typed cards, PRD v0.2 6.4 / 9.1]")
+        phase("evidence - typed cards, PRD v0.2 6.4 / 9.1")
         key = "e2e-key-000001"
         ev = client.post(
             f"/api/attempts/{attempt_id}/evidence",
@@ -360,7 +375,7 @@ def main() -> int:
                 conflict.json()["reason_code"],
             )
 
-        print("\n[transfer check + appeal - PRD v0.2 5.2, 9.4]")
+        phase("transfer check + appeal - PRD v0.2 5.2, 9.4")
         tr = client.post(
             f"/api/attempts/{attempt_id}/transfer",
             headers=HDR,
@@ -384,7 +399,7 @@ def main() -> int:
         )
         check("appeal opened", ap.status_code == 202, ap.text[:150])
 
-        print("\n[repair + autopsy]")
+        phase("repair + autopsy")
         auto = client.post(f"/api/attempts/{attempt_id}/complete", headers=HDR)
         check("completion ok", auto.status_code == 200, auto.text[:160])
         if auto.status_code == 200:
@@ -406,7 +421,7 @@ def main() -> int:
                   str(sorted(a["score"])))
             print(f"       score {a['score']['total']} {a['score']}")
 
-        print("\n[false-failure challenge - approving correct work]")
+        phase("false-failure challenge - approving correct work")
         s2 = client.post("/api/challenges/apt-mark-009/start", headers=HDR).json()
         j2 = client.post(
             f"/api/attempts/{s2['attempt_id']}/judge",
@@ -418,7 +433,7 @@ def main() -> int:
         check("outcome task is justify for a valid artifact",
               j2["outcome_task"] == "justify", j2["outcome_task"])
 
-        print("\n[false alarm is penalised]")
+        phase("false alarm is penalised")
         s3 = client.post("/api/challenges/apt-avg-010/start", headers=HDR).json()
         j3 = client.post(
             f"/api/attempts/{s3['attempt_id']}/judge",
@@ -430,7 +445,7 @@ def main() -> int:
               "95%" in j3["calibration_note"] and "91" not in j3["calibration_note"],
               j3["calibration_note"])
 
-        print("\n[insufficient information - the third truth state]")
+        phase("insufficient information - the third truth state")
         s5 = client.post("/api/challenges/apt-spd-011/start", headers=HDR).json()
         body5 = s5["challenge"]
         check(
@@ -485,7 +500,7 @@ def main() -> int:
             str(bad_judgment.status_code),
         )
 
-        print("\n[stats]")
+        phase("stats")
         st = client.get("/api/stats", headers=HDR).json()
         check("5 investigations recorded", st["claims_investigated"] == 5,
               str(st["claims_investigated"]))
@@ -508,11 +523,11 @@ def main() -> int:
         print(f"       investigation score {st['investigation_score']}")
         print(f"       skills {st['verification_skills']}")
 
-        print("\n[history]")
+        phase("history")
         hist = client.get("/api/history", headers=HDR).json()
         check("history has 5 entries", len(hist) == 5, str(len(hist)))
 
-        print("\n[dashboard endpoints]")
+        phase("dashboard endpoints")
         # Every request the dashboard makes on load. These were previously
         # untested, and /challenges/continue was raising AttributeError on
         # every call - invisible here, and fatal in the browser, because the
@@ -540,7 +555,7 @@ def main() -> int:
             str([c["id"] for c in resume if c["completed"]]),
         )
 
-        print("\n[guards]")
+        phase("guards")
         s4 = client.post("/api/challenges/apt-tw-002/start", headers=HDR).json()
         # A well-formed submission, so this exercises the judgment guard rather
         # than tripping schema validation first.
@@ -573,7 +588,7 @@ def main() -> int:
         missing = client.post("/api/challenges/does-not-exist/start", headers=HDR)
         check("unknown challenge 404s", missing.status_code == 404)
 
-        print("\n[calibration]")
+        phase("calibration")
         # Approve a flawed artifact whose badge reads 94, while 95% sure: the
         # exact failure this product exists to train.
         believed = client.post(

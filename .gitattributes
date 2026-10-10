@@ -1,0 +1,19 @@
+# Normalise line endings. Development happens on Windows, CI runs on Linux;
+# without this, files committed with CRLF produce spurious diffs and can break
+# shell scripts and shebangs on the runner.
+* text=auto eol=lf
+
+# Binary assets - never translate.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.wasm binary
+*.db binary
+*.zip binary
+*.woff binary
+*.woff2 binary
+
+# Generated; collapse in diffs and exclude from language stats.
+frontend/package-lock.json linguist-generated=true -diff
