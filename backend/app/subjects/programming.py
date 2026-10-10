@@ -31,7 +31,7 @@ import ast
 from typing import Any
 
 from app.engine import sandbox
-from app.engine.contracts import Challenge
+from app.engine.contracts import Challenge, TruthState
 from app.subjects.base import SubjectConfig, ValidationResult
 from app.subjects.catalog import BY_KEY
 
@@ -96,6 +96,22 @@ class ProgrammingAdapter:
         reference = payload.get("reference_code")
         entry = payload.get("entry_point")
         cases: list[str] = list(payload.get("test_inputs") or [])
+
+        if challenge.truth_state is TruthState.INSUFFICIENT_INFORMATION:
+            # These work *because* what is needed to decide them is withheld -
+            # `prg-conditions-loops-004` asks whether countdown() terminates
+            # when its starting value comes from a settings file nobody has
+            # shown. Running it would require inventing that value, which
+            # answers the question the challenge is asking the student to
+            # refuse to answer.
+            return [
+                ValidationResult(
+                    True,
+                    "insufficient_information",
+                    "Underdetermined by design; executing it would supply the "
+                    "information the challenge deliberately withholds.",
+                )
+            ]
 
         if not (ai_code and reference and entry and cases):
             return [

@@ -164,6 +164,21 @@ class AptitudeAdapter:
                         "the canonical answer (PRD v0.2 section 8.1).",
                     )
                 )
+            elif challenge.truth_state == TruthState.INSUFFICIENT_INFORMATION:
+                # Not a missing check: these challenges work *because* what is
+                # needed to decide them is withheld, so there is nothing to
+                # compute and supplying a solver would destroy them. Reported
+                # distinctly so coverage does not read it as an unfilled gap.
+                results.append(
+                    ValidationResult(
+                        True,
+                        "insufficient_information",
+                        "Underdetermined by design; computing it would supply "
+                        "the information the challenge deliberately withholds.",
+                    )
+                )
+                results.append(self._check_failure_location(challenge))
+                return results
             else:
                 results.append(
                     ValidationResult(

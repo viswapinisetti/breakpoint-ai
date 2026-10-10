@@ -267,13 +267,27 @@ plan has to account for:
   separates a controlled failure from a hallucination — only runs on that
   verified subset.
 
-  **The ceiling is about 46%, not 100%.** Grouping the 830 by artifact type,
-  roughly 252 could be decided by execution given an authored payload; the
-  other 578 are `explanation`, `prompt`, `architecture`, `workflow`,
-  `chart`, `proof` and similar, where the question is a judgment and a
-  deterministic validator would be fake rigor. Mathematics and Data Analytics
-  are already close to exhausted (3 and 4 remaining respectively); the real
-  backlog is Backend, Data Science, Frontend, DevOps and MLOps.
+  A third category sits between the two: 16 challenges are **skipped by
+  design**. An `insufficient_information` challenge works precisely because
+  what is needed to decide it is withheld, so executing it would answer the
+  question the student is being asked to refuse to answer. Those are not gaps
+  and no payload should be written for them.
+
+  **Most of the remainder is not mechanically decidable, and the honest
+  ceiling is low.** Counting by artifact type overstates it badly: `api_contract`,
+  `pipeline` and `notebook` look runnable and are not. Reading the Backend and
+  Programming content bears this out — Backend's 46 `api_contract` challenges
+  ask whether a design is *safe* ("is it safe to trust `claims['sub']`?"), not
+  what a function returns, and several are JavaScript. The subjects already
+  deep are near exhausted: Mathematics and Data Analytics have 3 and 4
+  plausibly-executable challenges left.
+
+  What remains would need either a weakened sandbox (adding `sqlite3`
+  reintroduces filesystem access) or new runners with narrow payoff (a
+  multi-file program runner would unlock about four import-behaviour
+  challenges). Neither is worth faking: a validator that simulates Express or
+  CORS verifies a toy model, not the artifact, and claiming verification that
+  is not there is worse than honest Tier B.
 - **No difficulty-1 content.** The floor is 2, and 65% of the inventory sits
   at 3–4, so there is no gentle on-ramp for a first session.
 
