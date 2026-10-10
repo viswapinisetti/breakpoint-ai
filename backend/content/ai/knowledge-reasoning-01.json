@@ -1,0 +1,451 @@
+[
+  {
+    "id": "ai-knowledge-reasoning-001",
+    "subject": "ai",
+    "topic": "Knowledge & Reasoning",
+    "subtopic": "Affirming the consequent in a rule base",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the rule base justify concluding that the battery is dead?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "Rule base:\nR1: IF battery_dead THEN car_does_not_start\nFact: car_does_not_start\nAI inference: \"Therefore battery_dead.\""
+    },
+    "ai_claim": "Yes. R1 links a dead battery with the car not starting, and the car does not start, so the battery is dead.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "R1: a dead battery makes the car not start."
+      },
+      {
+        "index": 2,
+        "text": "The car does not start."
+      },
+      {
+        "index": 3,
+        "text": "The rule applies in reverse to explain the fact."
+      },
+      {
+        "index": 4,
+        "text": "So the battery is dead."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Running a rule backwards as if it were an equivalence",
+      "explanation": "From 'if P then Q' and Q, nothing follows about P - that is affirming the consequent. The car may not start because of an empty tank or a faulty starter. R1 supports battery_dead as a hypothesis (abduction), to be tested, not as a conclusion.",
+      "why_convincing": "Diagnosis does work backwards from symptoms, which makes the inference feel natural."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: Q does not imply P. A dead battery is one possible explanation among several.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An empty fuel tank also stops the car from starting, with a healthy battery.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Modus ponens: P -> Q, P |- Q. Affirming the consequent (P -> Q, Q |- P) is invalid.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A car with no fuel does not start."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look for other causes of the same fact."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 applies the rule in reverse."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An implication does not run backwards."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider an empty tank."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 'does not start' does not imply 'battery dead'."
+      }
+    ],
+    "repair": "Treat battery_dead as a hypothesis and test it (e.g. check the lights).",
+    "debrief": "Rule-based systems that chain backwards must distinguish deduction from abductive hypotheses.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-knowledge-reasoning-002",
+    "subject": "ai",
+    "topic": "Knowledge & Reasoning",
+    "subtopic": "Absence from the database",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the empty query result show the patient has no allergies?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "Hospital knowledge base query: allergies(patient_7412) returns no rows.\nThe patient was transferred from another hospital yesterday; records are migrated weekly.\nAI: \"The patient has no allergies, so penicillin is safe.\""
+    },
+    "ai_claim": "Yes. The allergy table has no entries for the patient, so they have no allergies.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The system queried the allergy table."
+      },
+      {
+        "index": 2,
+        "text": "No rows were returned."
+      },
+      {
+        "index": 3,
+        "text": "If the patient had allergies, they would be recorded."
+      },
+      {
+        "index": 4,
+        "text": "So the patient has no allergies."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Applying the closed-world assumption where it does not hold",
+      "explanation": "Treating 'not recorded' as 'false' (the closed-world assumption) is valid only if the database is complete. Here the patient's records have not been migrated yet, so absence of evidence is not evidence of absence. The safe conclusion is 'unknown', prompting a check with the patient or the previous hospital.",
+      "why_convincing": "Databases usually are treated as complete, and the query succeeded."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the records are incomplete (not yet migrated), so allergies are unknown. Check before prescribing.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Records from the previous hospital are migrated weekly; the transfer was yesterday.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "The closed-world assumption is valid only for complete knowledge bases.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The previous hospital's record lists a penicillin allergy."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the database is complete for this patient."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every allergy would be recorded."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Not recorded is not the same as false unless the data are complete."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the migration schedule."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the records are incomplete, so allergies are unknown."
+      }
+    ],
+    "repair": "Return 'unknown' for incomplete records and require verification.",
+    "debrief": "Systems that reason from absence must know whether their knowledge is complete. In safety-critical settings, unknown must stay unknown.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-knowledge-reasoning-003",
+    "subject": "ai",
+    "topic": "Knowledge & Reasoning",
+    "subtopic": "Modus tollens",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the inference valid (assuming the rule holds)?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "Rules: IF server_overloaded THEN response_time > 2 s.\nObservation: response_time = 0.4 s.\nAI inference: \"Therefore the server is not overloaded.\""
+    },
+    "ai_claim": "Yes. If overload always makes responses slower than 2 s, then a 0.4 s response means the server cannot be overloaded. This is modus tollens.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Rule: overloaded -> slow (> 2 s)."
+      },
+      {
+        "index": 2,
+        "text": "The response was not slow (0.4 s)."
+      },
+      {
+        "index": 3,
+        "text": "From P -> Q and not Q, conclude not P."
+      },
+      {
+        "index": 4,
+        "text": "So the server is not overloaded."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Modus tollens (P -> Q, not Q |- not P) is valid; the conclusion is as reliable as the rule.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Modus tollens: from P -> Q and not Q, infer not P.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "0.4 s is not greater than 2 s.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.4",
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Identify the form of the argument."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 names the inference rule."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Denying the consequent is valid; affirming it is not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check whether 0.4 s satisfies the rule's consequent."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It is valid modus tollens. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Compare this with affirming the consequent: the valid direction is 'not Q, so not P'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-knowledge-reasoning-004",
+    "subject": "ai",
+    "topic": "Knowledge & Reasoning",
+    "subtopic": "Updating a belief with evidence",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's calculation correct?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "P(fire) = 0.02 in a warehouse on a given night.\nThe smoke alarm sounds with probability 0.95 if there is a fire and 0.10 if there is not.\nThe alarm sounds.\nAI: \"P(fire | alarm) = 0.02 x 0.95 / (0.02 x 0.95 + 0.98 x 0.10) = 0.162, about 16%.\""
+    },
+    "ai_claim": "Yes. Bayes' rule gives P(fire | alarm) = 0.019 / (0.019 + 0.098) = 0.162. Because false alarms are common relative to fires, the alarm raises the probability from 2% to about 16%, not to 95%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "P(alarm and fire) = 0.02 x 0.95 = 0.019."
+      },
+      {
+        "index": 2,
+        "text": "P(alarm and no fire) = 0.98 x 0.10 = 0.098."
+      },
+      {
+        "index": 3,
+        "text": "P(alarm) = 0.117."
+      },
+      {
+        "index": 4,
+        "text": "P(fire | alarm) = 0.019 / 0.117 = 0.162."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: about 16%. The evidence raises the probability eightfold, but false alarms still dominate.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "0.019 / 0.117 = 0.162",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0.162"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Apply Bayes' rule."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 compute the joint probabilities."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "P(H | E) = P(E | H) P(H) / P(E)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute the denominator."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. P(fire | alarm) is about 0.162. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Probabilistic reasoning combines evidence strength with prior plausibility. Bayes' rule makes both explicit.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-knowledge-reasoning-005",
+    "subject": "ai",
+    "topic": "Knowledge & Reasoning",
+    "subtopic": "Default reasoning about birds",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can Tweety fly?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "Knowledge base: Tweety is a bird. Most birds fly.\nThe knowledge base contains no information about Tweety's species.\nAI: \"Tweety can fly.\""
+    },
+    "ai_claim": "Yes. Tweety is a bird, and birds fly, so Tweety can fly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Tweety is a bird."
+      },
+      {
+        "index": 2,
+        "text": "Birds fly."
+      },
+      {
+        "index": 3,
+        "text": "Tweety has all the properties of birds."
+      },
+      {
+        "index": 4,
+        "text": "So Tweety can fly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Tweety's species (or any exception information). 'Most birds fly' is a default, not a universal rule: penguins, ostriches and injured birds do not. Without knowing Tweety is not an exception, the conclusion is only a plausible default, not a fact.",
+    "resolving_scenarios": [
+      "Tweety is a sparrow: the default applies and Tweety can fly.",
+      "Tweety is a penguin: the default is overridden and Tweety cannot fly."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It cannot be determined from the knowledge base. Step 2 turns 'most birds fly' into 'all birds fly'.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Penguins are birds that cannot fly.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If Tweety is a penguin, the conclusion is false."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the knowledge base actually says about birds."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 strengthens 'most' to 'all'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Default rules allow exceptions, so their conclusions are defeasible."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a penguin."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is a default, not a law. A sparrow flies; a penguin does not. It cannot be decided."
+      }
+    ],
+    "repair": "Mark the conclusion as a default ('probably flies') or ask for Tweety's species.",
+    "debrief": "Common-sense knowledge is full of defaults with exceptions. Non-monotonic reasoning keeps such conclusions revisable.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,287 @@
+[
+  {
+    "id": "eng-essential-grammar-001",
+    "subject": "english",
+    "topic": "Essential Grammar",
+    "subtopic": "Neither ... nor and verb agreement",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the verb 'was' correct in this sentence?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "Neither the manager nor the interns was informed about the change."
+    },
+    "ai_claim": "Yes. 'Neither' is singular, so the verb must be singular: 'was'.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The subject begins with 'Neither'."
+      },
+      {
+        "index": 2,
+        "text": "'Neither' takes a singular verb."
+      },
+      {
+        "index": 3,
+        "text": "So the verb is 'was'."
+      },
+      {
+        "index": 4,
+        "text": "The sentence is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Applying the rule for 'neither' alone to 'neither ... nor'",
+      "explanation": "'Neither' on its own ('Neither of them was') takes a singular verb, but with 'neither ... nor' the verb agrees with the nearer subject. Here the nearer subject is 'the interns' (plural), so the verb is 'were': 'Neither the manager nor the interns were informed.' (Reversing the order - 'Neither the interns nor the manager was' - makes 'was' correct.)",
+      "why_convincing": "The singular rule for 'neither' is well known and often over-applied."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Incorrect: with 'neither ... nor', the verb agrees with the nearer subject, 'the interns', so it should be 'were'.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "With 'either/neither ... or/nor', the verb agrees with the subject closest to it (proximity rule).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Neither the manager nor the interns were informed about the change.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'Neither the interns nor the manager was informed' is correct because 'manager' is nearer."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the subject closest to the verb."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 applies the rule for 'neither' on its own."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In 'neither ... nor' sentences, the verb agrees with the nearer subject."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Is 'the interns' singular or plural?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the nearer subject is plural, so the verb is 'were'."
+      }
+    ],
+    "repair": "Neither the manager nor the interns were informed about the change.",
+    "debrief": "Correlative conjunctions follow the proximity rule. If the plural verb sounds awkward, put the plural subject last and use 'were'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-essential-grammar-002",
+    "subject": "english",
+    "topic": "Essential Grammar",
+    "subtopic": "Present perfect with a finished time",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this sentence grammatically correct?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "I have completed the quarterly report yesterday."
+    },
+    "ai_claim": "Yes. 'Have completed' is correct because the report is finished, and 'yesterday' tells us when.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The report is finished."
+      },
+      {
+        "index": 2,
+        "text": "Finished actions use the present perfect."
+      },
+      {
+        "index": 3,
+        "text": "'Yesterday' adds when it happened."
+      },
+      {
+        "index": 4,
+        "text": "So the sentence is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Using the present perfect with a specific past time",
+      "explanation": "In standard English, the present perfect ('have completed') links the past to the present and is not used with a finished time expression such as 'yesterday', 'last week' or 'in 2024'. With a specific past time, use the simple past: 'I completed the quarterly report yesterday.' Without the time, 'I have completed the quarterly report' is correct.",
+      "why_convincing": "The action is finished, and 'have completed' is often taught as the 'finished action' tense."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Incorrect: use the simple past with 'yesterday': 'I completed the quarterly report yesterday.'",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "The present perfect is not used with expressions of finished past time (yesterday, last week, ago).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "I completed the quarterly report yesterday.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'I have completed the report' (no time expression) is correct."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the time expression."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 chooses the tense for finished actions."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The present perfect does not combine with a specific finished time."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try the sentence without 'yesterday'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: with 'yesterday', use the simple past."
+      }
+    ],
+    "repair": "I completed the quarterly report yesterday.",
+    "debrief": "Choose between present perfect and simple past by asking: is a finished time mentioned? If yes, simple past.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-essential-grammar-003",
+    "subject": "english",
+    "topic": "Essential Grammar",
+    "subtopic": "Dangling modifiers",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this sentence clear and grammatically correct?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "Walking into the office, the lights were switched off by Ravi."
+    },
+    "ai_claim": "Yes. It correctly says that Ravi switched off the lights as he walked into the office; the passive voice is acceptable.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The sentence describes Ravi walking into the office."
+      },
+      {
+        "index": 2,
+        "text": "The lights were switched off."
+      },
+      {
+        "index": 3,
+        "text": "'By Ravi' tells us who did it."
+      },
+      {
+        "index": 4,
+        "text": "So the sentence is correct and clear."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 1,
+      "misconception": "Ignoring what an introductory participle modifies",
+      "explanation": "An introductory participle phrase ('Walking into the office') modifies the subject of the main clause that follows it. Here that subject is 'the lights', so the sentence literally says the lights walked into the office. This is a dangling modifier. Make the person who walks the subject: 'Walking into the office, Ravi switched off the lights.'",
+      "why_convincing": "Readers can guess the intended meaning, so the error is easy to miss."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Incorrect: 'Walking into the office' dangles - it attaches to 'the lights'. Rewrite with Ravi as the subject.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "An introductory participial phrase refers to the subject of the main clause.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Walking into the office, Ravi switched off the lights.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "As written, the lights are the ones walking into the office."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who is walking into the office, according to the grammar."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 assumes the phrase refers to Ravi."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Introductory participle phrases modify the main clause's subject."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find the subject of 'were switched off'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: the phrase attaches to 'the lights'. Make Ravi the subject."
+      }
+    ],
+    "repair": "Walking into the office, Ravi switched off the lights.",
+    "debrief": "Passive voice often causes dangling modifiers by removing the doer from the subject position. Put the doer first.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

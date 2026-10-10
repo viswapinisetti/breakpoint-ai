@@ -1,0 +1,471 @@
+[
+  {
+    "id": "mlo-ci-cd-ct-for-ml-001",
+    "subject": "mlops",
+    "topic": "CI/CD/CT for ML",
+    "subtopic": "A green build without a quality gate",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does a green CI run show the release is safe?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "ML repository CI: lint, unit tests for feature functions, build the serving image, deploy.\nThe retrained model inside the image is not evaluated in CI.\nAI: \"CI is green, so the release is safe to deploy.\""
+    },
+    "ai_claim": "Yes. All checks passed, so the code and model are ready for deployment.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Linting passed."
+      },
+      {
+        "index": 2,
+        "text": "Unit tests passed."
+      },
+      {
+        "index": 3,
+        "text": "The image built successfully."
+      },
+      {
+        "index": 4,
+        "text": "So the release is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 4,
+      "misconception": "Testing the code but not the model",
+      "explanation": "The checks verify code quality, but nothing measures the model's predictions. A retrained model with a data bug or a regression passes every check. ML CI needs model gates: evaluation on a fixed holdout against thresholds and against the current production model, plus data validation, before deployment.",
+      "why_convincing": "In software projects, green CI does mean a tested release."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: CI never evaluates the model. Add holdout evaluation and champion comparison gates.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A model trained on a mislabelled week passes all CI checks with AUC 0.62.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0.62"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "ML pipelines need model-quality gates in addition to code tests.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A degraded model ships with a green build."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List what the checks actually test."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 generalises from code checks."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models need their own evaluation gates."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine a badly trained model."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: nothing checks the model's quality."
+      }
+    ],
+    "repair": "Add an evaluation gate: holdout metrics vs thresholds and vs the production model.",
+    "debrief": "ML releases have two artifacts: code and model. Test both.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ci-cd-ct-for-ml-002",
+    "subject": "mlops",
+    "topic": "CI/CD/CT for ML",
+    "subtopic": "Auto-deploying every retrained model",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it safe to deploy every retrained model automatically?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Continuous training: every Sunday, retrain on the last 90 days and automatically deploy the new model.\nOne Sunday, a logging bug had duplicated a single merchant's transactions 50 times.\nAI: \"Retraining weekly keeps the model fresh, so deploying automatically is safe.\""
+    },
+    "ai_claim": "Yes. Fresh data makes a better model, so each week's model is an improvement and can be deployed automatically.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each week's model uses the latest 90 days."
+      },
+      {
+        "index": 2,
+        "text": "Fresher data gives better models."
+      },
+      {
+        "index": 3,
+        "text": "So each new model is an improvement."
+      },
+      {
+        "index": 4,
+        "text": "Automatic deployment is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 2,
+      "misconception": "Assuming fresher data always produces a better model",
+      "explanation": "Fresh data can be broken data. The duplicated merchant dominates the training set, skewing the model, and it deploys without any check. Continuous training needs gates: data validation (duplicates, volumes, distributions) and a comparison with the current model on a fixed holdout, deploying only if the new model is at least as good.",
+      "why_convincing": "'Fresh' usually means 'better' in ML."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: bad data produces bad models. Gate CT with data validation and a champion-challenger comparison.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "One merchant's transactions are duplicated 50 times in that week's data.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "50"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "The auto-deployed model flags that merchant's customers as fraud at 10 times the normal rate.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A corrupted week ships a skewed model."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what happens when the training data are wrong."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes fresh data are good data."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Automation needs gates that can say no."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider the duplication bug."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: fresh data can be corrupt. Gate deployments."
+      }
+    ],
+    "repair": "Validate data and compare against the champion before automatic deployment.",
+    "debrief": "Automation amplifies whatever it runs on. Put checks where they can stop a bad run.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ci-cd-ct-for-ml-003",
+    "subject": "mlops",
+    "topic": "CI/CD/CT for ML",
+    "subtopic": "Model file resolved at runtime",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is production guaranteed to serve the model CI evaluated?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "CI trains and evaluates model v19, then builds the serving image.\nAt startup, the serving container downloads s3://acme-models/churn/latest.pkl.\nA data scientist uploads an experimental model to latest.pkl for a quick demo.\nAI: \"Production serves the model CI evaluated.\""
+    },
+    "ai_claim": "Yes. CI evaluated v19 and built the image, so production runs v19.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "CI evaluated v19."
+      },
+      {
+        "index": 2,
+        "text": "CI built the serving image."
+      },
+      {
+        "index": 3,
+        "text": "Production runs that image."
+      },
+      {
+        "index": 4,
+        "text": "So production serves v19."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Serving a model resolved from a mutable location",
+      "explanation": "The image does not contain v19; it fetches latest.pkl at startup. The next pod restart or scale-out loads whatever is there now - the unevaluated demo model. Bake the evaluated artifact into the image, or load a specific registry version or content hash recorded by CI.",
+      "why_convincing": "The image was built by CI after evaluation, so it seems to carry the model."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: pods load whatever is at latest.pkl when they start. Pin the evaluated model version or hash.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "pod restart at 16:40 -> downloads latest.pkl (demo model) -> serves unevaluated predictions",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Deployments must reference immutable, evaluated artifacts.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After a pod restart, production serves the demo model."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the container loads at startup."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the image contains v19."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Mutable references let unreviewed artifacts reach production."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a restart after the demo upload."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: latest.pkl can change. Pin the version."
+      }
+    ],
+    "repair": "Reference models by registry version or content hash, recorded by CI.",
+    "debrief": "What you tested must be exactly what runs. Mutable 'latest' pointers break that guarantee.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ci-cd-ct-for-ml-004",
+    "subject": "mlops",
+    "topic": "CI/CD/CT for ML",
+    "subtopic": "Training with production write credentials",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is using read-write production credentials harmless because the job only runs SELECT queries?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "The nightly training job reads from the production orders database using the application's credentials, which have read and write access.\nAI: \"It only runs SELECT queries, so the write permission doesn't matter.\""
+    },
+    "ai_claim": "Yes. The training code only reads data, so having write permission creates no risk.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The job only issues SELECT queries."
+      },
+      {
+        "index": 2,
+        "text": "Reads do not modify data."
+      },
+      {
+        "index": 3,
+        "text": "So write access is unused."
+      },
+      {
+        "index": 4,
+        "text": "It is harmless."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Granting privileges beyond what the job needs",
+      "explanation": "The risk is not what the code does today but what it could do: a bug (an accidental UPDATE in a feature query), a compromised dependency in the training environment, or a leaked credential could modify or delete production orders. Training should use a read-only role (ideally on a replica or warehouse), with its own credentials.",
+      "why_convincing": "The current code really does only read."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: write access turns bugs and compromises into data loss. Use read-only credentials on a replica.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A malicious package in the training image uses the credentials to DELETE FROM orders.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Least privilege: give each job only the permissions it requires.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A typo in a query-builder change runs an UPDATE on production."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the credentials would allow if misused."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 considers only intended behaviour."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Least privilege limits the impact of bugs and compromises."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a compromised dependency."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: unused permissions are still risk. Use read-only access."
+      }
+    ],
+    "repair": "Create a read-only role for training on a replica or warehouse.",
+    "debrief": "Permissions define the worst case, regardless of intended use.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ci-cd-ct-for-ml-005",
+    "subject": "mlops",
+    "topic": "CI/CD/CT for ML",
+    "subtopic": "A gated delivery pipeline",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this pipeline guards against the main ways a retrained model can go wrong?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Pipeline: validate data (schema, volumes, drift) -> train -> evaluate on a fixed, time-based holdout -> compare with the production model (must be at least as good on overall and per-segment metrics) -> register -> deploy as a 5% canary for 24 hours -> promote if live metrics hold, otherwise roll back automatically."
+    },
+    "ai_claim": "Yes. Bad data is stopped before training, regressions are caught offline against the champion (including per segment), the canary exposes problems on live traffic with limited impact, and automatic rollback bounds the damage.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Data validation blocks corrupted inputs."
+      },
+      {
+        "index": 2,
+        "text": "Offline comparison with the champion catches regressions, including segment-level ones."
+      },
+      {
+        "index": 3,
+        "text": "A 5% canary tests real traffic with limited exposure."
+      },
+      {
+        "index": 4,
+        "text": "Automatic rollback limits the impact of problems found live."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Layered gates - data, offline, live - with automatic rollback are the backbone of safe continuous training.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "week 33: data check fails (row count 40% low) -> pipeline stops; production model unchanged",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "40"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Map each stage to a failure it catches."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 includes segment metrics."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Safe CT layers data, offline and online checks."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace a corrupted data week."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The pipeline has layered gates. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Each gate catches a different failure class. Together they make automation safe.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

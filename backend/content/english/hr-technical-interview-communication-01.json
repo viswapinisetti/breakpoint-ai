@@ -1,0 +1,471 @@
+[
+  {
+    "id": "eng-hr-technical-interview-communication-001",
+    "subject": "english",
+    "topic": "HR & Technical Interview Communication",
+    "subtopic": "'Tell me about yourself'",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this the best way to answer 'Tell me about yourself'?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Planned answer: \"I was born in Nagpur. I did my schooling at St. Mary's and got 88% in Class 10 and 91% in Class 12. My father is a bank manager and my mother is a teacher. Then I did B.Tech...\"\nAI: \"A complete chronological account is the best answer.\""
+    },
+    "ai_claim": "Yes. Going through your life story in order gives the interviewer a complete picture.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The interviewer wants to know about you."
+      },
+      {
+        "index": 2,
+        "text": "A chronological account covers everything."
+      },
+      {
+        "index": 3,
+        "text": "Completeness gives a full picture."
+      },
+      {
+        "index": 4,
+        "text": "So this is the best answer."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 2,
+      "misconception": "Treating the question as a request for a life history",
+      "explanation": "The question is an invitation to pitch your fit for the role in about a minute. Birthplace, school marks and parents' jobs use up that time without showing relevant skills. A strong answer covers the present (current role/degree and key skills), a relevant achievement, and why this role: 'I'm a final-year CS student who has built two backend projects in Python... I'm excited about this role because...'",
+      "why_convincing": "The question sounds like it asks for everything."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a life history wastes the opening. Give a focused present-past-future pitch tied to the role.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "\"I'm a final-year computer science student. In my internship I built a REST API used by 3 internal teams. I enjoy backend work, which is why this role appeals to me.\"",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "'Tell me about yourself' calls for a concise, role-relevant summary.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The interviewer interrupts before the candidate reaches any relevant experience."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the interviewer wants to learn in the first minute."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 equates completeness with relevance."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The answer should be a short pitch for the role."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Time the planned answer."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: a life history is not relevant. Pitch your fit."
+      }
+    ],
+    "repair": "Present-past-future: who you are now, a relevant achievement, why this role.",
+    "debrief": "First answers set the tone. Make the opening minute about fit, not biography.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-hr-technical-interview-communication-002",
+    "subject": "english",
+    "topic": "HR & Technical Interview Communication",
+    "subtopic": "'I'm a perfectionist'",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this answer always impress interviewers?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Question: \"What is your biggest weakness?\"\nPlanned answer: \"I'm a perfectionist. I work too hard.\"\nAI: \"This answer always impresses interviewers because it turns a weakness into a strength.\""
+    },
+    "ai_claim": "Yes. It presents a strength disguised as a weakness, so interviewers are always impressed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The question invites a weakness."
+      },
+      {
+        "index": 2,
+        "text": "Perfectionism sounds like a strength."
+      },
+      {
+        "index": 3,
+        "text": "Interviewers like strengths."
+      },
+      {
+        "index": 4,
+        "text": "So the answer always impresses."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Assuming a cliché disguised as a weakness will impress",
+      "explanation": "Interviewers hear this answer constantly and often read it as evasive, missing what the question tests: self-awareness and a willingness to improve. A better answer names a real, non-critical weakness and shows concrete improvement: 'I used to hesitate to ask questions early in a task; now I check requirements in the first hour and ask when blocked for more than 30 minutes.'",
+      "why_convincing": "It is widely recommended in older advice."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: it is a cliché that can seem evasive. Name a real weakness and show how you are improving.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "\"I used to avoid asking questions early. Now I confirm requirements at the start and ask for help if I'm stuck for more than 30 minutes.\"",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "30"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "The weakness question assesses self-awareness and growth.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An interviewer follows up: 'Give me a real example.'"
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the question is designed to test."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes disguised strengths impress."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Self-awareness and improvement are what interviewers look for."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider an interviewer's follow-up."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the cliché can seem evasive."
+      }
+    ],
+    "repair": "Give a genuine weakness, its effect, and the steps you are taking.",
+    "debrief": "Honest, specific answers with evidence of growth beat rehearsed clichés.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-hr-technical-interview-communication-003",
+    "subject": "english",
+    "topic": "HR & Technical Interview Communication",
+    "subtopic": "Bluffing in a technical interview",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is bluffing confidently the best approach when you don't know a technical answer?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Advice from a senior: \"If you don't know the answer to a technical question, answer confidently anyway. Interviewers reward confidence more than accuracy.\""
+    },
+    "ai_claim": "Yes. Confidence impresses interviewers, and hesitation looks weak, so a confident answer is better than admitting you don't know.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Interviewers value confidence."
+      },
+      {
+        "index": 2,
+        "text": "Admitting uncertainty looks weak."
+      },
+      {
+        "index": 3,
+        "text": "A confident answer shows strength."
+      },
+      {
+        "index": 4,
+        "text": "So bluffing is best."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Assuming confidence outweighs accuracy",
+      "explanation": "Technical interviewers usually probe answers with follow-ups, so bluffs are exposed quickly - and a confidently wrong answer signals that you may do the same at work, which is worse than not knowing. A strong approach: say what you do know, reason aloud towards an answer, state assumptions, and say how you would find out.",
+      "why_convincing": "Confidence does help presentation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: bluffs are easily exposed and damage trust. Reason aloud from what you know and be honest about gaps.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A candidate claims a hash map lookup is O(log n); one follow-up question exposes the bluff.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "\"I haven't used that API, but based on similar ones I'd expect... Let me reason through it.\"",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A single follow-up question reveals the bluff."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what happens after a bluffed answer."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 values confidence over accuracy."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Honest reasoning shows problem-solving; bluffing damages trust."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine the interviewer's next question."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: bluffing is risky and revealing. Reason aloud."
+      }
+    ],
+    "repair": "Share what you know, reason aloud, state assumptions, and say how you'd verify.",
+    "debrief": "Interviewers are hiring someone to solve problems they don't yet know the answer to. Show how you think.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-hr-technical-interview-communication-004",
+    "subject": "english",
+    "topic": "HR & Technical Interview Communication",
+    "subtopic": "Answering a different question",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this answer the question well?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Question: \"Why should we hire you?\"\nPlanned answer: \"Because this is my dream company, the brand is famous, and the salary and location are perfect for me.\"\nAI: \"This answer shows strong motivation, so it is a good answer.\""
+    },
+    "ai_claim": "Yes. It shows how much the candidate wants the job, and motivation is what the question is about.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The question asks why they should hire you."
+      },
+      {
+        "index": 2,
+        "text": "The answer shows strong motivation."
+      },
+      {
+        "index": 3,
+        "text": "Motivation makes a good employee."
+      },
+      {
+        "index": 4,
+        "text": "So it is a good answer."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 1,
+      "misconception": "Answering 'why do you want this job' instead of 'why should we hire you'",
+      "explanation": "The question asks what value the candidate brings to the company; the answer explains what the company brings to the candidate (brand, salary, location). A good answer links the candidate's skills and evidence to the role's needs: 'You need someone who can build and test APIs; in my internship I...'",
+      "why_convincing": "Motivation is relevant to hiring and is easy to talk about."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: it explains the candidate's wants, not their value. Connect your skills and evidence to the role's needs.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "\"The role needs strong Python and API skills. In my internship I built an API used by 3 teams and cut report time by 80%. I can contribute quickly.\"",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "80"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "'Why should we hire you?' asks for evidence of fit and value.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The interviewer still doesn't know what the candidate can do for them."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whose benefit the question is about."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 reinterprets the question."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The question asks about your value to the employer."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rewrite focusing on skills and results."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: the answer addresses a different question."
+      }
+    ],
+    "repair": "Map two or three of your strengths, with evidence, to the role's requirements.",
+    "debrief": "Listen to the exact question. Many weak answers are good answers to a different question.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-hr-technical-interview-communication-005",
+    "subject": "english",
+    "topic": "HR & Technical Interview Communication",
+    "subtopic": "A STAR answer about conflict",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this is a strong answer?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Question: \"Tell me about a time you disagreed with a teammate.\"\nAnswer: \"(Situation) In our final-year project, a teammate wanted to skip testing to meet the demo date. (Task) I was responsible for the backend and worried about bugs. (Action) I proposed writing tests only for the three most critical APIs and took on two of them myself, working an extra evening. (Result) We met the deadline, the tests caught a login bug before the demo, and we agreed to test critical paths in future sprints.\""
+    },
+    "ai_claim": "Yes. It follows the STAR structure, shows respectful handling of disagreement with a practical compromise, highlights the candidate's own actions, and ends with a concrete result and a lesson.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Situation and task set the context briefly."
+      },
+      {
+        "index": 2,
+        "text": "The action is specific and shows ownership and compromise."
+      },
+      {
+        "index": 3,
+        "text": "The result is concrete: the deadline was met and a bug was caught."
+      },
+      {
+        "index": 4,
+        "text": "It closes with a lasting improvement."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A concise STAR answer with a specific, collaborative action and a measurable outcome is exactly what behavioural questions look for.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "STAR: Situation, Task, Action, Result - with emphasis on the candidate's own actions and outcomes.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "three"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each part of STAR."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 focuses on the candidate's actions."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Behavioural answers need specific actions and results."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for the result."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It is a strong STAR answer. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Good behavioural answers are short stories with a clear action by you and a result that matters.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

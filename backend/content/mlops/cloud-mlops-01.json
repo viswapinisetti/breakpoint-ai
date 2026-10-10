@@ -1,0 +1,471 @@
+[
+  {
+    "id": "mlo-cloud-mlops-001",
+    "subject": "mlops",
+    "topic": "Cloud MLOps",
+    "subtopic": "An idle GPU instance",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does billing stop when the training job finishes?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "A data scientist launched an 8-GPU instance (Rs 2,500/hour) for a 6-hour training run on Friday and went home; the notebook finished at 22:00.\nAI: \"Cloud billing stops when the job finishes.\""
+    },
+    "ai_claim": "Yes. The cloud charges for compute used, and compute stops being used when the job finishes, so billing stops.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Cloud billing is usage-based."
+      },
+      {
+        "index": 2,
+        "text": "The training job finished at 22:00."
+      },
+      {
+        "index": 3,
+        "text": "After that, no compute is used."
+      },
+      {
+        "index": 4,
+        "text": "So billing stops."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 3,
+      "misconception": "Confusing job completion with instance termination",
+      "explanation": "Instances are billed while running, whether or not a job is active. The idle instance runs all weekend: about 58 hours x Rs 2,500 = Rs 1,45,000 for nothing. Use managed training jobs that release hardware on completion, auto-shutdown for idle notebooks, and budget alerts.",
+      "why_convincing": "'Pay for what you use' suggests billing follows activity."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the instance is billed until it is stopped. Use managed jobs or idle auto-shutdown.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Friday 22:00 to Monday 08:00 is 58 hours at Rs 2,500/hour = Rs 1,45,000.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1,45,000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "VM instances bill per running second regardless of utilisation.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The weekend bill for an idle instance exceeds the training cost many times over."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the cloud bills for."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates idle with unbilled."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Instances bill while running, not while busy."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the weekend cost."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the running instance keeps billing."
+      }
+    ],
+    "repair": "Use managed training jobs, idle auto-shutdown and budget alerts.",
+    "debrief": "In the cloud, the expensive mistakes are forgotten resources. Automate shutdown.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-cloud-mlops-002",
+    "subject": "mlops",
+    "topic": "Cloud MLOps",
+    "subtopic": "An exposed notebook server",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the notebook server effectively private because its IP is not publicised?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "A Jupyter server runs on a cloud VM with a public IP, port 8888 open to 0.0.0.0/0, and token authentication disabled 'to make access easier'. The VM has an IAM role with access to the training-data bucket.\nAI: \"Nobody knows the IP address, so it's effectively private.\""
+    },
+    "ai_claim": "Yes. The IP address has not been shared with anyone, so no one else will find the server.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The server has a public IP."
+      },
+      {
+        "index": 2,
+        "text": "The IP has not been shared."
+      },
+      {
+        "index": 3,
+        "text": "People cannot connect to an address they don't know."
+      },
+      {
+        "index": 4,
+        "text": "So the server is effectively private."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Relying on an unknown IP for security",
+      "explanation": "Internet-wide scanners probe every IPv4 address continuously; open Jupyter servers are found within hours and give attackers a shell with the VM's IAM role - including the training data. Keep notebooks off public IPs (VPN or identity-aware proxy), require authentication, and scope IAM roles narrowly.",
+      "why_convincing": "An unadvertised address feels hidden."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: scanners find open ports quickly, and an unauthenticated Jupyter gives code execution. Remove public access and require auth.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Search engines for exposed services index open Jupyter servers by port and banner.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Unauthenticated remote code execution endpoints must never be internet-exposed.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An attacker runs code as the VM and downloads the training bucket."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how attackers find servers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes an unknown IP is hidden."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Internet scanning makes obscurity useless."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what Jupyter access allows."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: open ports are scanned. Require auth and remove public access."
+      }
+    ],
+    "repair": "Put notebooks behind a VPN or identity-aware proxy, enable authentication and limit IAM scope.",
+    "debrief": "Notebook servers are remote shells. Treat them with the same security as SSH.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-cloud-mlops-003",
+    "subject": "mlops",
+    "topic": "Cloud MLOps",
+    "subtopic": "Spot instances without checkpoints",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the job finish at 70% lower cost?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "A 30-hour training job runs on spot GPU instances (70% cheaper) without saving checkpoints.\nSpot instances in this region are typically reclaimed after 4-12 hours.\nAI: \"Spot instances give the same result for 70% less.\""
+    },
+    "ai_claim": "Yes. Spot instances run the same hardware at a 70% discount, so the job finishes at 70% lower cost.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Spot GPUs are the same hardware."
+      },
+      {
+        "index": 2,
+        "text": "They cost 70% less."
+      },
+      {
+        "index": 3,
+        "text": "The job runs for 30 hours either way."
+      },
+      {
+        "index": 4,
+        "text": "So it finishes at 70% lower cost."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on uninterrupted spot capacity",
+      "explanation": "Spot instances can be reclaimed at short notice. With reclaims after 4-12 hours and no checkpoints, each interruption loses all progress, so a 30-hour job may never finish - costs accumulate with no result. Save checkpoints regularly (e.g. every 30 minutes to object storage) and resume automatically on a new instance.",
+      "why_convincing": "The discount is real and the hardware is identical."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without checkpoints, reclaims restart the job from scratch, possibly forever. Checkpoint and resume.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Reclaims typically occur after 4-12 hours; the job needs 30 hours.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "30"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Interruptible compute requires checkpointing and automatic resume.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After three reclaims, the job has used 25 hours and completed nothing."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the job length with typical spot lifetimes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the job runs uninterrupted."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Spot capacity can be reclaimed; work must be resumable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a reclaim at hour 10."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: interruptions lose progress. Checkpoint."
+      }
+    ],
+    "repair": "Checkpoint to object storage every 30 minutes and auto-resume.",
+    "debrief": "Cheap compute is only cheap if work survives interruptions.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-cloud-mlops-004",
+    "subject": "mlops",
+    "topic": "Cloud MLOps",
+    "subtopic": "Moving data across regions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does running training in another region from the data have no downside?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "Training data (40 TB) is stored in a Mumbai-region bucket. The training cluster runs in a US region, where GPUs are more available, reading the data over the network for each run (weekly).\nThe data includes Indian customers' personal data.\nAI: \"Cross-region access is transparent, so this setup has no downside.\""
+    },
+    "ai_claim": "Yes. Cloud storage is accessible from any region, so the cluster can read the data transparently with no downside.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The bucket can be read from any region."
+      },
+      {
+        "index": 2,
+        "text": "The cluster reads the data over the network."
+      },
+      {
+        "index": 3,
+        "text": "Access is transparent."
+      },
+      {
+        "index": 4,
+        "text": "So there is no downside."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Ignoring data location, egress and residency",
+      "explanation": "Reading 40 TB across regions every week incurs large inter-region transfer charges and slow reads, and moving Indian customers' personal data abroad may breach data-residency or contractual requirements. Co-locate compute with data (or use an approved, compliant copy), and check legal requirements before transferring personal data.",
+      "why_convincing": "Cloud storage APIs hide geography."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: weekly 40 TB cross-region reads cost egress, slow training, and may violate data-residency rules. Co-locate compute and data.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "40 TB x 4 runs per month = 160 TB of inter-region transfer monthly.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "160"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Personal data transfers across borders may be restricted by law and contracts.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The monthly transfer bill exceeds the GPU savings."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what cross-region reads cost and imply."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes location does not matter."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Data gravity: move compute to data, especially for personal data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute monthly transfer volume."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: egress costs and residency rules matter."
+      }
+    ],
+    "repair": "Train in the data's region (or an approved location) and review residency requirements.",
+    "debrief": "In ML, data is heavy and regulated. Plan compute around where it lives.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-cloud-mlops-005",
+    "subject": "mlops",
+    "topic": "Cloud MLOps",
+    "subtopic": "Autoscaling endpoints with scale-to-zero",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this configuration balances cost and reliability appropriately?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "Development and staging model endpoints: autoscale 0-2 instances, scaling to zero after 15 minutes without requests (cold start about 40 seconds).\nProduction endpoint: autoscale 2-10 instances on request rate, never below 2."
+    },
+    "ai_claim": "Yes. Dev and staging are idle most of the time, so scaling them to zero saves cost, and a 40-second cold start is acceptable there. Production keeps at least 2 instances for availability and no cold starts, and scales with demand.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Dev and staging are used intermittently."
+      },
+      {
+        "index": 2,
+        "text": "Scale-to-zero removes idle cost; cold starts are tolerable for them."
+      },
+      {
+        "index": 3,
+        "text": "Production keeps a minimum of 2 for redundancy and low latency."
+      },
+      {
+        "index": 4,
+        "text": "Autoscaling handles production peaks up to 10 instances."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Matching scaling policy to each environment's latency and availability needs is good cloud cost practice.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "staging idle 20 h/day -> ~20 instance-hours/day saved; production always has >= 2 instances",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the needs of dev, staging and production."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains production's minimum."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Scaling policies should reflect each environment's requirements."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a cold start in production."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The policies fit each environment. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cost optimisation and reliability are both served by policies tuned per environment.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

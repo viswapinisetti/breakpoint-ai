@@ -1,0 +1,475 @@
+[
+  {
+    "id": "dl-generative-models-001",
+    "subject": "deep-learning",
+    "topic": "Generative Models",
+    "subtopic": "GAN losses do not track quality",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the fall in generator loss show the images improved?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "log": "Epoch 10: generator loss 3.2, discriminator loss 0.4\nEpoch 40: generator loss 1.1, discriminator loss 1.3",
+      "conclusion": "\"The generator's loss fell by two-thirds, so the images are much better at epoch 40.\""
+    },
+    "ai_claim": "Yes. The generator's loss dropped from 3.2 to 1.1, so it is producing much better images.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Generator loss fell from 3.2 to 1.1."
+      },
+      {
+        "index": 2,
+        "text": "Lower loss means better performance."
+      },
+      {
+        "index": 3,
+        "text": "The generator's job is to make realistic images."
+      },
+      {
+        "index": 4,
+        "text": "So the images are much better."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 2,
+      "misconception": "Reading adversarial losses as quality metrics",
+      "explanation": "A GAN's losses are measured against a discriminator that changes during training. The generator's loss falls if the discriminator gets weaker, not only if images improve; the discriminator's loss rising to 1.3 is consistent with that. GAN losses oscillate and do not track sample quality. Evaluate with metrics such as FID and by inspecting samples.",
+      "why_convincing": "In ordinary training, lower loss does mean a better model."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the losses are relative to a moving opponent. Use FID and visual inspection.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Discriminator loss rose from 0.4 to 1.3: the discriminator got worse.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1.3"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Mode collapse can lower generator loss while every sample looks the same.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A collapsed generator producing one image can have low loss."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the generator's loss is measured against."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 applies the ordinary meaning of loss."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "GAN losses are adversarial; they reflect the balance between two networks."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the discriminator's loss."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: GAN losses do not track quality. Use FID."
+      }
+    ],
+    "repair": "Track FID (or precision/recall for generative models) and inspect samples regularly.",
+    "debrief": "When the objective is a game between two models, neither loss alone measures progress. Use external evaluation.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-generative-models-002",
+    "subject": "deep-learning",
+    "topic": "Generative Models",
+    "subtopic": "Sampling temperature",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does raising the temperature to 1.6 make the descriptions more faithful to the product data?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "language": "python",
+      "code": "# Generating product descriptions with a language model\nout = generate(prompt, temperature=1.6)\n# AI note: \"Higher temperature makes the model more accurate, so 1.6 gives the most faithful descriptions.\""
+    },
+    "ai_claim": "Yes. Higher temperature makes the model think harder about each token, so its outputs become more accurate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Temperature controls token selection."
+      },
+      {
+        "index": 2,
+        "text": "Higher temperature makes the model more careful."
+      },
+      {
+        "index": 3,
+        "text": "More careful selection means more accurate text."
+      },
+      {
+        "index": 4,
+        "text": "So 1.6 gives the most faithful descriptions."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Misunderstanding what temperature controls",
+      "explanation": "Temperature divides the logits before softmax. Values above 1 flatten the distribution, so less likely tokens are sampled more often: more variety, and more errors and invented details. For faithful, factual text, use a low temperature (e.g. 0-0.3).",
+      "why_convincing": "'Temperature' sounds like effort or energy."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: high temperature flattens the distribution and increases randomness and errors. Use a low temperature.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Logits [2, 0]: at T = 1, p = [0.88, 0.12]; at T = 1.6, p = [0.78, 0.22] - the unlikely token doubles its chance.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.78",
+          "0.22"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "At high temperature the model invents features the product does not have."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall what temperature does to the logits."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 attributes 'care' to temperature."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Temperature above 1 flattens the distribution; below 1 sharpens it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute softmax of [2, 0] at T = 1 and T = 1.6."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: high temperature adds randomness. Use a low temperature for faithfulness."
+      }
+    ],
+    "repair": "Use temperature around 0-0.3 for factual descriptions.",
+    "debrief": "Temperature trades diversity for reliability. Match it to the task: low for facts and extraction, higher for brainstorming.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-generative-models-003",
+    "subject": "deep-learning",
+    "topic": "Generative Models",
+    "subtopic": "Generated images that copy training data",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the report's claim hold?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "audit": "For 1,000 generated faces, the nearest training image (by embedding distance) was retrieved.\n23 generated images are near-duplicates of specific training photos.",
+      "claim_in_report": "\"All generated faces are novel, because generative models create new images rather than retrieving stored ones.\""
+    },
+    "ai_claim": "Yes. Generative models learn a distribution and sample new points from it; they do not store images, so every output is novel.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model learns the distribution of faces."
+      },
+      {
+        "index": 2,
+        "text": "Sampling produces new points from that distribution."
+      },
+      {
+        "index": 3,
+        "text": "The model does not store training images."
+      },
+      {
+        "index": 4,
+        "text": "So every output is novel."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Assuming generative models cannot memorise",
+      "explanation": "Models can memorise training examples, especially duplicated or rare ones, and reproduce them closely; the audit found 23 near-duplicates. This matters for privacy (faces of real people) and copyright. Deduplicate training data, audit outputs with nearest-neighbour search, and filter near-copies.",
+      "why_convincing": "The model has no explicit database of images, so storage seems impossible."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the audit found 23 near-duplicates of training photos. Memorisation is possible; deduplicate data and filter outputs.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "23 of 1,000 generated images are near-duplicates of training photos.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "23"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A generated face matches a real person's training photo."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the audit result."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes no information about individual images is kept."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Model weights can encode specific training examples."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare generated images with their nearest training images."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 23 outputs copy training images."
+      }
+    ],
+    "repair": "Deduplicate the training set and add nearest-neighbour filtering of outputs.",
+    "debrief": "Novelty must be measured, not assumed. Nearest-neighbour audits are a simple, necessary check for generative models.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-generative-models-004",
+    "subject": "deep-learning",
+    "topic": "Generative Models",
+    "subtopic": "Reading FID",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the higher FID show that model B is better?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "results": {
+        "title": "Image generators on the same dataset",
+        "columns": [
+          "model",
+          "FID"
+        ],
+        "rows": [
+          [
+            "A",
+            "12.4"
+          ],
+          [
+            "B",
+            "45.1"
+          ]
+        ]
+      },
+      "conclusion": "\"Model B is better: its FID score is much higher.\""
+    },
+    "ai_claim": "Yes. B's FID is 45.1 against A's 12.4, and a higher score means better image quality.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "FID compares generated and real images."
+      },
+      {
+        "index": 2,
+        "text": "B scores 45.1, A scores 12.4."
+      },
+      {
+        "index": 3,
+        "text": "Higher scores are better."
+      },
+      {
+        "index": 4,
+        "text": "So B is better."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Reading a distance as a score",
+      "explanation": "FID (Frechet Inception Distance) measures the distance between the feature distributions of generated and real images. Lower is better; 0 would mean identical distributions. A's 12.4 is much better than B's 45.1.",
+      "why_convincing": "Most benchmark 'scores' are higher-is-better."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: FID is a distance, so lower is better. Model A (12.4) is better.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "A has FID 12.4 and B has 45.1; lower means closer to real images.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "12.4",
+          "45.1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A perfect generator would have FID 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what FID measures."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes higher is better."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "FID is a distance between distributions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "What FID would a perfect generator have?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: lower FID is better, so A is better."
+      }
+    ],
+    "repair": "Always note each metric's direction (lower or higher is better) in results tables.",
+    "debrief": "Know each metric's direction before comparing models. Distances, losses and error rates are all lower-is-better.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-generative-models-005",
+    "subject": "deep-learning",
+    "topic": "Generative Models",
+    "subtopic": "How diffusion models generate",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's description of diffusion models correct?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "explanation": "Training: take a real image, add Gaussian noise at a random step t of a fixed schedule, and train a network to predict the added noise.\nGeneration: start from pure noise and repeatedly apply the network to remove predicted noise, step by step, until an image emerges."
+    },
+    "ai_claim": "Yes. The forward process gradually corrupts data with Gaussian noise on a fixed schedule; the network learns to predict that noise; generation reverses the process from pure noise, one denoising step at a time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The forward (noising) process has no learned parameters."
+      },
+      {
+        "index": 2,
+        "text": "At a random step t, the network is trained to predict the noise that was added."
+      },
+      {
+        "index": 3,
+        "text": "Generation starts from Gaussian noise."
+      },
+      {
+        "index": 4,
+        "text": "Iterative denoising steps turn noise into a sample."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. This is the standard denoising diffusion (DDPM) formulation: a fixed noising process and a learned reverse (denoising) process.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "x0 (image) -> add noise at step t -> network predicts the noise -> loss = MSE(predicted, actual noise)",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate the fixed process from the learned one."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 says the noising process is not learned."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Diffusion models learn to reverse a fixed noising process."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace one training step."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It describes training and sampling accurately. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Diffusion turns generation into many small denoising problems, each easy to learn - which is why training is stable compared with GANs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

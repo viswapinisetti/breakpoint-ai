@@ -1,0 +1,536 @@
+[
+  {
+    "id": "dsa-recursion-backtracking-001",
+    "subject": "dsa",
+    "topic": "Recursion & Backtracking",
+    "subtopic": "Base cases",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does fact(n) return n! for every integer n >= 0?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def fact(n):\n    if n == 1:\n        return 1\n    return n * fact(n - 1)"
+    },
+    "ai_claim": "Yes. It multiplies n by fact(n - 1) until it reaches the base case, fact(1) = 1.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "fact(1) returns 1, the base case."
+      },
+      {
+        "index": 2,
+        "text": "For larger n, fact(n) = n x fact(n - 1)."
+      },
+      {
+        "index": 3,
+        "text": "Every call moves one step closer to the base case."
+      },
+      {
+        "index": 4,
+        "text": "So fact(n) returns n! for every n >= 0."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 4,
+      "misconception": "Missing the base case for 0",
+      "explanation": "fact(0) calls fact(-1), fact(-2), ... and never reaches n == 1, so it recurses until Python raises RecursionError. Since 0! = 1, the base case should be n <= 1 (or n == 0).",
+      "why_convincing": "The base case works for every n >= 1, which covers almost every test anyone writes."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "fact(0) never reaches the base case and raises RecursionError, although 0! = 1. Use `if n <= 1: return 1`.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "fact(0) raises RecursionError; 0! = 1.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0",
+          "1"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "fact(0) -> fact(-1) -> fact(-2) -> ... never reaches 1",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "-1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "fact(0) raises RecursionError."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the smallest input the claim covers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says every call approaches the base case. Check that for n = 0."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A recursion must reach a base case from every allowed input."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace fact(0)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong for n = 0: it moves away from the base case and raises RecursionError. Use n <= 1 as the base case."
+      }
+    ],
+    "repair": "Change the base case to `if n <= 1: return 1`.",
+    "debrief": "Every recursive function must reach a base case from every input in its domain, and the smallest input is the one most often forgotten. Here the domain was stated as n >= 0, so 0 was the first value to test. Derive base cases from the domain, not from the typical call.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "fact",
+      "ai_code": "def fact(n):\n    if n == 1:\n        return 1\n    return n * fact(n - 1)",
+      "reference_code": "import math\n\ndef fact(n):\n    return math.factorial(n)",
+      "test_inputs": [
+        "(5,)",
+        "(1,)",
+        "(0,)"
+      ],
+      "counterexample_input": "(0,)"
+    }
+  },
+  {
+    "id": "dsa-recursion-backtracking-002",
+    "subject": "dsa",
+    "topic": "Recursion & Backtracking",
+    "subtopic": "Sharing a list across recursive calls",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does subsets([1, 2]) return all four subsets: [], [2], [1] and [1, 2]?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def subsets(items):\n    result = []\n    current = []\n\n    def go(i):\n        if i == len(items):\n            result.append(current)\n            return\n        go(i + 1)\n        current.append(items[i])\n        go(i + 1)\n        current.pop()\n\n    go(0)\n    return result"
+    },
+    "ai_claim": "Yes. The recursion includes or excludes each item and records the current subset at each leaf.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "At each index, go(i) first skips items[i] and then includes it."
+      },
+      {
+        "index": 2,
+        "text": "When i reaches the end, the current subset is complete."
+      },
+      {
+        "index": 3,
+        "text": "result.append(current) records that subset."
+      },
+      {
+        "index": 4,
+        "text": "The four leaves record [], [2], [1] and [1, 2]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Appending a reference to a list that keeps changing",
+      "explanation": "result.append(current) stores the same list object each time, not a snapshot. current is later modified and finally emptied by the pops, so every entry in result is that one empty list: [[], [], [], []]. Append a copy: result.append(current[:]).",
+      "why_convincing": "At the moment of each append, current holds the right subset, so the reasoning is correct at every step but the last."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "All four entries refer to the same list, which is [] when the recursion finishes. subsets([1, 2]) returns [[], [], [], []]. Use result.append(current[:]).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "subsets([1, 2]) returns [[], [], [], []].",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "result holds 4 references to one list; the final pop empties it",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "subsets([1]) returns [[], []]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what exactly is stored in result."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 appends current. Is that a snapshot?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Appending a list stores a reference; later changes to the list affect every stored reference."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print result after the recursion finishes."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: it stores references to one list that ends empty. Append a copy with current[:]."
+      }
+    ],
+    "repair": "Change the append to `result.append(current[:])`.",
+    "debrief": "Backtracking reuses one mutable working state, which is efficient but means every record must be a copy. This is the recursive cousin of the aliasing bug in [[0] * n] * n. When a result is collected from a structure that will change, store a snapshot.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "subsets",
+      "ai_code": "def subsets(items):\n    result = []\n    current = []\n\n    def go(i):\n        if i == len(items):\n            result.append(current)\n            return\n        go(i + 1)\n        current.append(items[i])\n        go(i + 1)\n        current.pop()\n\n    go(0)\n    return result",
+      "reference_code": "def subsets(items):\n    result = []\n    current = []\n\n    def go(i):\n        if i == len(items):\n            result.append(current[:])\n            return\n        go(i + 1)\n        current.append(items[i])\n        go(i + 1)\n        current.pop()\n\n    go(0)\n    return result",
+      "test_inputs": [
+        "([],)",
+        "([1],)",
+        "([1, 2],)"
+      ],
+      "counterexample_input": "([1, 2],)"
+    }
+  },
+  {
+    "id": "dsa-recursion-backtracking-003",
+    "subject": "dsa",
+    "topic": "Recursion & Backtracking",
+    "subtopic": "Permutations with repeated letters",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does perms('aab') return each distinct arrangement exactly once - the three strings 'aab', 'aba' and 'baa'?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def perms(s):\n    if len(s) <= 1:\n        return [s]\n    out = []\n    for i, c in enumerate(s):\n        for p in perms(s[:i] + s[i + 1:]):\n            out.append(c + p)\n    return out"
+    },
+    "ai_claim": "Yes. It places each character first and recursively arranges the rest, which produces every arrangement once.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "For a string of length 0 or 1 there is one arrangement."
+      },
+      {
+        "index": 2,
+        "text": "Otherwise, each character is chosen in turn to go first."
+      },
+      {
+        "index": 3,
+        "text": "The remaining characters are arranged recursively."
+      },
+      {
+        "index": 4,
+        "text": "Each arrangement is produced exactly once, so perms('aab') gives the 3 distinct strings."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 4,
+      "misconception": "Treating equal characters as distinct choices",
+      "explanation": "The two 'a's are chosen as first character separately, so every arrangement starting with 'a' is produced twice. perms('aab') returns 6 strings - 'aab', 'aba', 'aab', 'aba', 'baa', 'baa' - not 3. Skip a character already used at this position, or collect results in a set.",
+      "why_convincing": "For strings with distinct characters the algorithm is exactly right, and that is the usual test."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "With repeated characters, positions are distinct but characters are not, so duplicates appear: 6 results for 'aab'. Skip repeated characters at each level (track a set of used characters) to get each distinct arrangement once.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "perms('aab') returns 6 strings, with 'aab', 'aba' and 'baa' each twice.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "3! = 6 orderings of positions, but 3!/2! = 3 distinct strings",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "perms('aa') returns ['aa', 'aa']."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the function on a string with a repeated character."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 claims each arrangement appears once."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Choosing the first 'a' or the second 'a' leads to the same strings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the results for perms('aab') and compare with 3!/2!."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: repeated characters produce duplicate arrangements, so perms('aab') has 6 results, not 3."
+      }
+    ],
+    "repair": "At each level, skip a character that has already been placed in this position (keep a set of characters used at this level).",
+    "debrief": "Counting problems distinguish arrangements of positions from arrangements of values. The recursion enumerates positions, which is right for distinct characters and wrong for repeated ones. The count formula - n! divided by the factorials of repeat counts - is a quick check on any permutation generator.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "check",
+      "ai_code": "def perms(s):\n    if len(s) <= 1:\n        return [s]\n    out = []\n    for i, c in enumerate(s):\n        for p in perms(s[:i] + s[i + 1:]):\n            out.append(c + p)\n    return out\n\ndef check(s):\n    return sorted(perms(s))",
+      "reference_code": "from itertools import permutations\n\ndef check(s):\n    return sorted({''.join(p) for p in permutations(s)})",
+      "test_inputs": [
+        "('abc',)",
+        "('a',)",
+        "('aab',)"
+      ],
+      "counterexample_input": "('aab',)"
+    }
+  },
+  {
+    "id": "dsa-recursion-backtracking-004",
+    "subject": "dsa",
+    "topic": "Recursion & Backtracking",
+    "subtopic": "A memo that ignores a parameter",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "ways(n, steps) counts the ways to climb n stairs using the step sizes in steps. Does two_calls(4) return [5, 7]?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "memo = {}\n\ndef ways(n, steps):\n    if n == 0:\n        return 1\n    if n < 0:\n        return 0\n    if n in memo:\n        return memo[n]\n    memo[n] = sum(ways(n - s, steps) for s in steps)\n    return memo[n]\n\ndef two_calls(n):\n    return [ways(n, [1, 2]), ways(n, [1, 2, 3])]"
+    },
+    "ai_claim": "Yes. With steps [1, 2] there are 5 ways to climb 4 stairs, and with [1, 2, 3] there are 7.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "ways counts climbs recursively: from n, take any allowed step s and count the ways for n - s."
+      },
+      {
+        "index": 2,
+        "text": "The memo stores each result so that it is not recomputed."
+      },
+      {
+        "index": 3,
+        "text": "ways(4, [1, 2]) = 5 and ways(4, [1, 2, 3]) = 7."
+      },
+      {
+        "index": 4,
+        "text": "So two_calls(4) returns [5, 7]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Memoising on part of the input",
+      "explanation": "The memo is keyed by n alone, but the answer also depends on steps. It is a module-level dict, so the first call fills memo[1..4] for steps [1, 2]; the second call finds memo[4] = 5 already there and returns it. two_calls(4) returns [5, 5]. Key the memo by (n, tuple(steps)).",
+      "why_convincing": "Within a single call the memo is correct, and memoisation is usually shown with one fixed parameter."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Because the memo ignores steps and persists between calls, the second call reuses the first call's answers: [5, 5]. Use (n, tuple(steps)) as the key, or create the memo inside each top-level call.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "two_calls(4) returns [5, 5].",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "call 1 stores memo[4] = 5; call 2 finds memo[4] and returns 5",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4",
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "two_calls(4) returns [5, 5]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the memo's key includes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes the memo. Does every input affect the key?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A memo is only valid if its key captures every argument the result depends on."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace the second call of two_calls(4) and look up memo[4]."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the memo is keyed by n only and shared between calls, so the second call returns 5. Key it by (n, tuple(steps))."
+      }
+    ],
+    "repair": "Use `key = (n, tuple(steps))` for the memo.",
+    "debrief": "A cache is correct only if its key includes everything the result depends on. Module-level memos make the bug worse, because stale answers survive across calls. When reviewing memoisation, list the function's inputs and check each one appears in the key.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "two_calls",
+      "ai_code": "memo = {}\n\ndef ways(n, steps):\n    if n == 0:\n        return 1\n    if n < 0:\n        return 0\n    if n in memo:\n        return memo[n]\n    memo[n] = sum(ways(n - s, steps) for s in steps)\n    return memo[n]\n\ndef two_calls(n):\n    return [ways(n, [1, 2]), ways(n, [1, 2, 3])]",
+      "reference_code": "memo = {}\n\ndef ways(n, steps):\n    if n == 0:\n        return 1\n    if n < 0:\n        return 0\n    key = (n, tuple(steps))\n    if key in memo:\n        return memo[key]\n    memo[key] = sum(ways(n - s, steps) for s in steps)\n    return memo[key]\n\ndef two_calls(n):\n    return [ways(n, [1, 2]), ways(n, [1, 2, 3])]",
+      "test_inputs": [
+        "(1,)",
+        "(4,)"
+      ],
+      "counterexample_input": "(4,)"
+    }
+  },
+  {
+    "id": "dsa-recursion-backtracking-005",
+    "subject": "dsa",
+    "topic": "Recursion & Backtracking",
+    "subtopic": "Backtracking with constraint sets",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does queens(n) correctly count the ways to place n non-attacking queens on an n x n board - for example 4 for n = 6 and 92 for n = 8?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def queens(n):\n    count = 0\n    cols, d1, d2 = set(), set(), set()\n\n    def place(r):\n        nonlocal count\n        if r == n:\n            count += 1\n            return\n        for c in range(n):\n            if c in cols or r - c in d1 or r + c in d2:\n                continue\n            cols.add(c)\n            d1.add(r - c)\n            d2.add(r + c)\n            place(r + 1)\n            cols.remove(c)\n            d1.remove(r - c)\n            d2.remove(r + c)\n\n    place(0)\n    return count"
+    },
+    "ai_claim": "Yes. It places one queen per row and uses sets of used columns and diagonals to reject attacks, undoing each placement when it backtracks.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each recursion level places exactly one queen in row r, so no two queens share a row."
+      },
+      {
+        "index": 2,
+        "text": "cols, d1 (r - c) and d2 (r + c) record used columns and both diagonal directions, so a placement is rejected exactly when it would be attacked."
+      },
+      {
+        "index": 3,
+        "text": "After exploring a placement, the column and diagonals are removed again, restoring the state for the next choice."
+      },
+      {
+        "index": 4,
+        "text": "Every complete placement increments count once, giving 4 for n = 6 and 92 for n = 8."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Squares on the same diagonal share r - c or r + c, so the three sets detect every attack in O(1); undoing the state after each recursive call makes the search exhaustive without duplicates. queens(6) = 4 and queens(8) = 92.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "queens(6) returns 4 and queens(8) returns 92.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "4",
+          "92"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that every attack direction is covered and that state is restored."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 claims two numbers capture all diagonal attacks."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Squares on one diagonal share r - c; squares on the other share r + c."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Verify queens(4) = 2 by hand."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The sets cover columns and both diagonals, and backtracking restores them. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Backtracking is correct when three things hold: constraints are checked before placing, every choice is explored, and state is restored after each branch. This code satisfies all three, and the r - c / r + c diagonal trick makes checks O(1). Verify with small known values before trusting larger ones.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "queens",
+      "ai_code": "def queens(n):\n    count = 0\n    cols, d1, d2 = set(), set(), set()\n\n    def place(r):\n        nonlocal count\n        if r == n:\n            count += 1\n            return\n        for c in range(n):\n            if c in cols or r - c in d1 or r + c in d2:\n                continue\n            cols.add(c)\n            d1.add(r - c)\n            d2.add(r + c)\n            place(r + 1)\n            cols.remove(c)\n            d1.remove(r - c)\n            d2.remove(r + c)\n\n    place(0)\n    return count",
+      "reference_code": "from itertools import permutations\n\ndef queens(n):\n    return sum(\n        all(abs(p[i] - p[j]) != j - i for i in range(n) for j in range(i + 1, n))\n        for p in permutations(range(n))\n    )",
+      "test_inputs": [
+        "(1,)",
+        "(4,)",
+        "(6,)",
+        "(8,)"
+      ]
+    }
+  }
+]

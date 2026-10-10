@@ -1,0 +1,469 @@
+[
+  {
+    "id": "eng-presentation-public-speaking-001",
+    "subject": "english",
+    "topic": "Presentation & Public Speaking",
+    "subtopic": "Reading text-heavy slides",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is reading a 150-word slide aloud an effective way to present it?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Slide 4: 150 words in 12 bullet points, 16-point font.\nPlan: \"I'll read each bullet aloud so nobody misses anything.\""
+    },
+    "ai_claim": "Yes. Putting everything on the slide and reading it ensures the audience gets all the information.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "All the information is on the slide."
+      },
+      {
+        "index": 2,
+        "text": "The presenter reads every bullet."
+      },
+      {
+        "index": 3,
+        "text": "The audience hears and sees everything."
+      },
+      {
+        "index": 4,
+        "text": "So nothing is missed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Ignoring how audiences process slides and speech",
+      "explanation": "People read faster than the presenter speaks, so they read ahead and stop listening, and dense 16-point text is hard to read from the back. Slides should carry a few key words or a visual; the speaker explains. Put detail in a handout or appendix.",
+      "why_convincing": "Completeness feels like clarity."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: dense slides read aloud split attention. Use a few key points or a visual and speak to them; move detail to a handout.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Audiences cannot read dense text and listen at the same time effectively.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Slide 4: 'Delivery delays fell 32% after the route change' + one chart; details in the appendix.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "32"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The audience finishes reading the slide while the presenter is on bullet 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about reading versus listening speed."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the audience does both well."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Slides support the speaker; they are not a script."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine sitting at the back of the room."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: people read ahead and stop listening."
+      }
+    ],
+    "repair": "One message per slide, few words, a visual; detail in a handout.",
+    "debrief": "If the slide can be read without you, either you or the slide is unnecessary.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-presentation-public-speaking-002",
+    "subject": "english",
+    "topic": "Presentation & Public Speaking",
+    "subtopic": "No questions means understood",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the lack of questions show that everyone understood?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "After a 25-minute technical presentation to the sales team, the presenter asked 'Any questions?' Nobody responded.\nPresenter's note: \"No questions, so everyone fully understood.\""
+    },
+    "ai_claim": "Yes. If anyone had not understood, they would have asked, so silence means everyone understood.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The presenter invited questions."
+      },
+      {
+        "index": 2,
+        "text": "No one asked any."
+      },
+      {
+        "index": 3,
+        "text": "People ask when they do not understand."
+      },
+      {
+        "index": 4,
+        "text": "So everyone understood."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Reading silence as understanding",
+      "explanation": "Silence has many causes: confusion too deep to phrase a question, reluctance to look uninformed in front of colleagues, lack of time, or disengagement. Check understanding actively - ask a specific question ('How would you explain feature X to a customer?'), run a quick poll, or follow up individually.",
+      "why_convincing": "Asking for questions feels like checking understanding."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: silence can mean confusion or reluctance. Check understanding with specific questions or a quick activity.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "In a follow-up quiz, half the sales team could not explain the main new feature.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Understanding should be checked actively, not inferred from the absence of questions.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Several attendees were too unsure to know what to ask."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List reasons people might stay silent."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes confusion always produces questions."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Absence of questions is weak evidence of understanding."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a follow-up check."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: silence does not show understanding."
+      }
+    ],
+    "repair": "Ask a specific question or run a short check instead of 'Any questions?'",
+    "debrief": "Design understanding checks into presentations rather than inferring from silence.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-presentation-public-speaking-003",
+    "subject": "english",
+    "topic": "Presentation & Public Speaking",
+    "subtopic": "Opening with an apology",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this apology a good way to open the presentation?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Planned opening: \"Sorry, I didn't get much time to prepare, and I'm not very good at presenting, so please bear with me.\"\nAI: \"Apologising upfront builds rapport and lowers the audience's expectations helpfully.\""
+    },
+    "ai_claim": "Yes. Being humble and honest builds rapport, and lowering expectations makes any mistakes easier to forgive.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Honesty builds trust."
+      },
+      {
+        "index": 2,
+        "text": "Humility makes the speaker relatable."
+      },
+      {
+        "index": 3,
+        "text": "Lower expectations make mistakes acceptable."
+      },
+      {
+        "index": 4,
+        "text": "So the apology is a good opening."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Assuming self-deprecation builds credibility",
+      "explanation": "Opening with apologies tells the audience the content may not be worth their attention and undermines the speaker's credibility before they begin; many listeners disengage. The first 30 seconds should give the audience a reason to listen: the key message or a relevant hook. If time was short, keep the talk short and focused instead of apologising.",
+      "why_convincing": "Humility is often a virtue in conversation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the apology undermines credibility and interest. Open with the key message or a hook.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "\"In the next 10 minutes, I'll show how one change cut our delivery delays by a third - and what it means for your region.\"",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "10"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Openings should establish relevance and credibility.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The audience checks their phones after the apology."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the audience concludes from the first sentence."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes lowered expectations help."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Openings shape attention and credibility."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the apology with a strong hook."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: apologies undermine the talk. Open with the message."
+      }
+    ],
+    "repair": "Open with the key message or a relevant hook.",
+    "debrief": "Audiences decide quickly whether to pay attention. Use the first moments to give them a reason.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-presentation-public-speaking-004",
+    "subject": "english",
+    "topic": "Presentation & Public Speaking",
+    "subtopic": "Jargon for a non-technical audience",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this the best way to explain the change to HR leaders?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Update to the HR leadership team: \"We migrated the ATS to a microservices architecture with a Kafka event bus, cutting p99 latency from 1.2 s to 300 ms and improving MTTR.\"\nAI: \"Precise technical terms show expertise, so this is the best way to explain the change.\""
+    },
+    "ai_claim": "Yes. The precise terms and numbers show the team's expertise and accurately describe the improvement.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The terms are technically precise."
+      },
+      {
+        "index": 2,
+        "text": "The numbers show clear improvement."
+      },
+      {
+        "index": 3,
+        "text": "Precision demonstrates expertise."
+      },
+      {
+        "index": 4,
+        "text": "So this is the best explanation."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Ignoring the audience's background",
+      "explanation": "HR leaders probably do not know what ATS internals, Kafka, p99 latency or MTTR mean, so the message - what changed for them - is lost. Translate into outcomes they care about: 'The recruitment system now loads pages four times faster, and when problems occur we fix them in minutes rather than hours.'",
+      "why_convincing": "Precision is valuable with technical audiences."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the jargon hides the benefit from a non-technical audience. Explain outcomes in plain terms.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "The recruitment system is now about four times faster, and outages are fixed in minutes instead of hours.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Adapt vocabulary and detail to the audience's knowledge and interests.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An HR leader asks, 'So what does this mean for recruiters?'"
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the audience knows and cares about."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 values expertise over understanding."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Communicate outcomes in the audience's terms."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rewrite without technical terms."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the audience cannot decode the jargon."
+      }
+    ],
+    "repair": "Translate technical changes into outcomes for the audience.",
+    "debrief": "Expertise is shown by making complex things clear to the people who need them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-presentation-public-speaking-005",
+    "subject": "english",
+    "topic": "Presentation & Public Speaking",
+    "subtopic": "A clear presentation structure",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this structure suits a decision-focused presentation?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Structure for a 10-minute proposal:\n1. Key message (30 s): 'Switching to route planning software will cut delivery costs by about 12%.'\n2. Three supporting points, each with one piece of evidence.\n3. Anticipated concern (cost of the software) and the answer.\n4. Summary and a specific request: 'Approve a 3-month pilot in two cities.'"
+    },
+    "ai_claim": "Yes. It states the key message first, supports it with evidence, addresses the likely objection, and ends with a summary and a specific request, so decision-makers know what to decide and why.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The key message comes first."
+      },
+      {
+        "index": 2,
+        "text": "Evidence supports three clear points."
+      },
+      {
+        "index": 3,
+        "text": "The main objection is addressed."
+      },
+      {
+        "index": 4,
+        "text": "It closes with a summary and a specific ask."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Message-first structures with evidence, objection handling and a clear ask work well for decision-makers.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Decision presentations: lead with the recommendation, support it, handle objections, end with the ask.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "12"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what a decision-maker needs from the talk."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 ends with a specific request."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Bottom-line-up-front structures suit busy audiences."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check whether the ask is specific."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The structure fits a decision. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "State the conclusion, prove it, answer the doubt, ask for the decision.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

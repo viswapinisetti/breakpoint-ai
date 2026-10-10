@@ -1,0 +1,550 @@
+[
+  {
+    "id": "ds-exploratory-data-analysis-001",
+    "subject": "data-science",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "Zero correlation, strong relationship",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does r = 0 show that temperature deviation and extra energy use are unrelated?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "data": {
+        "title": "Temperature deviation vs energy use",
+        "columns": [
+          "deviation from 22 C (x)",
+          "extra kWh (y)"
+        ],
+        "rows": [
+          [
+            -2,
+            4
+          ],
+          [
+            -1,
+            1
+          ],
+          [
+            0,
+            0
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            4
+          ]
+        ]
+      },
+      "result": "Pearson correlation r = 0.00"
+    },
+    "ai_claim": "Yes. A correlation of 0 means there is no relationship between the two variables.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Pearson's r between x and y is 0.00."
+      },
+      {
+        "index": 2,
+        "text": "r measures the relationship between two variables."
+      },
+      {
+        "index": 3,
+        "text": "r = 0 means no relationship."
+      },
+      {
+        "index": 4,
+        "text": "So energy use does not depend on temperature deviation."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Reading zero correlation as no relationship",
+      "explanation": "Pearson's r measures linear association only. Here y = x^2 exactly: energy use rises whenever temperature moves away from 22 C in either direction. The symmetric U-shape gives r = 0, although y is completely determined by x. Plot the data before interpreting r.",
+      "why_convincing": "r is often described simply as 'the relationship between two variables'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: y = x^2 exactly, a perfect non-linear relationship with r = 0. Always plot the data.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Every y equals x^2: (-2)^2 = 4, (-1)^2 = 1, 0, 1, 4.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Pearson r for these points is exactly 0.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A scatter plot shows a perfect U-shape."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Plot the five points."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 interprets r = 0 as 'no relationship'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Pearson's r only detects linear relationships."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare each y with x squared."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: y = x^2 exactly, a strong non-linear relationship."
+      }
+    ],
+    "repair": "Plot the data; use measures suited to non-linear relationships (e.g. mutual information) or model the curve.",
+    "debrief": "Summary statistics can hide structure (Anscombe's quartet, the datasaurus). A scatter plot is part of computing a correlation.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-exploratory-data-analysis-002",
+    "subject": "data-science",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "Sentinel values in the summary",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the mean age of 41.7 a sound summary of customers' ages?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "describe": {
+        "title": "df['age'].describe()",
+        "columns": [
+          "stat",
+          "value"
+        ],
+        "rows": [
+          [
+            "count",
+            "12,000"
+          ],
+          [
+            "mean",
+            "41.7"
+          ],
+          [
+            "min",
+            "-1"
+          ],
+          [
+            "50%",
+            "34"
+          ],
+          [
+            "max",
+            "999"
+          ]
+        ]
+      },
+      "note": "The app stores -1 for 'not provided' and 999 for 'declined to answer'."
+    },
+    "ai_claim": "Yes. describe() computes the mean over 12,000 ages, which is 41.7, a plausible average age for customers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "describe() reports a count of 12,000 ages."
+      },
+      {
+        "index": 2,
+        "text": "The mean is 41.7."
+      },
+      {
+        "index": 3,
+        "text": "41.7 is plausible for customers."
+      },
+      {
+        "index": 4,
+        "text": "So it is a sound summary."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Trusting a plausible mean computed over sentinel codes",
+      "explanation": "min = -1 and max = 999 are codes, not ages. They are averaged in as if they were real: each 999 adds decades to the mean, and each -1 pulls it down. A plausible-looking 41.7 is still wrong. Replace sentinels with NaN (df['age'].replace({-1: np.nan, 999: np.nan})) before summarising.",
+      "why_convincing": "The mean lands in a believable range, which hides the problem."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the mean includes -1 and 999 codes. Convert them to NaN and recompute.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "min is -1 and max is 999, both impossible ages.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-1",
+          "999"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "If 1% of rows are 999, they add about 10 years to the mean on their own.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The median, 34, is far below the mean, a sign that extreme codes pull the mean up."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the min and max."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 judges the mean by plausibility."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Sentinel codes must be converted to missing values before computing statistics."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Read the note about -1 and 999."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the mean includes codes, not ages. Replace them with NaN."
+      }
+    ],
+    "repair": "Replace -1 and 999 with NaN, then describe again.",
+    "debrief": "Always read min and max first: impossible values reveal sentinels, unit errors and typos that silently distort means.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-exploratory-data-analysis-003",
+    "subject": "data-science",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "z-scores in a small sample",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this rule flag the Rs 10,00,000 invoice as an outlier?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "data": "Ten invoice amounts: nine of Rs 10 and one of Rs 10,00,000",
+      "rule": "Flag values with |z| > 3, where z = (x - mean) / standard deviation (sample SD)"
+    },
+    "ai_claim": "Yes. Rs 10,00,000 is enormously far from the other values, so its z-score is far above 3 and it is flagged.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Nine invoices are Rs 10 and one is Rs 10,00,000."
+      },
+      {
+        "index": 2,
+        "text": "The large value is far from the typical value."
+      },
+      {
+        "index": 3,
+        "text": "Its z-score is therefore very large, far above 3."
+      },
+      {
+        "index": 4,
+        "text": "So the rule flags it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming a huge value always has a huge z-score",
+      "explanation": "The outlier inflates both the mean and the standard deviation it is measured against. In a sample of n values, no z-score (with the sample SD) can exceed (n - 1) / sqrt(n); for n = 10 that is about 2.85. The Rs 10,00,000 invoice gets z = 2.85 and is not flagged. Use robust methods (median and MAD, or the IQR rule) for small samples.",
+      "why_convincing": "The value is obviously extreme, so a large z-score seems certain."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: its z-score is about 2.85, the maximum possible with n = 10. Use a robust rule such as median/MAD.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Maximum |z| for n = 10 is (10 - 1) / sqrt(10) = 2.85, below 3.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2.85"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "Computing z for the invoice with the sample SD gives about 2.85.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2.85"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "No value in a sample of 10 can ever pass |z| > 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Remember the outlier affects the mean and SD too."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the z-score grows with the value."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In small samples, z-scores are bounded by (n - 1) / sqrt(n)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the bound for n = 10."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: z cannot exceed about 2.85 with 10 values. Use median/MAD."
+      }
+    ],
+    "repair": "Use a robust score: |x - median| / MAD, or the IQR rule.",
+    "debrief": "Outlier rules based on the mean and SD are masked by the outliers themselves, especially in small samples. Robust statistics do not have this weakness.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-exploratory-data-analysis-004",
+    "subject": "data-science",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "Comparing groups of different sizes",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the chart support the claim that Group B's sessions are shorter?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "chart": "Overlaid histograms of session length (minutes), counts on the y axis\nGroup A: 1,000 users, tallest bar about 180\nGroup B: 100 users, tallest bar about 20",
+      "claim_in_report": "Group B's sessions are much shorter and less varied."
+    },
+    "ai_claim": "Yes. Group B's bars are far lower across the chart, so its users have shorter, less varied sessions.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Both groups' session lengths are shown as histograms."
+      },
+      {
+        "index": 2,
+        "text": "Group B's bars are much lower than Group A's."
+      },
+      {
+        "index": 3,
+        "text": "Lower bars mean shorter sessions."
+      },
+      {
+        "index": 4,
+        "text": "So Group B's sessions are shorter."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Comparing count histograms of groups with different sizes",
+      "explanation": "Bar height shows how many users fall in each bin, not how long sessions are. Group B has a tenth as many users, so its bars are lower everywhere even if its distribution is identical. Session length is on the x axis: compare where the distributions sit. Normalise the histograms (density=True) or compare medians and box plots.",
+      "why_convincing": "Lower bars look like 'less', and the chart overlays the groups directly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: bar heights reflect group size (1,000 vs 100). Use density histograms or box plots to compare session lengths.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Group A has 1,000 users and Group B 100.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1,000",
+          "100"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "If B's distribution were identical to A's, its bars would still be one-tenth as tall.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Identical distributions would produce the same chart."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the y axis measures."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 reads bar height as session length."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Counts depend on group size; densities do not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider the size of each group."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: bar height is a count, and B is 10 times smaller. Normalise the histograms."
+      }
+    ],
+    "repair": "Plot densities (or percentages), or use side-by-side box plots.",
+    "debrief": "Comparisons between groups of different sizes need normalised displays. Counts answer 'how many?', not 'how long?'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-exploratory-data-analysis-005",
+    "subject": "data-science",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "Log scale for skewed data",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this log-scale histogram is a better way to explore the spend distribution, and that the centre near 10^3 means typical spend is about Rs 1,000?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "chart": "Histogram of monthly customer spend, x axis log10 scale: 10^2 to 10^5 rupees\nThe distribution looks roughly bell-shaped, centred near 10^3 (Rs 1,000).",
+      "note": "On a linear axis, 95% of customers are squeezed into the first bar."
+    },
+    "ai_claim": "Yes. Spend is heavily right-skewed, so a log axis spreads out the bulk of customers. Equal distances represent equal ratios, and the peak near 10^3 corresponds to a typical (roughly median) spend of about Rs 1,000.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "On a linear axis, a few very large spenders compress everyone else into one bar."
+      },
+      {
+        "index": 2,
+        "text": "A log axis maps multiplicative differences to equal distances."
+      },
+      {
+        "index": 3,
+        "text": "The data look roughly symmetric on the log scale, so spend is roughly log-normal."
+      },
+      {
+        "index": 4,
+        "text": "The centre, near 10^3, corresponds to a typical spend of about Rs 1,000."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Log scales are the standard way to explore right-skewed quantities such as spend and income. For a roughly log-normal distribution, the centre of the log histogram corresponds to the median (the geometric mean), not the arithmetic mean.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "log10(1,000) = 3, the centre of the log histogram.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "On the linear axis, 95% of customers fall in the first bar.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "95"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about how skew affects a linear histogram."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 interprets the centre of a log-scale distribution."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "On a log scale, equal distances mean equal ratios, and the centre is the geometric mean (median)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Convert 10^3 to rupees."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The log scale reveals the distribution, and typical spend is about Rs 1,000. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Choosing scales is part of exploration. Right-skewed data often becomes interpretable on a log axis, provided you translate back to real units when reporting.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

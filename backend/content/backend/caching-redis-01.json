@@ -1,0 +1,379 @@
+[
+  {
+    "id": "be-caching-redis-001",
+    "subject": "backend",
+    "topic": "Caching & Redis",
+    "subtopic": "Cache stampede on expiry",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this cache ensure the heavy queries run at most once per hour?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "def homepage_data():\n    data = redis.get(\"homepage\")\n    if data is None:\n        data = build_homepage()           # 3 heavy queries, about 2 s\n        redis.set(\"homepage\", data, ex=3600)\n    return data\n\n# Traffic: about 500 requests per second for this data."
+    },
+    "ai_claim": "Yes. The data is rebuilt only when the key is missing, which happens once an hour after expiry, so the queries run once per hour.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The key lives for 3,600 seconds."
+      },
+      {
+        "index": 2,
+        "text": "While it exists, requests are served from Redis."
+      },
+      {
+        "index": 3,
+        "text": "When it expires, the next request rebuilds it."
+      },
+      {
+        "index": 4,
+        "text": "So the heavy queries run once per hour."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Assuming only one request sees the missing key",
+      "explanation": "Rebuilding takes about 2 seconds, and during that time every request also finds the key missing. At 500 requests per second, roughly 1,000 requests run build_homepage at once, hitting the database with thousands of heavy queries - a cache stampede. Use a lock (SET NX) so one request rebuilds, serve stale data meanwhile, or refresh the key before it expires.",
+      "why_convincing": "In a single-user test only one request ever sees the miss."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: every request arriving during the 2-second rebuild also misses, about 1,000 rebuilds at once. Add a rebuild lock or early refresh.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "t = 0 key expires; t = 0-2 s, 500 req/s x 2 s = 1,000 requests miss and call build_homepage",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1,000",
+          "500"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Cache-aside without request coalescing lets concurrent misses all recompute the value.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "At expiry, about 1,000 concurrent rebuilds run."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider requests that arrive while the rebuild is still running."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes only the next request rebuilds."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "All concurrent misses recompute unless something coordinates them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply requests per second by the rebuild time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: about 1,000 requests miss during the rebuild and all run the queries. Add a lock or early refresh."
+      }
+    ],
+    "repair": "Acquire a lock with SET homepage:lock NX EX 10 before rebuilding; others serve stale data or wait.",
+    "debrief": "Caches protect databases only while they hit. The moment a hot key expires, concurrency turns one miss into thousands. Popular keys need coordinated or early refresh.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-caching-redis-002",
+    "subject": "backend",
+    "topic": "Caching & Redis",
+    "subtopic": "Caching personalised responses publicly",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this header safely speed up /api/me without exposing one user's data to another?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.get(\"/api/me\")\ndef me(user=Depends(current_user)):\n    return JSONResponse(\n        {\"name\": user.name, \"email\": user.email, \"orders\": user.recent_orders()},\n        headers={\"Cache-Control\": \"public, max-age=300\"},\n    )\n# A CDN sits in front of the API and honours Cache-Control."
+    },
+    "ai_claim": "Yes. Each user's browser caches its own response for 5 minutes, which reduces load without affecting other users.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Cache-Control: max-age=300 lets the response be reused for 5 minutes."
+      },
+      {
+        "index": 2,
+        "text": "Each user's browser keeps its own cache."
+      },
+      {
+        "index": 3,
+        "text": "So a user only ever sees their own cached data."
+      },
+      {
+        "index": 4,
+        "text": "The API receives fewer requests."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 2,
+      "misconception": "Overlooking shared caches",
+      "explanation": "public allows shared caches - the CDN - to store the response. The URL is the same for everyone and the cache key does not include the user, so the CDN can serve Asha's name, email and orders to the next user who requests /api/me. Personalised responses need Cache-Control: private (or no-store).",
+      "why_convincing": "Browser caching alone would be safe, and that is the cache most developers picture."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: public lets the CDN cache the response under one URL and serve it to other users. Use Cache-Control: private, max-age=300 (or no-store).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Request /api/me as Asha, then as Ben within 5 minutes via the CDN: Ben receives Asha's data (X-Cache: HIT).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "RFC 9111: 'public' permits shared caches to store a response; 'private' restricts it to a single user's cache.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The CDN serves one user's profile to another user."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List every cache between the user and the API."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 considers only the browser cache."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "public permits shared caches such as CDNs and proxies."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Request /api/me as two different users through the CDN."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the CDN is a shared cache, so users can receive each other's data. Use private."
+      }
+    ],
+    "repair": "Send `Cache-Control: private, max-age=300` (or `no-store` for sensitive data).",
+    "debrief": "Cache-Control speaks to every cache on the path, not just the browser. Anything user-specific must be private, or the cache key must include the user.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-caching-redis-003",
+    "subject": "backend",
+    "topic": "Caching & Redis",
+    "subtopic": "Invalidating after a write",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After update_price(7, 499) returns, does the next call to get_price(7) return 499?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "def get_price(pid):\n    v = redis.get(f\"price:{pid}\")\n    if v is None:\n        v = db.price(pid)\n        redis.set(f\"price:{pid}\", v, ex=3600)\n    return v\n\ndef update_price(pid, price):\n    db.set_price(pid, price)      # committed\n    redis.delete(f\"price:{pid}\")"
+    },
+    "ai_claim": "Yes. The database is updated first, then the cached price is deleted, so the next read misses the cache, loads 499 from the database and caches it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "update_price commits 499 to the database."
+      },
+      {
+        "index": 2,
+        "text": "It then deletes price:7 from Redis."
+      },
+      {
+        "index": 3,
+        "text": "The next get_price(7) finds no cached value."
+      },
+      {
+        "index": 4,
+        "text": "It reads 499 from the database, caches it and returns it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct for a read that happens after update_price returns. Updating the database before deleting the key means a later read cannot re-cache the old value from the database. (A read already in flight during the update can still race; short TTLs bound that.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "commit 499 -> DEL price:7 -> GET miss -> DB returns 499 -> SET price:7 499",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "499"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the order of the database write and the cache delete."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on the key being gone when the next read starts."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Delete-after-write ensures the next miss loads the committed value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace get_price(7) after update_price returns."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The next read misses and loads 499 from the database. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cache-aside invalidation is correct when the database write commits before the key is deleted. The claim scopes itself to reads after the update, which is exactly what that ordering guarantees.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-caching-redis-004",
+    "subject": "backend",
+    "topic": "Caching & Redis",
+    "subtopic": "Falsy values treated as cache misses",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For a sold-out product (stock level 0), are repeat calls served from the cache without querying the database?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "cache = {}   # in-process cache\n\ndef stock_level(pid):\n    cached = cache.get(f\"stock:{pid}\")\n    if cached:\n        return cached\n    level = db.stock(pid)            # slow query\n    cache[f\"stock:{pid}\"] = level\n    return level"
+    },
+    "ai_claim": "Yes. After the first call, stock:7 is in the cache with value 0, so later calls return it from the cache.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The first call misses, queries the database and caches 0."
+      },
+      {
+        "index": 2,
+        "text": "Later calls call cache.get and find the entry."
+      },
+      {
+        "index": 3,
+        "text": "The cached value is returned."
+      },
+      {
+        "index": 4,
+        "text": "So the database is queried only once."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Using truthiness to test for a cache hit",
+      "explanation": "cache.get returns 0, and if cached: treats 0 as a miss because 0 is falsy. Every call for a sold-out product runs the slow query again - and sold-out products are often the most requested during a sale. Test with if cached is not None (or 'key in cache').",
+      "why_convincing": "For products in stock, the cache works perfectly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 0 is falsy, so the check fails and the database is queried every time. Use if cached is not None.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Call stock_level for a product with stock 0 twice: db.stock runs both times.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "In Python, 0, '', [] and None are all falsy; use 'is not None' to detect presence.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Every request for a sold-out product hits the database."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Evaluate the if condition when the cached value is 0."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says the entry is found and returned. Check the condition."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Truthiness treats 0 like a missing value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace two calls for a product with stock 0."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: 0 is falsy, so it is treated as a miss. Use 'is not None'."
+      }
+    ],
+    "repair": "Use `if cached is not None: return cached`.",
+    "debrief": "Caches must distinguish 'no entry' from 'an entry whose value is empty, zero or false'. Truthiness conflates them, and the failure only shows for exactly those values.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

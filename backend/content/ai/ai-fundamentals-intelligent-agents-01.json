@@ -1,0 +1,474 @@
+[
+  {
+    "id": "ai-ai-fundamentals-intelligent-agents-001",
+    "subject": "ai",
+    "topic": "AI Fundamentals & Intelligent Agents",
+    "subtopic": "Passing for human is not understanding",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the test result show that the chatbot understands customers' problems?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "In a 5-minute blind chat test, 60% of judges could not tell a customer-service chatbot from a human agent.\nMarketing copy: \"Our bot truly understands your problems.\""
+    },
+    "ai_claim": "Yes. Most judges could not tell it apart from a human, and humans understand problems, so the chatbot understands them too.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "60% of judges mistook the bot for a human."
+      },
+      {
+        "index": 2,
+        "text": "Humans understand the problems they discuss."
+      },
+      {
+        "index": 3,
+        "text": "Something indistinguishable from a human must understand too."
+      },
+      {
+        "index": 4,
+        "text": "So the chatbot understands customers' problems."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Inferring understanding from imitation",
+      "explanation": "The test shows the bot's replies were convincing in short chats, not that it understands problems or solves them correctly. Fluent text can accompany wrong answers, and 5-minute conversations rarely probe edge cases. Measure what matters: resolution rate, correctness on realistic cases and escalation quality.",
+      "why_convincing": "Human-likeness is impressive, and the Turing test is a famous benchmark."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: indistinguishability in short chats is about style, not understanding or correctness. Evaluate task outcomes.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A bot can fluently give a wrong refund policy and still sound human.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Behavioural imitation in a short test does not establish comprehension or task competence.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "60"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Judges were fooled on style, not on whether answers were correct."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the test actually measured."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 moves from 'seems human' to 'understands'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Imitating conversation and solving problems are different capabilities."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a fluent but wrong answer."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: seeming human does not show understanding. Measure outcomes."
+      }
+    ],
+    "repair": "Evaluate the bot on real support cases: correctness, resolution and safe escalation.",
+    "debrief": "The Turing test measures indistinguishability, not intelligence or usefulness. Product claims need task-level evidence.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-ai-fundamentals-intelligent-agents-002",
+    "subject": "ai",
+    "topic": "AI Fundamentals & Intelligent Agents",
+    "subtopic": "Reflex agents in partially observable worlds",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this simple reflex agent clean every dirty square?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "explanation": "A cleaning robot senses only whether its current square is dirty.\nRules: if dirty -> suck; if clean -> move right; at the right wall -> move right (bumps, stays).\nRoom: a row of 5 squares; dirt on squares 1 and 4; robot starts on square 3."
+    },
+    "ai_claim": "Yes. The robot sucks whenever it finds dirt and keeps moving otherwise, so it will reach and clean every dirty square.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "On a dirty square, the robot sucks."
+      },
+      {
+        "index": 2,
+        "text": "On a clean square, it moves right."
+      },
+      {
+        "index": 3,
+        "text": "So it keeps moving until every square has been visited."
+      },
+      {
+        "index": 4,
+        "text": "Every dirty square gets cleaned."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming a reflex agent explores the whole environment",
+      "explanation": "The robot only ever moves right. Starting on square 3, it cleans square 4, reaches square 5 and bumps against the wall forever. Square 1 is never visited. With only local perception and no memory, a simple reflex agent can get stuck; it needs state (which squares it has seen) or randomised movement.",
+      "why_convincing": "The rules handle both percepts, so they look complete."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: it only moves right, so square 1 (left of the start) is never reached.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Start at 3: clean 3 -> 4 dirty, suck -> 5 -> bump at the wall forever; square 1 stays dirty.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Simple reflex agents act on the current percept only; in partially observable environments they can loop.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Square 1 is never visited."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Trace the robot from square 3."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every square is eventually visited."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A reflex agent without memory may never explore parts of the environment."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Which direction does the robot never move?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: it never moves left, so square 1 stays dirty."
+      }
+    ],
+    "repair": "Give the agent memory of visited squares (a model-based agent) or a sweep pattern.",
+    "debrief": "Agent design depends on the environment. Partial observability is exactly where internal state becomes necessary.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-ai-fundamentals-intelligent-agents-003",
+    "subject": "ai",
+    "topic": "AI Fundamentals & Intelligent Agents",
+    "subtopic": "Judging a decision by its outcome",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the bad outcome show the agent's decision was irrational?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "A delivery agent chose route A (expected 25 min) over route B (expected 35 min) using live traffic probabilities.\nAn unexpected accident closed route A; the delivery took 60 minutes.\nReview comment: \"The agent behaved irrationally - it chose the slow route.\""
+    },
+    "ai_claim": "Yes. The agent's choice led to a 60-minute delivery, much worse than route B, so it made an irrational decision.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The agent chose route A."
+      },
+      {
+        "index": 2,
+        "text": "Route A took 60 minutes."
+      },
+      {
+        "index": 3,
+        "text": "Route B would probably have been faster."
+      },
+      {
+        "index": 4,
+        "text": "So the choice was irrational."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Confusing a bad outcome with a bad decision",
+      "explanation": "A rational agent maximises expected performance given the information available at decision time. With the probabilities it had, route A's expected time (25 min) beat B's (35 min). An unforeseeable accident does not make that choice irrational - rationality is not omniscience. Judge the decision by its expected value and information, and improve the information if accidents were predictable.",
+      "why_convincing": "Outcomes are visible; the reasoning behind a decision is not."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: given its information, choosing the lower expected time was rational. The accident was bad luck, not bad reasoning.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "At decision time, route A's expected time was 25 minutes versus 35 for B.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "25",
+          "35"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Rationality means maximising expected performance given the percepts, not knowing the future.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Choosing route B would have been worse on average."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate the decision from the outcome."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 judges the decision by what happened afterwards."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A rational agent maximises expected performance with the information it has."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the expected times at decision time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the choice was rational given the information."
+      }
+    ],
+    "repair": "Evaluate decisions by expected value and information quality, over many trips.",
+    "debrief": "Good decisions can have bad outcomes. Evaluating agents on single outcomes rewards luck and punishes sound reasoning.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-ai-fundamentals-intelligent-agents-004",
+    "subject": "ai",
+    "topic": "AI Fundamentals & Intelligent Agents",
+    "subtopic": "Classifying an environment",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's classification of the poker environment correct?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "Task environment: an AI plays Texas Hold'em poker.\nAI classification: \"fully observable, deterministic, single-agent\""
+    },
+    "ai_claim": "Yes. The agent can see the whole table - the board cards, the bets and the pot - so poker is fully observable, and the rules are fixed, so it is deterministic.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The agent sees the community cards, bets and pot."
+      },
+      {
+        "index": 2,
+        "text": "So the environment is fully observable."
+      },
+      {
+        "index": 3,
+        "text": "The rules of poker are fixed, so it is deterministic."
+      },
+      {
+        "index": 4,
+        "text": "The agent plays for itself, so it is single-agent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Treating what is visible as the whole state",
+      "explanation": "Opponents' hole cards are hidden, so poker is partially observable. Card deals are random, so it is stochastic, and other players act strategically, so it is multi-agent (competitive). These properties are what make poker hard, and they call for probabilistic reasoning and opponent modelling.",
+      "why_convincing": "The table does show a lot of information."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: poker is partially observable (hidden cards), stochastic (shuffled deck) and multi-agent (opponents).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "The agent cannot see opponents' two hole cards.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "An environment is fully observable only if the sensors give the complete relevant state.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The best action depends on cards the agent cannot see."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the agent cannot see."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats visible information as the full state."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Fully observable means the percepts reveal the complete relevant state."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider opponents' hole cards and the shuffle."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: poker is partially observable, stochastic and multi-agent."
+      }
+    ],
+    "repair": "Classify poker as partially observable, stochastic, sequential and multi-agent.",
+    "debrief": "Environment properties determine which techniques apply. Misclassifying them leads to agents that assume away the hard parts.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-ai-fundamentals-intelligent-agents-005",
+    "subject": "ai",
+    "topic": "AI Fundamentals & Intelligent Agents",
+    "subtopic": "Maximising expected utility",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's reasoning correct?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "A risk-neutral scheduling agent chooses between two routes:\nRoute A: 30 minutes, certain.\nRoute B: 20 minutes with probability 0.7, 50 minutes with probability 0.3.\nAI: \"Route B has an expected time of 29 minutes, so a risk-neutral agent picks B.\""
+    },
+    "ai_claim": "Yes. B's expected time is 0.7 x 20 + 0.3 x 50 = 29 minutes, one minute less than A's 30, so an agent that only cares about expected time chooses B.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "E[A] = 30 minutes."
+      },
+      {
+        "index": 2,
+        "text": "E[B] = 0.7 x 20 + 0.3 x 50 = 14 + 15 = 29 minutes."
+      },
+      {
+        "index": 3,
+        "text": "A risk-neutral agent minimises expected time."
+      },
+      {
+        "index": 4,
+        "text": "29 < 30, so it chooses B."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: E[B] = 29 < 30. (A risk-averse agent, for example one facing a hard 40-minute deadline, might prefer A.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "0.7 x 20 + 0.3 x 50 = 29",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "29"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute the expected time of each route."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states the agent's objective."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A risk-neutral agent compares expected values only."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate 0.7 x 20 + 0.3 x 50."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. B's expected time is 29, so B is chosen. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Expected utility is the core of rational choice under uncertainty. The utility function - including attitudes to risk - is part of the agent's design.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

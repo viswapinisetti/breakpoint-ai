@@ -1,0 +1,450 @@
+[
+  {
+    "id": "dsa-greedy-dynamic-programming-001",
+    "subject": "dsa",
+    "topic": "Greedy & Dynamic Programming",
+    "subtopic": "Greedy by value density for 0/1 knapsack",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "With capacity 50 and items [[10, 60], [20, 100], [30, 120]] (weight, value), does best_value return the maximum achievable value?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def best_value(items, capacity):\n    \"\"\"items: [weight, value] pairs; each item can be taken at most once.\"\"\"\n    total = 0\n    for w, v in sorted(items, key=lambda it: it[1] / it[0], reverse=True):\n        if w <= capacity:\n            capacity -= w\n            total += v\n    return total"
+    },
+    "ai_claim": "Yes. Taking items in order of value per unit weight is optimal, giving the best total.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Value per kg: 60/10 = 6, 100/20 = 5, 120/30 = 4."
+      },
+      {
+        "index": 2,
+        "text": "Take the item worth 6 per kg (weight 10), then the one worth 5 per kg (weight 20): 30 kg used, value 160."
+      },
+      {
+        "index": 3,
+        "text": "Taking the densest items first always gives the best total."
+      },
+      {
+        "index": 4,
+        "text": "So the maximum value is 160."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Applying the fractional-knapsack greedy rule to 0/1 knapsack",
+      "explanation": "Value-density greed is optimal only when items can be split. Here items are whole: after taking 10 kg and 20 kg, the 30 kg item no longer fits in the remaining 20 kg. Taking 20 kg + 30 kg instead gives 100 + 120 = 220. 0/1 knapsack needs dynamic programming.",
+      "why_convincing": "The greedy rule is correct for the fractional version, which is often taught first, and density feels like the obvious measure of a good item."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The optimum is 220 (items of 20 kg and 30 kg), but greedy returns 160. Solve 0/1 knapsack with dynamic programming over capacity.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "20 + 30 = 50 kg for 100 + 120 = 220 > 160",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "220",
+          "160"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "best_value([[10, 60], [20, 100], [30, 120]], 50) returns 160.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "160"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Taking the 20 kg and 30 kg items gives 220."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try other combinations that fit in 50 kg."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims density order is always optimal."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Greedy by density is optimal for fractional knapsack, not when items are indivisible."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the value of taking the 20 kg and 30 kg items."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: with whole items, 20 kg + 30 kg = 220 beats greedy's 160. Use dynamic programming."
+      }
+    ],
+    "repair": "Use dynamic programming: best[c] = max(best[c], best[c - w] + v) over capacities, iterating c downwards for each item.",
+    "debrief": "Greedy algorithms are correct only for problems with the greedy-choice property, and a small change - indivisible items - removes it. When a greedy rule is proposed, look for a counterexample where an early 'best' choice blocks a better combination. Here three items suffice.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "best_value",
+      "ai_code": "def best_value(items, capacity):\n    \"\"\"items: [weight, value] pairs; each item can be taken at most once.\"\"\"\n    total = 0\n    for w, v in sorted(items, key=lambda it: it[1] / it[0], reverse=True):\n        if w <= capacity:\n            capacity -= w\n            total += v\n    return total",
+      "reference_code": "def best_value(items, capacity):\n    best = [0] * (capacity + 1)\n    for w, v in items:\n        for c in range(capacity, w - 1, -1):\n            best[c] = max(best[c], best[c - w] + v)\n    return best[capacity]",
+      "test_inputs": [
+        "([[5, 10]], 4)",
+        "([[10, 60], [20, 100], [30, 120]], 50)"
+      ],
+      "counterexample_input": "([[10, 60], [20, 100], [30, 120]], 50)"
+    }
+  },
+  {
+    "id": "dsa-greedy-dynamic-programming-002",
+    "subject": "dsa",
+    "topic": "Greedy & Dynamic Programming",
+    "subtopic": "Subsequence versus contiguous run",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does lis(a) return the length of the longest strictly increasing subsequence (not necessarily contiguous)? For [3, 1, 2, 5, 4, 6] that length is 4.",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def lis(a):\n    \"\"\"Length of the longest strictly increasing subsequence.\"\"\"\n    if not a:\n        return 0\n    best = cur = 1\n    for i in range(1, len(a)):\n        cur = cur + 1 if a[i] > a[i - 1] else 1\n        best = max(best, cur)\n    return best"
+    },
+    "ai_claim": "Yes. It tracks the current increasing streak and the best one, which gives 4 for [3, 1, 2, 5, 4, 6].",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "cur is the length of the increasing sequence ending at index i."
+      },
+      {
+        "index": 2,
+        "text": "If a[i] > a[i - 1], the sequence extends by one; otherwise it restarts at 1."
+      },
+      {
+        "index": 3,
+        "text": "best is the longest such sequence found."
+      },
+      {
+        "index": 4,
+        "text": "For [3, 1, 2, 5, 4, 6], lis returns 4."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Computing the longest increasing run instead of subsequence",
+      "explanation": "Comparing only with the previous element measures contiguous runs. A subsequence may skip elements: 1, 2, 4, 6 skips 5. The longest run in [3, 1, 2, 5, 4, 6] is 1, 2, 5 (length 3), so the function returns 3. The subsequence DP compares a[i] with every earlier a[j].",
+      "why_convincing": "The recurrence has the right shape - 'ending at index i' - but the wrong set of predecessors."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The code finds the longest contiguous increasing run: lis([3, 1, 2, 5, 4, 6]) returns 3. The longest increasing subsequence (e.g. 1, 2, 4, 6) has length 4; use d[i] = 1 + max(d[j] for j < i with a[j] < a[i]).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "lis([3, 1, 2, 5, 4, 6]) returns 3; the answer is 4.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3",
+          "4"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "1, 2, 4, 6 is an increasing subsequence of length 4 that skips 5.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "For [1, 3, 2, 4], lis returns 2, but 1, 3, 4 (or 1, 2, 4) has length 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the code allows elements to be skipped."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 compares a[i] only with a[i - 1]."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A subsequence can skip elements; only a contiguous run must use neighbours."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find an increasing subsequence of [3, 1, 2, 5, 4, 6] that skips an element."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 computes contiguous runs, so the result is 3. The subsequence 1, 2, 4, 6 has length 4; compare with all earlier elements."
+      }
+    ],
+    "repair": "Use d[i] = 1 + max(d[j] for all j < i with a[j] < a[i]) (default 1), and return max(d).",
+    "debrief": "'Subsequence' and 'substring' (contiguous run) are different problems with similar-looking DP. The state 'ending at i' is right; the transition must consider every valid predecessor, not just the neighbour. Test with an input where the best answer skips an element.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "lis",
+      "ai_code": "def lis(a):\n    \"\"\"Length of the longest strictly increasing subsequence.\"\"\"\n    if not a:\n        return 0\n    best = cur = 1\n    for i in range(1, len(a)):\n        cur = cur + 1 if a[i] > a[i - 1] else 1\n        best = max(best, cur)\n    return best",
+      "reference_code": "def lis(a):\n    d = [1] * len(a)\n    for i in range(len(a)):\n        for j in range(i):\n            if a[j] < a[i]:\n                d[i] = max(d[i], d[j] + 1)\n    return max(d, default=0)",
+      "test_inputs": [
+        "([],)",
+        "([1, 2, 3],)",
+        "([3, 1, 2, 5, 4, 6],)"
+      ],
+      "counterexample_input": "([3, 1, 2, 5, 4, 6],)"
+    }
+  },
+  {
+    "id": "dsa-greedy-dynamic-programming-003",
+    "subject": "dsa",
+    "topic": "Greedy & Dynamic Programming",
+    "subtopic": "Which greedy choice schedules meetings",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For meetings [[1, 10], [2, 3], [4, 5]], does max_meetings return the largest number of non-overlapping meetings one room can host?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def max_meetings(meetings):\n    \"\"\"meetings: [start, end] pairs; one room; meetings may not overlap.\"\"\"\n    count, free_at = 0, 0\n    for s, e in sorted(meetings):\n        if s >= free_at:\n            count += 1\n            free_at = e\n    return count"
+    },
+    "ai_claim": "Yes. Taking meetings in order of start time and accepting each one that fits gives the maximum number.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Meetings are sorted by start time."
+      },
+      {
+        "index": 2,
+        "text": "Each meeting is accepted if it starts after the room becomes free."
+      },
+      {
+        "index": 3,
+        "text": "Starting as early as possible leaves the most time for later meetings."
+      },
+      {
+        "index": 4,
+        "text": "So max_meetings returns the maximum, 1 for this input."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Greedy on the wrong criterion",
+      "explanation": "Choosing the earliest start can pick a long meeting that blocks many short ones: [1, 10] blocks both [2, 3] and [4, 5]. The optimal greedy choice is the earliest finish time, which leaves the room free soonest: [2, 3] then [4, 5], giving 2.",
+      "why_convincing": "'Start early' sounds efficient, and on many inputs start and finish order coincide."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Sorting by start time returns 1 here, but 2 meetings fit ([2, 3], [4, 5]). Sort by end time instead; the exchange argument proves earliest-finish is optimal.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "max_meetings([[1, 10], [2, 3], [4, 5]]) returns 1; 2 is possible.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1",
+          "2"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "[2, 3] and [4, 5] do not overlap and fit in one room.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2",
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "[1, 10] is accepted first and blocks two shorter meetings."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try an input with one long early meeting and several short ones."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 justifies the choice of 'earliest start'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The optimal greedy rule for interval scheduling picks the meeting that ends first."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare choosing [1, 10] with choosing [2, 3] and [4, 5]."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: an early-starting long meeting blocks others. Sort by end time; the maximum here is 2."
+      }
+    ],
+    "repair": "Sort by end time: `sorted(meetings, key=lambda m: m[1])`.",
+    "debrief": "For greedy algorithms, the criterion is the entire algorithm, and plausible criteria often fail. Interval scheduling's correct criterion - earliest finish - comes with a proof. When evaluating a greedy rule, search for a counterexample built around one choice that crowds out several others.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "max_meetings",
+      "ai_code": "def max_meetings(meetings):\n    \"\"\"meetings: [start, end] pairs; one room; meetings may not overlap.\"\"\"\n    count, free_at = 0, 0\n    for s, e in sorted(meetings):\n        if s >= free_at:\n            count += 1\n            free_at = e\n    return count",
+      "reference_code": "def max_meetings(meetings):\n    \"\"\"meetings: [start, end] pairs; one room; meetings may not overlap.\"\"\"\n    count, free_at = 0, 0\n    for s, e in sorted(meetings, key=lambda m: m[1]):\n        if s >= free_at:\n            count += 1\n            free_at = e\n    return count",
+      "test_inputs": [
+        "([[1, 2], [3, 4]],)",
+        "([[1, 10], [2, 3], [4, 5]],)"
+      ],
+      "counterexample_input": "([[1, 10], [2, 3], [4, 5]],)"
+    }
+  },
+  {
+    "id": "dsa-greedy-dynamic-programming-004",
+    "subject": "dsa",
+    "topic": "Greedy & Dynamic Programming",
+    "subtopic": "Initialising the first row of a DP table",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For grid = [[1, 3, 1], [1, 5, 1], [4, 2, 1]], does min_path(grid) return 7, the minimum path sum from top-left to bottom-right moving only right or down?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def min_path(grid):\n    \"\"\"Minimum sum from top-left to bottom-right, moving only right or down.\"\"\"\n    rows, cols = len(grid), len(grid[0])\n    dp = [[0] * cols for _ in range(rows)]\n    dp[0][0] = grid[0][0]\n    for c in range(1, cols):\n        dp[0][c] = grid[0][c]\n    for r in range(1, rows):\n        dp[r][0] = dp[r - 1][0] + grid[r][0]\n    for r in range(1, rows):\n        for c in range(1, cols):\n            dp[r][c] = grid[r][c] + min(dp[r - 1][c], dp[r][c - 1])\n    return dp[-1][-1]"
+    },
+    "ai_claim": "Yes. The DP fills each cell with its value plus the cheaper of the cells above and to the left, giving 7.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "dp[r][c] is the cheapest cost to reach cell (r, c)."
+      },
+      {
+        "index": 2,
+        "text": "The first row and first column can each be reached in only one way, so they are initialised directly."
+      },
+      {
+        "index": 3,
+        "text": "Every other cell adds its value to the cheaper of dp[r - 1][c] and dp[r][c - 1]."
+      },
+      {
+        "index": 4,
+        "text": "dp[-1][-1] is 7 for this grid."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Initialising the first row without accumulating",
+      "explanation": "A cell in the first row can only be reached along the row, so its cost is the running sum: dp[0][c] = dp[0][c - 1] + grid[0][c]. The code sets dp[0][c] = grid[0][c], forgetting the cells before it, which makes the first row look cheaper than it is. The first column is accumulated correctly, which hides the asymmetry. For this grid the function returns 3, not 7.",
+      "why_convincing": "Step 2's reasoning - one way in - is correct; the code implements it for the column but not the row."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The first row should be cumulative: [1, 4, 5]. With the bug it is [1, 3, 1], and the function returns 3 instead of 7.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "min_path([[1, 3, 1], [1, 5, 1], [4, 2, 1]]) returns 3; the answer is 7.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3",
+          "7"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "row 0 becomes [1, 3, 1] instead of [1, 4, 5]",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4",
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "min_path([[1, 1, 1]]) returns 1 instead of 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare how the first row and the first column are initialised."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says both are reached in one way. Check that the row's code reflects that."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A first-row cell's cost includes every cell to its left."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate min_path on a single-row grid."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2's code is wrong for the row: it is not cumulative, so the result is 3 instead of 7. Use dp[0][c] = dp[0][c - 1] + grid[0][c]."
+      }
+    ],
+    "repair": "Set `dp[0][c] = dp[0][c - 1] + grid[0][c]` for the first row.",
+    "debrief": "Dynamic programming bugs usually live in the base cases, not the recurrence. Here the recurrence is right and the boundary initialisation is inconsistent between rows and columns. Test a DP on degenerate inputs - a single row, a single column - where the answer is a simple sum.",
+    "transfer_check": {
+      "question": "What should min_path([[2, 3, 4]]) return?",
+      "answer": "9",
+      "explanation": "A single row can only be walked straight across: 2 + 3 + 4 = 9."
+    },
+    "validation_payload": {
+      "entry_point": "min_path",
+      "ai_code": "def min_path(grid):\n    \"\"\"Minimum sum from top-left to bottom-right, moving only right or down.\"\"\"\n    rows, cols = len(grid), len(grid[0])\n    dp = [[0] * cols for _ in range(rows)]\n    dp[0][0] = grid[0][0]\n    for c in range(1, cols):\n        dp[0][c] = grid[0][c]\n    for r in range(1, rows):\n        dp[r][0] = dp[r - 1][0] + grid[r][0]\n    for r in range(1, rows):\n        for c in range(1, cols):\n            dp[r][c] = grid[r][c] + min(dp[r - 1][c], dp[r][c - 1])\n    return dp[-1][-1]",
+      "reference_code": "def min_path(grid):\n    \"\"\"Minimum sum from top-left to bottom-right, moving only right or down.\"\"\"\n    rows, cols = len(grid), len(grid[0])\n    dp = [[0] * cols for _ in range(rows)]\n    dp[0][0] = grid[0][0]\n    for c in range(1, cols):\n        dp[0][c] = dp[0][c - 1] + grid[0][c]\n    for r in range(1, rows):\n        dp[r][0] = dp[r - 1][0] + grid[r][0]\n    for r in range(1, rows):\n        for c in range(1, cols):\n            dp[r][c] = grid[r][c] + min(dp[r - 1][c], dp[r][c - 1])\n    return dp[-1][-1]",
+      "test_inputs": [
+        "([[5]],)",
+        "([[1, 3, 1], [1, 5, 1], [4, 2, 1]],)",
+        "([[1, 1, 1]],)"
+      ],
+      "counterexample_input": "([[1, 3, 1], [1, 5, 1], [4, 2, 1]],)"
+    }
+  }
+]

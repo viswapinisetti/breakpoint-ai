@@ -1,0 +1,487 @@
+[
+  {
+    "id": "ds-time-series-nlp-fundamentals-001",
+    "subject": "data-science",
+    "topic": "Time Series & NLP Fundamentals",
+    "subtopic": "Random splits for forecasting",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 4% a realistic estimate of the error when forecasting next month's sales?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "# daily sales, 2023-01-01 to 2026-06-30\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2)   # shuffle=True by default\nmodel.fit(X_train, y_train)\nprint(mean_absolute_percentage_error(y_test, model.predict(X_test)))   # 4%"
+    },
+    "ai_claim": "Yes. The model was tested on held-out days and had 4% error, so forecasting next month will have about 4% error.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "20% of days were held out."
+      },
+      {
+        "index": 2,
+        "text": "The model was trained on the rest."
+      },
+      {
+        "index": 3,
+        "text": "Held-out error is 4%."
+      },
+      {
+        "index": 4,
+        "text": "So forecasting next month will have about 4% error."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 1,
+      "misconception": "Shuffling time-series data before splitting",
+      "explanation": "train_test_split shuffles by default, so test days are scattered between training days. The model predicts each test day from its neighbours on both sides - interpolation, with knowledge of the future. Forecasting next month means extrapolating past the last training day. Split by time (train on data before a date, test after), or use TimeSeriesSplit.",
+      "why_convincing": "It is the standard split function, and the error is computed correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a shuffled split lets the model use future days, so 4% is optimistic. Use a chronological split or TimeSeriesSplit.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Test days are interleaved with training days from 2023 to 2026.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Training on data before 2026-01-01 and testing on 2026 gives about 11% MAPE.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "11"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The model 'forecasts' 15 March 2025 knowing 14 and 16 March."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what shuffle does to dates."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 splits randomly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Forecast evaluation must test on periods after the training data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at where test days fall in time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: shuffling leaks the future. Split chronologically."
+      }
+    ],
+    "repair": "Use a time-based split (or `TimeSeriesSplit`).",
+    "debrief": "Evaluation must mirror use. A forecast predicts the future from the past, so the test set must lie in the future of the training data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-time-series-nlp-fundamentals-002",
+    "subject": "data-science",
+    "topic": "Time Series & NLP Fundamentals",
+    "subtopic": "Comparing with a naive baseline",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the evidence support calling the model excellent?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "results": {
+        "title": "Next-day demand forecast, last 90 days",
+        "columns": [
+          "Method",
+          "MAPE"
+        ],
+        "rows": [
+          [
+            "Naive: tomorrow = today",
+            "5.0%"
+          ],
+          [
+            "Our gradient-boosting model",
+            "6.0%"
+          ]
+        ]
+      },
+      "report": "\"Our model achieves an excellent 6% error.\""
+    },
+    "ai_claim": "Yes. 6% error is very low for demand forecasting, so the model is excellent.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model's MAPE is 6%."
+      },
+      {
+        "index": 2,
+        "text": "Demand forecasts often have errors above 10%."
+      },
+      {
+        "index": 3,
+        "text": "6% is well below that."
+      },
+      {
+        "index": 4,
+        "text": "So the model is excellent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Judging error without the baseline",
+      "explanation": "The naive forecast 'tomorrow equals today' scores 5.0%, better than the model's 6.0%. The model adds complexity and loses accuracy. Forecast models must beat simple baselines (naive, seasonal naive) on the same data before any other comparison matters.",
+      "why_convincing": "6% sounds low in isolation, and the baseline is easy to overlook."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the model is worse than the naive baseline (6.0% vs 5.0% MAPE).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Naive MAPE 5.0% vs model 6.0% on the same 90 days.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5.0",
+          "6.0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Replacing the model with 'tomorrow = today' would reduce error."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the model with the baseline in the table."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 compares with a general figure, not this data."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A model is judged relative to simple baselines on the same data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Which method has the lower MAPE?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the naive baseline is better. The model is not excellent."
+      }
+    ],
+    "repair": "Report skill relative to the naive and seasonal-naive baselines.",
+    "debrief": "Always include a trivial baseline. In forecasting, naive methods are surprisingly hard to beat, and beating them is the minimum bar.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-time-series-nlp-fundamentals-003",
+    "subject": "data-science",
+    "topic": "Time Series & NLP Fundamentals",
+    "subtopic": "Stop-word removal and negation",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do the features for 'The food was not good' preserve its negative meaning?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "from sklearn.feature_extraction.text import CountVectorizer\nvec = CountVectorizer(stop_words=\"english\")\nX = vec.fit_transform(reviews)      # sentiment classifier features\n# review: \"The food was not good\""
+    },
+    "ai_claim": "Yes. Stop-word removal only drops filler words like 'the' and 'was', so the meaningful words remain and the review's sentiment is preserved.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Stop words are common filler words."
+      },
+      {
+        "index": 2,
+        "text": "'the' and 'was' are removed."
+      },
+      {
+        "index": 3,
+        "text": "Meaningful words such as 'not' and 'good' remain."
+      },
+      {
+        "index": 4,
+        "text": "So the negative sentiment is preserved."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Removing stop words for sentiment analysis",
+      "explanation": "scikit-learn's English stop-word list includes 'not' (and 'no', 'nor', 'never'). The review becomes {food, good}, identical to 'The food was good'. For sentiment, negations are crucial. Keep negations (a custom stop-word list or none) and use n-grams such as 'not good'.",
+      "why_convincing": "Stop words sound like harmless filler."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 'not' is a stop word, so the review becomes 'food good'. Keep negations and add bigrams.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "vec.build_analyzer()('The food was not good') returns ['food', 'good'].",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "'not' is in sklearn's ENGLISH_STOP_WORDS.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'not good' and 'good' produce identical features."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether 'not' is on the stop-word list."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes negations survive."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Standard stop-word lists include negation words."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the analyzer on the review."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 'not' is removed, flipping the meaning. Keep negations and use bigrams."
+      }
+    ],
+    "repair": "Use `CountVectorizer(stop_words=None, ngram_range=(1, 2))` or a custom list without negations.",
+    "debrief": "Preprocessing defaults encode assumptions about the task. For sentiment, negation and intensity words carry the signal.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-time-series-nlp-fundamentals-004",
+    "subject": "data-science",
+    "topic": "Time Series & NLP Fundamentals",
+    "subtopic": "Bag of words ignores order",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can a classifier using these features tell the two headlines apart?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "texts": "A: \"dog bites man\"\nB: \"man bites dog\"",
+      "features": "Bag-of-words counts (unigrams)"
+    },
+    "ai_claim": "Yes. The headlines describe different events, and the classifier sees their words, so it can distinguish them.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The headlines describe different events."
+      },
+      {
+        "index": 2,
+        "text": "Each headline is converted to word counts."
+      },
+      {
+        "index": 3,
+        "text": "The classifier sees the words of each headline."
+      },
+      {
+        "index": 4,
+        "text": "So it can tell them apart."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming word counts keep word order",
+      "explanation": "Both headlines contain exactly dog, bites and man once each, so their unigram count vectors are identical. No classifier can separate identical inputs. Order-sensitive features - n-grams ('dog bites', 'bites man') or sequence models - are needed.",
+      "why_convincing": "To a human the meanings are obviously different."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the unigram vectors are identical. Use bigrams or a sequence model.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Both texts vectorise to {bites: 1, dog: 1, man: 1}.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "With bigrams, 'dog bites' and 'man bites' differ.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The two feature vectors are equal."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Write out the word counts for each headline."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the representation keeps order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Bag of words discards word order entirely."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the two count vectors."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the vectors are identical, so they cannot be separated. Use n-grams."
+      }
+    ],
+    "repair": "Add bigrams (`ngram_range=(1, 2)`) or use a sequence-aware model.",
+    "debrief": "Every representation discards something. Know what your features cannot see before expecting a model to learn it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-time-series-nlp-fundamentals-005",
+    "subject": "data-science",
+    "topic": "Time Series & NLP Fundamentals",
+    "subtopic": "Weekly lag features",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that lag_7 gives each row the same store's sales on the same weekday last week, without using future data?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "# daily store sales with a strong weekly pattern (weekends high)\ndf[\"lag_7\"] = df.groupby(\"store\")[\"sales\"].shift(7)\ndf[\"lag_1\"] = df.groupby(\"store\")[\"sales\"].shift(1)\n# rows are sorted by store and date, one row per store per day"
+    },
+    "ai_claim": "Yes. Grouping by store and shifting by 7 rows moves each store's series forward a week, so each row sees its sales from 7 days earlier - the same weekday - and nothing from the future.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "groupby('store') keeps each store's series separate."
+      },
+      {
+        "index": 2,
+        "text": "shift(7) moves values down 7 rows within each store."
+      },
+      {
+        "index": 3,
+        "text": "With one row per day, 7 rows back is the same weekday last week."
+      },
+      {
+        "index": 4,
+        "text": "Shifting only looks backwards, so no future data is used."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A lag of the seasonal period is a standard, leakage-free feature for data with weekly seasonality, provided rows are sorted and complete.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "For store S1 on 2026-03-15 (a Sunday), lag_7 equals S1's sales on 2026-03-08 (a Sunday).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "7"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the direction of the shift."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on one row per store per day."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "shift(k) looks k rows into the past within each group."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Pick a row and find its lag_7 source."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. lag_7 is the same weekday last week, with no leakage. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Seasonal lags capture repeating patterns cheaply. Grouping keeps stores apart, and a positive shift guarantees only the past is used.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,468 @@
+[
+  {
+    "id": "nc-automation-workflow-fundamentals-001",
+    "subject": "no-code-automation",
+    "topic": "Automation & Workflow Fundamentals",
+    "subtopic": "Saving every attachment",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the Invoices folder contain only supplier invoices?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Trigger: New email in accounts@acme.example (Gmail)\nAction: Upload each attachment to Drive folder 'Invoices'\nGoal: keep a folder of supplier invoices."
+    },
+    "ai_claim": "Yes. Suppliers email their invoices to this inbox, so the attachments uploaded are the invoices.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Suppliers send invoices to accounts@."
+      },
+      {
+        "index": 2,
+        "text": "The workflow runs on every new email."
+      },
+      {
+        "index": 3,
+        "text": "It uploads each attachment."
+      },
+      {
+        "index": 4,
+        "text": "So the folder contains the invoices."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Automating without filtering the input",
+      "explanation": "The workflow uploads every attachment from every email: signature logos, newsletters, spam, internal replies with screenshots, and duplicate invoices in reply threads. The folder fills with non-invoices, making it unusable. Add filters (sender domain allowlist, PDF only, subject contains 'invoice') and deduplicate.",
+      "why_convincing": "The inbox's main purpose is invoices, so its attachments seem to be invoices."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: every attachment is saved, including logos and spam. Filter by sender, file type and subject.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "A week's run saved 214 files: 61 invoices, 98 signature images, 55 other attachments.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "214",
+          "61"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Workflows should validate and filter inputs before acting.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An email signature logo lands in the Invoices folder."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about all the emails this inbox receives."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 uploads without checking."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Automations need filters that match their goal."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count what one week's run saved."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: every attachment is saved. Add filters."
+      }
+    ],
+    "repair": "Add filters: sender domain allowlist, PDF attachments, subject keywords; dedupe by file hash.",
+    "debrief": "An automation does exactly what it is told, at scale. Specify precisely which inputs it should act on.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-automation-workflow-fundamentals-002",
+    "subject": "no-code-automation",
+    "topic": "Automation & Workflow Fundamentals",
+    "subtopic": "Optional fields in later steps",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will every registrant get the SMS and will the workflow run cleanly?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Trigger: New form submission (fields: name, email, phone - phone optional)\nAction 1: Add row to CRM\nAction 2: Send SMS 'Thanks for registering' to {{phone}}\nAI: \"Every registrant gets the SMS confirmation.\""
+    },
+    "ai_claim": "Yes. Every submission triggers the workflow, and the SMS step sends to the phone field, so every registrant gets it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each submission triggers the workflow."
+      },
+      {
+        "index": 2,
+        "text": "The CRM row is added."
+      },
+      {
+        "index": 3,
+        "text": "The SMS is sent to the phone number."
+      },
+      {
+        "index": 4,
+        "text": "So every registrant is confirmed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Not handling an empty optional field",
+      "explanation": "Phone is optional. For registrants who leave it blank, the SMS step has no recipient: it errors (possibly halting or flagging the run) and those people get no confirmation. Add a filter or branch: send SMS only if phone is not empty, and email the others instead.",
+      "why_convincing": "Test submissions usually fill in every field."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: blank phone numbers make the SMS step fail. Branch on whether phone is present.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "A submission without a phone number produces the error 'Recipient number is required' at Action 2.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "submission (phone empty) -> CRM row added -> SMS step fails -> no confirmation sent",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "People who skip the phone field get no confirmation."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Submit the form without a phone number."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes phone is always present."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Workflows must handle optional and missing fields."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at what the SMS step receives."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: empty phones break the SMS step. Add a branch."
+      }
+    ],
+    "repair": "Add a condition: if phone is not empty, send SMS; otherwise send an email confirmation.",
+    "debrief": "Test automations with minimal, not just complete, inputs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-automation-workflow-fundamentals-003",
+    "subject": "no-code-automation",
+    "topic": "Automation & Workflow Fundamentals",
+    "subtopic": "A personal account connection",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the workflow keep sending confirmations after Priya's account is deactivated?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "The company's order-confirmation workflow sends emails through Priya's personal work Gmail connection, which she authorised when she built it.\nPriya is leaving the company next week; her account will be deactivated.\nAI: \"The workflow belongs to the company workspace, so it will keep running after she leaves.\""
+    },
+    "ai_claim": "Yes. The workflow is stored in the company's workspace, so it keeps running regardless of who built it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The workflow lives in the company workspace."
+      },
+      {
+        "index": 2,
+        "text": "The company owns it."
+      },
+      {
+        "index": 3,
+        "text": "Ownership keeps it running."
+      },
+      {
+        "index": 4,
+        "text": "So it continues after Priya leaves."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on an individual's credentials",
+      "explanation": "The workflow's email step authenticates with Priya's account. When it is deactivated, the connection's token becomes invalid and every run fails - order confirmations stop. Move connections to a shared service account (e.g. orders@), document owners, and review connections in the offboarding checklist.",
+      "why_convincing": "The workflow itself is visibly in the company's space."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the email step uses Priya's credentials, which will stop working. Reconnect with a shared service account.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "account deactivated -> OAuth token revoked -> 'invalid_grant' on every send -> confirmations stop",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Production automations should use service accounts, not personal credentials.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The day after Priya leaves, confirmations stop."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whose credentials the email step uses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes ownership of the workflow covers its connections."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Connections are authorised by individual accounts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Deactivate the account in a test."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the connection depends on Priya's account. Use a service account."
+      }
+    ],
+    "repair": "Reconnect with a shared service account and add connections to offboarding.",
+    "debrief": "Automations inherit the lifecycle of the credentials they use. Personal credentials make business processes fragile.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-automation-workflow-fundamentals-004",
+    "subject": "no-code-automation",
+    "topic": "Automation & Workflow Fundamentals",
+    "subtopic": "Schedules and time zones",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the summary be posted at 9 AM India time?",
+    "artifact_type": "trigger_config",
+    "artifact": {
+      "workflow": "Trigger: Schedule - every day at 09:00\nAccount time zone setting: UTC (default, never changed)\nAction: Post the daily sales summary to the team channel.\nAI: \"The summary will be posted at 9 AM for the Bengaluru team.\""
+    },
+    "ai_claim": "Yes. The schedule says 09:00, so the summary is posted at 9 AM for the team.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The schedule is set for 09:00."
+      },
+      {
+        "index": 2,
+        "text": "The team is in Bengaluru."
+      },
+      {
+        "index": 3,
+        "text": "09:00 is 9 AM for them."
+      },
+      {
+        "index": 4,
+        "text": "So it is posted at 9 AM."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Ignoring the account's time zone setting",
+      "explanation": "Schedules run in the account's (or workflow's) time zone. With UTC, 09:00 is 14:30 IST - the summary arrives mid-afternoon. Set the account or workflow time zone to Asia/Kolkata, or schedule 03:30 UTC.",
+      "why_convincing": "The number 09:00 looks self-explanatory."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 09:00 UTC is 14:30 IST. Set the time zone to Asia/Kolkata.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "09:00 UTC + 5:30 = 14:30 IST",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "14:30"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Scheduled triggers use the configured time zone.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The morning summary arrives at 2:30 PM."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the account's time zone."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes 09:00 means local time."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Schedules follow the configured time zone."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Convert 09:00 UTC to IST."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: it runs at 14:30 IST. Fix the time zone."
+      }
+    ],
+    "repair": "Set the workflow's time zone to Asia/Kolkata.",
+    "debrief": "Every time in an automation has a time zone, stated or not. Check which one.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-automation-workflow-fundamentals-005",
+    "subject": "no-code-automation",
+    "topic": "Automation & Workflow Fundamentals",
+    "subtopic": "Search before create",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this design avoids duplicate contacts?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Trigger: New order in the shop\nStep 1: Search CRM for a contact with this email\nStep 2 (if found): Update the contact's last_order_date\nStep 3 (if not found): Create a new contact\nAI: \"Repeat customers are updated, not duplicated, and re-running an order does not create duplicates.\""
+    },
+    "ai_claim": "Yes. The workflow looks for an existing contact by email first, updates it if found and creates one only if not, so repeat customers and re-runs do not create duplicates.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The CRM is searched by email before any change."
+      },
+      {
+        "index": 2,
+        "text": "Existing contacts are updated."
+      },
+      {
+        "index": 3,
+        "text": "New contacts are created only when no match exists."
+      },
+      {
+        "index": 4,
+        "text": "Re-running for the same order finds the contact and updates it again."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Search-before-create (an upsert) keyed on a stable identifier makes the workflow idempotent for contacts. (Normalising email case helps matching.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Two orders from asha@example.com produce one contact with the latest order date.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow a repeat customer's second order."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 covers re-runs."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Upserts keyed on a unique field prevent duplicates."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the workflow twice for the same order."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Search-before-create avoids duplicates. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Design automations so running them twice is harmless. Upserts are the simplest way.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

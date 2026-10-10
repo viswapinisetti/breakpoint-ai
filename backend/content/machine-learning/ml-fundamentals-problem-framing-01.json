@@ -1,0 +1,505 @@
+[
+  {
+    "id": "ml-ml-fundamentals-problem-framing-001",
+    "subject": "machine-learning",
+    "topic": "ML Fundamentals & Problem Framing",
+    "subtopic": "Clustering is not prediction",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this a sound way to predict defaults?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# Goal: predict which loan applicants will default.\n# We have 5 years of past loans with a 'defaulted' column.\nkm = KMeans(n_clusters=2).fit(applicants[features])\napplicants[\"will_default\"] = km.labels_ == 1"
+    },
+    "ai_claim": "Yes. K-means splits applicants into two groups, and one group will correspond to defaulters, so the cluster labels predict default.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Default is a yes/no outcome, so two groups are needed."
+      },
+      {
+        "index": 2,
+        "text": "K-means divides applicants into two clusters."
+      },
+      {
+        "index": 3,
+        "text": "One cluster will correspond to the defaulters."
+      },
+      {
+        "index": 4,
+        "text": "So cluster 1 predicts default."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Using an unsupervised method for a supervised problem",
+      "explanation": "K-means groups applicants by similarity in the features, ignoring the defaulted column entirely. The two clusters may split by income, age or region - anything - and nothing makes cluster 1 mean 'defaults'. With 5 years of labelled outcomes, this is a supervised classification problem: train a classifier on the labels and evaluate it on held-out loans.",
+      "why_convincing": "Two clusters for two classes sounds like a natural match."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: clustering ignores the labels. Train a supervised classifier on the defaulted column.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The defaulted column exists but is never used.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "The clusters could split applicants by city, with defaulters spread evenly across both.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Cluster 1 may contain the same default rate as cluster 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the labels are used anywhere."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes clusters align with the outcome."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "When labelled outcomes exist, use supervised learning."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare default rates within each cluster."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: k-means ignores the labels. Train a classifier."
+      }
+    ],
+    "repair": "Train a classifier (e.g. logistic regression or gradient boosting) on the labelled loans.",
+    "debrief": "Framing comes first: with labels and a target to predict, the problem is supervised. Unsupervised methods find structure, not answers to a chosen question.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-ml-fundamentals-problem-framing-002",
+    "subject": "machine-learning",
+    "topic": "ML Fundamentals & Problem Framing",
+    "subtopic": "Defining the label",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this label correctly mark customers who have churned?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# Data snapshot: all customers as of 31 March.\n# Label: churned = no purchase between 1 and 31 March.\ndf[\"churned\"] = df[\"last_purchase\"] < \"2026-03-01\""
+    },
+    "ai_claim": "Yes. Customers who made no purchase in March have stopped buying, so they are marked as churned.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Churn means a customer has stopped buying."
+      },
+      {
+        "index": 2,
+        "text": "No purchase in March shows the customer stopped."
+      },
+      {
+        "index": 3,
+        "text": "The label marks those customers."
+      },
+      {
+        "index": 4,
+        "text": "So the label identifies churners."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 2,
+      "misconception": "A label definition that mislabels whole groups",
+      "explanation": "Customers who buy every two or three months routinely skip a month, so a quarterly buyer - or anyone who last bought on 27 February - has no March purchase and is labelled churned although still active. The label must reflect normal purchase cycles - e.g. no purchase for 90 days - and only judge customers with enough tenure.",
+      "why_convincing": "The rule is simple and matches a common informal definition."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: infrequent but active buyers are mislabelled. Define churn with a window longer than normal purchase gaps.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A customer who bought on 27 February and again on 10 April is labelled churned on 31 March.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "Quarterly buyers skip two months out of three.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A loyal quarterly customer is labelled churned two months in three."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about customers with different buying rhythms."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats one quiet month as leaving."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Labels should reflect the behaviour you actually want to predict."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a customer who buys every three months."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: a quiet month is not churn for everyone. Redefine the label."
+      }
+    ],
+    "repair": "Define churn with a window longer than normal purchase gaps, and exclude customers with short tenure.",
+    "debrief": "The label is the model's definition of the problem. A sloppy label produces a model that is accurate at predicting the wrong thing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-ml-fundamentals-problem-framing-003",
+    "subject": "machine-learning",
+    "topic": "ML Fundamentals & Problem Framing",
+    "subtopic": "Optimising a proxy",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the CTR gain show that readers are getting more valuable recommendations?",
+    "artifact_type": "metric_report",
+    "artifact": {
+      "goal": "Recommend articles that readers find valuable.",
+      "target": "Train the ranker to maximise click-through rate.",
+      "result": "CTR +18% in an A/B test. Average reading time per click -35%. Unsubscribes +6%."
+    },
+    "ai_claim": "Yes. Clicks show what readers want, so an 18% increase in clicks means the recommendations are more valuable.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Readers click on articles they want to read."
+      },
+      {
+        "index": 2,
+        "text": "CTR rose by 18%."
+      },
+      {
+        "index": 3,
+        "text": "Clicks measure value to readers."
+      },
+      {
+        "index": 4,
+        "text": "So recommendations became more valuable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming the proxy equals the goal",
+      "explanation": "Clicks measure curiosity about a headline, not value. Optimising them directly rewards clickbait: reading time per click fell 35% and unsubscribes rose 6%. The model got better at the proxy while moving away from the goal. Use targets closer to value (read-through, return visits) and track guardrail metrics.",
+      "why_convincing": "Clicks and value usually move together, until a model optimises clicks directly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: shorter reading time and more unsubscribes indicate less value. CTR is a gamed proxy here.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Reading time per click fell 35% and unsubscribes rose 6%.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "35",
+          "6"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "A misleading headline increases CTR while disappointing readers.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Clickbait headlines raise CTR and lower satisfaction."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the other two metrics."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates clicks with value."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "When a proxy becomes the target, it stops tracking the goal (Goodhart's law)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare reading time and unsubscribes."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the proxy improved while value fell. Use better targets and guardrails."
+      }
+    ],
+    "repair": "Optimise for engagement quality (read-through, return visits) with CTR as one signal, plus guardrail metrics.",
+    "debrief": "Every trained model optimises exactly what you give it. Choose targets that cannot be gamed cheaply, and watch guardrails.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-ml-fundamentals-problem-framing-004",
+    "subject": "machine-learning",
+    "topic": "ML Fundamentals & Problem Framing",
+    "subtopic": "Negative R-squared",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does R^2 = -0.083 mean the model has a weak but useful fit?",
+    "artifact_type": "metric_report",
+    "artifact": {
+      "results": {
+        "title": "Delivery time model, test set",
+        "columns": [
+          "Metric",
+          "Value"
+        ],
+        "rows": [
+          [
+            "MSE of model",
+            "1,300"
+          ],
+          [
+            "MSE of predicting the training mean",
+            "1,200"
+          ],
+          [
+            "R^2",
+            "-0.083"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. R^2 is close to 0, so the model explains a small part of the variation - a weak but useful fit.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "R^2 measures how much variation the model explains."
+      },
+      {
+        "index": 2,
+        "text": "Its value is -0.083, close to 0."
+      },
+      {
+        "index": 3,
+        "text": "A value near 0 means a weak fit."
+      },
+      {
+        "index": 4,
+        "text": "So the model is weakly useful."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Treating a negative R^2 as a weak positive fit",
+      "explanation": "R^2 = 1 - MSE_model / MSE_baseline. Negative R^2 means the model's error (1,300) is larger than that of simply predicting the mean (1,200). The model is worse than the trivial baseline, not weakly useful.",
+      "why_convincing": "R^2 is often introduced as a number between 0 and 1."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: R^2 < 0 means worse than predicting the mean (1,300 vs 1,200 MSE).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "1 - 1,300 / 1,200 = -0.083",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-0.083"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The model's MSE (1,300) exceeds the mean baseline's (1,200).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1,300",
+          "1,200"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Replacing the model with the training mean reduces error."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall how R^2 is defined."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 reads a negative value as 'weak'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "R^2 compares the model with predicting the mean."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the two MSE values."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: negative R^2 means worse than the mean baseline."
+      }
+    ],
+    "repair": "Compare every model with the mean baseline; investigate why this one is worse (leakage in reverse, distribution shift, bugs).",
+    "debrief": "On test data R^2 can be negative, and when it is, the model is worse than doing nothing clever. Always report the baseline alongside.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-ml-fundamentals-problem-framing-005",
+    "subject": "machine-learning",
+    "topic": "ML Fundamentals & Problem Framing",
+    "subtopic": "Ranking under limited capacity",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that precision@200 is a well-chosen metric for this setup?",
+    "artifact_type": "metric_report",
+    "artifact": {
+      "setup": "Sales can call 200 leads per day out of about 5,000 new leads.\nPlan: score leads with the model's predicted conversion probability, call the top 200, and evaluate with precision@200 (share of the called leads that convert)."
+    },
+    "ai_claim": "Yes. Only the top 200 leads are acted on, so what matters is how many of them convert. Precision@200 measures exactly that; performance on the other 4,800 leads does not affect results.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Capacity is 200 calls per day."
+      },
+      {
+        "index": 2,
+        "text": "The model's job is to rank leads so the best 200 are called."
+      },
+      {
+        "index": 3,
+        "text": "Precision@200 measures the conversion rate among those 200."
+      },
+      {
+        "index": 4,
+        "text": "Metrics over all 5,000 leads (such as accuracy) would reward correctly ignoring leads nobody calls."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. When capacity is fixed, the problem is ranking, and a top-k metric aligned to the capacity measures business value directly.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Only 200 of about 5,000 leads are called each day.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "200"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "If 60 of the top 200 convert, precision@200 = 30%.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "30"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which predictions lead to actions."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 frames the task as ranking."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "With fixed capacity, evaluate the top of the ranking."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what accuracy would reward here."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Precision@200 matches the decision the model supports. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Choose metrics that mirror how predictions are used. Fixed capacity turns classification into ranking, and top-k metrics follow.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

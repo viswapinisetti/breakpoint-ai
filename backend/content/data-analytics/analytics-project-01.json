@@ -1,0 +1,510 @@
+[
+  {
+    "id": "da-analytics-project-001",
+    "subject": "data-analytics",
+    "topic": "Analytics Project",
+    "subtopic": "Choosing the metric after seeing results",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the report show the new onboarding succeeded?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "project_log": "Week 1: goal - test whether the new onboarding raises 30-day retention.\nWeek 4: retention unchanged (41% vs 41%).\nWeek 4: analyst notices time-on-app rose 12% and reports: 'New onboarding increased engagement by 12%.'"
+    },
+    "ai_claim": "Yes. Time on app rose 12%, which shows the new onboarding increased engagement.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The new onboarding was launched."
+      },
+      {
+        "index": 2,
+        "text": "Time on app rose by 12%."
+      },
+      {
+        "index": 3,
+        "text": "Time on app measures engagement."
+      },
+      {
+        "index": 4,
+        "text": "So the onboarding succeeded."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Switching the success metric after the fact",
+      "explanation": "The pre-agreed success metric was 30-day retention, and it did not move. Picking a different metric after seeing the data - one of many that could have moved by chance - is outcome switching: with enough metrics, something always rises. Report the primary result (no retention change) and treat time on app as an exploratory finding to test separately.",
+      "why_convincing": "The 12% rise is real data, and 'engagement' sounds like the goal."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the primary metric, retention, was unchanged. Time on app is a post-hoc finding and needs its own test.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "30-day retention was 41% in both groups.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "41"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Pre-registering the primary metric prevents outcome switching.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Among 20 unplanned metrics, one will often move by chance."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the metric reported with the one planned."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 declares success on a metric chosen after the results."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Success must be judged on the pre-agreed primary metric."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check what happened to retention."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the planned metric did not move. The time-on-app rise is exploratory."
+      }
+    ],
+    "repair": "Report the primary result honestly, and test time on app as a new hypothesis.",
+    "debrief": "Decide how success will be measured before looking at results. Otherwise any project can be declared a success.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-analytics-project-002",
+    "subject": "data-analytics",
+    "topic": "Analytics Project",
+    "subtopic": "Joining sources with different date ranges",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 1.8 a fair measure of August's return on ad spend?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "sources": "Ad spend export: 1-31 August.\nOrders export: 1-24 August (pulled on 25 August).",
+      "result": "Return on ad spend (August) = revenue from orders / ad spend = 1.8"
+    },
+    "ai_claim": "Yes. It divides August's order revenue by August's ad spend, so it is August's return on ad spend.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Both exports cover August."
+      },
+      {
+        "index": 2,
+        "text": "Revenue comes from the orders export."
+      },
+      {
+        "index": 3,
+        "text": "Spend comes from the ad spend export."
+      },
+      {
+        "index": 4,
+        "text": "Revenue / spend = 1.8 for August."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 1,
+      "misconception": "Combining data covering different periods",
+      "explanation": "The orders export stops on 24 August, while spend covers the whole month. A week of revenue is missing from the numerator while all the spend is in the denominator, so ROAS is understated (by roughly a quarter if sales were steady). Align the periods: re-pull orders for the full month, or compare 1-24 August for both.",
+      "why_convincing": "Both files are labelled August."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: revenue covers 24 days and spend 31 days. Align both to the same dates before dividing.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The orders export ends on 24 August; spend runs to 31 August.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "24",
+          "31"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "With steady sales, full-month revenue is about 31 / 24 x current revenue, so ROAS would be about 1.8 x 1.29 = 2.3.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "2.3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Re-pulling orders on 1 September would raise ROAS without any change in performance."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the date range of each source."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 assumes both exports cover the full month."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Ratios need numerator and denominator over the same period."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the orders export's end date with the spend export's."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: orders stop on 24 August. Align the periods."
+      }
+    ],
+    "repair": "Re-pull orders for all of August (or restrict spend to 1-24 August).",
+    "debrief": "Before combining sources, check that their periods, filters and definitions line up. Mismatched ranges are one of the most common silent errors in analytics projects.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-analytics-project-003",
+    "subject": "data-analytics",
+    "topic": "Analytics Project",
+    "subtopic": "Extrapolating a seasonal spike",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the straight-line projection a sound basis for December's plan?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Monthly orders: Sep 100k, Oct 150k, Nov 300k (Diwali)\nA straight trend line through the three points projects December at about 400k.",
+      "plan": "Stock and staff for 400k orders in December."
+    },
+    "ai_claim": "Yes. Orders have risen every month, and the trend line projects about 400k for December, so planning for 400k is sensible.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Orders rose from 100k to 150k to 300k."
+      },
+      {
+        "index": 2,
+        "text": "A linear trend fits the three points."
+      },
+      {
+        "index": 3,
+        "text": "Extending the line gives about 400k in December."
+      },
+      {
+        "index": 4,
+        "text": "So the business should plan for 400k."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 2,
+      "misconception": "Fitting a trend through a seasonal peak",
+      "explanation": "November's jump is Diwali, a seasonal spike, not a growth trend. Extending a line through it assumes the spike continues. December usually falls back after festive peaks. Forecast with seasonality in mind: compare with previous years' December/November ratio, or use a seasonal model.",
+      "why_convincing": "Three rising points look like a clear trend."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the rise is seasonal. Base December on last year's pattern (e.g. the Dec/Nov ratio) or a seasonal model, not on a straight line.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If last December was 55% of last November, December this year would be about 165k, not 400k.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "165"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "November includes Diwali.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "300"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Stocking for 400k risks a large overstock after the festive season."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask why November was so high."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats the points as a linear trend."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Seasonal effects must be modelled, not extrapolated."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at last year's December relative to November."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: November is a seasonal spike. Use seasonal patterns to forecast December."
+      }
+    ],
+    "repair": "Forecast using previous years' seasonality (or a seasonal model such as ETS or SARIMA).",
+    "debrief": "Trend lines through seasonal data project the season, not the business. Always compare with the same period in previous years.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-analytics-project-004",
+    "subject": "data-analytics",
+    "topic": "Analytics Project",
+    "subtopic": "Comparing months with different lengths",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "By what percentage did average daily sales change from February 2024 to February 2025?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "February sales",
+        "columns": [
+          "Year",
+          "Sales (Rs)",
+          "Days"
+        ],
+        "rows": [
+          [
+            "2024",
+            290000,
+            29
+          ],
+          [
+            "2025",
+            280000,
+            28
+          ]
+        ]
+      }
+    },
+    "ai_claim": "-3.448276. Sales fell from 2,90,000 to 2,80,000, a change of -3.448276%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "February 2024 sales were Rs 2,90,000."
+      },
+      {
+        "index": 2,
+        "text": "February 2025 sales were Rs 2,80,000."
+      },
+      {
+        "index": 3,
+        "text": "(2,80,000 - 2,90,000) / 2,90,000 = -3.448276%."
+      },
+      {
+        "index": 4,
+        "text": "So daily sales fell by 3.45%."
+      }
+    ],
+    "ai_final_answer": "-3.448276",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 4,
+      "misconception": "Comparing totals as if the periods were equal",
+      "explanation": "February 2024 had 29 days (a leap year) and February 2025 had 28. Daily sales were 2,90,000 / 29 = 10,000 in both years: a 0% change. The monthly total fell only because the month was a day shorter. Compare per-day figures (or same-length periods).",
+      "why_convincing": "The percentage change is computed correctly for the totals."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Per day: 10,000 in both years, so the change is 0%.",
+    "canonical_answer": "0",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "290,000 / 29 = 10,000; 280,000 / 28 = 10,000",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "10000",
+          "0"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "February 2024 had 29 days; February 2025 had 28.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "29",
+          "28"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An extra day alone explains the whole difference."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the number of days in each February."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 converts a change in totals into a change in daily sales."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Periods of different length must be normalised per day."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide each total by its number of days."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: daily sales were 10,000 in both years, a 0% change."
+      }
+    ],
+    "repair": "",
+    "debrief": "Calendar effects - leap years, weekends, holidays shifting between months - move totals without any change in performance. Normalise per day or per trading day.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (280000 / 28 - 290000 / 29) / (290000 / 29) * 100",
+      "flawed_solver": "answer = (280000 - 290000) / 290000 * 100"
+    }
+  },
+  {
+    "id": "da-analytics-project-005",
+    "subject": "data-analytics",
+    "topic": "Analytics Project",
+    "subtopic": "Reproducible analysis",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that producing next month's report needs little more than changing report_month and re-running?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "setup": "The monthly report's SQL is in a Git repository.\nQueries take a single parameter, report_month.\nA data dictionary defines every metric and its source table.\nThe notebook pulls data, computes metrics and renders charts in one run."
+    },
+    "ai_claim": "Yes. The logic is versioned, parameterised by month and documented, and one run produces the whole report, so next month only needs the parameter changed - and anyone can check how each number was made.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "All queries live in version control, so the logic is preserved and reviewable."
+      },
+      {
+        "index": 2,
+        "text": "The only month-specific input is report_month."
+      },
+      {
+        "index": 3,
+        "text": "Metric definitions are documented, so results are interpretable."
+      },
+      {
+        "index": 4,
+        "text": "One run regenerates data, metrics and charts for the new month."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Version control, parameters, documentation and end-to-end execution are the core of reproducible analysis. (A data-quality check at the start of each run is a useful addition.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "report_month is the only parameter in the queries.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Reproducible analysis: versioned code, parameterised inputs, documented definitions, automated execution.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what would need to change for next month."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 depends on the queries being parameterised."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Reproducibility comes from versioned code, parameters and documentation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare this with a report built by hand in spreadsheets."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The setup makes next month's report a parameter change. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Reproducibility turns a one-off analysis into a dependable process and makes every number traceable.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

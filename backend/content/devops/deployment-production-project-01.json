@@ -1,0 +1,478 @@
+[
+  {
+    "id": "dev-deployment-production-project-001",
+    "subject": "devops",
+    "topic": "Deployment & Production Project",
+    "subtopic": "Dropping a column during a rolling deploy",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is dropping the column in the same release safe?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "pipeline": "# Release 5.0: code stops using users.nickname; the migration drops the column.\n# Pipeline: run migration, then rolling update of 6 pods (takes ~8 minutes).\n# AI: \"The new code doesn't use nickname, so dropping it in the same release is safe.\""
+    },
+    "ai_claim": "Yes. The new code no longer reads nickname, so removing the column in the same release causes no errors.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Release 5.0 stops using nickname."
+      },
+      {
+        "index": 2,
+        "text": "The migration drops the column."
+      },
+      {
+        "index": 3,
+        "text": "The new code does not need it."
+      },
+      {
+        "index": 4,
+        "text": "So there are no errors."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Forgetting old code runs during a rolling deploy",
+      "explanation": "The migration runs first, then pods are replaced over about 8 minutes. During that window, old pods (still selecting nickname) query a column that no longer exists and fail; a rollback would fail too. Use expand-and-contract: release 5.0 stops using the column, and a later release drops it once no old code remains.",
+      "why_convincing": "The new code really does not need the column."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: old pods still query nickname during the rollout. Drop the column in a later release.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "migration drops nickname -> old pods: 'column users.nickname does not exist' for ~8 minutes",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "8"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "5.0: stop reading/writing nickname. 5.1 (after 5.0 is fully deployed): drop the column.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Requests served by old pods fail during the rollout."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which code versions run during the rollout."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 considers only the new code."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Schema changes must be compatible with old and new code at once."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace an old pod after the migration."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: old pods still use the column. Use expand-and-contract."
+      }
+    ],
+    "repair": "Split the change: stop using the column first, drop it in a later release.",
+    "debrief": "During a rolling deploy, two versions run at once. Database changes must work for both.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-deployment-production-project-002",
+    "subject": "devops",
+    "topic": "Deployment & Production Project",
+    "subtopic": "Deploying the latest tag",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the team reliably roll back to the previous version with this setup?",
+    "artifact_type": "k8s_manifest",
+    "artifact": {
+      "language": "yaml",
+      "manifest": "containers:\n  - name: web\n    image: acme/web:latest\n    imagePullPolicy: Always\n# Rollback plan: \"re-deploy the previous version.\""
+    },
+    "ai_claim": "Yes. They can re-deploy the previous version at any time, because the images are in the registry.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every release is pushed to the registry."
+      },
+      {
+        "index": 2,
+        "text": "Old images remain stored."
+      },
+      {
+        "index": 3,
+        "text": "The team can re-deploy the previous one."
+      },
+      {
+        "index": 4,
+        "text": "So rollback is reliable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on a mutable tag",
+      "explanation": "The manifest references 'latest', which now points to the bad release. 'Re-deploy the previous version' has no identifier: nobody recorded which digest was running, and restarting pods pulls the same broken latest. Pods may even run different versions after a node restart. Deploy immutable version tags or digests (acme/web:2.7.3 or @sha256:...) and record each deployment.",
+      "why_convincing": "The previous image does exist somewhere in the registry."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 'latest' is mutable and the previous version is not identified. Deploy immutable tags or digests.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "rollout undo re-applies the previous ReplicaSet spec, which also says acme/web:latest -> pulls the broken image",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "image: acme/web:2.7.3   # or acme/web@sha256:<digest>",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Restarting pods pulls the broken 'latest' again."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 'latest' points to after the bad release."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the previous version is identifiable."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Deployments need immutable references."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try kubectl rollout undo."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: latest is mutable. Use version tags or digests."
+      }
+    ],
+    "repair": "Deploy immutable tags or digests and keep a deployment history.",
+    "debrief": "Rollbacks need a precise target. Immutable references make 'the previous version' mean something.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-deployment-production-project-003",
+    "subject": "devops",
+    "topic": "Deployment & Production Project",
+    "subtopic": "Killing in-flight requests on deploy",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are no requests lost when pods are terminated during a deploy?",
+    "artifact_type": "k8s_manifest",
+    "artifact": {
+      "language": "yaml",
+      "manifest": "# Pods are terminated during rolling updates.\n# The app exits immediately on SIGTERM; no preStop hook; terminationGracePeriodSeconds: 30\n# Some requests (report exports) take up to 20 seconds.\n# AI: \"Kubernetes stops sending traffic before terminating a pod, so no requests are lost.\""
+    },
+    "ai_claim": "Yes. Kubernetes removes a pod from the Service before stopping it, so no requests are lost.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Terminating pods are removed from Service endpoints."
+      },
+      {
+        "index": 2,
+        "text": "So new requests go to other pods."
+      },
+      {
+        "index": 3,
+        "text": "The pod is then stopped."
+      },
+      {
+        "index": 4,
+        "text": "No requests are lost."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 4,
+      "misconception": "Assuming endpoint removal and shutdown are coordinated",
+      "explanation": "Endpoint removal and SIGTERM happen concurrently; load balancers and kube-proxy take a moment to stop routing, so new requests can still arrive. And because the app exits immediately on SIGTERM, in-flight 20-second exports are cut off. Handle SIGTERM gracefully (stop accepting, finish in-flight work within the grace period), and add a short preStop delay so routing updates first.",
+      "why_convincing": "Removal from endpoints is real and happens early."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the app aborts in-flight requests on SIGTERM, and routing updates race with shutdown. Add graceful shutdown and a preStop delay.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "SIGTERM at t=0 -> app exits at t=0.1 s -> 15-second export in progress returns a connection reset",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "15"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "lifecycle: {preStop: {exec: {command: [\"sleep\", \"5\"]}}}  # plus: on SIGTERM stop accepting and drain for up to 25 s",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "25"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Report exports in progress fail during each deploy."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the app does on SIGTERM."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 ignores in-flight requests."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Graceful shutdown requires the app to drain work and routing to update first."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace an export running when SIGTERM arrives."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: in-flight requests are killed. Drain gracefully."
+      }
+    ],
+    "repair": "Implement graceful SIGTERM handling and a preStop delay within the grace period.",
+    "debrief": "Zero-downtime deploys need cooperation from the app: stop taking work, finish what is in flight, then exit.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-deployment-production-project-004",
+    "subject": "devops",
+    "topic": "Deployment & Production Project",
+    "subtopic": "A canary at 3 AM",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does a clean 5-minute canary at 03:00 prove the release is safe?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "pipeline": "canary:\n  weight: 5%\n  duration: 5m\n  success: error_rate < 1%\n# Scheduled for 03:00 IST, when traffic is ~40 requests/min.\n# AI: \"5 minutes of canary traffic with no errors proves the release is safe.\""
+    },
+    "ai_claim": "Yes. The canary served real traffic for 5 minutes without errors, which shows the release is safe to promote.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "5% of traffic went to the new version."
+      },
+      {
+        "index": 2,
+        "text": "It ran for 5 minutes."
+      },
+      {
+        "index": 3,
+        "text": "The error rate stayed below 1%."
+      },
+      {
+        "index": 4,
+        "text": "So the release is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 4,
+      "misconception": "Assuming a tiny sample represents production",
+      "explanation": "At 40 requests/min, 5% for 5 minutes is about 10 requests - far too few to detect even a 5% error rate reliably (10 requests show no errors about 60% of the time at that rate), and night-time traffic misses daytime features and load. Size canaries by request count and cover representative traffic: run longer, at higher weight, or at peak, with statistical comparison to the baseline.",
+      "why_convincing": "Real production traffic sounds like strong evidence."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: about 10 requests cannot establish safety. Size the canary by traffic volume and duration.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "40 req/min x 5 min x 5% = 10 requests",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "10"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "canary: weight 10%, run until 5,000 requests or 60 minutes, compare error rate and p99 latency with baseline",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "5,000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A bug affecting 5% of requests is likely to show no errors in 10 requests."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the requests the canary served."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 generalises from a tiny sample."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Canary analysis needs enough traffic to detect regressions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 40 x 5 x 0.05."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: 10 requests prove little. Size canaries by volume."
+      }
+    ],
+    "repair": "Run canaries on enough traffic (by count), compared statistically with the baseline.",
+    "debrief": "A canary is an experiment. Without enough samples, 'no errors' is not evidence.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-deployment-production-project-005",
+    "subject": "devops",
+    "topic": "Deployment & Production Project",
+    "subtopic": "Blue-green switching",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this gives a near-instant, low-risk rollback path?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "plan": "# Blue (v1) serves all traffic. Green (v2) is deployed alongside and passes smoke tests on an internal URL.\n# The load balancer switches 100% of traffic to green; blue keeps running for 1 hour.\n# If metrics degrade, traffic is switched back to blue.\n# Database migrations in v2 are additive only (backward compatible)."
+    },
+    "ai_claim": "Yes. Blue stays running and untouched, so rolling back is just switching the load balancer back; because v2's migrations are additive, v1 still works against the database.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Green is tested on an internal URL before receiving traffic."
+      },
+      {
+        "index": 2,
+        "text": "The switch moves all traffic at once."
+      },
+      {
+        "index": 3,
+        "text": "Blue remains running for an hour, ready to take traffic."
+      },
+      {
+        "index": 4,
+        "text": "Additive migrations keep the database compatible with v1, so switching back works."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Blue-green with backward-compatible schema changes gives an immediate rollback by traffic switch.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "14:05 switch to green; 14:12 error rate rises; 14:13 switch back to blue; errors stop",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what makes rollback fast and safe here."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 addresses the database."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Rollback by traffic switch requires the old version to keep working with current data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what would break if a column had been dropped."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The design supports instant rollback. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Fast rollbacks depend on keeping the old version runnable, including compatibility with the database.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

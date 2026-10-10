@@ -1,0 +1,448 @@
+[
+  {
+    "id": "mlo-experiment-tracking-001",
+    "subject": "mlops",
+    "topic": "Experiment Tracking",
+    "subtopic": "Runs evaluated on different splits",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the dashboard show run-118 is the better model?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "Tracking dashboard, sorted by val_auc:\n  run-118  val_auc 0.874  (random 80/20 split, seed 7)\n  run-092  val_auc 0.861  (time-based split: last 2 months)\nAI: \"run-118 is the better model.\""
+    },
+    "ai_claim": "Yes. run-118 has a higher validation AUC, so it is the better model.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "run-118's val_auc is 0.874."
+      },
+      {
+        "index": 2,
+        "text": "run-092's val_auc is 0.861."
+      },
+      {
+        "index": 3,
+        "text": "Higher AUC means a better model."
+      },
+      {
+        "index": 4,
+        "text": "So run-118 is better."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Comparing metrics computed on different validation sets",
+      "explanation": "The runs used different splits: a random split (usually easier, with future data leaking into training) and a time-based split (harder, more realistic). Their AUCs are not comparable. Evaluate candidate models on the same, fixed validation set - ideally the time-based one that mirrors deployment.",
+      "why_convincing": "The dashboard lists them side by side in one column."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the metrics come from different splits. Re-evaluate both on the same (time-based) validation set.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "run-118 used a random 80/20 split; run-092 used the last 2 months.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "On the time-based split, run-118 scores 0.852, below run-092.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.852"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Evaluated on the same split, the ranking reverses."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how each run was validated."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 compares numbers from different evaluations."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Metrics are comparable only on the same data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Re-score run-118 on the time-based split."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: different splits. Compare on the same validation set."
+      }
+    ],
+    "repair": "Fix a standard validation set (and log its ID) for all compared runs.",
+    "debrief": "An experiment tracker is only as useful as the consistency of what it records.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-experiment-tracking-002",
+    "subject": "mlops",
+    "topic": "Experiment Tracking",
+    "subtopic": "Metrics without the data version",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does logging hyperparameters and metrics give everything needed to compare and reproduce experiments?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "Each run logs hyperparameters and metrics, but not which data snapshot was used.\nThe training table is rebuilt weekly.\nAI: \"We log everything needed to compare and reproduce experiments.\""
+    },
+    "ai_claim": "Yes. Hyperparameters and metrics describe each experiment fully, so runs can be compared and reproduced.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Hyperparameters describe the training setup."
+      },
+      {
+        "index": 2,
+        "text": "Metrics describe the results."
+      },
+      {
+        "index": 3,
+        "text": "Together they describe the experiment."
+      },
+      {
+        "index": 4,
+        "text": "So runs can be compared and reproduced."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Omitting the data version from experiment records",
+      "explanation": "The training table changes weekly, so two runs with identical hyperparameters may differ only because the data changed. Without the data version, it is impossible to tell whether an improvement came from a hyperparameter or new data, or to reproduce either run. Log the data snapshot ID (and code commit) with every run.",
+      "why_convincing": "Hyperparameters feel like 'the experiment'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without the data version, runs are neither comparable nor reproducible. Log data snapshot IDs and code commits.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Two runs with the same parameters differ by 0.02 AUC because they used different weekly snapshots.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.02"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "An experiment record must include data, code, configuration and environment versions.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An 'improvement' turns out to be new data, not a better setting."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what else changes between runs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes hyperparameters define the experiment."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Data versions are part of every experiment."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider two runs with identical parameters."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: data changes weekly and is not logged."
+      }
+    ],
+    "repair": "Log data snapshot IDs and code commits with every run.",
+    "debrief": "Most 'mysterious' metric changes turn out to be data changes. Record the data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-experiment-tracking-003",
+    "subject": "mlops",
+    "topic": "Experiment Tracking",
+    "subtopic": "What a good run record contains",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this logging lets the team compare runs fairly and trace any model back to how it was produced?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "mlflow.start_run() logs for every run:\n- all hyperparameters (the full config dict)\n- metrics per epoch and final test metrics\n- the trained model artifact and its input signature\n- git commit, data snapshot ID, and the environment lock file\n- tags: author, purpose ('lr sweep', 'feature X ablation')"
+    },
+    "ai_claim": "Yes. Full configs and metrics enable comparison; the artifact, commit, data ID and environment make each model traceable and reproducible; tags explain why runs exist.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Logging the whole config avoids forgotten parameters."
+      },
+      {
+        "index": 2,
+        "text": "Per-epoch and test metrics support comparison."
+      },
+      {
+        "index": 3,
+        "text": "Artifact, commit, data ID and environment give lineage."
+      },
+      {
+        "index": 4,
+        "text": "Tags record the purpose of each run."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. This covers comparison (config and metrics) and lineage (code, data, environment, artifact).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "model v18 -> run 7c2 -> commit 9b2f, data snap-2026-08-01, env lock, config",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check comparison and lineage separately."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 provides lineage."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Good tracking records inputs, outputs and intent."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace a model back to its data."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The logging supports comparison and lineage. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Track enough that a stranger could answer 'where did this model come from, and why?'",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-experiment-tracking-004",
+    "subject": "mlops",
+    "topic": "Experiment Tracking",
+    "subtopic": "Logging the full configuration",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that logging the entire resolved configuration is better than hand-picking parameters?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "Instead of logging a hand-picked list of parameters, the training script logs the entire resolved configuration object (including defaults) as a JSON artifact and flattened parameters."
+    },
+    "ai_claim": "Yes. Hand-picked lists miss parameters people forget matter, including defaults. Logging the full resolved config records every setting, so differences between runs are always visible.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "People forget to log some parameters."
+      },
+      {
+        "index": 2,
+        "text": "Defaults change silently between versions."
+      },
+      {
+        "index": 3,
+        "text": "The resolved config includes every setting and default."
+      },
+      {
+        "index": 4,
+        "text": "So any difference between runs can be found."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Logging the resolved configuration is a cheap way to prevent 'what was different about that run?' puzzles.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "diff of two runs' config artifacts shows dropout 0.1 vs 0.3 - a parameter nobody had listed",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.1"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about a parameter nobody remembered to log."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 mentions defaults."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Complete records make runs diffable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Diff two runs' full configs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Full config logging prevents omissions. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Automate completeness: log everything the code actually used, not what someone thought to list.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-experiment-tracking-005",
+    "subject": "mlops",
+    "topic": "Experiment Tracking",
+    "subtopic": "Is the top run the best model",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is run-47 the best model configuration?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "A hyperparameter sweep of 300 runs; sorted by validation AUC:\n  run-47  0.8421\n  run-212 0.8418\n  run-9   0.8415\nEach run was trained once with a single seed; no repeat runs or confidence intervals are available."
+    },
+    "ai_claim": "Yes. run-47 has the highest validation AUC of all 300 runs, so it is the best configuration.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "300 configurations were tried."
+      },
+      {
+        "index": 2,
+        "text": "run-47 scored highest, 0.8421."
+      },
+      {
+        "index": 3,
+        "text": "The highest score is the best configuration."
+      },
+      {
+        "index": 4,
+        "text": "So run-47 is best."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "How much AUC varies between seeds and validation samples. The top three differ by 0.0006; if seed-to-seed variation is around 0.003, the ranking among them is noise, and picking the maximum of 300 noisy scores favours a lucky run. Repeated runs (several seeds) or confidence intervals are needed.",
+    "resolving_scenarios": [
+      "Seed-to-seed standard deviation is 0.0002: run-47 is genuinely (if slightly) the best.",
+      "Seed-to-seed standard deviation is 0.003: runs 47, 212 and 9 are indistinguishable, and run-47's lead is luck."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It cannot be decided without estimates of run-to-run variance. Step 3 treats the maximum of noisy scores as the best configuration.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The top three runs differ by only 0.0006 AUC.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.0006"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Retraining run-47 with another seed could score 0.839."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how much a single run's score varies."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 ignores noise and selection."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The maximum of many noisy scores is biased upward."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Retrain the top configurations with several seeds."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 ignores variance. With tiny variance, run-47 wins; with realistic variance, the top runs tie. It cannot be decided."
+      }
+    ],
+    "repair": "Retrain the top few configurations with several seeds and compare means with intervals.",
+    "debrief": "Sweeps find good regions, not exact winners. Confirm the top candidates with repeated runs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

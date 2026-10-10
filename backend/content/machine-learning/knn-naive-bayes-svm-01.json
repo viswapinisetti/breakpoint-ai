@@ -1,0 +1,535 @@
+[
+  {
+    "id": "ml-knn-naive-bayes-svm-001",
+    "subject": "machine-learning",
+    "topic": "KNN, Naive Bayes & SVM",
+    "subtopic": "KNN is slow at prediction",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does fast training mean k-NN will also be fast at prediction time?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "plan": "Serve a k-NN classifier (k = 5) over 20 million stored examples, answering each API request in under 20 ms.\nAI note: \"k-NN trains instantly, so it will be fast in production too.\""
+    },
+    "ai_claim": "Yes. k-NN needs no training at all, so it is a fast model and predictions will easily meet 20 ms.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "k-NN does no work at training time."
+      },
+      {
+        "index": 2,
+        "text": "It simply stores the data."
+      },
+      {
+        "index": 3,
+        "text": "A model that trains instantly is fast."
+      },
+      {
+        "index": 4,
+        "text": "So predictions will be fast."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Confusing cheap training with cheap prediction",
+      "explanation": "k-NN defers all work to prediction: each query must find the nearest of 20 million stored points. A brute-force search computes 20 million distances per request, far beyond 20 ms. k-NN is a 'lazy' learner. Use an approximate nearest-neighbour index, reduce the data, or choose a model whose prediction cost is independent of training size.",
+      "why_convincing": "'No training' sounds like 'fast'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: prediction scans (or indexes) all 20 million examples per query. Use an ANN index or a different model.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "20,000,000 distances x 50 dimensions = 10^9 operations per request.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "20,000,000"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "k-NN's prediction cost grows with the training set size.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Each request compares the query with every stored example."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where k-NN does its work."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 generalises from training speed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "k-NN is lazy: all computation happens at query time."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the distances per request."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: prediction is expensive with 20 million points."
+      }
+    ],
+    "repair": "Use an approximate nearest-neighbour index (e.g. HNSW) or a parametric model.",
+    "debrief": "Account for both training and inference costs. Lazy learners shift cost to inference, where latency limits live.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-knn-naive-bayes-svm-002",
+    "subject": "machine-learning",
+    "topic": "KNN, Naive Bayes & SVM",
+    "subtopic": "Naive Bayes and duplicated features",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the reviewer right that duplicated words leave the predictions unchanged?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "change": "A spam filter (multinomial Naive Bayes on word counts) gets a new feature pipeline that accidentally includes every word twice (the title is copied into the body).",
+      "claim_in_review": "\"Duplicating features does not change Naive Bayes predictions; it just repeats the same evidence.\""
+    },
+    "ai_claim": "Yes. The duplicate words carry the same information, so the classifier's predictions stay the same.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every word now appears twice."
+      },
+      {
+        "index": 2,
+        "text": "Duplicates add no new information."
+      },
+      {
+        "index": 3,
+        "text": "So the posterior probabilities stay the same."
+      },
+      {
+        "index": 4,
+        "text": "Predictions are unchanged."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Forgetting that Naive Bayes treats features as independent evidence",
+      "explanation": "Naive Bayes multiplies the likelihood of each feature as if they were independent. Duplicating every word squares each likelihood ratio, doubling the log-odds contribution of the text. Probabilities become far more extreme (overconfident), and borderline messages can flip class when the prior is fixed. The independence assumption is exactly what duplicates violate.",
+      "why_convincing": "Informationally, nothing new was added."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: duplicated features are counted as independent evidence, squaring likelihood ratios and making predictions overconfident (and sometimes different).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "A word with likelihood ratio 3 contributes ln 3 = 1.10 to the log-odds once, 2.20 when duplicated.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2.20"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "A message at log-odds -0.5 from its words plus a prior of +0.8 is spam (0.3); duplicated, -1.0 + 0.8 = -0.2 flips it to ham.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-0.2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Borderline messages change class after duplication."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall how Naive Bayes combines features."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the model knows the features are duplicates."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The model multiplies likelihoods as if features were independent."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute log-odds with and without duplication."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: duplicates are double-counted, changing and sharpening predictions."
+      }
+    ],
+    "repair": "Remove duplicated text; watch for correlated features in Naive Bayes.",
+    "debrief": "The 'naive' assumption means correlated features are over-counted. Naive Bayes often ranks well but produces poorly calibrated probabilities for this reason.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-knn-naive-bayes-svm-003",
+    "subject": "machine-learning",
+    "topic": "KNN, Naive Bayes & SVM",
+    "subtopic": "Zero probabilities without smoothing",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For a spam email containing 'invoice' along with 20 strongly spammy words, can this classifier still rate it as spam?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# Hand-written Naive Bayes, no smoothing:\n# P(word | spam) = count(word in spam) / total spam words\n# The word 'invoice' never appeared in the spam training emails.\nscore_spam = prior_spam * prod(P(w | spam) for w in email_words)"
+    },
+    "ai_claim": "Yes. One unseen word has little effect; the 20 spammy words dominate, so the email is still rated spam.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The email contains 20 strongly spammy words."
+      },
+      {
+        "index": 2,
+        "text": "'invoice' is only one word."
+      },
+      {
+        "index": 3,
+        "text": "One word has little influence on the product."
+      },
+      {
+        "index": 4,
+        "text": "So the email is rated spam."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Letting an unseen word zero the whole product",
+      "explanation": "P('invoice' | spam) = 0 / N = 0, and multiplying by 0 makes score_spam exactly 0, whatever the other 20 words say. The email can never be classified as spam. Laplace (add-one) smoothing - (count + 1) / (N + V) - gives unseen words a small non-zero probability.",
+      "why_convincing": "Intuitively, one word among twenty should matter little."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the zero probability for 'invoice' makes the spam score 0. Use Laplace smoothing.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "score_spam = prior x ... x 0 = 0",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "With add-one smoothing, P('invoice' | spam) = 1 / (N + V) > 0, and the email is rated spam.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Any email with a word unseen in spam training is always ham."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute P('invoice' | spam)."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes one factor cannot dominate a product."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A single zero factor makes a product zero."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply the likelihoods including the zero."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the zero makes the spam score 0. Use Laplace smoothing."
+      }
+    ],
+    "repair": "Use Laplace smoothing: P(w | c) = (count + 1) / (N_c + V).",
+    "debrief": "Products of probabilities are fragile: one zero dominates everything. Smoothing and log-space sums are standard defences.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-knn-naive-bayes-svm-004",
+    "subject": "machine-learning",
+    "topic": "KNN, Naive Bayes & SVM",
+    "subtopic": "A linear SVM on XOR",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the linear SVM classify all four training points correctly?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "data": {
+        "title": "Training points",
+        "columns": [
+          "x1",
+          "x2",
+          "label"
+        ],
+        "rows": [
+          [
+            0,
+            0,
+            "A"
+          ],
+          [
+            1,
+            1,
+            "A"
+          ],
+          [
+            0,
+            1,
+            "B"
+          ],
+          [
+            1,
+            0,
+            "B"
+          ]
+        ]
+      },
+      "plan": "LinearSVC(C=1000) - \"a large C forces the SVM to classify every training point correctly.\""
+    },
+    "ai_claim": "Yes. A very large C penalises misclassification heavily, so the SVM will find a line that separates the classes perfectly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "C controls the penalty for misclassified points."
+      },
+      {
+        "index": 2,
+        "text": "With C = 1000, errors are very costly."
+      },
+      {
+        "index": 3,
+        "text": "So the SVM finds a boundary with no errors."
+      },
+      {
+        "index": 4,
+        "text": "All four points are classified correctly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Expecting a penalty to create separability",
+      "explanation": "This is the XOR pattern: no straight line separates {(0,0), (1,1)} from {(0,1), (1,0)}. A large C only makes the optimiser try harder; the best any linear boundary can do is 3 of 4 correct. A non-linear kernel (e.g. RBF or polynomial) or a feature such as x1 x x2 is needed.",
+      "why_convincing": "Large C does drive training error to zero - when the data are linearly separable."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: XOR is not linearly separable, so at most 3 of the 4 points can be correct. Use a non-linear kernel or add x1 x x2.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Any line that puts (0,0) and (1,1) on one side must also put (0,1) or (1,0) there.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "With the feature x1 x x2 added, a linear boundary separates the classes.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "No line separates the XOR classes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try drawing a line that separates the two classes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a perfect linear boundary exists."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "C cannot create separability that the feature space lacks."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Plot the four points."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: XOR is not linearly separable. Use a non-linear kernel."
+      }
+    ],
+    "repair": "Use an RBF or polynomial kernel, or add the interaction feature x1 x x2.",
+    "debrief": "Model capacity is set by the hypothesis class, not by regularisation settings. A linear model cannot represent XOR, whatever C is.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-knn-naive-bayes-svm-005",
+    "subject": "machine-learning",
+    "topic": "KNN, Naive Bayes & SVM",
+    "subtopic": "The SVM C parameter",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's reading of the table correct?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "results": {
+        "title": "RBF SVM, fixed gamma",
+        "columns": [
+          "C",
+          "train accuracy",
+          "validation accuracy",
+          "support vectors"
+        ],
+        "rows": [
+          [
+            "0.1",
+            "0.84",
+            "0.83",
+            "1,420"
+          ],
+          [
+            "1",
+            "0.90",
+            "0.87",
+            "780"
+          ],
+          [
+            "100",
+            "0.99",
+            "0.81",
+            "310"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. Larger C penalises margin violations more, so the SVM fits the training data more tightly with fewer support vectors and a narrower margin. Training accuracy rises, but validation accuracy peaks at C = 1 and drops at C = 100: overfitting.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "C sets the cost of margin violations."
+      },
+      {
+        "index": 2,
+        "text": "Larger C gives a narrower margin and fewer support vectors (1,420 -> 310)."
+      },
+      {
+        "index": 3,
+        "text": "Training accuracy rises to 0.99."
+      },
+      {
+        "index": 4,
+        "text": "Validation accuracy is best at C = 1 (0.87), so C = 100 overfits."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. C trades margin width against training errors; validation performance chooses C = 1 here.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Validation accuracy: 0.83, 0.87, 0.81 for C = 0.1, 1, 100.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0.87"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Relate C to the margin."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 connects C to the number of support vectors."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Large C means a hard margin that fits training data closely."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find the best validation accuracy."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. C = 1 balances fit and generalisation. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "C is a regularisation knob with the opposite convention to lambda: larger C, less regularisation. Validation curves choose it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

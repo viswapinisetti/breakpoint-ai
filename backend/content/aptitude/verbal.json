@@ -1,0 +1,660 @@
+[
+  {
+    "id": "apt-vr-023",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Inference versus stated fact",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Read the passage and judge whether the AI's conclusion is supported by it.",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "The city introduced a bicycle-sharing scheme in April. By December, cycling trips recorded on the city's counters had risen by 40%. Car registrations in the city fell by 2% over the same period.",
+      "question_asked": "Did the bicycle-sharing scheme reduce car use?"
+    },
+    "ai_claim": "Yes — cycling rose sharply and car registrations fell, so the scheme moved people out of cars.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The passage records a 40% rise in cycling trips after the scheme began."
+      },
+      {
+        "index": 2,
+        "text": "It also records a 2% fall in car registrations over the same period."
+      },
+      {
+        "index": 3,
+        "text": "One transport mode rose while the other fell, which is the pattern expected if people switched from cars to bicycles."
+      },
+      {
+        "index": 4,
+        "text": "The scheme therefore reduced car use."
+      }
+    ],
+    "ai_final_answer": "supported",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Reading two co-occurring trends as one causing the other",
+      "explanation": "The passage reports two changes in the same period and attributes neither to the other. Car registrations are also not car use — a registration count measures ownership, not journeys. And the cyclists may be people who previously walked or took the bus. Nothing in the text links the two figures.",
+      "why_convincing": "Steps 1 and 2 quote the passage accurately, and the two trends point in the directions the conclusion needs. The switch from 'registrations' to 'car use' happens silently in step 4, so the substitution is never visible as a claim."
+    },
+    "canonical_solution": "Not supported. The passage records two co-occurring changes and connects them nowhere. Car registrations measure ownership rather than use, so even a genuine fall would not establish reduced driving. The increased cycling could equally have come from former pedestrians or bus users. The passage supports only that cycling rose and registrations fell during the same months.",
+    "canonical_answer": "not supported",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "Registrations measure ownership, not use.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "The new cyclists could be former pedestrians.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If every new cyclist previously walked, both stated figures hold exactly and car use is unchanged."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the words the passage uses with the words the conclusion uses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 quote accurately. Examine the two moves step 4 makes at once."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Two trends occurring together do not establish that one caused the other."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask who the new cyclists might have been before, and what a registration actually counts."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 both infers causation from co-occurrence and swaps 'registrations' for 'use'. The new cyclists may have been pedestrians, and registrations measure ownership."
+      }
+    ],
+    "repair": "Step 4 should conclude that the passage records two simultaneous changes without linking them, and that registrations are not a measure of car use. Establishing the claim would need data on where the new cyclists' trips came from.",
+    "debrief": "Two things happen in every unsupported-inference question: a causal link is read into a co-occurrence, and a term is quietly swapped for a near-synonym that means something different. Reading the conclusion word by word against the passage catches the second even when the first feels plausible — 'registrations' and 'use' are not interchangeable, and noticing that is the whole answer.",
+    "validation_payload": {
+      "solver": "# The passage constrains two facts. Test whether they force the conclusion.\n# World: every new cyclist previously walked, so car use is unchanged.\ncycling_rose = True\nregistrations_fell = True\ncar_use_reduced = False\npassage_holds = cycling_rose and registrations_fell\nanswer = 'not supported' if (passage_holds and not car_use_reduced) else 'supported'",
+      "flawed_solver": "cycling_rose = True\nregistrations_fell = True\n# Flawed rule: opposing trends imply one caused the other.\nanswer = 'supported' if (cycling_rose and registrations_fell) else 'not supported'"
+    }
+  },
+  {
+    "id": "apt-vr-024",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Identifying an unstated assumption",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Which assumption does this argument depend on?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "argument": "Our support team should switch to the new ticketing tool. Teams that adopted it reported resolving tickets 20% faster.",
+      "ai_answer": "The argument assumes the new tool has a good user interface."
+    },
+    "ai_claim": "The argument assumes the new tool has a good user interface, since that is what would make teams faster.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The argument's evidence is that adopting teams resolved tickets 20% faster."
+      },
+      {
+        "index": 2,
+        "text": "A tool makes a team faster largely through being easy to use."
+      },
+      {
+        "index": 3,
+        "text": "So the argument depends on the tool having a good user interface."
+      }
+    ],
+    "ai_final_answer": "good user interface",
+    "simulated_confidence": 87,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Offering a plausible explanation instead of a required assumption",
+      "explanation": "An assumption is something the argument needs in order to work — if it is false, the argument collapses. The interface quality is not needed: the argument would stand even if the tool were fast for some other reason. What the argument does require is that this team resembles the adopting teams closely enough for their result to transfer, and that the speed-up was caused by the tool rather than something coinciding with it.",
+      "why_convincing": "Step 2 is a reasonable causal story and interface quality genuinely does affect speed. The slip is between 'a plausible reason this might be true' and 'something the argument cannot do without' — the negation test distinguishes them and is not applied."
+    },
+    "canonical_solution": "The required assumption is that our team is relevantly similar to the teams that reported the improvement — same ticket types, volume and skill mix — so their result generalises to us. Negate it and the argument fails immediately. Negate 'the interface is good' and the argument survives: the tool could be faster through better automation or routing. Plausible explanation and necessary assumption are different things.",
+    "canonical_answer": "the teams are comparable",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "An assumption is required if negating it breaks the argument.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "The argument survives a poor interface if the tool automates well.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Suppose the interface is mediocre but the tool auto-routes tickets to the right agent. The 20% figure still holds and the argument is unaffected — so that assumption was not required."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Distinguish what would explain the evidence from what the argument needs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 offers a mechanism. Ask whether the argument depends on that particular mechanism."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Test a candidate assumption by negating it: if the argument still stands, it was not assumed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Negate 'the interface is good' and see whether the argument survives. Then do the same for 'our team is like theirs'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 gives a plausible mechanism rather than a required assumption. The argument survives a poor interface but collapses if our team is unlike the adopting teams — that is the real assumption."
+      }
+    ],
+    "repair": "The assumption is that our support team is sufficiently similar to the teams that reported the gain for their result to carry over. The negation test confirms it: if the teams differ materially, the evidence supports nothing about us.",
+    "debrief": "The negation test is the whole technique for assumption questions, and it takes one sentence to apply: negate the candidate and ask whether the argument still works. Plausible-sounding explanations pass an intuitive check and fail this one, which is exactly why the test is worth applying mechanically rather than by feel.",
+    "validation_payload": {
+      "solver": "# An assumption is required exactly when its negation breaks the argument.\ndef argument_holds(teams_comparable, good_interface):\n    return teams_comparable\n\nrequired_interface = not argument_holds(True, False)\nrequired_comparable = not argument_holds(False, True)\nanswer = 'the teams are comparable' if (required_comparable and not required_interface) else 'good user interface'",
+      "flawed_solver": "# Flawed rule: whatever plausibly explains the evidence is the assumption.\nplausible_mechanism = 'good user interface'\nanswer = plausible_mechanism"
+    }
+  },
+  {
+    "id": "apt-vr-025",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Weakening an argument",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Which of the AI's reasoning best weakens the argument below?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "argument": "The new streetlights reduced night-time accidents: in the year after installation, accidents on lit roads fell by 30%.",
+      "ai_answer": "The lights cost more than expected to install."
+    },
+    "ai_claim": "The strongest weakener is that the lights cost more than expected — that undermines the case for them.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The argument claims the streetlights produced a benefit."
+      },
+      {
+        "index": 2,
+        "text": "If the lights cost far more than budgeted, the case for installing them is undermined."
+      },
+      {
+        "index": 3,
+        "text": "So the cost overrun weakens the argument."
+      }
+    ],
+    "ai_final_answer": "cost overrun",
+    "simulated_confidence": 85,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Weakening the policy case instead of the stated causal claim",
+      "explanation": "The argument's claim is causal: the lights reduced accidents. Cost is irrelevant to whether they did — an expensive intervention that works still works. A genuine weakener attacks the causal link, for example that traffic volumes on those roads fell 30% over the same year, or that accidents fell equally on unlit roads.",
+      "why_convincing": "Cost really is a reason to object to streetlights, so the answer feels responsive. The switch is from the argument's claim (the lights caused the reduction) to a different claim (the lights were worth installing), and both are things one might argue about."
+    },
+    "canonical_solution": "Cost does not weaken a causal claim. To weaken 'the lights reduced accidents', attack the link: accidents fell by the same 30% on comparable unlit roads, or traffic on the lit roads dropped sharply that year, or the count changed because reporting rules changed. Each offers an alternative explanation for the same figure. Cost affects whether the lights were worth it, which the argument never claimed.",
+    "canonical_answer": "alternative explanation for the fall",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "A weakener must bear on the claim actually made.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "An expensive intervention can still be effective.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A treatment costing ten times its budget and curing the disease is still effective. Cost and efficacy are independent."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "State the argument's claim in one sentence before judging what weakens it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes what cost undermines. Compare that with what the argument asserts."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A weakener must attack the stated claim, not a different claim about the same subject."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for a fact that would explain the 30% fall without the lights causing it."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 weakens the case for installing the lights, not the claim that they reduced accidents. A real weakener offers another explanation for the fall — traffic volumes dropping, or unlit roads falling equally."
+      }
+    ],
+    "repair": "Choose a fact that offers an alternative explanation for the 30% fall — for instance that accidents fell equally on comparable unlit roads that year, which would show the lights were not the cause.",
+    "debrief": "Weaken and strengthen questions turn entirely on identifying the claim precisely. 'The lights reduced accidents' is causal; 'the lights were worth installing' is evaluative. An option addressing the second feels relevant and does nothing to the first. Write the claim down before assessing any option — the answer usually becomes obvious once the target is fixed.",
+    "validation_payload": {
+      "solver": "# A weakener must reduce support for the causal claim itself.\ndef supports_causal_claim(lights_caused_drop):\n    return lights_caused_drop\n\n# Cost overrun leaves the causal claim untouched.\nafter_cost_news = supports_causal_claim(True)\n# An alternative explanation removes the support.\nafter_alternative = supports_causal_claim(False)\nanswer = ('alternative explanation for the fall'\n          if after_cost_news and not after_alternative\n          else 'cost overrun')",
+      "flawed_solver": "# Flawed rule: anything that makes the policy look bad weakens the argument.\nanswer = 'cost overrun'"
+    }
+  },
+  {
+    "id": "apt-vr-026",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Scope of a stated conclusion",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's reading of this passage correct?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "In the trial, patients who took the drug recovered on average two days sooner than those who did not. The effect was observed in patients aged 18 to 45. Researchers noted that the trial did not include patients with existing heart conditions.",
+      "question_asked": "What does the passage support?"
+    },
+    "ai_claim": "The passage supports that the drug shortens recovery by about two days in adults aged 18 to 45 without existing heart conditions.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The passage reports a two-day average reduction in recovery time for those taking the drug."
+      },
+      {
+        "index": 2,
+        "text": "It states the effect was observed in the 18 to 45 age range, so the finding is limited to that group."
+      },
+      {
+        "index": 3,
+        "text": "It records that patients with existing heart conditions were excluded, so the finding does not extend to them."
+      },
+      {
+        "index": 4,
+        "text": "The supported conclusion is therefore a two-day reduction in adults aged 18 to 45 without existing heart conditions."
+      }
+    ],
+    "ai_final_answer": "correct",
+    "simulated_confidence": 86,
+    "truth_state": "valid",
+    "canonical_solution": "Correct, and correctly scoped. The reading reports the effect size the passage gives, restricts it to the age range in which it was observed, and excludes the population the trial did not cover. It does not generalise beyond the trial, does not claim the drug works for everyone, and does not convert an average into a promise for an individual. That is exactly what the passage supports and no more.",
+    "canonical_answer": "correct",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the conclusion claims more, or less, than the passage states."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Compare each restriction in steps 2 and 3 against the passage."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A supported conclusion carries every limitation the evidence carries."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for anything in the conclusion that the passage does not state — a wider population, a stronger effect, an individual guarantee."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This reading is correct and properly scoped: right effect size, right age range, right exclusion, and no generalisation beyond the trial. Approving it was the right call."
+      }
+    ],
+    "repair": "",
+    "debrief": "Most verbal-reasoning challenges punish over-claiming, which trains a reflex to reject any confident conclusion. This one is confident and correct, because every limitation in the evidence survives into the statement. Approving it requires the same check as rejecting an over-claim — compare the conclusion's scope against the evidence's scope, clause by clause — and being willing to accept the answer when they match.",
+    "validation_payload": {
+      "solver": "passage_scope = {'effect_days': 2, 'ages': (18, 45), 'excludes_heart': True}\nclaim_scope = {'effect_days': 2, 'ages': (18, 45), 'excludes_heart': True}\nanswer = 'correct' if claim_scope == passage_scope else 'over-claims'"
+    }
+  },
+  {
+    "id": "apt-vr-055",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Identifying assumptions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Read the argument and judge whether the AI has correctly identified the assumption it depends on.",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "Our support tickets fell by 30% in the quarter after we published the new help centre. The help centre is clearly working, so we should invest in expanding it.",
+      "question_asked": "Which assumption does this argument depend on?",
+      "options": [
+        "A. Customers prefer reading documentation to contacting support.",
+        "B. The fall in tickets was not caused by something other than the help centre.",
+        "C. The help centre articles are well written.",
+        "D. Support staff costs are the largest part of the budget."
+      ]
+    },
+    "ai_claim": "The argument depends on assumption A: that customers prefer reading documentation to contacting support.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The argument observes a 30% fall in tickets after the help centre was published."
+      },
+      {
+        "index": 2,
+        "text": "It concludes that the help centre caused the fall and should be expanded."
+      },
+      {
+        "index": 3,
+        "text": "For the help centre to reduce tickets, customers must be choosing to read it instead of raising a ticket."
+      },
+      {
+        "index": 4,
+        "text": "That is a preference for documentation over support, so option A is the assumption the argument depends on."
+      }
+    ],
+    "ai_final_answer": "A",
+    "simulated_confidence": 83,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Selecting a plausible mechanism for the conclusion rather than a premise the argument cannot survive without",
+      "explanation": "An assumption is required only if its negation destroys the argument. Negate A: customers may not prefer documentation in general, yet the help centre could still have reduced tickets for the specific issues it covers - the argument survives. Negate B: if the fall had another cause, such as a seasonal dip or a shrinking customer base, the argument collapses entirely. B is the assumption; A is a description of a possible mechanism.",
+      "why_convincing": "Step 3 is a reasonable story about how the help centre would work, and the argument does need some such mechanism. Option A is the only one that names a mechanism, which makes it feel like the answer - and the negation test is never applied to any option, so the two candidates are never compared on the criterion that decides."
+    },
+    "canonical_solution": "Apply the negation test to each option. Not-A: even if customers do not generally prefer documentation, the help centre may still have cut tickets on the topics it covers, so the argument stands. Not-B: if the fall was caused by something else - seasonality, fewer customers, a bug fix - then the help centre did not do it and the conclusion fails. C and D are irrelevant to the inference. The required assumption is B.",
+    "canonical_answer": "B",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "An assumption is required exactly when its negation breaks the argument.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Negating A leaves the argument intact; negating B destroys it.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If tickets fell because the customer base shrank by 30%, every stated fact holds and the help centre did nothing - so B is required.",
+      "If customers hate documentation in general but used the help centre for the three issues it covers, the argument still works - so A is not required."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "There is a test that decides assumption questions. Check whether the solution applies it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 summarise the argument fairly. Step 3 introduces something the argument does not state."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An assumption is a premise the argument cannot survive without. Try negating each option."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Negate option A and ask whether the argument still works. Then negate option B."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is the failure: it picks a plausible mechanism rather than a required premise. Negating A leaves the argument standing; negating B destroys it, so B is the assumption."
+      }
+    ],
+    "repair": "Apply the negation test: A negated leaves the conclusion available, B negated removes the causal link entirely, so the required assumption is B.",
+    "debrief": "Assumption questions have a mechanical test, and the whole difficulty is remembering to use it instead of picking the most explanatory-sounding option. Negate the candidate. If the argument still works, it was not an assumption - it was a story. Here the appealing option describes how the thing might work; the correct one rules out the alternative explanation, which is what causal arguments actually need.",
+    "transfer_check": {
+      "question": "Apply the negation test to all four options A to D. How many of them, when negated, make the argument collapse?",
+      "answer": "1",
+      "explanation": "Only not-B breaks it: if something else caused the fall, the help centre did not. Negating A, C or D leaves the causal inference standing, so none of them is required."
+    },
+    "validation_payload": {
+      "solver": "# An assumption is required exactly when its negation breaks the argument.\ndef argument_holds(no_other_cause, prefers_docs, well_written, staff_costs_top):\n    return no_other_cause\nrequired = {\n    'B': not argument_holds(False, True, True, True),\n    'A': not argument_holds(True, False, True, True),\n    'C': not argument_holds(True, True, False, True),\n    'D': not argument_holds(True, True, True, False),\n}\nneeded = sorted(k for k, v in required.items() if v)\nanswer = needed[0] if len(needed) == 1 else 'ambiguous'\n",
+      "flawed_solver": "# Flawed rule: choose the option that describes a plausible mechanism.\nmechanism_options = {'A': True, 'B': False, 'C': False, 'D': False}\nanswer = sorted(k for k, v in mechanism_options.items() if v)[0]\n"
+    }
+  },
+  {
+    "id": "apt-vr-056",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Strengthen and weaken",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Read the argument and judge whether the AI has correctly identified which statement most weakens it.",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "Employees who attended the optional productivity workshop closed 22% more tasks in the following month than employees who did not attend. The workshop therefore makes employees more productive, and attendance should be made compulsory.",
+      "question_asked": "Which statement most weakens the argument?",
+      "options": [
+        "A. The workshop lasted only two hours.",
+        "B. Some attendees said they found the workshop boring.",
+        "C. Attendance was optional, and the employees who chose to attend already had the highest task-closure rates before the workshop.",
+        "D. Task closure is only one of several measures of productivity."
+      ]
+    },
+    "ai_claim": "Statement D most weakens the argument, because it shows the measure used is incomplete.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The argument concludes that the workshop causes higher productivity, based on a 22% difference in tasks closed."
+      },
+      {
+        "index": 2,
+        "text": "Statement D points out that task closure is only one measure of productivity."
+      },
+      {
+        "index": 3,
+        "text": "If the measure does not capture productivity fully, the evidence does not support a conclusion about productivity, so D undermines the argument most."
+      },
+      {
+        "index": 4,
+        "text": "Therefore D most weakens the argument."
+      }
+    ],
+    "ai_final_answer": "D",
+    "simulated_confidence": 80,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Preferring an objection to the measure over an objection that supplies an alternative cause",
+      "explanation": "D is a genuine limitation, but it leaves the causal claim standing for the part of productivity that was measured: the workshop still appears to raise task closure. C attacks the causal link itself - if the attendees were already the highest closers, self-selection explains the entire 22% gap and the workshop may have done nothing. An objection that offers a complete alternative explanation weakens more than one that narrows the conclusion's scope.",
+      "why_convincing": "D is a real weakness and is the kind of measurement caveat that reads as rigorous thinking. Step 3's reasoning about it is even valid as far as it goes - it just never compares D against C, and the question asks which weakens *most*, which is a comparison."
+    },
+    "canonical_solution": "The argument is causal: workshop attendance caused higher task closure. C identifies self-selection - the attendees were already the highest closers - which accounts for the whole 22% gap without the workshop having any effect, and so removes the argument's entire basis. D limits how far the conclusion generalises but leaves the measured effect intact. A and B are irrelevant. C most weakens the argument.",
+    "canonical_answer": "C",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If the attendees were already 22% ahead, the observed gap needs no workshop effect at all.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "22"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "An alternative cause for the whole observed effect weakens a causal claim more than a limit on the outcome measure.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Suppose attendees closed 22% more tasks before the workshop as well: every stated fact holds and the workshop's effect is zero."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "The question asks which option weakens the argument most, so the answer requires comparing options."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 argues for D on its own merits. Check whether any other option does more damage."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A causal argument is most vulnerable to an alternative explanation of the same evidence."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Read option C and ask how much of the 22% gap it explains without the workshop."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is the failure: it never compares D with C. C explains the entire 22% gap by self-selection, so C weakens the argument most."
+      }
+    ],
+    "repair": "Compare the options against the causal claim: C provides an alternative cause for the whole effect, so C weakens the argument most; D only narrows the conclusion's scope.",
+    "debrief": "Superlative questions - most weakens, best explains, strongest support - cannot be answered by evaluating one option well. The failure here is not a bad argument about D; it is a correct argument about D presented as though no comparison were needed. When an AI justifies its choice without mentioning the alternatives, the reasoning may be sound and the answer still wrong, and for a self-selected group the alternative cause is almost always the strongest objection available.",
+    "transfer_check": {
+      "question": "Suppose attendees were already closing 22% more tasks than non-attendees in the month before the workshop, and still close 22% more in the month after. By how many percentage points did the workshop change the gap?",
+      "answer": "0",
+      "explanation": "The gap was 22% before and 22% after, so none of it is attributable to the workshop: it is entirely self-selection, which is what option C says."
+    },
+    "validation_payload": {
+      "solver": "# Score each option by how much of the observed effect it explains away.\n# An alternative cause for the entire effect is a complete objection; a limit on the\n# outcome measure is partial; irrelevant statements score zero.\ndamage = {'A': 0, 'B': 0, 'C': 3, 'D': 1}\nbest = max(damage, key=lambda k: damage[k])\nanswer = best if list(damage.values()).count(damage[best]) == 1 else 'ambiguous'\n",
+      "flawed_solver": "# Flawed rule: pick the option that criticises the outcome measure.\ncriticises_measure = {'A': False, 'B': False, 'C': False, 'D': True}\nanswer = sorted(k for k, v in criticises_measure.items() if v)[0]\n"
+    }
+  },
+  {
+    "id": "apt-vr-057",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Inference versus stated fact",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Read the passage and judge whether the AI's verdict on the conclusion is correct.",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "A survey of 1,200 commuters in the city found that 68% would use a suburban rail service if one existed. The survey was conducted at three city-centre metro stations on weekday mornings.",
+      "question_asked": "Does the passage support the conclusion that most of the city's residents want a suburban rail service?"
+    },
+    "ai_claim": "The conclusion is not supported by the passage.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The passage reports that 68% of 1,200 surveyed commuters would use a suburban rail service."
+      },
+      {
+        "index": 2,
+        "text": "The survey was taken at metro stations on weekday mornings, so the respondents are people who already commute by public transport."
+      },
+      {
+        "index": 3,
+        "text": "The conclusion is about the city's residents, a different and much larger group that includes non-commuters, car users and people who work from home."
+      },
+      {
+        "index": 4,
+        "text": "A sample drawn from public-transport commuters cannot establish a claim about all residents, and 'would use if it existed' is not the same as 'wants'."
+      },
+      {
+        "index": 5,
+        "text": "So the passage does not support the conclusion."
+      }
+    ],
+    "ai_final_answer": "not supported",
+    "simulated_confidence": 66,
+    "truth_state": "valid",
+    "canonical_solution": "The verdict is correct and correctly reasoned. The sample is drawn from city-centre metro stations on weekday mornings, so it represents existing public-transport commuters rather than residents generally - non-commuters, car users and remote workers are all absent. The passage also reports willingness to use, which is not the same as wanting the service built. Both gaps are identified, so the conclusion is not supported.",
+    "canonical_answer": "not supported",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "A sample drawn from one subgroup cannot support a claim about the whole population.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "contradiction",
+        "summary": "'Would use if it existed' and 'wants' are different claims, as step 4 notes.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the verdict, then check whether the reasons given for it are the right reasons."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Two separate problems with the conclusion are named. Verify each against the passage."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A verdict can be right for the wrong reasons, so read steps 2 to 4 as claims in their own right."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask who was excluded by the sampling method, and whether 'would use' equals 'wants'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Every step holds. The sample covers public-transport commuters, not residents, and willingness to use is not the same as wanting it built. The correct verdict is to approve."
+      }
+    ],
+    "repair": "",
+    "debrief": "Sampling questions usually appear with the AI over-claiming, and the habit that forms is to challenge anything involving a survey. Here the AI is right, and being right is not enough - the reasoning has to be right too, which is what steps 2 to 4 have to be checked for. Note that the solution finds two independent defects, either of which would settle it: where the sample came from, and the gap between 'would use' and 'wants'.",
+    "transfer_check": {
+      "question": "The survey is repeated door-to-door with 1,000 residents: 300 are public-transport commuters, 68% of whom would use the service, and 20% of the other 700 would. What percentage of all residents surveyed would use it?",
+      "answer": "34.4",
+      "explanation": "0.68 x 300 = 204 and 0.20 x 700 = 140, so 344 of 1,000 = 34.4%. The 68% came from the group most likely to say yes; across residents it is about half that, well short of 'most'."
+    },
+    "validation_payload": {
+      "solver": "# The conclusion is supported only if the sample's population matches the\n# conclusion's population and the measured attitude matches the claimed one.\nsample_population = 'public transport commuters'\nconclusion_population = 'all residents'\nmeasured = 'would use if available'\nclaimed = 'wants the service'\nsupported = (\n    sample_population == conclusion_population and measured == claimed\n)\nanswer = 'supported' if supported else 'not supported'\n"
+    }
+  }
+]

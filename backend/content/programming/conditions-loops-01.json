@@ -1,0 +1,400 @@
+[
+  {
+    "id": "prg-conditions-loops-001",
+    "subject": "programming",
+    "topic": "Conditions & Loops",
+    "subtopic": "Leap-year conditions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does is_leap(year) follow the Gregorian leap-year rule for every year?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def is_leap(year):\n    return year % 4 == 0 and year % 100 != 0"
+    },
+    "ai_claim": "Yes. It checks divisibility by 4 and excludes century years, which is the Gregorian rule.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A year divisible by 4 is normally a leap year."
+      },
+      {
+        "index": 2,
+        "text": "Century years such as 1900 are not leap years, which `year % 100 != 0` handles."
+      },
+      {
+        "index": 3,
+        "text": "These two conditions together cover every case of the Gregorian rule."
+      },
+      {
+        "index": 4,
+        "text": "is_leap is correct for every year."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Missing the third clause of the Gregorian rule",
+      "explanation": "The Gregorian rule has three parts: divisible by 4, except centuries, except centuries divisible by 400. 2000 was a leap year, but is_leap(2000) returns False because 2000 % 100 == 0.",
+      "why_convincing": "The first two clauses are the ones people remember, and they are correct for every year anyone is likely to test except 2000 and 2400."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Gregorian leap years: divisible by 4 and not by 100, or divisible by 400. is_leap(2000) should be True but returns False. Correct: `return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0`.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "is_leap(2000) returns False, but 2000 was a leap year.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2000"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "400"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "is_leap(2000) returns False; 2000 had a 29 February."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the rule in step 3 against every kind of year, including unusual ones."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims the two conditions are complete."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The Gregorian rule has an exception to its exception for centuries."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test is_leap on the year 2000."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: centuries divisible by 400 are leap years. is_leap(2000) returns False; add `or year % 400 == 0`."
+      }
+    ],
+    "repair": "Return `(year % 4 == 0 and year % 100 != 0) or year % 400 == 0`.",
+    "debrief": "Rules with nested exceptions are where conditionals fail, because the common cases pass and the rare case is years away. A branch-by-branch test list - an ordinary year, a leap year, a century, a 400-year century - would catch it immediately. Build test cases from the rule's clauses, not from typical inputs.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "is_leap",
+      "ai_code": "def is_leap(year):\n    return year % 4 == 0 and year % 100 != 0",
+      "reference_code": "def is_leap(year):\n    return (year % 4 == 0 and year % 100 != 0) or year % 400 == 0",
+      "test_inputs": [
+        "(2024,)",
+        "(2023,)",
+        "(1900,)",
+        "(2000,)"
+      ],
+      "counterexample_input": "(2000,)"
+    }
+  },
+  {
+    "id": "prg-conditions-loops-002",
+    "subject": "programming",
+    "topic": "Conditions & Loops",
+    "subtopic": "Trial division up to the square root",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does is_prime(n) correctly classify every integer n from -10 to 10,000?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def is_prime(n):\n    if n < 2:\n        return False\n    for d in range(2, int(n ** 0.5) + 1):\n        if n % d == 0:\n            return False\n    return True"
+    },
+    "ai_claim": "Yes. It rejects numbers below 2 and checks every possible divisor up to the square root.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Numbers below 2 are not prime, so they return False immediately."
+      },
+      {
+        "index": 2,
+        "text": "Any composite n has a divisor d with 2 <= d <= sqrt(n)."
+      },
+      {
+        "index": 3,
+        "text": "range(2, int(n ** 0.5) + 1) includes sqrt(n) itself when n is a perfect square, for example 5 when n is 25."
+      },
+      {
+        "index": 4,
+        "text": "If no divisor is found in that range, n is prime, so the function is correct on this range."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The function is correct on this range: every composite n has a factor no larger than sqrt(n), the +1 makes the range include that bound, and n < 2 is handled first. For n up to 10,000, n ** 0.5 is computed exactly enough for int() to give the right bound.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "is_prime(25) and is_prime(49) return False; is_prime(97) and is_prime(7919) return True.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "25",
+          "49"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the boundaries of the loop's range."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is the step that decides whether perfect squares are caught."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A composite n always has a factor at most sqrt(n), so checking up to and including that bound is enough."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test perfect squares of primes, such as 25 and 49, and small edge values such as 0, 1 and 2."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The +1 in the range includes sqrt(n), so 25 and 49 are caught, and values below 2 are rejected. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Loop bounds are the classic source of off-by-one errors, so a range ending in `+ 1` deserves a check. Here the check confirms it: without the +1, perfect squares of primes such as 25 would be reported prime. Testing exactly at the boundary is how you turn suspicion into a verdict.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "is_prime",
+      "ai_code": "def is_prime(n):\n    if n < 2:\n        return False\n    for d in range(2, int(n ** 0.5) + 1):\n        if n % d == 0:\n            return False\n    return True",
+      "reference_code": "def is_prime(n):\n    return n >= 2 and all(n % d for d in range(2, n))",
+      "test_inputs": [
+        "(-10,)",
+        "(0,)",
+        "(1,)",
+        "(2,)",
+        "(25,)",
+        "(49,)",
+        "(97,)",
+        "(7919,)",
+        "(10000,)"
+      ]
+    }
+  },
+  {
+    "id": "prg-conditions-loops-003",
+    "subject": "programming",
+    "topic": "Conditions & Loops",
+    "subtopic": "Inclusive loop bounds",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does sum_to(n) return 1 + 2 + ... + n for every integer n >= 0?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def sum_to(n):\n    total = 0\n    for i in range(1, n + 1):\n        total += i\n    return total"
+    },
+    "ai_claim": "Yes. range(1, n + 1) visits 1 through n, and each value is added once.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "range(1, n + 1) starts at 1 and stops before n + 1, so it visits 1, 2, ..., n."
+      },
+      {
+        "index": 2,
+        "text": "Each visited value is added to total exactly once."
+      },
+      {
+        "index": 3,
+        "text": "For n = 0 the range is empty, so the function returns 0."
+      },
+      {
+        "index": 4,
+        "text": "sum_to(n) returns 1 + 2 + ... + n for every n >= 0."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. range's end is exclusive, so n + 1 makes n the last value; n = 0 gives an empty sum of 0. Equivalent closed form: n(n + 1)/2.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "sum_to(10) returns 55 = 10 x 11 / 2.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "55"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check both ends of the range."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 describes what range(1, n + 1) visits. Verify it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "range(a, b) includes a and excludes b."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare sum_to(10) with 10 x 11 / 2, and check sum_to(0)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. range(1, n + 1) visits exactly 1 to n, and n = 0 gives 0. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "An explicit `+ 1` on a range bound often looks like a patch for an off-by-one error, which invites suspicion. Here it is exactly what an exclusive end point requires. The check is quick: compare with the closed form n(n + 1)/2 at one ordinary value and at the edge n = 0.",
+    "transfer_check": {
+      "question": "What does sum_to(20) return?",
+      "answer": "210",
+      "explanation": "20 x 21 / 2 = 210."
+    },
+    "validation_payload": {
+      "entry_point": "sum_to",
+      "ai_code": "def sum_to(n):\n    total = 0\n    for i in range(1, n + 1):\n        total += i\n    return total",
+      "reference_code": "def sum_to(n):\n    return n * (n + 1) // 2",
+      "test_inputs": [
+        "(0,)",
+        "(1,)",
+        "(10,)",
+        "(100,)"
+      ]
+    }
+  },
+  {
+    "id": "prg-conditions-loops-004",
+    "subject": "programming",
+    "topic": "Conditions & Loops",
+    "subtopic": "Loop termination and inputs",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The scheduler calls countdown(config[\"start\"], 3), where config is loaded from a settings file. Will this call always finish?",
+    "artifact_type": "function",
+    "artifact": {
+      "language": "python",
+      "code": "def countdown(n, step):\n    while n != 0:\n        n -= step\n    return \"done\"\n\n# called from the scheduler as:\ncountdown(config[\"start\"], 3)"
+    },
+    "ai_claim": "Yes. n goes down by 3 on every iteration until it reaches 0, and then the loop stops.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each iteration subtracts 3 from n."
+      },
+      {
+        "index": 2,
+        "text": "The start value in the settings file is a positive count such as 30."
+      },
+      {
+        "index": 3,
+        "text": "From 30, n goes 27, 24, ..., 3, 0, and the loop stops at 0."
+      },
+      {
+        "index": 4,
+        "text": "So the call always finishes."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The value of config[\"start\"]. The loop only stops when n hits exactly 0, which happens only if the start value is a non-negative multiple of 3. The settings file's value is never shown or constrained.",
+    "resolving_scenarios": [
+      "start = 30: n goes 30, 27, ..., 3, 0 and the call finishes after 10 iterations.",
+      "start = 31: n goes 31, 28, ..., 1, -2, -5, ... and never equals 0, so the loop runs forever."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Whether the call finishes depends on config[\"start\"], which is not given. With `while n != 0`, the loop ends only if n lands exactly on 0: a start of 30 finishes, a start of 31 never does. The claim cannot be settled from the code shown; changing the condition to `while n > 0` would make it finish for any start value.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A start value of 31 skips from 1 to -2 and never reaches 0.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "31"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "countdown(31, 3) never finishes: n goes 1, -2, -5, ..."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where each value used in the steps comes from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states a fact about the settings file. Look for it in what you were shown."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A `!=` loop condition only stops if the value lands exactly on the target."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try start values of 30 and 31 and trace the loop."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 invents the start value. The code only finishes when config[\"start\"] is a non-negative multiple of 3; 31 loops forever. From what is shown, it cannot be decided."
+      }
+    ],
+    "repair": "State the requirement on config[\"start\"] (a non-negative multiple of 3), or make the loop robust with `while n > 0`.",
+    "debrief": "Termination arguments are only as good as the assumptions about the input, and step 2 supplied a convenient value that the code never guarantees. A `!=` condition is fragile because it demands an exact landing. When an answer depends on data you were not shown, the honest verdict is that it cannot be decided - and the fix is usually to make the code independent of that data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

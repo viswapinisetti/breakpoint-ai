@@ -1,0 +1,471 @@
+[
+  {
+    "id": "ai-responsible-ai-evaluation-001",
+    "subject": "ai",
+    "topic": "Responsible AI & Evaluation",
+    "subtopic": "Five hand-picked prompts",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this evaluation support calling the chatbot accurate?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "A team tested a new support chatbot with 5 prompts they wrote themselves; all 5 answers were good.\nLaunch note: \"Evaluation complete: the chatbot is accurate.\""
+    },
+    "ai_claim": "Yes. It answered all 5 test prompts well, so it is accurate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "5 prompts were tested."
+      },
+      {
+        "index": 2,
+        "text": "All 5 answers were good."
+      },
+      {
+        "index": 3,
+        "text": "A 100% pass rate shows accuracy."
+      },
+      {
+        "index": 4,
+        "text": "So the chatbot is accurate."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Evaluating on a tiny, self-written test set",
+      "explanation": "Five prompts written by the builders reflect what they expect, not what customers ask. They cannot estimate an error rate or reveal failure modes (ambiguous questions, policy edge cases, angry users, other languages). Build an evaluation set from real, representative queries - hundreds, including hard cases - with clear grading criteria.",
+      "why_convincing": "A perfect score looks conclusive."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 5 self-written prompts cannot establish accuracy. Evaluate on a large, representative set of real queries.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Only 5 prompts, all written by the team.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Real tickets include refund disputes in Hindi, which none of the 5 prompts covered.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The first day's real queries include cases the test never touched."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where the prompts came from and how many there were."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats 5/5 as proof."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Evaluation sets must be representative and large enough to estimate error rates."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the prompts with real customer tickets."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 5 self-written prompts prove little."
+      }
+    ],
+    "repair": "Build an evaluation set from sampled real tickets, including hard and adversarial cases.",
+    "debrief": "Evaluation is only as good as its test set. Sample from reality and include the hard cases.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-responsible-ai-evaluation-002",
+    "subject": "ai",
+    "topic": "Responsible AI & Evaluation",
+    "subtopic": "LLM-as-judge bias",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do the judge's scores show that A is objectively better?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "An LLM judge scores answers from 1-10. Model A's answers average 300 words; model B's average 90 words.\nJudge averages: A 8.4, B 6.9. Human raters preferred B's answers in 58% of pairwise comparisons.\nReport: \"The judge's scores show A is objectively better.\""
+    },
+    "ai_claim": "Yes. The judge scored A higher on average, and an automated judge is objective, so A is better.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The judge scored A 8.4 and B 6.9."
+      },
+      {
+        "index": 2,
+        "text": "The judge applies the same criteria to every answer."
+      },
+      {
+        "index": 3,
+        "text": "Automated scoring is objective."
+      },
+      {
+        "index": 4,
+        "text": "So A is better."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Treating an automated judge as unbiased",
+      "explanation": "LLM judges have known biases, including a preference for longer answers and for answers resembling their own style. Here A's answers are three times longer, and humans actually preferred B 58% of the time. Validate judges against human ratings, control for length (or use pairwise comparisons with position swapping), and report agreement.",
+      "why_convincing": "Automation feels objective because it is consistent."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the judge's preference may reflect length bias; human raters preferred B. Validate and debias the judge.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Humans preferred B in 58% of pairwise comparisons.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "58"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Padding B's answers with extra text raises their judge scores without improving content.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Longer but no better answers score higher."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the judge's verdict with human preferences."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates consistency with objectivity."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "LLM judges can be biased towards length and style."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at average answer lengths."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the judge may be biased. Validate against humans."
+      }
+    ],
+    "repair": "Calibrate the judge against human ratings, control for length and swap answer positions.",
+    "debrief": "Automated evaluation scales but inherits biases. Measure its agreement with humans before trusting it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-responsible-ai-evaluation-003",
+    "subject": "ai",
+    "topic": "Responsible AI & Evaluation",
+    "subtopic": "Red teaming once",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the pre-launch red-teaming make ongoing safety work unnecessary?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "Before launch, a team ran a two-week red-team exercise on their chatbot and fixed every issue found.\nPlan: \"The model is now safe. No further red teaming or monitoring is needed.\""
+    },
+    "ai_claim": "Yes. The red team tested the model thoroughly and every issue was fixed, so the model is safe from now on.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The red team spent two weeks probing the model."
+      },
+      {
+        "index": 2,
+        "text": "Every issue found was fixed."
+      },
+      {
+        "index": 3,
+        "text": "No known issues remain."
+      },
+      {
+        "index": 4,
+        "text": "So the model is safe and needs no further testing."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming 'no known issues' means 'no issues'",
+      "explanation": "Red teaming finds some failures, not all. Real users try far more inputs than a two-week exercise, new jailbreak techniques appear continually, and prompts, tools and model versions change over time. Safety needs ongoing monitoring, incident reporting and periodic re-testing.",
+      "why_convincing": "A thorough exercise with every finding fixed feels complete."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: red teaming cannot find every issue, and threats change. Monitor in production and re-test regularly.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A new jailbreak technique published after launch bypasses the fixes.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Testing shows the presence of problems, not their absence.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Users find a failure in the first week that the red team never tried."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what red teaming can prove."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates 'no known issues' with safety."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Testing samples failures; it cannot rule them all out."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider new attack techniques after launch."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: unknown and future issues remain. Keep monitoring."
+      }
+    ],
+    "repair": "Add production monitoring, abuse reporting and scheduled re-testing after every change.",
+    "debrief": "Safety is a process, not a milestone.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-responsible-ai-evaluation-004",
+    "subject": "ai",
+    "topic": "Responsible AI & Evaluation",
+    "subtopic": "Legal information without review",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it safe to publish such answers without review?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "An HR assistant built on an LLM answers: \"Under current Indian labour law, employees are entitled to 26 weeks of paid leave for any family emergency.\"\nPlan: let the assistant answer employees' legal questions directly, with no review."
+    },
+    "ai_claim": "Yes. The model states the law clearly and specifically, so its legal answers can be given directly to employees.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The answer cites 'current Indian labour law'."
+      },
+      {
+        "index": 2,
+        "text": "It gives a specific entitlement: 26 weeks."
+      },
+      {
+        "index": 3,
+        "text": "Specific, confident legal statements are reliable."
+      },
+      {
+        "index": 4,
+        "text": "So answers can go out without review."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F14",
+      "location": 3,
+      "misconception": "Trusting confident legal claims from a model",
+      "explanation": "The answer blends a real provision (26 weeks is the maternity benefit entitlement) into an invented general 'family emergency' right. Confident, specific-sounding legal claims can be fabricated or outdated. For legal and HR questions, ground answers in the actual policy and statute text, cite sources, and route uncertain cases to people.",
+      "why_convincing": "It mentions a real number and sounds authoritative."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the entitlement is not a general family-emergency right. Legal answers need grounding in sources and human review.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "26 weeks is the maternity benefit, not leave for 'any family emergency'.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "26"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "High-stakes answers need source grounding and review.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An employee takes 26 weeks off based on a right that does not exist."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the claim against the actual law."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats specificity as reliability."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models can merge real facts into false claims."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Where does 26 weeks actually come from?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the claim is fabricated from a real provision. Ground and review."
+      }
+    ],
+    "repair": "Answer only from retrieved policy and statute text, cite it, and escalate uncertain cases to HR.",
+    "debrief": "The most harmful hallucinations mix a true detail into a false claim. High-stakes domains need grounding and review.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-responsible-ai-evaluation-005",
+    "subject": "ai",
+    "topic": "Responsible AI & Evaluation",
+    "subtopic": "A sound evaluation protocol",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this protocol gives trustworthy evidence about the model's quality?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "Evaluation plan for a claims-triage model:\n- 600 real claims sampled across claim types and months, held out from all development.\n- Written rubric; two trained reviewers label each case independently; disagreements adjudicated; Cohen's kappa reported (0.78).\n- Metrics reported overall and per claim type and language.\n- Test set frozen before any prompt or model changes."
+    },
+    "ai_claim": "Yes. The test set is representative and held out, labels are reliable (two reviewers, kappa 0.78, adjudication), results are broken down by subgroup, and freezing the set prevents tuning to it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Sampling across types and months makes the set representative."
+      },
+      {
+        "index": 2,
+        "text": "Holding it out and freezing it prevents overfitting to the test."
+      },
+      {
+        "index": 3,
+        "text": "Two independent reviewers with kappa 0.78 show reliable labels."
+      },
+      {
+        "index": 4,
+        "text": "Subgroup metrics reveal uneven performance."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Representative held-out data, reliable labels with measured agreement, and disaggregated reporting are the core of a trustworthy evaluation.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Inter-rater agreement: Cohen's kappa = 0.78.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.78"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check sampling, label quality and reporting."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 addresses label reliability."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Trustworthy evaluation needs representative data, reliable labels and subgroup analysis."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask whether anything was tuned on the test set."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The protocol is sound. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The quality of an evaluation depends on its data, its labels and its reporting. This protocol covers all three.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

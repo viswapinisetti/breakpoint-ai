@@ -1,0 +1,394 @@
+[
+  {
+    "id": "dsa-complexity-analysis-001",
+    "subject": "dsa",
+    "topic": "Complexity Analysis",
+    "subtopic": "Nested loops with a constant inner bound",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the time complexity of weighted_total for a list of length n?",
+    "artifact_type": "complexity_analysis",
+    "artifact": {
+      "language": "python",
+      "code": "def weighted_total(a):\n    total = 0\n    for i in range(len(a)):\n        for j in range(3):\n            total += a[i] * j\n    return total"
+    },
+    "ai_claim": "It is O(n^2), because it has two nested loops.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The outer loop runs once for each of the n elements."
+      },
+      {
+        "index": 2,
+        "text": "Inside it there is a second loop."
+      },
+      {
+        "index": 3,
+        "text": "Two nested loops mean O(n) x O(n) work."
+      },
+      {
+        "index": 4,
+        "text": "So weighted_total is O(n^2)."
+      }
+    ],
+    "ai_final_answer": "O(n^2)",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Counting loop nesting instead of iterations",
+      "explanation": "Complexity comes from how many times the body runs, not from how many loops are nested. The inner loop always runs exactly 3 times, independent of n, so the body runs 3n times: O(n).",
+      "why_convincing": "'Nested loops = O(n^2)' is a rule of thumb that is right so often that people stop checking the inner bound."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The inner loop has a constant bound (3). Total work is 3n = O(n).",
+    "canonical_answer": "O(n)",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Body executions = n x 3 = 3n",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Doubling n from 1,000 to 2,000 doubles the work (3,000 -> 6,000), not quadruples it.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "For n = 1,000 the body runs 3,000 times, not 1,000,000."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count how many times the innermost statement runs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats the inner loop as depending on n."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A loop whose bound is a constant contributes a constant factor."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out the number of body executions for n = 1,000."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the inner loop always runs 3 times, so the total is 3n = O(n)."
+      }
+    ],
+    "repair": "Replace step 3: the inner loop runs a constant 3 times, so the total is 3n, which is O(n).",
+    "debrief": "Big-O analysis counts operations, and the structure of the code is only a hint. Nested loops multiply their iteration counts, so the question is always what each loop's bound depends on. Write the count as a formula in n before naming the class.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dsa-complexity-analysis-002",
+    "subject": "dsa",
+    "topic": "Complexity Analysis",
+    "subtopic": "Triangular loop totals",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the time complexity of count_steps(n)?",
+    "artifact_type": "complexity_analysis",
+    "artifact": {
+      "language": "python",
+      "code": "def count_steps(n):\n    steps = 0\n    for i in range(n):\n        j = i\n        while j < n:\n            j += 1\n            steps += 1\n    return steps"
+    },
+    "ai_claim": "It is O(n): the inner loop's work shrinks as i grows, so on average it does constant work per outer iteration.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The outer loop runs n times."
+      },
+      {
+        "index": 2,
+        "text": "The inner loop starts at j = i, so it runs n - i times, which gets smaller each time."
+      },
+      {
+        "index": 3,
+        "text": "Because the inner work keeps shrinking, it averages out to a constant per outer iteration."
+      },
+      {
+        "index": 4,
+        "text": "So the total is O(n)."
+      }
+    ],
+    "ai_final_answer": "O(n)",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Treating a shrinking inner loop as constant on average",
+      "explanation": "The inner loop runs n, n-1, ..., 1 times. The total is n + (n-1) + ... + 1 = n(n+1)/2, whose average per outer iteration is (n+1)/2 - proportional to n, not constant. The complexity is O(n^2).",
+      "why_convincing": "'Shrinking' sounds like it should cancel out, and step 2 is exactly right, so step 3 feels like a small, safe summary."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Sum of the inner iterations: n + (n-1) + ... + 1 = n(n+1)/2 = O(n^2). count_steps(n) itself returns this total.",
+    "canonical_answer": "O(n^2)",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "n + (n-1) + ... + 1 = n(n+1)/2",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "count_steps(1000) returns 500500, which is about n^2/2.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "500500"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "count_steps(1000) returns 500,500."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Add up the inner loop's iteration counts exactly."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 replaces a sum with an 'average'. Compute that average."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "1 + 2 + ... + n = n(n+1)/2."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate count_steps(1000) by the formula."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the inner counts sum to n(n+1)/2, an average of about n/2 per iteration, so the total is O(n^2)."
+      }
+    ],
+    "repair": "Replace steps 3-4: the total is n(n+1)/2, which is O(n^2).",
+    "debrief": "Shrinking work is not the same as constant work: the average of n, n-1, ..., 1 is still proportional to n. Whenever a loop bound depends on the outer variable, write the sum and evaluate it; triangular sums like this are the most common hidden O(n^2) in real code.",
+    "transfer_check": {
+      "question": "How many times does steps += 1 run for n = 10?",
+      "answer": "55",
+      "explanation": "10 x 11 / 2 = 55."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "dsa-complexity-analysis-003",
+    "subject": "dsa",
+    "topic": "Complexity Analysis",
+    "subtopic": "Halving loops",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the time complexity of halvings(n)?",
+    "artifact_type": "complexity_analysis",
+    "artifact": {
+      "language": "python",
+      "code": "def halvings(n):\n    count = 0\n    while n > 1:\n        n //= 2\n        count += 1\n    return count"
+    },
+    "ai_claim": "It is O(n), because the loop keeps running until n comes down to 1.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The loop continues while n > 1."
+      },
+      {
+        "index": 2,
+        "text": "Each iteration reduces n."
+      },
+      {
+        "index": 3,
+        "text": "The loop therefore runs about n times before n reaches 1."
+      },
+      {
+        "index": 4,
+        "text": "So halvings is O(n)."
+      }
+    ],
+    "ai_final_answer": "O(n)",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming every reduction is a decrement",
+      "explanation": "n is halved each time, not decreased by 1. Starting from n, after k iterations it is about n / 2^k, which reaches 1 when k = log2(n). For n = 1,000,000 the loop runs about 20 times: O(log n).",
+      "why_convincing": "'Runs until n reaches 1' describes a countdown, and step 2's vague 'reduces' hides how fast."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Halving reaches 1 after about log2(n) iterations, so halvings is O(log n). halvings(1,000,000) returns 19.",
+    "canonical_answer": "O(log n)",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "halvings(1000000) = 19, about log2(1,000,000).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "19"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "n: 16 -> 8 -> 4 -> 2 -> 1 (4 iterations)",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "halvings(1024) returns 10, not about 1,024."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask by how much n shrinks on each iteration."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes n goes down by one each time."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Repeated halving reaches 1 after about log2(n) steps."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace halvings(16) and count the iterations."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: n is halved each time, so the loop runs about log2(n) times: O(log n)."
+      }
+    ],
+    "repair": "Replace step 3: n halves each iteration, so the loop runs about log2(n) times.",
+    "debrief": "How fast a loop variable moves decides the complexity: adding a constant gives O(n), multiplying or dividing gives O(log n). This halving pattern is the engine of binary search and balanced trees. When analysing a loop, write the variable's value after k iterations.",
+    "transfer_check": {
+      "question": "What does halvings(1024) return?",
+      "answer": "10",
+      "explanation": "1024 = 2^10, so it halves 10 times."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "dsa-complexity-analysis-004",
+    "subject": "dsa",
+    "topic": "Complexity Analysis",
+    "subtopic": "Amortised cost of appends",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A dynamic array doubles its capacity when full, copying all elements into the new space. Is building a list with n appends O(n) in total, despite those copies?",
+    "artifact_type": "complexity_analysis",
+    "artifact": {
+      "language": "python",
+      "code": "def build(n):\n    items = []\n    for i in range(n):\n        items.append(i)   # dynamic array: occasionally resizes and copies\n    return items"
+    },
+    "ai_claim": "Yes. Appending n items costs O(n) in total, because the copying is amortised across the appends.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Most appends write into spare capacity in O(1)."
+      },
+      {
+        "index": 2,
+        "text": "A resize copies all current elements, but it happens only when the size reaches 1, 2, 4, 8, ... ."
+      },
+      {
+        "index": 3,
+        "text": "The total copying is at most 1 + 2 + 4 + ... + n < 2n."
+      },
+      {
+        "index": 4,
+        "text": "So n appends cost O(n) in total, which is O(1) amortised per append."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. With geometric (doubling) growth, total copy work is bounded by a geometric series below 2n, so n appends cost O(n) overall - amortised O(1) each. (Python lists over-allocate by a smaller factor, with the same asymptotic result.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "1 + 2 + 4 + ... + n < 2n copies in total",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "A single append can be O(n). Decide whether that changes the total."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 bounds the total copying. Check the sum."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A geometric series 1 + 2 + ... + n is less than 2n."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add up the copy costs for n = 16."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Doubling makes total copying less than 2n, so n appends are O(n) overall. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Worst-case cost per operation and total cost over a sequence are different questions. A single resize is expensive, but doubling makes resizes rare enough that their cost spreads to O(1) per append. Amortised analysis is why dynamic arrays are practical; check the growth factor, because growing by a constant amount would make the total O(n^2).",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

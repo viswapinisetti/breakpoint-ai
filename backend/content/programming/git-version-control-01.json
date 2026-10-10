@@ -1,0 +1,468 @@
+[
+  {
+    "id": "prg-git-version-control-001",
+    "subject": "programming",
+    "topic": "Git & Version Control",
+    "subtopic": "What commit -a stages",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After these commands, is report.py included in a new commit?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "bash",
+      "code": "$ git status\nOn branch main\nUntracked files:\n  report.py\n\n$ git commit -am \"Add report\""
+    },
+    "ai_claim": "Yes. `git commit -a` stages the changes automatically, so report.py is committed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "`git commit -a` stages changes automatically before committing."
+      },
+      {
+        "index": 2,
+        "text": "report.py is a change in the working directory, so -a stages it."
+      },
+      {
+        "index": 3,
+        "text": "-m supplies the message, so the commit happens in one step."
+      },
+      {
+        "index": 4,
+        "text": "report.py is included in the new commit."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Believing -a stages untracked files",
+      "explanation": "`-a` stages only modifications and deletions of files Git already tracks. report.py is untracked, so -a ignores it. With no tracked changes, Git reports 'nothing added to commit but untracked files present' and makes no commit. It needs `git add report.py` first.",
+      "why_convincing": "'-a' reads like 'all', and for everyday edits to existing files it does commit everything."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "`git commit -a` never adds untracked files. report.py stays untracked and, since nothing else changed, no commit is created. Run `git add report.py` and then commit.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "git status still lists report.py under 'Untracked files' after the commit command.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "git add report.py\ngit commit -m \"Add report\"",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After `git commit -am`, `git status` still shows report.py as untracked."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check exactly which files -a is documented to stage."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats a new file like a change to a tracked file."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "`git commit -a` stages modified and deleted tracked files; it never adds untracked files."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run git status after the commit command and see where report.py is listed."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: -a skips untracked files, so report.py is not committed (and no commit is made). Use git add first."
+      }
+    ],
+    "repair": "Run `git add report.py` before `git commit -m \"Add report\"`.",
+    "debrief": "Shortcut flags are defined narrowly: -a means 'all tracked changes', not 'everything in the folder'. New files are the classic casualty, and they are usually the ones that matter. After committing, `git status` is the cheapest verification there is.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-git-version-control-002",
+    "subject": "programming",
+    "topic": "Git & Version Control",
+    "subtopic": "Pushing after rewriting history",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the final `git push` succeed without --force?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "bash",
+      "code": "$ git log --oneline\nc3 Add payment API        (already pushed to origin/main)\nb2 Add cart\n\n$ git reset --hard HEAD~1\n# edit files, then:\n$ git commit -am \"Payment API, take two\"\n$ git push"
+    },
+    "ai_claim": "Yes. The new commit is simply sent to origin and main moves to it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "`git reset --hard HEAD~1` moves main back to b2 and discards c3 locally."
+      },
+      {
+        "index": 2,
+        "text": "The new commit d4 is built on top of b2."
+      },
+      {
+        "index": 3,
+        "text": "Pushing sends d4 to origin, and origin moves main to d4."
+      },
+      {
+        "index": 4,
+        "text": "The push succeeds."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Forgetting that the remote still has the discarded commit",
+      "explanation": "origin/main still points at c3. d4 is built on b2, so d4 does not contain c3 and the push is not a fast-forward. Git rejects it ('Updates were rejected because the tip of your current branch is behind'). Forcing it rewrites shared history; for a pushed commit, `git revert c3` is the safe undo.",
+      "why_convincing": "Locally, c3 has vanished from the log, so it is easy to forget that the remote remembers it."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The remote's main is at c3, which is not an ancestor of d4, so a normal push is rejected as non-fast-forward. It would need `git push --force-with-lease`, which rewrites history other people may have pulled. Undo pushed commits with git revert instead.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "origin/main = c3; local main = d4 (parent b2); c3 is not an ancestor of d4 -> push rejected",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "git revert c3   # instead of reset, for a pushed commit",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The push fails with 'Updates were rejected because the tip of your current branch is behind its remote counterpart'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare what origin/main points to with what your local main points to."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the remote simply accepts the new commit."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A normal push only succeeds when it fast-forwards the remote branch."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check whether c3 is an ancestor of the new commit."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: origin still has c3, which is not in the new commit's history, so the push is rejected. Use git revert for pushed commits."
+      }
+    ],
+    "repair": "Instead of reset, run `git revert c3`, then make the new changes and push normally.",
+    "debrief": "Local history and remote history are separate until they are synchronised, and resetting only changes yours. Once a commit is shared, rewriting it breaks everyone who pulled it, which is why Git refuses the push. The rule of thumb: reset is for commits nobody else has; revert is for everything else.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-git-version-control-003",
+    "subject": "programming",
+    "topic": "Git & Version Control",
+    "subtopic": "What git revert does to history",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After `git revert a1b2c3`, does `git log` still show commit a1b2c3?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "bash",
+      "code": "$ git log --oneline -3\na1b2c3 Change tax rounding   (pushed)\n9f8e7d Add invoices\n$ git revert a1b2c3"
+    },
+    "ai_claim": "No. Reverting a commit removes it from the branch's history.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "a1b2c3 introduced a bug and has already been pushed."
+      },
+      {
+        "index": 2,
+        "text": "`git revert a1b2c3` undoes that commit."
+      },
+      {
+        "index": 3,
+        "text": "Undoing a commit removes it from the branch's history."
+      },
+      {
+        "index": 4,
+        "text": "So git log no longer shows a1b2c3."
+      }
+    ],
+    "ai_final_answer": "no",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Confusing revert with removing a commit",
+      "explanation": "git revert creates a new commit whose changes are the inverse of a1b2c3. The original commit stays in history, followed by a new commit such as 'Revert \"Change tax rounding\"'. That is exactly why revert is safe for pushed commits.",
+      "why_convincing": "'Revert' sounds like 'go back', and the working files do end up as if the commit never happened."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Yes. Revert adds a new commit that undoes a1b2c3's changes; history keeps both. `git log` shows the revert commit on top of a1b2c3.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "git log after revert: <new> Revert \"Change tax rounding\", a1b2c3 Change tax rounding, 9f8e7d Add invoices",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Revert records a new inverse commit; history is not rewritten.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After the revert, git log lists both a1b2c3 and a new 'Revert ...' commit."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Distinguish undoing a commit's changes from deleting the commit."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims history is changed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "git revert adds a new commit; it never rewrites existing commits."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run git log --oneline after the revert and read the top entries."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: revert adds an inverse commit, so a1b2c3 is still in the log, with the revert commit above it."
+      }
+    ],
+    "repair": "Replace step 3: revert records a new commit that undoes a1b2c3; both commits remain in history.",
+    "debrief": "Git offers two kinds of undo: rewriting history (reset, rebase) and recording a correction (revert). They leave the files in the same state but leave history very differently, and only the second is safe once a commit is shared. Knowing which kind a command is matters more than knowing its syntax.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-git-version-control-004",
+    "subject": "programming",
+    "topic": "Git & Version Control",
+    "subtopic": "Ignoring a file that is already tracked",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After the later edit, does git status show config/local.json as modified?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "bash",
+      "code": "$ git ls-files\nconfig/local.json\nsrc/app.py\n\n$ echo \"config/local.json\" >> .gitignore\n$ git add .gitignore\n$ git commit -m \"Ignore local config\"\n\n# later, edit config/local.json, then:\n$ git status"
+    },
+    "ai_claim": "No. The file is now in .gitignore, so Git ignores changes to it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "config/local.json is added to .gitignore and the change is committed."
+      },
+      {
+        "index": 2,
+        "text": ".gitignore tells Git which files to ignore."
+      },
+      {
+        "index": 3,
+        "text": "From now on, changes to config/local.json are ignored."
+      },
+      {
+        "index": 4,
+        "text": "git status does not show it as modified."
+      }
+    ],
+    "ai_final_answer": "no",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Believing .gitignore affects files that are already tracked",
+      "explanation": "Ignore rules apply only to untracked files. config/local.json was already tracked (git ls-files lists it), so Git keeps tracking it and git status shows the edit. To stop tracking it, run `git rm --cached config/local.json` and commit.",
+      "why_convincing": "Adding a file to .gitignore feels like the complete solution, and for new files it is."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Yes. .gitignore never untracks a file already in the index, so edits still appear as modifications. Use `git rm --cached config/local.json` (keeping the local file) and commit to stop tracking it.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "git ls-files lists config/local.json -> tracked -> ignore rules do not apply -> shown as modified",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "git rm --cached config/local.json\ngit commit -m \"Stop tracking local config\"",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After editing the file, git status lists 'modified: config/local.json'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the file was tracked before the ignore rule was added."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 extends the ignore rule to a file Git already knows."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Ignore rules affect only untracked files."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the output of git ls-files at the top."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the file is already tracked, so .gitignore has no effect on it. Remove it from the index with git rm --cached."
+      }
+    ],
+    "repair": "Run `git rm --cached config/local.json` and commit; after that the ignore rule applies.",
+    "debrief": "An ignore file answers 'which untracked files should Git not offer to add?', not 'which files should Git stop watching?'. Secrets and local configuration committed once remain tracked - and in history - until explicitly removed. When a rule seems not to work, check the file's current state before the rule.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-git-version-control-005",
+    "subject": "programming",
+    "topic": "Git & Version Control",
+    "subtopic": "Fast-forward merges",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "main has no new commits since feature branched from it. With Git's default settings, does this merge create a merge commit?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "bash",
+      "code": "$ git log --oneline --graph --all\n* e5 (feature) Add search\n* d4 Add filters\n* c3 (main) Initial layout\n\n$ git checkout main\n$ git merge feature"
+    },
+    "ai_claim": "No. Git fast-forwards main to feature's latest commit, so no merge commit is created.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "feature's history contains every commit on main, because main has not moved since the branch point."
+      },
+      {
+        "index": 2,
+        "text": "In that case Git can fast-forward: it simply moves the main pointer to feature's latest commit, e5."
+      },
+      {
+        "index": 3,
+        "text": "Fast-forwarding is Git's default whenever it is possible, so no merge commit is created."
+      },
+      {
+        "index": 4,
+        "text": "To force a merge commit, you would run `git merge --no-ff feature`."
+      }
+    ],
+    "ai_final_answer": "no",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Because main (c3) is an ancestor of feature (e5), the merge is a fast-forward: main moves to e5 and no merge commit is made. `--no-ff` would create one; the configuration setting merge.ff = false would change the default.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "main = c3, an ancestor of e5 -> fast-forward -> main = e5, no new commit",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether main has diverged from feature."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 relies on main being an ancestor of feature. Verify it in the graph."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "When the target branch is an ancestor of the merged branch, Git fast-forwards by default."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Read the graph: is c3 in feature's history?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. main has not moved, so the merge fast-forwards and no merge commit is created. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Many people expect every merge to produce a merge commit, so this answer invites a challenge. Git only needs one when histories have diverged; otherwise it just moves the pointer. Teams that want a visible merge record use --no-ff deliberately, which is a policy choice, not a correction.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

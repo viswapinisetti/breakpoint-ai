@@ -1,0 +1,135 @@
+[
+  {
+    "id": "be-authz-001",
+    "subject": "backend",
+    "topic": "Authentication & Authorization",
+    "subtopic": "Authentication mistaken for authorization",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this endpoint correctly restrict access to a user's own invoices?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "@router.get(\"/invoices/{invoice_id}\")\ndef get_invoice(invoice_id: int, user = Depends(current_user)):\n    # current_user rejects the request if the JWT is missing or invalid\n    invoice = db.query(Invoice).filter(Invoice.id == invoice_id).first()\n    if invoice is None:\n        raise HTTPException(404)\n    return invoice",
+      "access_matrix": "Alice owns invoice 1. Bob owns invoice 2. Both are signed in."
+    },
+    "ai_claim": "Yes — the endpoint requires a valid token, so only authenticated users can read invoices.",
+    "ai_solution": [
+      {"index": 1, "text": "`Depends(current_user)` rejects any request without a valid token, so anonymous access is impossible."},
+      {"index": 2, "text": "A missing invoice returns 404 rather than leaking existence."},
+      {"index": 3, "text": "Since every caller is an authenticated user and the record is fetched by id, access is properly restricted."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Treating authentication as authorization",
+      "explanation": "The handler establishes *who* the caller is and never checks *what* they may access. Bob, fully authenticated, can request /invoices/1 and receive Alice's invoice. The query must be scoped to the caller: filter on `Invoice.owner_id == user.id`, or fetch and then compare ownership before returning.",
+      "why_convincing": "Steps 1 and 2 are both correct and both describe real security controls, so the handler reads as security-conscious. The dependency injection also makes the token check the visually prominent line, which is exactly the check that is present."
+    },
+    "canonical_solution": "No. Authentication is enforced; authorization is absent. Any signed-in user can read any invoice by id — a direct object reference vulnerability. Scope the query: `filter(Invoice.id == invoice_id, Invoice.owner_id == user.id)`, returning 404 when it misses so ownership is not leaked through a 403.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "counterexample", "summary": "Bob requests invoice 1 and receives Alice's data.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "rule", "summary": "Authentication establishes who the caller is; authorization must still check that the invoice's owner_id is the caller's id.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["Bob is authenticated and calls GET /invoices/1. The token is valid, the invoice exists, and Alice's invoice is returned."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Separate the question of who the caller is from what they are permitted to see."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are correct. Step 3 concludes something neither of them established."},
+      {"level": 3, "kind": "concept", "text": "Authentication identifies the caller. Authorization decides whether that caller may access this resource."},
+      {"level": 4, "kind": "strong", "text": "Trace a request from Bob for an invoice id that belongs to Alice."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 treats authentication as sufficient. Nothing compares the invoice's owner with the caller, so any signed-in user can read any invoice. Scope the query by owner_id."}
+    ],
+    "repair": "Scope the lookup to the caller: `db.query(Invoice).filter(Invoice.id == invoice_id, Invoice.owner_id == user.id).first()`, still returning 404 on a miss so the existence of other users' invoices is not disclosed.",
+    "debrief": "This is the most common serious web vulnerability and it hides behind a control that is genuinely present. A visible auth dependency satisfies the reviewer's search for \"is this protected?\" while answering a different question. Read every handler twice: once asking who may call it, once asking which rows it may return — and check that the second question is answered in the query, not in an assumption.",
+    "validation_payload": {}
+  },
+  {
+    "id": "be-cache-002",
+    "subject": "backend",
+    "topic": "Caching & Redis",
+    "subtopic": "Cache key completeness",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this caching layer correct?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "@router.get(\"/dashboard\")\ndef dashboard(user = Depends(current_user)):\n    key = \"dashboard\"\n    cached = redis.get(key)\n    if cached:\n        return json.loads(cached)\n    data = build_dashboard(user)\n    redis.setex(key, 60, json.dumps(data))\n    return data"
+    },
+    "ai_claim": "Yes — the cache has a 60-second expiry, so data is never more than a minute stale.",
+    "ai_solution": [
+      {"index": 1, "text": "`setex` stores the value with a 60-second time to live, so entries expire automatically."},
+      {"index": 2, "text": "A cache hit returns immediately, avoiding the cost of rebuilding the dashboard."},
+      {"index": 3, "text": "Staleness is therefore bounded at 60 seconds, which is the stated requirement. The layer is correct."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Reasoning about freshness while ignoring what the key does not distinguish",
+      "explanation": "The cache key is the constant string \"dashboard\" and does not include the user. The first caller's dashboard is served to every other user for the next 60 seconds. The bug is not staleness — it is cross-user data disclosure. The key must include the user identity: `f\"dashboard:{user.id}\"`.",
+      "why_convincing": "Steps 1 and 2 are correct, and the reasoning answers the question it set itself — staleness really is bounded at 60 seconds. The defect is in a dimension the analysis never considers, and a constant key looks unremarkable next to a correct TTL."
+    },
+    "canonical_solution": "No. The key omits the user, so the cache is shared across all callers: whoever populates it first has their dashboard served to everyone else until it expires. Use a per-user key such as `f\"dashboard:{user.id}\"`. The 60-second TTL is fine and is not the problem.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "counterexample", "summary": "Alice populates the cache; Bob receives her dashboard.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "rule", "summary": "A cache key must include every input that changes the response - here, the user id.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["Alice requests /dashboard at t=0 and populates the key. Bob requests at t=5 and receives Alice's data."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what the cache key distinguishes, and what it does not."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are about freshness. Ask whether freshness is the only thing that can go wrong here."},
+      {"level": 3, "kind": "concept", "text": "A cache key must include every input the cached value depends on."},
+      {"level": 4, "kind": "strong", "text": "Trace two different users hitting this endpoint within the same minute."},
+      {"level": 5, "kind": "reveal", "text": "The key is the constant \"dashboard\", so every user shares one entry and receives whoever populated it. Include the user id in the key."}
+    ],
+    "repair": "Build the key from every input the value depends on: `key = f\"dashboard:{user.id}\"`. The TTL can stay at 60 seconds.",
+    "debrief": "A cache key is a claim about what the cached value depends on, and an incomplete key is a correctness bug rather than a performance one. Here the analysis is sound about the question it asks and never asks the other one. When reviewing a cache, list every input the value varies with and check each appears in the key — user, tenant, locale, permissions, feature flags.",
+    "validation_payload": {}
+  },
+  {
+    "id": "be-idem-003",
+    "subject": "backend",
+    "topic": "REST API Development",
+    "subtopic": "Idempotent retries",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this endpoint safely handle a client that retries after a timeout?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "@router.post(\"/payments\")\ndef create_payment(body: PaymentIn, idem_key: str = Header(...)):\n    existing = db.query(Payment).filter(Payment.idem_key == idem_key).first()\n    if existing:\n        return existing            # replay the original outcome\n    payment = Payment(amount=body.amount, idem_key=idem_key)\n    db.add(payment)\n    db.commit()                    # unique index on idem_key\n    charge_card(payment)\n    return payment"
+    },
+    "ai_claim": "Yes — the idempotency key is required, checked before creating, and enforced by a unique index, so a retry cannot create a second payment.",
+    "ai_solution": [
+      {"index": 1, "text": "The header is required, so every request carries a key the client controls across retries."},
+      {"index": 2, "text": "An existing record with that key short-circuits and replays the original outcome rather than charging again."},
+      {"index": 3, "text": "The unique index on idem_key means that even if two requests race past the lookup, only one insert can commit; the other fails and does not create a duplicate payment."},
+      {"index": 4, "text": "A retry after a timeout therefore returns the original payment instead of creating a second one."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "canonical_solution": "Correct for the stated question. The client-supplied key plus a unique index makes duplicate payment *records* impossible: the lookup handles the common case and the index handles the race. A retry after a timeout finds the existing row and replays it. (Worth noting as a refinement rather than a defect: if the process dies between commit and charge_card, the record exists unpaid, so a real system reconciles that separately — but that is a durability concern, not a duplicate-payment one.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what stops a second record being created, in both the common case and a race."},
+      {"level": 2, "kind": "direction", "text": "Step 3 relies on the database constraint. Check that it does the work claimed."},
+      {"level": 3, "kind": "concept", "text": "Idempotency needs a client-supplied key and a uniqueness guarantee that survives concurrency."},
+      {"level": 4, "kind": "strong", "text": "Trace two identical requests arriving simultaneously and both passing the lookup."},
+      {"level": 5, "kind": "reveal", "text": "This design is sound. The lookup handles the ordinary retry and the unique index handles the race, so duplicate payment records cannot be created. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "The check-then-insert pattern is usually a bug, which makes this one easy to reject on sight — but the unique index closes exactly the window the lookup leaves open, and that is what makes it correct. The reviewing skill is to identify which guarantee covers which failure mode, rather than pattern-matching on a shape that is often wrong. Note also what a correct review says about the residual risk (a crash between commit and charge) without inflating it into a defect.",
+    "validation_payload": {}
+  }
+]

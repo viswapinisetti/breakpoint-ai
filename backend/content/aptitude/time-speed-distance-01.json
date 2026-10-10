@@ -1,0 +1,95 @@
+[
+  {
+    "id": "apt-time-speed-distance-001",
+    "subject": "aptitude",
+    "topic": "Time, Speed & Distance",
+    "subtopic": "Meeting at the start on a circular track",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Two runners start together from the same point on a 400 m circular track and run in opposite directions at 5 m/s and 3 m/s. After how many seconds will they first be together again at the starting point?",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "They will first be together at the starting point after 400 seconds.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The first runner completes a lap every 400 / 5 = 80 seconds."
+      },
+      {
+        "index": 2,
+        "text": "The second runner completes a lap every 400 / 3 = 133 1/3 seconds."
+      },
+      {
+        "index": 3,
+        "text": "Both are at the starting point together when the time is a common multiple of 80 and 400/3."
+      },
+      {
+        "index": 4,
+        "text": "Writing both over 3 gives 240/3 and 400/3; the LCM of 240 and 400 is 1200, so the time is 1200 / 3 = 400 seconds."
+      },
+      {
+        "index": 5,
+        "text": "The direction of running does not matter here, because being at the start depends only on each runner's own lap time."
+      }
+    ],
+    "ai_final_answer": "400",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Runner 1 is at the start at multiples of 80 s; runner 2 at multiples of 400/3 s. The first common time is LCM(80, 400/3) = LCM(240, 400)/3 = 1200/3 = 400 s. (Their first meeting anywhere on the track is sooner - after 400 / (5 + 3) = 50 s - but the question asks about the starting point.)",
+    "canonical_answer": "400",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "At 400 s runner 1 has done 5 laps and runner 2 exactly 3 laps.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "400",
+          "5",
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate 'meeting anywhere on the track' from 'meeting at the starting point'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 produces a fractional lap time. Check that step 4 handles it correctly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Two runners are both at the start only at a common multiple of their individual lap times."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check that at 400 s each runner has completed a whole number of laps."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. At 400 s the first runner has run 2000 m (5 laps) and the second 1200 m (3 laps), and no earlier time works. The relative-speed figure of 50 s answers a different question. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The tempting move here is relative speed, which gives 50 seconds - the first meeting anywhere on the track, not at the start. The solution resisted that and handled the fractional lap time properly by writing both times over a common denominator. Reading exactly what the question asks, and recognising when a familiar technique answers a different question, is most of the work.",
+    "transfer_check": {
+      "question": "On a 300 m circular track, runners at 6 m/s and 4 m/s start together. After how many seconds are they first together at the start?",
+      "answer": "150",
+      "explanation": "Lap times are 50 s and 75 s; LCM(50, 75) = 150."
+    },
+    "validation_payload": {
+      "solver": "a = Fraction(400, 5)\nb = Fraction(400, 3)\nk = 1\nwhile (k * a / b).denominator != 1:\n    k += 1\nanswer = k * a"
+    }
+  }
+]

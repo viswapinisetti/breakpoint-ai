@@ -1,0 +1,479 @@
+[
+  {
+    "id": "prg-database-connectivity-001",
+    "subject": "programming",
+    "topic": "Database Connectivity",
+    "subtopic": "Building SQL with f-strings",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is find_user safe from SQL injection?",
+    "artifact_type": "function",
+    "artifact": {
+      "language": "python",
+      "code": "def find_user(cur, email):\n    cur.execute(f\"SELECT id, name FROM users WHERE email = '{email}'\")\n    return cur.fetchone()"
+    },
+    "ai_claim": "Yes. The email is wrapped in quotes inside the query, so it is treated as a plain value.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The query looks up a user by email."
+      },
+      {
+        "index": 2,
+        "text": "The email is placed inside single quotes in the SQL string."
+      },
+      {
+        "index": 3,
+        "text": "Anything inside quotes is treated as a string value by the database, so it cannot change the query."
+      },
+      {
+        "index": 4,
+        "text": "find_user is safe from SQL injection."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Believing quotes protect interpolated input",
+      "explanation": "The input can contain a quote itself. An email of `' OR '1'='1` produces WHERE email = '' OR '1'='1', which matches every row. Quoting in the string offers no protection; values must be passed as query parameters: cur.execute(\"... WHERE email = ?\", (email,)) (the placeholder is %s for some drivers).",
+      "why_convincing": "For every normal email the query works perfectly, and the quotes look like they fence the value in."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "f-string interpolation lets input rewrite the SQL. `' OR '1'='1` closes the quote and adds a condition that is always true. Use parameters: cur.execute(\"SELECT id, name FROM users WHERE email = ?\", (email,)).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "email = \"' OR '1'='1\" makes the WHERE clause always true.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "cur.execute(\"SELECT id, name FROM users WHERE email = ?\", (email,))",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "find_user(cur, \"' OR '1'='1\") returns the first user in the table."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what happens if the input contains the same quote character."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims the quotes make the value harmless."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Input interpolated into SQL text can close a quote and add SQL of its own; only parameters keep data separate from code."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Substitute the email ' OR '1'='1 into the query and read the result."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: input containing a quote escapes the string, so ' OR '1'='1 matches every row. Use a parameterised query."
+      }
+    ],
+    "repair": "Use `cur.execute(\"SELECT id, name FROM users WHERE email = ?\", (email,))`.",
+    "debrief": "SQL injection is what happens when data is allowed to become code, and string formatting is how it happens. Parameterised queries send the SQL and the values separately, so no value can change the query's structure. The review rule is absolute: never format user input into SQL text.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-database-connectivity-002",
+    "subject": "programming",
+    "topic": "Database Connectivity",
+    "subtopic": "Transactions need a commit",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After sell_one(42) returns, is the stock for item 42 permanently reduced by 1 in shop.db?",
+    "artifact_type": "function",
+    "artifact": {
+      "language": "python",
+      "code": "import sqlite3\n\ndef sell_one(item_id):\n    conn = sqlite3.connect(\"shop.db\")\n    cur = conn.cursor()\n    cur.execute(\"UPDATE stock SET qty = qty - 1 WHERE id = ?\", (item_id,))\n    conn.close()"
+    },
+    "ai_claim": "Yes. The UPDATE runs against the database, so the quantity is reduced.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "sell_one connects to shop.db and creates a cursor."
+      },
+      {
+        "index": 2,
+        "text": "The UPDATE statement reduces qty by 1 for the item."
+      },
+      {
+        "index": 3,
+        "text": "Executing a statement writes the change to the database file."
+      },
+      {
+        "index": 4,
+        "text": "Closing the connection leaves the reduced quantity in place."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Assuming executed statements are saved without a commit",
+      "explanation": "Python's sqlite3 module opens a transaction implicitly before an UPDATE. The change becomes permanent only on conn.commit(); closing the connection without committing discards it. Call conn.commit() (or use `with conn:`) before closing.",
+      "why_convincing": "Within the same connection, a SELECT after the UPDATE would show the new quantity, so it looks saved."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. The UPDATE is inside an uncommitted transaction, and conn.close() does not commit, so the change is rolled back. Add conn.commit() before close, or use the connection as a context manager (`with conn:` commits on success).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "execute UPDATE -> implicit transaction open -> close() without commit -> rolled back",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "conn.commit()\nconn.close()",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Open a new connection after sell_one(42) returns: qty for item 42 is unchanged."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what makes a change permanent in a database transaction."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims execute alone saves the change."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Changes inside a transaction are visible only to that connection until they are committed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for conn.commit() in the function."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the UPDATE runs in an implicit transaction that is never committed, so closing the connection discards it. Call conn.commit()."
+      }
+    ],
+    "repair": "Call `conn.commit()` before `conn.close()`, or wrap the work in `with conn:`.",
+    "debrief": "Transactions make a group of changes all-or-nothing, which means nothing is permanent until commit. Code that tests its own write on the same connection sees the change and concludes it is saved. Verify persistence from a fresh connection, and make commits explicit.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-database-connectivity-003",
+    "subject": "programming",
+    "topic": "Database Connectivity",
+    "subtopic": "One-element parameter tuples",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does product_name pass item_id to the query as its single parameter?",
+    "artifact_type": "function",
+    "artifact": {
+      "language": "python",
+      "code": "def product_name(cur, item_id):\n    cur.execute(\"SELECT name FROM products WHERE id = ?\", (item_id))\n    return cur.fetchone()"
+    },
+    "ai_claim": "Yes. The parameter is supplied in parentheses as the second argument, as the driver expects.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The query has one placeholder, ?."
+      },
+      {
+        "index": 2,
+        "text": "The driver expects the parameters as a sequence in the second argument."
+      },
+      {
+        "index": 3,
+        "text": "(item_id) is that one-element sequence."
+      },
+      {
+        "index": 4,
+        "text": "So item_id is bound to the placeholder."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Writing (x) for a one-element tuple",
+      "explanation": "Parentheses alone do not make a tuple: (item_id) is just item_id. A one-element tuple needs a comma: (item_id,). Passing a bare integer raises an error because parameters must be a sequence; passing a string such as '42' is treated as a sequence of characters and fails with 'Incorrect number of bindings'.",
+      "why_convincing": "Tuples usually appear in parentheses, so (item_id) looks like one. The comma, which is what actually makes a tuple, is the easiest character to miss."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "(item_id) evaluates to item_id, not a tuple. Use (item_id,) or [item_id].",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "type((42)) is int, type((42,)) is tuple",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "42"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "cur.execute(\"SELECT name FROM products WHERE id = ?\", (item_id,))",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "product_name(cur, '42') fails with 'Incorrect number of bindings supplied' (2 characters for 1 placeholder)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what makes a value a tuple in Python."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims (item_id) is a sequence."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A one-element tuple requires a trailing comma; parentheses alone only group."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate type((42)) and type((42,))."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: (item_id) is not a tuple, so the parameters are not a sequence of one value. Write (item_id,)."
+      }
+    ],
+    "repair": "Pass `(item_id,)` as the parameters.",
+    "debrief": "In Python the comma makes the tuple; the parentheses are optional grouping. This slip is common enough in database code that the error messages ('Incorrect number of bindings') are recognisable on sight. When one value goes into a parameter list, write the trailing comma every time.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-database-connectivity-004",
+    "subject": "programming",
+    "topic": "Database Connectivity",
+    "subtopic": "Queries inside a loop",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For 500 customers, how many queries does this code send to the database?",
+    "artifact_type": "function",
+    "artifact": {
+      "language": "python",
+      "code": "totals = {}\nfor cid in customer_ids:          # 500 customers\n    cur.execute(\"SELECT amount FROM orders WHERE customer_id = ?\", (cid,))\n    totals[cid] = sum(row[0] for row in cur.fetchall())"
+    },
+    "ai_claim": "It sends 1 query: the cursor batches all the SELECT statements together.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The cursor is created once, before the loop."
+      },
+      {
+        "index": 2,
+        "text": "A single cursor sends all its statements to the database together, as one batch."
+      },
+      {
+        "index": 3,
+        "text": "So the 500 SELECT statements travel as one query."
+      },
+      {
+        "index": 4,
+        "text": "The code sends 1 query."
+      }
+    ],
+    "ai_final_answer": "1",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Believing a cursor batches separate execute calls",
+      "explanation": "Each cur.execute sends its statement to the database and waits for the result; fetchall() then reads those rows before the next iteration. There is no batching, so 500 customers mean 500 queries and 500 round trips. One grouped query does the same work: SELECT customer_id, SUM(amount) FROM orders WHERE customer_id IN (...) GROUP BY customer_id.",
+      "why_convincing": "Creating the cursor once looks like setting up a single operation, and the code runs quickly against a local test database with a few customers."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Every iteration executes and fetches one SELECT, so the code sends 500 queries (the 'N+1 queries' pattern). A single query with GROUP BY customer_id returns all totals in one round trip.",
+    "canonical_answer": "500",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "loop runs 500 times -> 500 execute() calls -> 500 queries",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "500"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "SELECT customer_id, SUM(amount) FROM orders WHERE customer_id IN (...) GROUP BY customer_id",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "500"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With database query logging on, the log shows 500 separate SELECT statements."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count how many times execute runs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 claims the cursor combines statements."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Each execute call is a separate statement sent to the database; fetchall reads its results before the loop continues."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the loop iterations and the execute calls inside it."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: a cursor does not batch separate execute calls. The loop sends 500 queries; one GROUP BY query would replace them."
+      }
+    ],
+    "repair": "Replace the loop with one query: `SELECT customer_id, SUM(amount) FROM orders WHERE customer_id IN (...) GROUP BY customer_id`.",
+    "debrief": "Code that is fine with 5 records can be ruinous with 50,000, and queries in a loop are the most common cause. Each round trip carries fixed latency, so 500 small queries are far slower than one grouped query. When you see execute inside a loop, count the iterations and ask whether the database could do the loop itself.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-database-connectivity-005",
+    "subject": "programming",
+    "topic": "Database Connectivity",
+    "subtopic": "Placeholders for an IN list",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is products_by_ids safe from SQL injection through the values in ids?",
+    "artifact_type": "function",
+    "artifact": {
+      "language": "python",
+      "code": "def products_by_ids(cur, ids):\n    placeholders = \",\".join(\"?\" * len(ids))\n    cur.execute(f\"SELECT id, name FROM products WHERE id IN ({placeholders})\", ids)\n    return cur.fetchall()"
+    },
+    "ai_claim": "Yes. Only '?' placeholders are formatted into the SQL; the ids themselves are passed as parameters.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "placeholders is built from the character '?' repeated len(ids) times and joined with commas, for example '?,?,?'."
+      },
+      {
+        "index": 2,
+        "text": "The f-string inserts only those placeholders into the SQL, never the id values."
+      },
+      {
+        "index": 3,
+        "text": "The ids are passed as the parameters argument, so the driver binds each one to a placeholder."
+      },
+      {
+        "index": 4,
+        "text": "No value from ids can change the SQL, so the function is safe from injection through ids."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The only interpolated text is a string of '?' characters whose length comes from len(ids); the values travel separately as parameters. (Separately from injection, an empty ids list produces 'IN ()', which is a syntax error and should be handled before the query.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "ids = [3, 7] -> SQL 'WHERE id IN (?,?)' with parameters [3, 7]",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3",
+          "7"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "An f-string in SQL is a warning sign, so check exactly what it inserts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 is the key claim: what text does the f-string put into the SQL?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Injection needs user data inside the SQL text; parameters are sent separately from it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write out the SQL string for ids = [3, 7] and list what is parameterised."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The f-string inserts only '?' characters, and the values are bound as parameters. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "An f-string inside a SQL call deserves scrutiny, but the question is always what gets interpolated. Here it is only placeholder characters, which is the standard way to parameterise an IN list of variable length. A precise review distinguishes formatting SQL structure (safe when you control it) from formatting user data (never safe).",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

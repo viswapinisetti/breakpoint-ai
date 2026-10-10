@@ -1,0 +1,634 @@
+[
+  {
+    "id": "da-data-cleaning-preparation-001",
+    "subject": "data-analytics",
+    "topic": "Data Cleaning & Preparation",
+    "subtopic": "Duplicate rows inflate totals",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the total revenue from these orders, in rupees?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "CRM export (merged from two systems)",
+        "columns": [
+          "order_id",
+          "amount (Rs)"
+        ],
+        "rows": [
+          [
+            "O-1",
+            1000
+          ],
+          [
+            "O-2",
+            2500
+          ],
+          [
+            "O-2",
+            2500
+          ],
+          [
+            "O-3",
+            1500
+          ],
+          [
+            "O-4",
+            500
+          ],
+          [
+            "O-4",
+            500
+          ]
+        ]
+      }
+    },
+    "ai_claim": "8,500. Adding the amount column: 1,000 + 2,500 + 2,500 + 1,500 + 500 + 500 = 8,500.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The export lists order amounts."
+      },
+      {
+        "index": 2,
+        "text": "Each row is an order."
+      },
+      {
+        "index": 3,
+        "text": "Summing the amount column gives total revenue."
+      },
+      {
+        "index": 4,
+        "text": "The total is 8,500."
+      }
+    ],
+    "ai_final_answer": "8500",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 2,
+      "misconception": "Not checking for duplicate records",
+      "explanation": "O-2 and O-4 each appear twice, a typical result of merging two systems. There are 4 orders, not 6. Deduplicate on order_id first: 1,000 + 2,500 + 1,500 + 500 = 5,500.",
+      "why_convincing": "Each row looks like a valid order, and the sum is computed correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Remove duplicate order_ids, then sum: 5,500.",
+    "canonical_answer": "5500",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "O-2 and O-4 each appear twice.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "calculation",
+        "summary": "1,000 + 2,500 + 1,500 + 500 = 5,500",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5500"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Counting O-2 twice adds Rs 2,500 that was never earned."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether any order_id repeats."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes each row is a distinct order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Merged exports often contain duplicates; deduplicate on the key."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count distinct order_ids."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: two orders are duplicated. The real total is 5,500."
+      }
+    ],
+    "repair": "Deduplicate on order_id (Remove Duplicates or DISTINCT) before summing.",
+    "debrief": "Before aggregating, confirm the key is unique. Duplicates from merges and repeated imports inflate every total without any visible error.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 1000 + 2500 + 1500 + 500",
+      "flawed_solver": "answer = 1000 + 2500 + 2500 + 1500 + 500 + 500"
+    }
+  },
+  {
+    "id": "da-data-cleaning-preparation-002",
+    "subject": "data-analytics",
+    "topic": "Data Cleaning & Preparation",
+    "subtopic": "Filling missing values with zero",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After the cleaning step, the average age is computed. What is the average age of customers who provided one?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Customer ages (blank = not provided)",
+        "columns": [
+          "Customer",
+          "Age"
+        ],
+        "rows": [
+          [
+            "C1",
+            30
+          ],
+          [
+            "C2",
+            40
+          ],
+          [
+            "C3",
+            ""
+          ],
+          [
+            "C4",
+            50
+          ]
+        ]
+      },
+      "step": "Cleaning step applied: blanks replaced with 0."
+    },
+    "ai_claim": "30. After filling the blank with 0, the ages are 30, 40, 0 and 50, and their average is 30.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The blank age was replaced with 0 to remove missing values."
+      },
+      {
+        "index": 2,
+        "text": "The ages are now 30, 40, 0 and 50."
+      },
+      {
+        "index": 3,
+        "text": "Their sum is 120, over 4 customers."
+      },
+      {
+        "index": 4,
+        "text": "The average age is 30."
+      }
+    ],
+    "ai_final_answer": "30",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 1,
+      "misconception": "Imputing a missing value with an impossible number",
+      "explanation": "0 is not an unknown age; it is a false age of zero, and it drags the mean down. The average of customers who gave their age is (30 + 40 + 50) / 3 = 40. Leave missing values out of the average (or impute thoughtfully and flag it).",
+      "why_convincing": "Replacing blanks with 0 is a common quick fix that makes formulas stop complaining."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The average of known ages is (30 + 40 + 50) / 3 = 40. Filling with 0 invents a newborn customer.",
+    "canonical_answer": "40",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(30 + 40 + 50) / 3 = 40",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "40"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "No customer is actually 0 years old.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Filling with 0 lowers the average by 10 years."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether 0 is a plausible age."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 changes the data before averaging."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Missing values should be excluded or imputed with a justified value, not zero."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Average only the ages that were provided."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: 0 is not 'missing'. The average of known ages is 40."
+      }
+    ],
+    "repair": "Exclude missing ages from the average, and report how many were missing.",
+    "debrief": "Every imputation changes the statistics. Zero is only correct when the true value is zero; otherwise it biases means and totals. Always report how many values were missing.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (30 + 40 + 50) / 3",
+      "flawed_solver": "answer = (30 + 40 + 0 + 50) / 4"
+    }
+  },
+  {
+    "id": "da-data-cleaning-preparation-003",
+    "subject": "data-analytics",
+    "topic": "Data Cleaning & Preparation",
+    "subtopic": "Inconsistent category labels",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many customers are in Pune?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Customers by city (raw)",
+        "columns": [
+          "city (as typed)",
+          "customers"
+        ],
+        "rows": [
+          [
+            "Pune",
+            2
+          ],
+          [
+            "pune",
+            2
+          ],
+          [
+            "Pune ",
+            1
+          ],
+          [
+            "Delhi",
+            3
+          ]
+        ]
+      },
+      "chart_note": "A bar chart built from this table shows Delhi as the largest city."
+    },
+    "ai_claim": "2. The Pune row shows 2 customers, so Pune has 2 customers and Delhi, with 3, is the largest city.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The table groups customers by city."
+      },
+      {
+        "index": 2,
+        "text": "The Pune row has 2 customers."
+      },
+      {
+        "index": 3,
+        "text": "The other rows are different cities."
+      },
+      {
+        "index": 4,
+        "text": "So Pune has 2 customers."
+      }
+    ],
+    "ai_final_answer": "2",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Treating spelling variants as different categories",
+      "explanation": "'Pune', 'pune' and 'Pune ' (trailing space) are the same city typed differently. Normalising case and whitespace gives 2 + 2 + 1 = 5 customers in Pune, which makes Pune, not Delhi, the largest city. Clean categories (TRIM, LOWER or a mapping table) before grouping.",
+      "why_convincing": "Grouping tools treat the labels as distinct, so the table looks authoritative."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "After trimming and lower-casing, Pune has 5 customers.",
+    "canonical_answer": "5",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "2 + 2 + 1 = 5",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "'pune' and 'Pune ' differ from 'Pune' only in case and a trailing space.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After cleaning, Pune (5) is larger than Delhi (3)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look closely at the city labels."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats 'pune' and 'Pune ' as other cities."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Text categories need normalising (case, whitespace) before grouping."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply TRIM and LOWER to the labels."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: they are the same city. Pune has 5 customers."
+      }
+    ],
+    "repair": "Normalise city names with TRIM and LOWER (or a lookup table) before grouping.",
+    "debrief": "Free-text categories fragment into variants. Profiling distinct values - and fixing case, whitespace and spelling - comes before any group-by.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 2 + 2 + 1",
+      "flawed_solver": "answer = 2"
+    }
+  },
+  {
+    "id": "da-data-cleaning-preparation-004",
+    "subject": "data-analytics",
+    "topic": "Data Cleaning & Preparation",
+    "subtopic": "Mixed units in one column",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the average parcel weight, in kilograms?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Parcel weights (two warehouses)",
+        "columns": [
+          "Parcel",
+          "weight",
+          "source"
+        ],
+        "rows": [
+          [
+            "P1",
+            2,
+            "Warehouse A (kg)"
+          ],
+          [
+            "P2",
+            1500,
+            "Warehouse B (g)"
+          ],
+          [
+            "P3",
+            2.5,
+            "Warehouse A (kg)"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "501.5. The weights are 2, 1,500 and 2.5; their average is 1,504.5 / 3 = 501.5 kg.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "There are three parcels."
+      },
+      {
+        "index": 2,
+        "text": "Their weights are 2, 1,500 and 2.5."
+      },
+      {
+        "index": 3,
+        "text": "The sum is 1,504.5."
+      },
+      {
+        "index": 4,
+        "text": "The average is 501.5 kg."
+      }
+    ],
+    "ai_final_answer": "501.5",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Adding values measured in different units",
+      "explanation": "Warehouse B records grams, so 1,500 means 1.5 kg. Converted, the weights are 2, 1.5 and 2.5 kg, and the average is 2 kg. Convert to one unit before any arithmetic.",
+      "why_convincing": "The source column mentions units, but the weight column looks uniform."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Convert P2 to 1.5 kg; the average is (2 + 1.5 + 2.5) / 3 = 2 kg.",
+    "canonical_answer": "2",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(2 + 1.5 + 2.5) / 3 = 2",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "P2 comes from Warehouse B, which records grams.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1500"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A 1.5 kg parcel counted as 1,500 kg makes the average meaningless."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the units for each warehouse."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 uses the raw numbers."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Values must share a unit before they are added or averaged."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Convert P2 from grams to kilograms."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: P2 is 1.5 kg, not 1,500. The average is 2 kg."
+      }
+    ],
+    "repair": "Convert all weights to kilograms before averaging.",
+    "debrief": "Merged sources often disagree on units, currencies or time zones. Check each source's conventions, and store the unit alongside the value.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (2 + 1.5 + 2.5) / 3",
+      "flawed_solver": "answer = (2 + 1500 + 2.5) / 3"
+    }
+  },
+  {
+    "id": "da-data-cleaning-preparation-005",
+    "subject": "data-analytics",
+    "topic": "Data Cleaning & Preparation",
+    "subtopic": "Removing an entry error",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Excluding the confirmed entry error, what is the average age of the remaining patients?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Patient ages in a clinic sample",
+        "columns": [
+          "Patient",
+          "Age"
+        ],
+        "rows": [
+          [
+            "A",
+            34
+          ],
+          [
+            "B",
+            41
+          ],
+          [
+            "C",
+            430
+          ],
+          [
+            "D",
+            29
+          ],
+          [
+            "E",
+            36
+          ]
+        ]
+      },
+      "note": "The clinic confirms C's age was mistyped; the correct value is unknown."
+    },
+    "ai_claim": "35. 430 is an impossible age and confirmed as a typo, so it is excluded; (34 + 41 + 29 + 36) / 4 = 35.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "430 is not a possible human age, and the clinic confirmed the error."
+      },
+      {
+        "index": 2,
+        "text": "Since the correct value is unknown, the record is excluded from the average."
+      },
+      {
+        "index": 3,
+        "text": "The remaining ages sum to 140."
+      },
+      {
+        "index": 4,
+        "text": "140 / 4 = 35."
+      }
+    ],
+    "ai_final_answer": "35",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 35. Excluding a confirmed, impossible value is justified; the exclusion should be documented. (Including it would give 114.)",
+    "canonical_answer": "35",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(34 + 41 + 29 + 36) / 4 = 35",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "35"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Including 430 gives an average of 570 / 5 = 114.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "114"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the exclusion is justified."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 relies on the clinic's confirmation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Confirmed entry errors can be excluded; genuine but unusual values should not be."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Average the four remaining ages."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The typo is excluded and the average of the rest is 35. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Outliers need a reason before removal. An impossible, confirmed typo qualifies; a surprisingly large but real value does not. Document every exclusion.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (34 + 41 + 29 + 36) / 4"
+    }
+  }
+]

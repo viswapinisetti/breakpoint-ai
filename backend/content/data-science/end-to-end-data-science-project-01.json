@@ -1,0 +1,487 @@
+[
+  {
+    "id": "ds-end-to-end-data-science-project-001",
+    "subject": "data-science",
+    "topic": "End-to-End Data Science Project",
+    "subtopic": "Training on an unusual period",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 2020-2021 data a sound basis for forecasting 2026 demand?",
+    "artifact_type": "experiment_design",
+    "artifact": {
+      "plan": "Train a model on 2020-2021 food-delivery orders to forecast order volumes for 2026 planning.",
+      "context": "2020-2021 included lockdowns, when delivery demand was unusually high and restaurant dining was closed."
+    },
+    "ai_claim": "Yes. Two full years of data is plenty of history, so the model will learn demand patterns that apply to 2026.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The data covers two full years."
+      },
+      {
+        "index": 2,
+        "text": "Two years capture seasonality."
+      },
+      {
+        "index": 3,
+        "text": "Demand patterns learned from them carry forward."
+      },
+      {
+        "index": 4,
+        "text": "So the model will forecast 2026 well."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming the training period represents the future",
+      "explanation": "Lockdowns changed behaviour: dining out was impossible, so delivery demand was inflated and its daily and weekly patterns were unusual. A model trained on that period learns those conditions. 2026 demand comes from a different world, so forecasts will be biased. Use recent, representative data, and treat lockdown periods as anomalies (exclude or flag them).",
+      "why_convincing": "Two years is a respectable amount of data."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the lockdown period is unrepresentative of 2026. Train on recent data and handle 2020-2021 as an anomaly.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The training period coincides with lockdowns, when restaurants were closed.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2020"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Weekday lunch orders from offices, common in 2026, were almost absent in 2020-2021.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Forecasts overstate delivery demand once dining reopens."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the conditions of 2020-2021 still hold."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes past patterns carry forward."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models assume the future resembles the training data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare lockdown behaviour with normal behaviour."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 2020-2021 is unrepresentative. Use recent data and flag anomalies."
+      }
+    ],
+    "repair": "Train on recent post-lockdown data; exclude or flag 2020-2021.",
+    "debrief": "Distribution shift is the most common reason good offline models fail. Ask whether the training period resembles the deployment period.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-end-to-end-data-science-project-002",
+    "subject": "data-science",
+    "topic": "End-to-End Data Science Project",
+    "subtopic": "Optimising the wrong objective",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is maximising accuracy the right way to choose the model and threshold here?",
+    "artifact_type": "experiment_design",
+    "artifact": {
+      "costs": "A missed churner costs Rs 5,000 in lost revenue. Contacting a customer who would have stayed costs Rs 500.",
+      "choice": "Pick the model and threshold with the highest accuracy."
+    },
+    "ai_claim": "Yes. Accuracy counts all correct predictions, so the most accurate model makes the fewest mistakes and is the best choice.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Accuracy is the share of correct predictions."
+      },
+      {
+        "index": 2,
+        "text": "Higher accuracy means fewer mistakes."
+      },
+      {
+        "index": 3,
+        "text": "Fewer mistakes is always better."
+      },
+      {
+        "index": 4,
+        "text": "So choose the most accurate model."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Treating all errors as equally costly",
+      "explanation": "Accuracy weighs a missed churner (Rs 5,000) the same as an unnecessary contact (Rs 500). The most accurate threshold may miss many churners to avoid cheap false alarms. Choose the threshold that minimises expected cost: 5,000 x FN + 500 x FP, which favours higher recall.",
+      "why_convincing": "Accuracy is the default metric in most tutorials."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: errors have a 10:1 cost ratio. Choose by expected cost (5,000 x FN + 500 x FP), not accuracy.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Model X: 100 FN, 50 FP -> Rs 5,25,000; Model Y: 40 FN, 300 FP -> Rs 3,50,000. Y is cheaper despite 190 more errors.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "525000",
+          "350000"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "A missed churner costs 10 times as much as an unnecessary contact.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A model with more errors can cost much less."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the costs of the two kinds of error."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every mistake costs the same."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "With asymmetric costs, optimise expected cost, not accuracy."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute cost for a model with fewer false negatives but more false positives."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: errors differ tenfold in cost. Optimise expected cost."
+      }
+    ],
+    "repair": "Select the threshold that minimises 5,000 x FN + 500 x FP on validation data.",
+    "debrief": "The evaluation metric is a statement of business values. When error costs differ, build them into the metric.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-end-to-end-data-science-project-003",
+    "subject": "data-science",
+    "topic": "End-to-End Data Science Project",
+    "subtopic": "A feature that reveals the answer",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is AUC 0.99 evidence of an excellent model for use at checkout?",
+    "artifact_type": "experiment_design",
+    "artifact": {
+      "target": "Will this order be returned? (predicted at checkout)",
+      "features": "basket_value, category, customer_tenure, delivery_city, refund_issued",
+      "result": "Validation AUC 0.99"
+    },
+    "ai_claim": "Yes. An AUC of 0.99 on held-out validation data shows the model separates returned and kept orders almost perfectly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model uses five order features."
+      },
+      {
+        "index": 2,
+        "text": "It was evaluated on held-out data."
+      },
+      {
+        "index": 3,
+        "text": "AUC 0.99 means near-perfect separation."
+      },
+      {
+        "index": 4,
+        "text": "So it is an excellent model for checkout."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 1,
+      "misconception": "Including a feature that exists only after the outcome",
+      "explanation": "refund_issued is set after a return is processed, so it nearly equals the label. At checkout it does not exist yet. The model's AUC comes from this leak and will collapse in use. Remove features not available at prediction time, and check suspiciously high scores for leakage.",
+      "why_convincing": "Held-out validation feels like protection against every problem."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: refund_issued is only known after a return, so it leaks the label. Remove it; expect a much lower, honest AUC.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "refund_issued is populated after the return is processed.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Without refund_issued, validation AUC drops to 0.71.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0.71"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "At checkout, refund_issued is always false, so the model sees no signal."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check when each feature becomes available."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 includes a feature from after the outcome."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Features must be available at prediction time."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask when refund_issued is set."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: refund_issued leaks the label. Remove it."
+      }
+    ],
+    "repair": "Keep only features known at checkout; audit features for timing.",
+    "debrief": "An AUC near 1.0 on a hard business problem is a red flag. Check each feature's timestamp against the prediction moment.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-end-to-end-data-science-project-004",
+    "subject": "data-science",
+    "topic": "End-to-End Data Science Project",
+    "subtopic": "Offline gains and business impact",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the offline improvement show the new model will raise revenue?",
+    "artifact_type": "experiment_design",
+    "artifact": {
+      "result": "New recommendation model: offline NDCG@10 improved from 0.412 to 0.431 on historical clicks.",
+      "plan": "\"Ship to all users; this will raise revenue.\""
+    },
+    "ai_claim": "Yes. NDCG measures ranking quality, and it improved by 4.6%, so users will click and buy more, raising revenue.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "NDCG@10 rose from 0.412 to 0.431."
+      },
+      {
+        "index": 2,
+        "text": "Better ranking means users see more relevant items."
+      },
+      {
+        "index": 3,
+        "text": "More relevant items lead to more purchases."
+      },
+      {
+        "index": 4,
+        "text": "So revenue will rise."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Equating an offline metric with online impact",
+      "explanation": "Offline metrics are computed on past clicks, which were shaped by the old model (users could only click what they were shown). Gains in NDCG often do not translate into more purchases, and clicks are not revenue. Run an online A/B test measuring revenue per user before a full rollout.",
+      "why_convincing": "Steps 1 and 2 are reasonable, and offline metrics do correlate with online results sometimes."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: offline ranking metrics on logged clicks do not establish revenue impact. Test online with an A/B experiment.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The evaluation uses historical clicks collected under the old model.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "A model that ranks cheap, clickable items higher can raise NDCG and lower revenue.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Click-optimised rankings can reduce basket value."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the offline metric measures, and on what data."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 links ranking quality to purchases without evidence."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Offline metrics are proxies; business impact needs online experiments."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a model that promotes cheap, clickable items."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: offline NDCG does not establish revenue impact. Run an A/B test."
+      }
+    ],
+    "repair": "Run an A/B test with revenue per user as the primary metric.",
+    "debrief": "Offline metrics are for choosing candidates; online experiments are for deciding. The gap between them is where many projects fail.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-end-to-end-data-science-project-005",
+    "subject": "data-science",
+    "topic": "End-to-End Data Science Project",
+    "subtopic": "A monitoring plan",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this plan can catch problems even before true labels arrive?",
+    "artifact_type": "experiment_design",
+    "artifact": {
+      "plan": "After deployment:\n- Daily: compare input feature distributions with training (population stability index), alert above 0.2.\n- Daily: track prediction score distribution.\n- Monthly: when true labels arrive (churn is known after 60 days), compute AUC and calibration on the labelled cohort.\n- Retrain when performance drops or drift alerts persist."
+    },
+    "ai_claim": "Yes. Input drift and prediction-distribution monitoring work without labels, so they give early warning during the 60 days before outcomes are known; the monthly labelled evaluation then confirms actual performance.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "True churn labels arrive only after 60 days."
+      },
+      {
+        "index": 2,
+        "text": "Input and prediction distributions are available immediately."
+      },
+      {
+        "index": 3,
+        "text": "Large shifts in them are early warning signs of degraded performance."
+      },
+      {
+        "index": 4,
+        "text": "Labelled evaluation later measures the real impact on AUC and calibration."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. With delayed labels, drift monitoring on inputs and outputs is the only early signal; it complements, not replaces, periodic labelled evaluation.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Labels arrive after 60 days, but inputs and predictions are available daily.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "60"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "PSI above 0.2 is a common threshold for significant drift.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what can be measured before labels exist."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 uses unlabelled signals as warnings."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Drift monitoring works without labels; performance evaluation needs them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List what is available on day 1 after deployment."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Drift monitoring gives early warning; labelled evaluation confirms. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Models degrade silently. A plan that combines label-free drift signals with delayed labelled evaluation catches problems early and confirms them properly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

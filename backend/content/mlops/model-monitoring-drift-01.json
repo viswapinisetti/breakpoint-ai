@@ -1,0 +1,354 @@
+[
+  {
+    "id": "mlo-model-monitoring-drift-001",
+    "subject": "mlops",
+    "topic": "Model Monitoring & Drift",
+    "subtopic": "Input drift is not necessarily accuracy loss",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the large PSI show that the model's accuracy has dropped?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "Monitoring shows PSI = 0.31 for the feature 'device_type' (a large shift: many more tablet users after a marketing campaign).\nAI: \"Input drift this large means the model's accuracy has dropped; retrain immediately.\""
+    },
+    "ai_claim": "Yes. A PSI above 0.25 indicates major drift, and drift means the model is now less accurate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "PSI of 0.31 exceeds the 0.25 threshold for major drift."
+      },
+      {
+        "index": 2,
+        "text": "The input distribution has changed."
+      },
+      {
+        "index": 3,
+        "text": "Models perform worse on changed data."
+      },
+      {
+        "index": 4,
+        "text": "So accuracy has dropped."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Equating input drift with performance loss",
+      "explanation": "Drift shows the inputs changed, not that predictions got worse. If the model handles tablet users well (or device_type matters little), accuracy may be unchanged; if the relationship between features and outcome changed, accuracy may drop even without input drift. Treat drift as a signal to investigate: check performance on labelled recent data and by segment before retraining.",
+      "why_convincing": "Drift alerts are often presented as degradation alerts."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: drift is a warning, not proof of degradation. Measure performance on recent labelled data (overall and for tablet users).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "On last week's labelled data, AUC is 0.84, the same as at launch, including 0.83 for tablet users.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.84"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Input drift and concept drift are different; only performance measurement shows degradation.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Accuracy is unchanged despite the drift."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what PSI measures."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes changed inputs mean worse predictions."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Drift in inputs does not necessarily change model accuracy."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check recent labelled performance."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: drift is not degradation. Measure performance."
+      }
+    ],
+    "repair": "Investigate drift alerts by measuring labelled performance overall and per segment.",
+    "debrief": "Drift metrics tell you where to look; performance metrics tell you whether there is a problem.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-monitoring-drift-002",
+    "subject": "mlops",
+    "topic": "Model Monitoring & Drift",
+    "subtopic": "Monitoring with delayed labels",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this plan gives timely warning despite the 90-day label delay?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "Loan default labels arrive 90 days after approval.\nMonitoring plan: daily input drift and prediction-distribution tracking; weekly early proxy (missed first payment, known after 30 days); quarterly AUC and calibration on matured labels."
+    },
+    "ai_claim": "Yes. Drift and prediction distributions give immediate signals, the 30-day missed-payment proxy gives an earlier outcome signal, and the matured labels confirm true performance quarterly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Inputs and predictions are available immediately."
+      },
+      {
+        "index": 2,
+        "text": "Missed first payments are an early proxy for default."
+      },
+      {
+        "index": 3,
+        "text": "True labels mature after 90 days."
+      },
+      {
+        "index": 4,
+        "text": "Combining the three gives early warning and eventual confirmation."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Layering immediate, proxy and ground-truth signals is the standard approach when labels are delayed.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "day 1 drift -> day 30 proxy -> day 90 true labels",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "30",
+          "90"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what is observable at each point in time."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 introduces the proxy."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Delayed labels call for proxies and drift monitoring."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Lay out the timeline."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The plan covers the label delay. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Monitoring must fit the label delay. Proxies bridge the gap between drift and ground truth.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-monitoring-drift-003",
+    "subject": "mlops",
+    "topic": "Model Monitoring & Drift",
+    "subtopic": "Per-feature drift thresholds",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this setup helps locate the source of distribution changes quickly?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "For each of the 12 most important features, the team computes PSI daily against the training distribution: alert at PSI > 0.2, warn at > 0.1.\nAlerts include the feature name and a plot comparing distributions."
+    },
+    "ai_claim": "Yes. Per-feature PSI shows which inputs shifted, the thresholds separate warnings from alerts, and the plots make the change easy to understand.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "PSI is computed separately for each important feature."
+      },
+      {
+        "index": 2,
+        "text": "Thresholds classify shifts as warnings or alerts."
+      },
+      {
+        "index": 3,
+        "text": "Alerts name the feature and show the distributions."
+      },
+      {
+        "index": 4,
+        "text": "So engineers can quickly see what changed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Feature-level drift monitoring on important features, with actionable alert content, localises problems quickly.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "alert: 'income PSI 0.27' with a plot showing a new spike at 0 (an upstream default change)",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.27"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how an engineer would find what changed."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 makes alerts actionable."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Per-feature metrics localise drift."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider an upstream default change."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The setup localises drift. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Good alerts point at the cause. Per-feature drift with plots turns an alarm into a lead.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-monitoring-drift-004",
+    "subject": "mlops",
+    "topic": "Model Monitoring & Drift",
+    "subtopic": "Has the model degraded",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Has the model's performance degraded?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "Launch: AUC 0.83 on 20,000 labelled cases.\nThis week: AUC 0.79 on 150 labelled cases (the only labels available so far).\nAI: \"AUC fell by 0.04, so the model has degraded; retrain now.\""
+    },
+    "ai_claim": "Yes. AUC dropped from 0.83 to 0.79, a clear decline, so the model has degraded.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Launch AUC was 0.83."
+      },
+      {
+        "index": 2,
+        "text": "This week's AUC is 0.79."
+      },
+      {
+        "index": 3,
+        "text": "A drop of 0.04 is substantial."
+      },
+      {
+        "index": 4,
+        "text": "So the model has degraded."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether 0.79 on 150 cases is distinguishable from 0.83. With only 150 labelled cases (and few positives), the AUC's uncertainty is large - a 95% interval of roughly +-0.07 - so the drop may be noise. The week's cases may also be an unusual subset (e.g. only fast-resolving ones).",
+    "resolving_scenarios": [
+      "More labels arrive and AUC settles at 0.82 on 3,000 cases: no real degradation.",
+      "AUC stays near 0.79 on 3,000 cases, with drift in key features: the model has genuinely degraded."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The evidence is too thin: 150 cases cannot resolve a 0.04 change. Step 3 ignores uncertainty.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "This week's AUC is based on 150 labelled cases versus 20,000 at launch.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "150"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Another random 150 cases could give AUC 0.85."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how precise an AUC from 150 cases is."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats the difference as certain."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Small samples give wide confidence intervals."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Estimate the interval with bootstrapping."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 ignores uncertainty. With more labels it may recover or confirm the drop. It cannot be decided yet."
+      }
+    ],
+    "repair": "Report confidence intervals, wait for more labels, and check drift and segment metrics.",
+    "debrief": "Monitoring decisions need uncertainty estimates, especially early when labels are few.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

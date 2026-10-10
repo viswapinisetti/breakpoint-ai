@@ -1,0 +1,140 @@
+[
+  {
+    "id": "dsa-bin-001",
+    "subject": "dsa",
+    "topic": "Searching & Sorting",
+    "subtopic": "Binary search boundary update",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this binary search. Does it terminate for every input?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            lo = mid          # advance the lower bound\n        else:\n            hi = mid - 1\n    return -1"
+    },
+    "ai_claim": "The search halves the interval on every iteration, so it always terminates.",
+    "ai_solution": [
+      {"index": 1, "text": "`mid` is always between `lo` and `hi`, so the index is in range."},
+      {"index": 2, "text": "When the middle element is too small, the target must lie above it, so the lower bound moves up to `mid`."},
+      {"index": 3, "text": "When it is too large, the upper bound moves below `mid`. Either way the interval shrinks."},
+      {"index": 4, "text": "A strictly shrinking interval reaches `lo > hi` in at most log₂(n) steps, so the loop always terminates."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Setting a bound to mid rather than past it, so the interval stops shrinking",
+      "explanation": "`lo = mid` does not exclude `mid`. When `hi == lo + 1`, integer division gives `mid == lo`, so `lo = mid` leaves `lo` unchanged and the loop repeats forever. The update must be `lo = mid + 1`, which excludes the element just tested.",
+      "why_convincing": "Steps 1, 3 and 4 are all correct, and `lo = mid` reads as the natural mirror of `hi = mid - 1`. The asymmetry is easy to miss because both lines look like they move a bound toward the middle."
+    },
+    "canonical_solution": "It does not always terminate. With `lo = mid`, take arr = [1, 3] and target = 3: lo=0, hi=1, mid=0, arr[0] < 3, so lo = 0 — unchanged. The loop spins forever. The fix is `lo = mid + 1`, which guarantees the interval strictly shrinks because the tested element is excluded.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "counterexample", "summary": "A two-element array where lo never advances.", "must_reference_step": 2, "must_contain_values": []},
+      {"type": "trace", "summary": "Trace lo, hi and mid for arr=[1,3], target=3.", "must_reference_step": 2, "must_contain_values": ["0"]}
+    ],
+    "counterexamples": ["search([1, 3], 3): lo=0, hi=1, mid=0. arr[0]=1 < 3 so lo = mid = 0. Nothing changed; the next iteration is identical."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Check that each branch strictly shrinks the interval, not merely moves a bound."},
+      {"level": 2, "kind": "direction", "text": "Compare the two update lines. One excludes the tested element; the other does not."},
+      {"level": 3, "kind": "concept", "text": "Termination needs the interval to strictly shrink every iteration. Re-testing the same element does not shrink it."},
+      {"level": 4, "kind": "strong", "text": "Trace the smallest case where lo and hi differ by one."},
+      {"level": 5, "kind": "reveal", "text": "Step 2 sets `lo = mid`, which does not exclude mid. When hi = lo + 1, mid = lo, so lo never moves and the loop hangs. It must be `lo = mid + 1`."}
+    ],
+    "repair": "Change `lo = mid` to `lo = mid + 1`. The element at `mid` has been tested and can be excluded, which makes the interval strictly smaller every iteration.",
+    "debrief": "Off-by-one errors in binary search are almost always termination bugs rather than wrong answers, and they surface only at the smallest interval — precisely the case that a mental trace over a ten-element array never reaches. When checking a loop, do not ask whether the bound moves; ask whether the interval is strictly smaller, and test it where the interval is already as small as it can get.",
+    "validation_payload": {
+      "entry_point": "search",
+      "ai_code": "def search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    steps = 0\n    while lo <= hi:\n        steps += 1\n        if steps > 50:\n            return 'infinite loop'\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            lo = mid\n        else:\n            hi = mid - 1\n    return -1",
+      "reference_code": "def search(arr, target):\n    lo, hi = 0, len(arr) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1",
+      "test_inputs": ["([1, 3], 3)", "([1, 2, 3, 4, 5], 5)", "([1, 2, 3], 2)", "([5], 5)", "([1, 2, 3], 9)"],
+      "counterexample_input": "([1, 3], 3)"
+    }
+  },
+  {
+    "id": "dsa-cx-002",
+    "subject": "dsa",
+    "topic": "Complexity Analysis",
+    "subtopic": "Amortised versus worst case",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this complexity claim correct?",
+    "artifact_type": "complexity_analysis",
+    "artifact": {
+      "claim": "Appending n items to a dynamic array that doubles when full is O(n) total, so each individual append is O(1)."
+    },
+    "ai_claim": "Both parts are correct: the total is O(n), so each append is O(1).",
+    "ai_solution": [
+      {"index": 1, "text": "Doubling means resizes happen at sizes 1, 2, 4, 8, …, n."},
+      {"index": 2, "text": "The copying work across all resizes is 1 + 2 + 4 + … + n < 2n, so the total cost of n appends is O(n)."},
+      {"index": 3, "text": "Dividing the O(n) total by n appends gives O(1) per append."},
+      {"index": 4, "text": "Each individual append is therefore O(1)."}
+    ],
+    "ai_final_answer": "correct",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Reading an amortised average as a worst-case bound on every operation",
+      "explanation": "The total really is O(n) and the amortised cost really is O(1), but an individual append is not O(1): the one that triggers a resize copies every existing element and costs Θ(n). \"O(1) amortised\" and \"O(1) worst case\" are different claims, and the difference matters for latency-sensitive systems.",
+      "why_convincing": "Steps 1 to 3 are all correct, and the division in step 3 is exactly how amortised analysis works. The slip is dropping the word \"amortised\" in step 4, which turns a true statement about the average into a false one about every case."
+    },
+    "canonical_solution": "Partly. The total is O(n) and each append is O(1) *amortised* — that much is right. But an individual append is not O(1) in the worst case: the append that triggers a resize copies all n existing elements and costs Θ(n). The correct statement is \"O(1) amortised, O(n) worst case per operation\".",
+    "canonical_answer": "partly correct",
+    "valid_evidence": [
+      {"type": "counterexample", "summary": "The append that triggers a resize costs Θ(n).", "must_reference_step": 4, "must_contain_values": []},
+      {"type": "trace", "summary": "Trace the append that adds a ninth element at capacity 8: it copies all 8 existing elements first, so that single call costs O(n).", "must_reference_step": 4, "must_contain_values": []}
+    ],
+    "counterexamples": ["With capacity 1,048,576 full, the next append allocates a new buffer and copies 1,048,576 elements. That single call is not constant time."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Distinguish what is claimed about the sequence from what is claimed about one operation."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 to 3 are correct. Look closely at the wording of step 4."},
+      {"level": 3, "kind": "concept", "text": "Amortised analysis bounds the average over a sequence. It says nothing about the worst single operation."},
+      {"level": 4, "kind": "strong", "text": "Work out the cost of the specific append that triggers a resize at large n."},
+      {"level": 5, "kind": "reveal", "text": "Step 4 drops the word \"amortised\". The resize-triggering append copies every element and costs Θ(n), so individual appends are not O(1) — only the average over a sequence is."}
+    ],
+    "repair": "Step 4 should read: each append is O(1) *amortised*. The worst case for a single append is Θ(n), incurred when the resize happens.",
+    "debrief": "Amortised bounds are among the easiest results to state slightly too strongly, because the arithmetic that produces them is a genuine average. The distinction is not pedantic: a system with a hard per-request latency budget cares about the Θ(n) append, and an amortised guarantee will not save it. When you see a per-operation cost derived by dividing a total, check whether the claim being made is about the average or about every case.",
+    "validation_payload": {}
+  },
+  {
+    "id": "dsa-dp-003",
+    "subject": "dsa",
+    "topic": "Greedy & Dynamic Programming",
+    "subtopic": "Greedy versus optimal",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this claim about the coin-change problem correct?",
+    "artifact_type": "algorithm",
+    "artifact": {
+      "claim": "For the coin set {1, 5, 10, 25}, always taking the largest coin that fits produces the minimum number of coins for any amount."
+    },
+    "ai_claim": "Correct — the greedy strategy is optimal for this coin set.",
+    "ai_solution": [
+      {"index": 1, "text": "Greedy is not optimal for arbitrary coin sets: for {1, 3, 4} and amount 6, greedy gives 4+1+1 = 3 coins where 3+3 = 2 coins is better."},
+      {"index": 2, "text": "So the question is whether {1, 5, 10, 25} is one of the sets where greedy happens to be optimal."},
+      {"index": 3, "text": "It is: this coin system is canonical, meaning greedy achieves the minimum for every amount. Each coin is at least twice the previous one and the set has the required divisibility structure."},
+      {"index": 4, "text": "So for {1, 5, 10, 25}, greedy is optimal."}
+    ],
+    "ai_final_answer": "correct",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. {1, 5, 10, 25} is a canonical coin system, so the greedy algorithm returns a minimum-size representation for every amount. The reasoning is also correctly scoped: it explicitly states that greedy is *not* optimal in general and offers {1, 3, 4} with amount 6 as the counterexample, then argues that this particular set is one where it does hold.",
+    "canonical_answer": "correct",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Check the scope of the claim: is it about all coin sets or this one?"},
+      {"level": 2, "kind": "direction", "text": "Step 1 concedes that greedy fails in general. Check whether step 3's narrower claim holds."},
+      {"level": 3, "kind": "concept", "text": "Greedy coin change is optimal exactly for canonical coin systems, of which the US-style set is one."},
+      {"level": 4, "kind": "strong", "text": "Try to find an amount under 100 where greedy beats or loses to the true optimum for {1, 5, 10, 25}."},
+      {"level": 5, "kind": "reveal", "text": "This reasoning is correct and correctly scoped. {1, 5, 10, 25} is canonical, so greedy is optimal for it, and the solution says plainly that this does not generalise. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "This artifact is easy to challenge for the wrong reason: \"greedy is not optimal for coin change\" is a well-known fact, and a reviewer running on that alone will reject a correct answer. The solution anticipates it — step 1 states the general result and gives the standard counterexample before narrowing to this set. Scope is the whole game: the general claim is false, the specific claim is true, and telling them apart is the skill being tested.",
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,365 @@
+[
+  {
+    "id": "fe-react-001",
+    "subject": "frontend",
+    "topic": "React",
+    "subtopic": "Mutating state in place",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does calling add('Buy milk') make the new todo appear on screen?",
+    "artifact_type": "component",
+    "artifact": {
+      "language": "jsx",
+      "code": "function TodoList() {\n  const [todos, setTodos] = useState([]);\n\n  function add(text) {\n    todos.push(text);\n    setTodos(todos);\n  }\n  // ... renders todos.map(...)\n}"
+    },
+    "ai_claim": "Yes. The todo is pushed into the array and setTodos is called, which triggers a re-render showing it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "todos.push adds the text to the array."
+      },
+      {
+        "index": 2,
+        "text": "setTodos(todos) passes the updated array to React."
+      },
+      {
+        "index": 3,
+        "text": "Calling a state setter always re-renders the component."
+      },
+      {
+        "index": 4,
+        "text": "So the new todo appears."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Mutating state and passing the same reference",
+      "explanation": "React compares the new state with the old using Object.is. push mutates the existing array, so setTodos receives the same reference, React sees no change and bails out of re-rendering. The todo does not appear (until something else causes a render). Create a new array: setTodos([...todos, text]).",
+      "why_convincing": "The array does contain the new item, and 'set state causes a render' is a common rule of thumb."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the same array reference is passed, so React skips the re-render. Use setTodos(prev => [...prev, text]).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Clicking add shows no change; the list updates only when another state change forces a render.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "setTodos(prev => [...prev, text]);",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The list stays the same after add('Buy milk')."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how React decides whether state changed."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says a setter call always re-renders."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "React compares state by reference (Object.is); mutation keeps the same reference."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the array passed to setTodos with the current state."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the same reference means no re-render. Create a new array."
+      }
+    ],
+    "repair": "Use `setTodos(prev => [...prev, text])`.",
+    "debrief": "React state must be treated as immutable: change it by replacing it. Mutation both skips renders and breaks features that depend on previous values (memoisation, concurrent rendering, dev tools).",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-react-002",
+    "subject": "frontend",
+    "topic": "React",
+    "subtopic": "Stable keys preserve component state",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After sorting, does the text the user typed stay with the same item?",
+    "artifact_type": "component",
+    "artifact": {
+      "language": "jsx",
+      "code": "{items.map(item => (\n  <li key={item.id}>\n    <input defaultValue={item.name} />\n  </li>\n))}\n// The user types into the second input, then the list is sorted by name."
+    },
+    "ai_claim": "Yes. Keys are the stable item ids, so React moves each <li> - and its input's typed text - with its item.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "React matches elements between renders by key."
+      },
+      {
+        "index": 2,
+        "text": "Each item's key is its id, which does not change when sorting."
+      },
+      {
+        "index": 3,
+        "text": "React therefore reorders the existing DOM nodes instead of reusing them by position."
+      },
+      {
+        "index": 4,
+        "text": "The typed text moves with its item."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. With stable keys, React preserves each element's identity and internal state across reorders. With index keys, the typed text would stay at the same position and appear under a different item.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Type into the second input, sort: the text follows its item to its new position.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "With key={index}, the typed text stays in the second row, now showing a different item.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how React identifies list items between renders."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 depends on the key staying the same when the order changes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Keys give elements identity; stable ids keep that identity across reorders."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare key={item.id} with key={index} after sorting."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Stable id keys make React move each item with its state. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Keys are identity, not just a warning suppressor. Index keys are fine only for lists that never reorder, insert or delete in the middle. The claim uses stable ids and explains why they matter.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-react-003",
+    "subject": "frontend",
+    "topic": "React",
+    "subtopic": "Functional state updates",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Starting from 0, does one click show 2?",
+    "artifact_type": "component",
+    "artifact": {
+      "language": "jsx",
+      "code": "function Counter() {\n  const [count, setCount] = useState(0);\n\n  function addTwo() {\n    setCount(c => c + 1);\n    setCount(c => c + 1);\n  }\n  return <button onClick={addTwo}>{count}</button>;\n}"
+    },
+    "ai_claim": "Yes. Each updater receives the latest pending state, so the first update makes 1 and the second makes 2.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Both setCount calls are queued during the click handler."
+      },
+      {
+        "index": 2,
+        "text": "React applies queued updaters in order."
+      },
+      {
+        "index": 3,
+        "text": "The first receives 0 and returns 1; the second receives 1 and returns 2."
+      },
+      {
+        "index": 4,
+        "text": "After the render, count is 2."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Updater functions chain on the pending state. (setCount(count + 1) twice would show 1, because both calls use the same stale count.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Clicking once shows 2.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "With setCount(count + 1) twice, one click shows 1.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what each updater function receives."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 chains the two updates."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Updater functions receive the most recent pending state, not the value from the render."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply the two updaters in order starting from 0."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The updaters chain, 0 -> 1 -> 2. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "When new state depends on old state, use the updater form. It avoids the stale values that closures capture, the same issue behind stale state in intervals and effects.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-react-004",
+    "subject": "frontend",
+    "topic": "React",
+    "subtopic": "When does the effect re-run",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the tracking effect run only when a different user is shown, and not on every re-render of the parent?",
+    "artifact_type": "component",
+    "artifact": {
+      "language": "jsx",
+      "code": "function Profile({ user }) {\n  useEffect(() => {\n    analytics.track(\"profile_view\", { id: user.id });\n  }, [user]);\n\n  return <h2>{user.name}</h2>;\n}\n// The parent component that renders <Profile user={...} /> is not shown."
+    },
+    "ai_claim": "Yes. The effect depends on user, so it runs only when the user changes, not on unrelated re-renders.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "useEffect re-runs when a dependency changes."
+      },
+      {
+        "index": 2,
+        "text": "The only dependency is user."
+      },
+      {
+        "index": 3,
+        "text": "Re-rendering the parent does not change which user is shown."
+      },
+      {
+        "index": 4,
+        "text": "So the effect runs only when a different user is shown."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "How the parent creates the user prop. Dependencies are compared by reference: if the parent builds a new object each render (user={{ id, name }}) the effect runs on every parent render; if it passes a stable object (from state or memoised), it runs only when the user changes.",
+    "resolving_scenarios": [
+      "The parent passes user from useState or a cache: the reference is stable and the effect runs only when the user changes.",
+      "The parent renders <Profile user={{ id: u.id, name: u.name }} />: a new object each render, so the effect runs on every render."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the parent, which is not shown. Step 3 assumes the same user means the same reference. Depending on [user.id] would make the answer 'yes' either way.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If the parent passes user={{ ...u }}, each render creates a new object and the effect runs again.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An inline object prop re-triggers the effect on every parent render."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how React compares dependencies."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes an unchanged user is the same object."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Dependencies are compared with Object.is, so a new object with the same content counts as a change."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a parent that writes user={{ id: 1, name: 'Asha' }}."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes a stable reference. A stable user runs it once; an inline object runs it every render. It cannot be decided."
+      }
+    ],
+    "repair": "Depend on the primitive that matters: `[user.id]`.",
+    "debrief": "Effect dependencies are compared by reference, so whether an effect re-runs can depend on code in another component. Depend on primitive values (ids) rather than objects when you can.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

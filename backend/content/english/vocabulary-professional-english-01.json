@@ -1,0 +1,442 @@
+[
+  {
+    "id": "eng-vocabulary-professional-english-001",
+    "subject": "english",
+    "topic": "Vocabulary & Professional English",
+    "subtopic": "'Revert back' for international readers",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will an international client reliably understand this as 'please reply by the end of the day'?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "Email to a client in London: \"Kindly revert back by EOD with your approval.\""
+    },
+    "ai_claim": "Yes. 'Revert' means reply in business English, so the client will understand the request clearly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "'Revert' means reply in business English."
+      },
+      {
+        "index": 2,
+        "text": "'Back' reinforces the idea of responding."
+      },
+      {
+        "index": 3,
+        "text": "EOD means end of day."
+      },
+      {
+        "index": 4,
+        "text": "So the client understands the request."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 1,
+      "misconception": "Assuming a regional meaning is universal",
+      "explanation": "In Indian English, 'revert' commonly means 'reply', but in British and American English it means 'return to a previous state' ('the system reverted to the old settings'). A London client may be confused, and 'revert back' is redundant in either variety. 'EOD' is also ambiguous across time zones. Write: 'Could you please reply with your approval by 5 pm UK time today?'",
+      "why_convincing": "The usage is very common in Indian workplaces."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: outside South Asia, 'revert' usually means 'go back to an earlier state'. Use 'reply' and give a clear deadline with a time zone.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "In British and American English, 'revert' means 'return to a previous state'; 'reply' is the standard verb for responding.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Could you please reply with your approval by 5 pm UK time today?",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A UK reader may think the email asks them to undo something."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 'revert' means to a British reader."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 assumes one meaning everywhere."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Some business terms have regional meanings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look up 'revert' in a British dictionary."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: 'revert' means 'go back' for many readers. Use 'reply'."
+      }
+    ],
+    "repair": "Could you please reply with your approval by 5 pm UK time today?",
+    "debrief": "Write for your reader's variety of English. Plain, universal words and explicit deadlines travel best.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-vocabulary-professional-english-002",
+    "subject": "english",
+    "topic": "Vocabulary & Professional English",
+    "subtopic": "Affect or effect",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 'effect' the right word here?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "The new leave policy will effect all employees from April."
+    },
+    "ai_claim": "Yes. The sentence is about the effect of the policy on employees, so 'effect' is correct.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The policy has an effect on employees."
+      },
+      {
+        "index": 2,
+        "text": "'Effect' describes that impact."
+      },
+      {
+        "index": 3,
+        "text": "The sentence uses 'effect'."
+      },
+      {
+        "index": 4,
+        "text": "So the word is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Confusing the noun 'effect' with the verb 'affect'",
+      "explanation": "Here the word is a verb (after 'will'), meaning 'to influence': the correct verb is 'affect'. 'Effect' is usually a noun ('the policy's effect'); as a verb, 'effect' means 'to bring about' ('to effect change'), which gives the wrong meaning. Correct: 'The new leave policy will affect all employees from April.'",
+      "why_convincing": "The meaning of 'impact' is close to both words."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Incorrect: use the verb 'affect': 'will affect all employees'.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "'Affect' is usually the verb (to influence); 'effect' is usually the noun (a result).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "The new leave policy will affect all employees from April.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'The policy will have an effect on all employees' is correct (noun)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Decide whether the word is a verb or a noun here."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats it as the noun."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "After 'will', a verb is needed; the verb meaning 'influence' is 'affect'."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try replacing it with 'influence'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the verb is 'affect'."
+      }
+    ],
+    "repair": "The new leave policy will affect all employees from April.",
+    "debrief": "A quick test: if 'influence' fits, use 'affect'; if 'result' fits, use 'effect'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-vocabulary-professional-english-003",
+    "subject": "english",
+    "topic": "Vocabulary & Professional English",
+    "subtopic": "Discreet and discrete",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 'discreet' the right word?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "Please be discreet about the salary figures until the announcement."
+    },
+    "ai_claim": "Yes. 'Discreet' means careful not to reveal private information, which fits; 'discrete' means separate or distinct, which would not fit.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The sentence asks people to keep information private."
+      },
+      {
+        "index": 2,
+        "text": "'Discreet' means careful and tactful about sensitive matters."
+      },
+      {
+        "index": 3,
+        "text": "'Discrete' means separate or individually distinct."
+      },
+      {
+        "index": 4,
+        "text": "So 'discreet' is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. 'Be discreet' means be careful not to reveal it.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "discreet = careful about what one says; discrete = separate, distinct (e.g. discrete data).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the meanings of the two words."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 defines the alternative."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Homophones with different meanings must be chosen by sense."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Which meaning does the sentence need?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. 'Discreet' fits. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Homophones pass spell-check. Check meaning, not just spelling.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-vocabulary-professional-english-004",
+    "subject": "english",
+    "topic": "Vocabulary & Professional English",
+    "subtopic": "Fewer or less",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are 'fewer' and 'less' both used correctly?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "After the new process, we received fewer complaints and spent less time on escalations."
+    },
+    "ai_claim": "Yes. 'Complaints' are countable, so 'fewer' is right; 'time' is uncountable, so 'less' is right.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "'Complaints' can be counted."
+      },
+      {
+        "index": 2,
+        "text": "Countable nouns take 'fewer'."
+      },
+      {
+        "index": 3,
+        "text": "'Time' here is uncountable."
+      },
+      {
+        "index": 4,
+        "text": "Uncountable nouns take 'less'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: fewer complaints (countable), less time (uncountable).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Use 'fewer' with countable plurals and 'less' with uncountable nouns.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether each noun can be counted."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 2 and 4 apply the rule."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Countable versus uncountable decides 'fewer' or 'less'."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try 'three complaints' and 'three times'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Both words are used correctly. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Formal writing keeps the fewer/less distinction, even though casual speech often uses 'less' for both.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-vocabulary-professional-english-005",
+    "subject": "english",
+    "topic": "Vocabulary & Professional English",
+    "subtopic": "'Please do the needful'",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 'Please do the needful' an appropriate closing for this email?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "Closing line of an email: \"Please do the needful.\"\nThe recipient is not specified."
+    },
+    "ai_claim": "Yes. It is a polite, standard business phrase that asks the reader to take the necessary action.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The phrase asks the reader to do what is necessary."
+      },
+      {
+        "index": 2,
+        "text": "It is polite."
+      },
+      {
+        "index": 3,
+        "text": "It is widely used in business emails."
+      },
+      {
+        "index": 4,
+        "text": "So it is appropriate."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Who the reader is and whether the needed action is stated. 'Do the needful' is common and understood in Indian workplaces, but many international readers find it unfamiliar or vague. It also only works if the email has already spelled out exactly what is needed.",
+    "resolving_scenarios": [
+      "An internal note to colleagues in an Indian office, after a clear list of actions: the phrase is understood and acceptable.",
+      "An email to a client in the US with no specific request stated: the phrase is unclear and may seem odd; a specific request is better."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the audience and on whether the email already states the action. Step 3 assumes a universal convention.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An American client may reply 'What exactly do you need from me?'",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Readers outside South Asia may not know the phrase."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who will read the email."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the phrase is standard everywhere."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Professional phrasing depends on audience and clarity of the request."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider an international client."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is an assumption. Internally it may work; internationally a specific request is better. It cannot be decided."
+      }
+    ],
+    "repair": "State the action directly: 'Could you please approve the invoice by Friday?'",
+    "debrief": "The clearest closing is a specific request with a deadline. Regional phrases depend on the reader.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

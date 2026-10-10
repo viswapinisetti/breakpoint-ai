@@ -1,0 +1,466 @@
+[
+  {
+    "id": "nc-ai-agents-tool-automation-001",
+    "subject": "no-code-automation",
+    "topic": "AI Agents & Tool Automation",
+    "subtopic": "An agent with a delete tool",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is giving the agent delete_record safe because it is instructed to delete only duplicates?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "A CRM clean-up agent can call: search_records, merge_records, delete_record.\nIt processes customer emails that ask to update contact details.\nAI: \"The agent only deletes duplicates, as instructed, so giving it delete_record is safe.\""
+    },
+    "ai_claim": "Yes. The agent follows its instructions, which only allow deleting duplicates, so the delete tool is safe.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The agent's instructions limit deletion to duplicates."
+      },
+      {
+        "index": 2,
+        "text": "The agent follows instructions."
+      },
+      {
+        "index": 3,
+        "text": "It only deletes duplicates."
+      },
+      {
+        "index": 4,
+        "text": "So the tool is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Relying on instructions to limit a destructive tool",
+      "explanation": "The agent reads customer emails - untrusted input that can contain instructions ('please delete all records for Acme Ltd'). Models can also misjudge what counts as a duplicate. Instructions are not enforcement. Remove delete_record, use merge (reversible) or soft-delete, and require human approval for destructive actions.",
+      "why_convincing": "In normal cases the agent does follow its instructions."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: injected or mistaken requests can trigger deletions. Remove the delete tool or require approval.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An email saying 'We are closing our account, delete every contact at acme.example' leads the agent to delete 34 records.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "34"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Destructive capabilities need technical controls, not just instructions.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An email triggers mass deletion."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where the agent's inputs come from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes perfect instruction-following."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Least privilege and approvals, not prompts, limit agent damage."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider an email that asks for deletion."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the tool can be misused. Remove it or gate it."
+      }
+    ],
+    "repair": "Replace delete with soft-delete or merge, and require approval for destructive actions.",
+    "debrief": "Give agents the smallest set of reversible tools that does the job.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-ai-agents-tool-automation-002",
+    "subject": "no-code-automation",
+    "topic": "AI Agents & Tool Automation",
+    "subtopic": "An agent's success report",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Were all 25 customers updated?",
+    "artifact_type": "automation_run",
+    "artifact": {
+      "workflow": "Agent summary posted to Slack: \"Done! Updated the phone numbers for all 25 customers.\"\nRun log: update_contact succeeded 12 times and returned 'error: invalid phone format' 13 times."
+    },
+    "ai_claim": "Yes. The agent processed all 25 customers and reported that the update is done.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The agent was given 25 customers."
+      },
+      {
+        "index": 2,
+        "text": "It called update_contact for each."
+      },
+      {
+        "index": 3,
+        "text": "It reported completion."
+      },
+      {
+        "index": 4,
+        "text": "So all 25 were updated."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F14",
+      "location": 3,
+      "misconception": "Trusting an agent's summary over its tool results",
+      "explanation": "The log shows 13 of the 25 calls failed with 'invalid phone format'. The agent's summary claims success anyway. Workflows should compute outcomes from tool results (count successes and failures), not from the model's self-report, and surface failures for follow-up.",
+      "why_convincing": "The agent did attempt every update."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: only 12 updates succeeded; 13 failed. Report outcomes from tool results.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "update_contact: 12 success, 13 'invalid phone format'",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "12",
+          "13"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "13 customers keep their old phone numbers."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the summary with the run log."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 trusts the agent's report."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Outcomes should be derived from tool results."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count successes in the log."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 13 updates failed."
+      }
+    ],
+    "repair": "Have the workflow tally tool results and post the real success/failure counts with a list of failures.",
+    "debrief": "Agents can narrate success that did not happen. Measure outcomes from the systems they act on.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-ai-agents-tool-automation-003",
+    "subject": "no-code-automation",
+    "topic": "AI Agents & Tool Automation",
+    "subtopic": "An outdated tool description",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the agent create correct invoices?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Tool 'create_invoice' description (written last year): parameters customer_id, amount.\nThe billing API has since changed: amount must be sent in paise as amount_minor, and gst_rate is required.\nAI: \"The agent will create correct invoices because it follows the tool description.\""
+    },
+    "ai_claim": "Yes. The agent follows the tool description exactly, so it sends the parameters the tool expects.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The agent reads the tool description."
+      },
+      {
+        "index": 2,
+        "text": "It sends customer_id and amount."
+      },
+      {
+        "index": 3,
+        "text": "The tool receives what the description says."
+      },
+      {
+        "index": 4,
+        "text": "So invoices are created correctly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on a tool description that no longer matches the API",
+      "explanation": "The agent can only follow the description it is given, which is out of date. It sends amount in rupees and omits gst_rate: requests fail, or worse, succeed with amounts 100 times too small if the wrapper maps amount to amount_minor. Keep tool definitions generated from (or tested against) the current API, and validate inputs in the tool wrapper.",
+      "why_convincing": "Following the description faithfully sounds like correctness."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the description is out of date, so the agent sends wrong parameters. Update the tool definition and validate inputs.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "agent sends {customer_id, amount: 4999} -> API expects amount_minor and gst_rate -> 422 error",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "422"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Tool definitions are contracts and must be versioned and tested with the underlying API.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Invoices fail or are created with wrong amounts."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the description with the current API."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the description is accurate."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Agents are only as correct as their tool definitions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call the API with the described parameters."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the description is outdated."
+      }
+    ],
+    "repair": "Regenerate tool definitions from the API spec and add contract tests.",
+    "debrief": "Tool definitions drift from APIs just like documentation does. Test them together.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-ai-agents-tool-automation-004",
+    "subject": "no-code-automation",
+    "topic": "AI Agents & Tool Automation",
+    "subtopic": "An agent run with no limits",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this run leave the CRM in a consistent state?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "An agent enriches 5,000 CRM records, one at a time, using web search and an LLM for each.\nNo limits on runtime, steps or spend. Each record is updated as it is processed.\nThe account's monthly AI budget cap is reached after about 2,100 records."
+    },
+    "ai_claim": "Yes. The agent processes each record fully before moving on, so every record it touches is correctly enriched.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The agent enriches one record at a time."
+      },
+      {
+        "index": 2,
+        "text": "Each record is completed before the next."
+      },
+      {
+        "index": 3,
+        "text": "Completed records are correct."
+      },
+      {
+        "index": 4,
+        "text": "So the CRM is consistent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Not planning for a run that stops partway",
+      "explanation": "The budget cap stops the run after about 2,100 records, leaving the CRM half-enriched with no record of where it stopped - and the record being processed at the moment of cut-off may be partially updated. Estimate cost beforehand, set per-run limits, track progress (a processed flag or cursor) so runs can resume, and write each record's update atomically.",
+      "why_convincing": "Processing records one at a time seems naturally safe."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the run stops at the budget cap, leaving ~2,900 records unprocessed and no resume point. Add limits, progress tracking and resumability.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "record 2,101: budget cap reached mid-enrichment -> run halts; no 'processed' markers exist",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2,101"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Long batch runs need budgets, checkpoints and resumable progress.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Nobody can tell which records were enriched."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the job's cost with the budget cap."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the run completes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Batch jobs need checkpoints to resume after interruption."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what happens at record 2,101."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the run stops partway with no resume point."
+      }
+    ],
+    "repair": "Estimate cost, set limits, mark processed records, and make the run resumable.",
+    "debrief": "Design every long run for interruption: budgets and outages will eventually stop it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-ai-agents-tool-automation-005",
+    "subject": "no-code-automation",
+    "topic": "AI Agents & Tool Automation",
+    "subtopic": "Human approval for outbound messages",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this design keeps the speed benefit of the agent while preventing embarrassing or wrong emails from reaching customers?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "A sales agent drafts personalised follow-up emails from CRM notes.\nDrafts are placed in an approval queue; a salesperson reviews, edits if needed, and clicks Send.\nThe agent cannot send email directly."
+    },
+    "ai_claim": "Yes. The agent does the time-consuming drafting, and a person approves every message before it goes out, so errors, wrong facts or tone problems are caught first.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The agent drafts emails from CRM notes."
+      },
+      {
+        "index": 2,
+        "text": "Drafts go to an approval queue."
+      },
+      {
+        "index": 3,
+        "text": "A salesperson reviews and edits."
+      },
+      {
+        "index": 4,
+        "text": "Only approved emails are sent; the agent cannot send."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Draft-and-approve is a standard human-in-the-loop pattern for outward-facing agent actions.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "draft mentions a discount not in the notes -> reviewer removes it -> corrected email sent",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the agent can do on its own."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 removes direct sending."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Human approval for external communication limits risk."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a draft with an invented discount."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It keeps speed and adds a safety check. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Let agents prepare and people decide, especially for anything customers will see.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,363 @@
+[
+  {
+    "id": "ds-feature-engineering-001",
+    "subject": "data-science",
+    "topic": "Feature Engineering",
+    "subtopic": "Label-encoding a nominal feature",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this encoding let the linear model learn a separate rent effect for each city?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "# city is nominal: Pune, Delhi, Chennai (no natural order)\ndf[\"city_code\"] = df[\"city\"].map({\"Chennai\": 0, \"Delhi\": 1, \"Pune\": 2})\nmodel = LinearRegression().fit(df[[\"city_code\", \"sqft\"]], df[\"rent\"])"
+    },
+    "ai_claim": "Yes. Each city gets its own code, so the model can tell the cities apart and learn each one's effect on rent.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each city is mapped to a distinct number."
+      },
+      {
+        "index": 2,
+        "text": "The model receives city_code as a feature."
+      },
+      {
+        "index": 3,
+        "text": "Distinct codes let the model distinguish the cities."
+      },
+      {
+        "index": 4,
+        "text": "So it learns a separate effect for each city."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Giving a linear model arbitrary ordinal codes",
+      "explanation": "A linear model learns one coefficient for city_code, so it assumes Delhi's effect lies exactly halfway between Chennai's and Pune's, and that the cities are evenly spaced in that order. The codes are arbitrary; reordering them changes the model. One-hot encode the cities so each gets its own coefficient.",
+      "why_convincing": "The codes do distinguish the cities, which is enough for tree models."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: one coefficient on arbitrary codes forces an order and equal spacing. Use one-hot encoding.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Swapping the codes for Delhi and Pune changes the fitted predictions, although nothing about the data changed.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "The model has one coefficient for city_code, not three city effects.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "With codes 0, 1, 2, Delhi's predicted effect is forced to be the average of Chennai's and Pune's."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the coefficients the model learns for city."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 confuses distinguishing with modelling separately."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Linear models treat numeric codes as quantities with order and spacing."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Reorder the codes and refit."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: one coefficient imposes an order. One-hot encode the cities."
+      }
+    ],
+    "repair": "Use `pd.get_dummies(df['city'])` or OneHotEncoder.",
+    "debrief": "Encodings carry assumptions. Numeric codes suit ordinal data or tree models; nominal categories in linear models need one-hot (or target) encoding.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-feature-engineering-002",
+    "subject": "data-science",
+    "topic": "Feature Engineering",
+    "subtopic": "Unseen categories at inference",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that transform succeeds for the Jaipur row, encoding it as all zeros?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "enc = OneHotEncoder(handle_unknown=\"ignore\")\nenc.fit(train[[\"city\"]])          # cities seen in training: Pune, Delhi, Chennai\nX_new = enc.transform(new_rows[[\"city\"]])   # new_rows includes 'Jaipur'"
+    },
+    "ai_claim": "Yes. With handle_unknown='ignore', an unseen category does not raise an error; its one-hot columns are all 0, as if it matched no known city.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The encoder learned three city columns from training."
+      },
+      {
+        "index": 2,
+        "text": "Jaipur was not seen during fitting."
+      },
+      {
+        "index": 3,
+        "text": "handle_unknown='ignore' tells the encoder not to raise an error."
+      },
+      {
+        "index": 4,
+        "text": "Jaipur is encoded as [0, 0, 0]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The default, handle_unknown='error', would raise; 'ignore' encodes unknown categories as all zeros. (The model then treats Jaipur like the baseline, which is worth monitoring.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "enc.transform([['Jaipur']]).toarray() returns [[0, 0, 0]].",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the handle_unknown setting."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on 'ignore'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "With handle_unknown='ignore', unseen categories become all-zero rows."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Transform a Jaipur row."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Jaipur is encoded as zeros without error. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Production data contains categories training never saw. Decide in advance how the pipeline handles them, and log how often it happens.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-feature-engineering-003",
+    "subject": "data-science",
+    "topic": "Feature Engineering",
+    "subtopic": "Cyclical features",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this makes 23:00 and 00:00 close together, while raw hours put them 23 apart?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "df[\"hour_sin\"] = np.sin(2 * np.pi * df[\"hour\"] / 24)\ndf[\"hour_cos\"] = np.cos(2 * np.pi * df[\"hour\"] / 24)\n# instead of using the raw hour 0-23 as a number"
+    },
+    "ai_claim": "Yes. Mapping hours onto a circle puts 23:00 and 00:00 next to each other (distance about 0.26), while 00:00 and 12:00 are opposite (distance 2). Raw hours would treat 23 and 0 as far apart.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Hour h maps to the point (sin(2 pi h / 24), cos(2 pi h / 24)) on a unit circle."
+      },
+      {
+        "index": 2,
+        "text": "Hours 23 and 0 are adjacent on the circle, about 0.26 apart."
+      },
+      {
+        "index": 3,
+        "text": "Hours 0 and 12 are opposite, 2 apart (the diameter)."
+      },
+      {
+        "index": 4,
+        "text": "As raw numbers, 23 and 0 differ by 23, the largest gap."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Sine and cosine encoding preserves the circular nature of time of day, so distance-based and linear models see midnight's neighbours correctly.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Distance between hour 23 and hour 0 on the unit circle = 2 sin(pi / 24) = 0.26",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.26"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "Distance between hours 0 and 12 = 2",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Place the hours on a circle."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 computes the distance between neighbours across midnight."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Both sin and cos are needed; either alone maps two different hours to the same value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the points for hours 23 and 0."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The encoding keeps 23:00 and 00:00 close. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cyclical quantities - hour, weekday, month, angle - need encodings that wrap around. Using both sine and cosine keeps every value distinct.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-feature-engineering-004",
+    "subject": "data-science",
+    "topic": "Feature Engineering",
+    "subtopic": "Will a new feature help",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will adding days_since_last_purchase improve the churn model's validation AUC?",
+    "artifact_type": "experiment_design",
+    "artifact": {
+      "proposal": "Add days_since_last_purchase to the churn model's features.",
+      "evidence": "Stakeholders believe recent buyers churn less. No validation experiment has been run yet."
+    },
+    "ai_claim": "Yes. Recency is a strong churn signal, so the feature will improve the model.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Customers who bought recently are less likely to churn."
+      },
+      {
+        "index": 2,
+        "text": "days_since_last_purchase captures recency."
+      },
+      {
+        "index": 3,
+        "text": "Adding an informative feature improves a model."
+      },
+      {
+        "index": 4,
+        "text": "So validation AUC will improve."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether the feature adds information the model does not already have, and whether it is computed without leakage. If the model already uses correlated features (e.g. orders in the last 30 days), the gain may be nil; if the feature is computed using data after the prediction date, validation AUC will rise misleadingly. No experiment has been run.",
+    "resolving_scenarios": [
+      "The model lacks any recency signal and the feature is computed as of the prediction date: validation AUC improves.",
+      "The model already includes orders_last_30_days and last_order_date bins: the new feature is redundant and AUC is unchanged."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It cannot be known without a validation experiment. Step 3 assumes an informative feature necessarily adds information to this model.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If orders_last_30_days is already a feature, recency information is largely present, and AUC may not change.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "30"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A redundant feature leaves AUC unchanged."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what features the model already has."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes any informative feature adds value."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A feature helps only if it adds information not already captured, without leakage."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a model that already has recent-order features."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes new information. It may help or be redundant. Only a validation experiment decides."
+      }
+    ],
+    "repair": "Compare validation AUC with and without the feature, using features computed as of the prediction date.",
+    "debrief": "Feature value is empirical. Intuition proposes features; validation on held-out data decides whether they stay.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

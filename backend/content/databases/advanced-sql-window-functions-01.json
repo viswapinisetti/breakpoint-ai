@@ -1,0 +1,597 @@
+[
+  {
+    "id": "db-advanced-sql-window-functions-001",
+    "subject": "databases",
+    "topic": "Advanced SQL & Window Functions",
+    "subtopic": "ROW_NUMBER and ties",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: everyone earning one of the top three salaries, including anyone tied. Does this query return Asha, Ben, Chen and Dev?",
+    "artifact_type": "sql",
+    "artifact": {
+      "employees": {
+        "title": "employees",
+        "columns": [
+          "name",
+          "dept",
+          "salary"
+        ],
+        "rows": [
+          [
+            "Asha",
+            "eng",
+            90
+          ],
+          [
+            "Ben",
+            "eng",
+            80
+          ],
+          [
+            "Chen",
+            "ops",
+            70
+          ],
+          [
+            "Dev",
+            "ops",
+            70
+          ],
+          [
+            "Eli",
+            "ops",
+            60
+          ]
+        ]
+      },
+      "query": "SELECT name, salary\nFROM (\n  SELECT name, salary,\n         ROW_NUMBER() OVER (ORDER BY salary DESC) AS rn\n  FROM employees\n) ranked\nWHERE rn <= 3;"
+    },
+    "ai_claim": "Yes. ROW_NUMBER ranks salaries from highest to lowest, and Chen and Dev share the third-highest salary, so both are included.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "ROW_NUMBER orders employees by salary, highest first."
+      },
+      {
+        "index": 2,
+        "text": "Asha (90) is 1 and Ben (80) is 2."
+      },
+      {
+        "index": 3,
+        "text": "Chen and Dev both earn 70, so they share position 3."
+      },
+      {
+        "index": 4,
+        "text": "rn <= 3 returns Asha, Ben, Chen and Dev."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating ROW_NUMBER like RANK",
+      "explanation": "ROW_NUMBER gives every row a distinct number, breaking ties arbitrarily: one of Chen and Dev gets 3 and the other 4. The query returns exactly three rows, and which of the two is dropped can change between runs. RANK() or DENSE_RANK() give tied rows the same number.",
+      "why_convincing": "The tie is visible in the data, and 'they share position 3' is how people rank ties by hand."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Only three rows are returned; either Chen or Dev is dropped arbitrarily. Use RANK() (ties share a rank, gaps follow) or DENSE_RANK() (no gaps) to include both.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The query returns exactly 3 rows; Chen and Dev get row numbers 3 and 4 in some order.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3",
+          "4"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Replace ROW_NUMBER() with RANK() OVER (ORDER BY salary DESC).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Dev (or Chen) gets row number 4 and is excluded."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how ROW_NUMBER numbers two rows with the same salary."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims tied rows share a number."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "ROW_NUMBER always assigns distinct numbers; RANK and DENSE_RANK assign equal numbers to ties."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the rows the query returns."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: ROW_NUMBER breaks the tie, so only 3 rows come back. Use RANK or DENSE_RANK."
+      }
+    ],
+    "repair": "Use `RANK() OVER (ORDER BY salary DESC)` (or DENSE_RANK) and keep rank <= 3.",
+    "debrief": "ROW_NUMBER, RANK and DENSE_RANK differ only on ties - which is exactly when the choice matters. Arbitrary tie-breaking also makes results non-deterministic. Decide what should happen to ties, then pick the function that does it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-advanced-sql-window-functions-002",
+    "subject": "databases",
+    "topic": "Advanced SQL & Window Functions",
+    "subtopic": "Window function results in WHERE",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In PostgreSQL, does this query return the highest-paid employee in each department?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "employees(name, dept, salary)",
+      "query": "SELECT name, dept, salary,\n       ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) AS rn\nFROM employees\nWHERE rn = 1;"
+    },
+    "ai_claim": "Yes. rn numbers employees within each department by salary, and WHERE rn = 1 keeps the top earner of each.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "PARTITION BY dept restarts the numbering in each department."
+      },
+      {
+        "index": 2,
+        "text": "ORDER BY salary DESC gives the highest earner rn = 1."
+      },
+      {
+        "index": 3,
+        "text": "WHERE rn = 1 keeps only those rows."
+      },
+      {
+        "index": 4,
+        "text": "So one top earner per department is returned."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Filtering on a window function in the same query level",
+      "explanation": "WHERE is evaluated before window functions and before SELECT aliases exist, so rn is not available there. PostgreSQL rejects the query (column \"rn\" does not exist), and window functions are not allowed in WHERE either. Compute rn in a subquery or CTE and filter in the outer query.",
+      "why_convincing": "The window logic in steps 1-2 is correct; only the placement of the filter is wrong."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The query fails: rn does not exist when WHERE runs. Wrap it: SELECT * FROM (SELECT ..., ROW_NUMBER() OVER (...) AS rn FROM employees) t WHERE rn = 1.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "PostgreSQL error: column \"rn\" does not exist.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "WITH ranked AS (SELECT *, ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) AS rn FROM employees) SELECT * FROM ranked WHERE rn = 1;",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The query raises an error instead of returning rows."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the order in which WHERE and SELECT are evaluated."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 filters on rn in the same query that defines it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Window functions are computed after WHERE, so their results can only be filtered in an outer query."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try running the query as written."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: rn does not exist at WHERE time, so the query errors. Filter in an outer query or CTE."
+      }
+    ],
+    "repair": "Move the window function into a CTE or subquery and filter rn = 1 outside it.",
+    "debrief": "Window functions run late in the logical query order - after WHERE, GROUP BY and HAVING. To filter on their output, add a level: a subquery or CTE. (Some engines add QUALIFY for this; standard PostgreSQL does not.)",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-advanced-sql-window-functions-003",
+    "subject": "databases",
+    "topic": "Advanced SQL & Window Functions",
+    "subtopic": "The default window frame with ties",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does running_total increase row by row, giving 10, 30, 35, 42?",
+    "artifact_type": "sql",
+    "artifact": {
+      "sales": {
+        "title": "sales",
+        "columns": [
+          "day",
+          "amount"
+        ],
+        "rows": [
+          [
+            1,
+            10
+          ],
+          [
+            2,
+            20
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            3,
+            7
+          ]
+        ]
+      },
+      "query": "SELECT day, amount,\n       SUM(amount) OVER (ORDER BY day) AS running_total\nFROM sales;"
+    },
+    "ai_claim": "Yes. The running total adds each row's amount to the sum of all previous rows: 10, 30, 35, 42.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "SUM with OVER (ORDER BY day) computes a cumulative sum."
+      },
+      {
+        "index": 2,
+        "text": "Row 1: 10."
+      },
+      {
+        "index": 3,
+        "text": "Each later row adds its amount to the previous total: 10 + 20 = 30, then 30 + 5 = 35."
+      },
+      {
+        "index": 4,
+        "text": "Row 4: 35 + 7 = 42."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Assuming the default frame is row by row",
+      "explanation": "With ORDER BY and no explicit frame, the default is RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW, which includes all peers - rows with the same ORDER BY value. Both day-2 rows see each other, so both get 35. The output is 10, 35, 35, 42. Specify ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW (plus a tie-breaking sort key) for a row-by-row total.",
+      "why_convincing": "With unique ORDER BY values, RANGE and ROWS give identical results, so the default usually looks row-by-row."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The two day-2 rows are peers under the default RANGE frame, so both show 35: the output is 10, 35, 35, 42. Use ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW with a unique ordering.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "running_total is 10, 35, 35, 42.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "35"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "SUM(amount) OVER (ORDER BY day, amount ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Both rows for day 2 get 35."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the rows that share the same day."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes each row sees only the rows before it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The default frame with ORDER BY is RANGE, which includes every row with the same ORDER BY value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the frame for each of the day-2 rows."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: under the default RANGE frame both day-2 rows include each other, giving 35 and 35. Use a ROWS frame."
+      }
+    ],
+    "repair": "Specify `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` and add a tie-breaker to ORDER BY.",
+    "debrief": "Window frames have defaults, and the default is RANGE, not ROWS. The difference only appears with duplicate ORDER BY values - which real data always has eventually. State the frame explicitly for running totals.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-advanced-sql-window-functions-004",
+    "subject": "databases",
+    "topic": "Advanced SQL & Window Functions",
+    "subtopic": "Window functions keep every row",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: one row per department with its average salary. Does this query return exactly two rows, eng and ops?",
+    "artifact_type": "sql",
+    "artifact": {
+      "employees": {
+        "title": "employees",
+        "columns": [
+          "name",
+          "dept",
+          "salary"
+        ],
+        "rows": [
+          [
+            "Asha",
+            "eng",
+            90
+          ],
+          [
+            "Ben",
+            "eng",
+            80
+          ],
+          [
+            "Chen",
+            "ops",
+            70
+          ],
+          [
+            "Dev",
+            "ops",
+            70
+          ],
+          [
+            "Eli",
+            "ops",
+            60
+          ]
+        ]
+      },
+      "query": "SELECT dept,\n       AVG(salary) OVER (PARTITION BY dept) AS avg_salary\nFROM employees;"
+    },
+    "ai_claim": "Yes. PARTITION BY dept groups the employees by department, so the query returns one row for each department with its average.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "PARTITION BY dept divides employees into eng and ops."
+      },
+      {
+        "index": 2,
+        "text": "AVG(salary) is computed within each partition: eng 85, ops about 66.7."
+      },
+      {
+        "index": 3,
+        "text": "Each partition produces one result row."
+      },
+      {
+        "index": 4,
+        "text": "So the query returns two rows."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Treating PARTITION BY like GROUP BY",
+      "explanation": "A window function adds a value to every input row; it does not collapse rows. The query returns five rows - one per employee - each showing its department's average (eng twice, ops three times). For one row per department, use GROUP BY dept.",
+      "why_convincing": "PARTITION BY and GROUP BY both 'group by department', and the averages in step 2 are correct."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The query returns 5 rows, one per employee. Use SELECT dept, AVG(salary) FROM employees GROUP BY dept for one row per department.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The query returns 5 rows: eng twice with 85, ops three times with about 66.7.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5",
+          "85"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "SELECT dept, AVG(salary) AS avg_salary FROM employees GROUP BY dept;",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "eng appears twice in the output, once per engineer."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the rows in the input and in the output."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims each partition produces one row."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Window functions compute over a set of rows but return one value per input row."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List the output row for each employee."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: window functions keep all 5 rows. Use GROUP BY for one row per department."
+      }
+    ],
+    "repair": "Use `GROUP BY dept` with AVG(salary).",
+    "debrief": "GROUP BY collapses rows; a window function annotates them. That is the whole point of windows - comparing each row with its group average, for example - and exactly why they cannot replace GROUP BY for summary tables.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-advanced-sql-window-functions-005",
+    "subject": "databases",
+    "topic": "Advanced SQL & Window Functions",
+    "subtopic": "Moving averages at the start of the series",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it correct that this produces a 3-day moving average of 30, 45, 60, 60, where the first two days average only the days available?",
+    "artifact_type": "sql",
+    "artifact": {
+      "visits": {
+        "title": "visits",
+        "columns": [
+          "day",
+          "n"
+        ],
+        "rows": [
+          [
+            1,
+            30
+          ],
+          [
+            2,
+            60
+          ],
+          [
+            3,
+            90
+          ],
+          [
+            4,
+            30
+          ]
+        ]
+      },
+      "query": "SELECT day, n,\n       AVG(n) OVER (ORDER BY day\n                    ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS avg_3day\nFROM visits;"
+    },
+    "ai_claim": "Yes. The frame covers the current row and up to two before it; days 1 and 2 have fewer rows, so they average one and two values.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The frame is the current row plus at most two preceding rows."
+      },
+      {
+        "index": 2,
+        "text": "Day 1 averages only itself: 30. Day 2 averages 30 and 60: 45."
+      },
+      {
+        "index": 3,
+        "text": "Day 3 averages 30, 60 and 90: 60."
+      },
+      {
+        "index": 4,
+        "text": "Day 4 averages 60, 90 and 30: 60."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A ROWS frame truncates at the start of the partition, so early rows average fewer values: 30, 45, 60, 60. (Filter out the first two rows if only full 3-day windows should be reported.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "day 1: 30/1 = 30; day 2: 90/2 = 45; day 3: 180/3 = 60; day 4: 180/3 = 60",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "45",
+          "60"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the frame for each of the first two rows."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 claims the frame shrinks at the start."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A ROWS frame includes only rows that exist; it does not pad with zeros or NULLs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute each day's average by hand."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The ROWS frame averages the available rows: 30, 45, 60, 60. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Moving averages over a ROWS frame are correct but include partial windows at the start. The claim states that behaviour accurately. Whether partial windows belong in a report is a presentation decision; the computation itself is right.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

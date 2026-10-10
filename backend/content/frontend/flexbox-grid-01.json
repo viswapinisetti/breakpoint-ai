@@ -1,0 +1,480 @@
+[
+  {
+    "id": "fe-flexbox-grid-001",
+    "subject": "frontend",
+    "topic": "Flexbox & Grid",
+    "subtopic": "Main axis versus cross axis",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does justify-content: center centre the toolbar's items vertically within its 80px height?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": ".toolbar {\n  display: flex;          /* flex-direction defaults to row */\n  height: 80px;\n  justify-content: center;\n}"
+    },
+    "ai_claim": "Yes. justify-content: center centres the items inside the flex container.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The toolbar is a flex container."
+      },
+      {
+        "index": 2,
+        "text": "justify-content aligns items inside the container."
+      },
+      {
+        "index": 3,
+        "text": "center places them in the middle of the 80px height."
+      },
+      {
+        "index": 4,
+        "text": "So the items are vertically centred."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Mixing up the main and cross axes",
+      "explanation": "justify-content aligns along the main axis, which is horizontal for flex-direction: row. It centres the items horizontally. Vertical alignment in a row is the cross axis, controlled by align-items: center.",
+      "why_convincing": "'Centre the items' sounds complete, and the property does centre them - along the other axis."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "justify-content centres horizontally in a row. Use align-items: center for vertical centring (both properties for both axes).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "justify-content aligns along the main axis; align-items aligns along the cross axis.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": ".toolbar { display: flex; align-items: center; }",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The items sit centred horizontally but at the top of the 80px bar."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Identify the toolbar's main axis."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes justify-content works vertically."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In a row, the main axis is horizontal; align-items controls the vertical cross axis."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check where the items sit vertically."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: justify-content centres horizontally in a row. Use align-items: center."
+      }
+    ],
+    "repair": "Add `align-items: center`.",
+    "debrief": "Flexbox has two axes, and each alignment property belongs to one. Changing flex-direction swaps them, so always name the axis before choosing the property.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-flexbox-grid-002",
+    "subject": "frontend",
+    "topic": "Flexbox & Grid",
+    "subtopic": "Flex items and min-width: auto",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does flex: 1 guarantee the text column stays within the 400px row?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": ".row { display: flex; width: 400px; }\n.icon { width: 40px; }\n.text { flex: 1; }\n\n<div class=\"row\">\n  <div class=\"icon\"></div>\n  <div class=\"text\">https://example.com/a-very-long-unbroken-url-that-keeps-going-and-going</div>\n</div>"
+    },
+    "ai_claim": "Yes. flex: 1 makes the text column take the remaining 360px and shrink as needed, so it never overflows.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The icon takes 40px."
+      },
+      {
+        "index": 2,
+        "text": "flex: 1 lets the text column grow and shrink to fill the remaining space."
+      },
+      {
+        "index": 3,
+        "text": "The text column can shrink to any width, so it takes 360px."
+      },
+      {
+        "index": 4,
+        "text": "So the content stays within the row."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Forgetting that flex items do not shrink below their content",
+      "explanation": "Flex items default to min-width: auto, which stops them shrinking below their min-content width. An unbreakable URL's min-content width is the whole URL, so the text column grows past 360px and overflows the row. Set min-width: 0 (and overflow-wrap: anywhere or text-overflow: ellipsis) on the text column.",
+      "why_convincing": "With ordinary words the text wraps and everything fits, so tests with normal text pass."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: min-width: auto keeps the column at least as wide as the unbreakable URL, which overflows. Add min-width: 0 and a wrapping or truncation rule.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "With the long URL, the text column's width exceeds 360px and spills out of the 400px row.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "360"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": ".text { flex: 1; min-width: 0; overflow-wrap: anywhere; }",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A long URL pushes the row wider than 400px."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the layout with content that cannot wrap."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims the column can shrink to any width."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Flex items have min-width: auto by default, which is their min-content width."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find the min-content width of an unbroken URL."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: min-width: auto prevents shrinking below the URL's width. Add min-width: 0."
+      }
+    ],
+    "repair": "Add `min-width: 0` to .text, plus `overflow-wrap: anywhere` or truncation.",
+    "debrief": "The automatic minimum size of flex items is the most common cause of mysterious overflow in flex layouts. Test layouts with long, unbreakable strings - URLs, emails, IDs - not just lorem ipsum.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-flexbox-grid-003",
+    "subject": "frontend",
+    "topic": "Flexbox & Grid",
+    "subtopic": "1fr is not always equal",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are the three columns always exactly 200px each?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": ".grid {\n  display: grid;\n  width: 600px;\n  grid-template-columns: repeat(3, 1fr);\n}\n/* the first cell contains a 400px-wide image */"
+    },
+    "ai_claim": "Yes. 1fr divides the free space equally, so three 1fr columns in 600px are always 200px each.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The grid is 600px wide."
+      },
+      {
+        "index": 2,
+        "text": "Each column is 1fr."
+      },
+      {
+        "index": 3,
+        "text": "1fr is an equal share of the space, whatever the content."
+      },
+      {
+        "index": 4,
+        "text": "So each column is 200px."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming 1fr ignores content size",
+      "explanation": "1fr means minmax(auto, 1fr): the column's minimum is its content's min-content size. A 400px image forces the first column to at least 400px, leaving 200px to share between the others, so the columns are unequal (or overflow). Use repeat(3, minmax(0, 1fr)) for strictly equal columns.",
+      "why_convincing": "With small content, the columns really are equal."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the 400px image sets the first column's minimum. Use minmax(0, 1fr) (and max-width: 100% on the image) for equal columns.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "In grid-template-columns, 1fr is shorthand for minmax(auto, 1fr), so a track never shrinks below its content's minimum size.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "grid-template-columns: repeat(3, minmax(0, 1fr));",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "With the 400px image, the first column is 400px and the others share the remaining 200px."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider what happens when content is larger than an equal share."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims fr ignores content."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The automatic minimum of an fr track is its content's min-content width."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Put a 400px image in a 200px column."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 1fr has an automatic content minimum. Use minmax(0, 1fr)."
+      }
+    ],
+    "repair": "Use `repeat(3, minmax(0, 1fr))` and constrain images with max-width: 100%.",
+    "debrief": "Like flex items, grid tracks protect their content by default. 'Equal columns' needs minmax(0, 1fr). When a layout breaks only with certain content, suspect an automatic minimum size.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-flexbox-grid-004",
+    "subject": "frontend",
+    "topic": "Flexbox & Grid",
+    "subtopic": "auto-fill versus auto-fit",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do the two cards stretch to fill the full 1000px (500px each)?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": ".cards {\n  display: grid;\n  width: 1000px;\n  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));\n}\n/* only 2 cards are rendered */"
+    },
+    "ai_claim": "Yes. With minmax(200px, 1fr), the cards grow to share all available space, so each is 500px.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each track is at least 200px and can grow to 1fr."
+      },
+      {
+        "index": 2,
+        "text": "There are only two cards."
+      },
+      {
+        "index": 3,
+        "text": "The two tracks share the 1000px equally."
+      },
+      {
+        "index": 4,
+        "text": "So each card is 500px wide."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Confusing auto-fill with auto-fit",
+      "explanation": "auto-fill creates as many tracks as fit - five 200px tracks in 1000px - and keeps the empty ones. The 1fr is shared among all five, so each card is 200px and the rest of the row is empty. auto-fit collapses empty tracks, which would let two cards stretch to 500px each.",
+      "why_convincing": "The two keywords differ only when there are fewer items than tracks, which is easy not to test."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: auto-fill keeps five tracks, so each card is 200px. Use auto-fit to collapse empty tracks and stretch the cards.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "auto-fill keeps empty repeated tracks; auto-fit collapses them to zero.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "DevTools' grid overlay shows five 200px columns, three of them empty.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "200"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Two cards occupy 400px and 600px of the row is empty."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the tracks the grid creates, not the items."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes only two tracks exist."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "auto-fill creates tracks for the space available; auto-fit collapses the empty ones."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide 1000px into 200px tracks."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: auto-fill creates five tracks, so each card is 200px. Use auto-fit."
+      }
+    ],
+    "repair": "Use `repeat(auto-fit, minmax(200px, 1fr))`.",
+    "debrief": "auto-fill and auto-fit give identical results when the row is full and different results when it is not. Test responsive grids with few items as well as many.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-flexbox-grid-005",
+    "subject": "frontend",
+    "topic": "Flexbox & Grid",
+    "subtopic": "flex: 1 and equal widths",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are the three tabs equal in width (200px each) even though their labels have different lengths?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": ".tabs { display: flex; width: 600px; }\n.tab  { flex: 1; }\n\n<div class=\"tabs\">\n  <div class=\"tab\">Home</div>\n  <div class=\"tab\">Order history</div>\n  <div class=\"tab\">Settings</div>\n</div>"
+    },
+    "ai_claim": "Yes. flex: 1 expands to flex: 1 1 0%, so each tab starts from zero and receives an equal share of 600px, as long as no label is wider than 200px.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "flex: 1 means flex-grow 1, flex-shrink 1, flex-basis 0%."
+      },
+      {
+        "index": 2,
+        "text": "With a zero basis, all 600px is free space."
+      },
+      {
+        "index": 3,
+        "text": "Equal grow factors share it equally: 200px each."
+      },
+      {
+        "index": 4,
+        "text": "The labels are all narrower than 200px, so min-width: auto does not interfere."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A zero flex-basis makes widths depend only on grow factors, giving equal tabs. With flex: auto (basis auto), longer labels would get wider tabs.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "flex: 1 is equivalent to flex: 1 1 0%.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "DevTools shows each tab at 200px.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "200"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what flex-basis the shorthand flex: 1 sets."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 depends on the basis being zero."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "When flex-basis is 0, only the grow factors decide how space is divided."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare flex: 1 with flex: auto for these labels."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. flex: 1 sets a zero basis, so the tabs share 600px equally. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "flex: 1 and flex: auto look similar but distribute space differently: from zero, or from each item's content size. The claim also states the one condition that could break equality, a label wider than its share.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

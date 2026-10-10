@@ -1,0 +1,371 @@
+[
+  {
+    "id": "cs-computer-networks-001",
+    "subject": "computer-science",
+    "topic": "Computer Networks",
+    "subtopic": "Usable hosts in a subnet",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many usable host addresses does an IPv4 /26 subnet provide?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "A /26 subnet provides 64 usable host addresses.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A /26 prefix leaves 32 - 26 = 6 bits for hosts."
+      },
+      {
+        "index": 2,
+        "text": "6 host bits give 2^6 = 64 addresses."
+      },
+      {
+        "index": 3,
+        "text": "Each address can be assigned to a host."
+      },
+      {
+        "index": 4,
+        "text": "So a /26 has 64 usable host addresses."
+      }
+    ],
+    "ai_final_answer": "64",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Forgetting the network and broadcast addresses",
+      "explanation": "In a conventional IPv4 subnet, the all-zeros host address identifies the network and the all-ones address is the broadcast address; neither can be assigned to a host. A /26 has 64 addresses but 64 - 2 = 62 usable hosts.",
+      "why_convincing": "Steps 1 and 2 are exact, and 'addresses' slides into 'usable addresses' without anyone noticing."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "2^6 = 64 addresses, minus the network and broadcast addresses: 62 usable hosts.",
+    "canonical_answer": "62",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "2^6 - 2 = 62",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "62"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "In 192.168.1.0/26, 192.168.1.0 is the network address and 192.168.1.63 the broadcast.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "63"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "192.168.1.63 is the broadcast address of 192.168.1.0/26 and cannot be given to a host."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether every address in a subnet can be given to a host."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats all 64 addresses the same way."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Two addresses in each conventional subnet are reserved: network and broadcast."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List the first and last address of 192.168.1.0/26 and their roles."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the network and broadcast addresses are reserved, so a /26 has 62 usable hosts."
+      }
+    ],
+    "repair": "Replace step 3: subtract the network and broadcast addresses, giving 62 usable hosts.",
+    "debrief": "Address counts and usable-host counts differ by the reserved addresses, and mixing them up leads to subnets that are two hosts too small. Write out the first and last address of a range to see what each is for. (Point-to-point /31 links are a special case with no broadcast, which is exactly why the rule has to be stated.)",
+    "transfer_check": {
+      "question": "How many usable host addresses does a /27 subnet provide?",
+      "answer": "30",
+      "explanation": "2^5 - 2 = 30."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-computer-networks-002",
+    "subject": "computer-science",
+    "topic": "Computer Networks",
+    "subtopic": "Bandwidth versus latency",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A client fetches a 1 KB response over a link with a 100 ms round-trip time and 100 Mbps bandwidth. If the bandwidth is upgraded to 200 Mbps, does the fetch time roughly halve?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. Doubling the bandwidth doubles the speed, so the fetch takes about half as long.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Fetch time depends on how fast data moves over the link."
+      },
+      {
+        "index": 2,
+        "text": "Bandwidth is the link's speed."
+      },
+      {
+        "index": 3,
+        "text": "Doubling bandwidth from 100 to 200 Mbps doubles the speed."
+      },
+      {
+        "index": 4,
+        "text": "So the fetch time roughly halves."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Treating bandwidth as the only factor in transfer time",
+      "explanation": "Total time is about latency plus size/bandwidth. 1 KB is 8,000 bits: 0.08 ms at 100 Mbps and 0.04 ms at 200 Mbps. The 100 ms round trip dominates, so the fetch goes from about 100.08 ms to about 100.04 ms - essentially unchanged.",
+      "why_convincing": "'Speed' is used loosely for both bandwidth and latency, and for large downloads bandwidth really is what matters."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Transfer time = round-trip latency + size / bandwidth = 100 ms + 0.08 ms before, 100 ms + 0.04 ms after. The fetch time barely changes; reducing latency (or round trips) is what would help.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "8,000 bits / 100 Mbps = 0.08 ms, tiny next to 100 ms RTT",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.08",
+          "100"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Small transfers are latency-bound; large transfers are bandwidth-bound.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Even infinite bandwidth would leave the fetch at about 100 ms."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Split the fetch time into its components."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 equates 'bandwidth' with 'speed'. Check that for a small response."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Time is roughly latency plus size divided by bandwidth."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 8,000 bits / 100 Mbps and compare it with 100 ms."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 ignores latency: the 100 ms round trip dominates a 1 KB transfer, so doubling bandwidth saves only 0.04 ms."
+      }
+    ],
+    "repair": "Replace steps 2-4: time is about 100 ms latency + 0.08 ms transfer; doubling bandwidth saves 0.04 ms, so the time does not halve.",
+    "debrief": "Bandwidth is how wide the pipe is; latency is how long the pipe is. Web pages made of many small requests are latency-bound, which is why techniques like caching, connection reuse and CDNs help more than faster links. Before choosing a fix, compute which term dominates.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-computer-networks-003",
+    "subject": "computer-science",
+    "topic": "Computer Networks",
+    "subtopic": "How routers forward packets",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does a router decide where to forward an IP packet next by looking at the packet's destination MAC address?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. The router reads the destination MAC address and sends the packet towards that device.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every network interface has a unique MAC address."
+      },
+      {
+        "index": 2,
+        "text": "The packet's frame carries the destination MAC address."
+      },
+      {
+        "index": 3,
+        "text": "The router forwards the packet across the internet towards the device with that MAC address."
+      },
+      {
+        "index": 4,
+        "text": "So the next hop is chosen from the destination MAC address."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Confusing link-layer and network-layer addressing",
+      "explanation": "Routers forward using the destination IP address, matched against the routing table. MAC addresses only matter on a single link: at each hop the router strips the old frame and builds a new one addressed to the next hop's MAC. The destination MAC in a frame is the next hop, not the final host.",
+      "why_convincing": "Every frame really does carry a destination MAC, and MAC addresses really are unique, so steps 1 and 2 make step 3 sound natural."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Routing decisions use the destination IP address and the routing table. MAC addresses are rewritten at every hop and identify only the next device on the local link.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Routers make forwarding decisions on the destination IP address; MAC addresses are hop-by-hop.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "Across three routers the destination IP stays the same while the destination MAC changes at every hop.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A packet from India to a server in Europe keeps the same destination IP, but its destination MAC changes at every router."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Distinguish the address used on one link from the address used end to end."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 uses the MAC address across the whole internet."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "MAC addresses are link-layer (one hop); IP addresses are network-layer (end to end)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Follow a packet across two routers and note which addresses change."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: routers forward on the destination IP address; MAC addresses are rewritten at every hop."
+      }
+    ],
+    "repair": "Replace step 3: the router looks up the destination IP address in its routing table and re-frames the packet for the next hop.",
+    "debrief": "Networking is layered, and each layer's address has a scope: MAC for one link, IP for end to end, ports for a process on a host. Many confusions come from using an address outside its scope. When tracing a packet, write down which fields change at each hop and which never do.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-computer-networks-004",
+    "subject": "computer-science",
+    "topic": "Computer Networks",
+    "subtopic": "Cost of the TCP handshake",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Without TCP Fast Open, must at least one full round trip pass before a client can send its first byte of application data on a new TCP connection?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. The three-way handshake (SYN, SYN-ACK, ACK) takes one round trip before data can flow.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The client sends SYN to start the connection."
+      },
+      {
+        "index": 2,
+        "text": "The server replies with SYN-ACK."
+      },
+      {
+        "index": 3,
+        "text": "Only after receiving SYN-ACK does the client send ACK, and it can send data together with or after it."
+      },
+      {
+        "index": 4,
+        "text": "So one full round trip passes before the first data byte leaves the client."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The client must wait for SYN-ACK, which takes one round trip, before sending data (it can piggyback data on the final ACK). TLS on top adds further round trips; TCP Fast Open and QUIC exist to reduce this cost.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "t=0 SYN -> t=RTT receive SYN-ACK -> send ACK + data",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the messages the client must receive before sending data."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is the key: when is the client allowed to send data?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The client may send data only after the connection is established from its side, i.e. after receiving SYN-ACK."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Draw the handshake on a timeline in units of round-trip time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The client waits one round trip for SYN-ACK before its first data. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Handshakes cost round trips, and round trips cost latency that no bandwidth upgrade removes. This is why connection reuse, TCP Fast Open and QUIC matter for performance. Knowing how many round trips a protocol needs before useful work lets you estimate its latency on any network.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

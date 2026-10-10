@@ -1,0 +1,518 @@
+[
+  {
+    "id": "ml-linear-logistic-regression-001",
+    "subject": "machine-learning",
+    "topic": "Linear & Logistic Regression",
+    "subtopic": "Comparing coefficients on different scales",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the larger coefficient show that age matters more than income for spend?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "coefficients": {
+        "title": "Linear regression for monthly spend (Rs)",
+        "columns": [
+          "feature (unscaled)",
+          "coefficient"
+        ],
+        "rows": [
+          [
+            "age (years)",
+            "12.0"
+          ],
+          [
+            "annual_income (Rs)",
+            "0.004"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. Age's coefficient, 12.0, is thousands of times larger than income's, 0.004, so age has far more influence on spend.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Coefficients measure each feature's influence."
+      },
+      {
+        "index": 2,
+        "text": "Age has coefficient 12.0."
+      },
+      {
+        "index": 3,
+        "text": "Income has coefficient 0.004."
+      },
+      {
+        "index": 4,
+        "text": "So age matters far more."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 1,
+      "misconception": "Comparing coefficients of features in different units",
+      "explanation": "A coefficient is the change in spend per unit of the feature: Rs 12 per year of age, Rs 0.004 per rupee of income. Income varies by lakhs, so a typical difference of Rs 5,00,000 changes spend by Rs 2,000, while a 10-year age difference changes it by Rs 120. Compare standardised coefficients (or per-standard-deviation effects).",
+      "why_convincing": "Bigger number, bigger effect, is the naive reading."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: coefficients depend on units. Per typical variation, income has the larger effect (Rs 2,000 vs Rs 120).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "0.004 x 5,00,000 = 2,000 vs 12 x 10 = 120",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "2000",
+          "120"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Measuring income in lakhs would multiply its coefficient by 1,00,000 without changing the model.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Changing income's units changes its coefficient but not its importance."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the units of each feature."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 reads coefficients as comparable influence."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Coefficients are per unit; compare effects over typical ranges or standardise."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply each coefficient by a typical change in its feature."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: coefficients depend on units. Income's effect is larger."
+      }
+    ],
+    "repair": "Standardise features before fitting (or compare coefficient x feature SD).",
+    "debrief": "Coefficient size is meaningful only on a common scale. Standardising makes effects comparable.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-linear-logistic-regression-002",
+    "subject": "machine-learning",
+    "topic": "Linear & Logistic Regression",
+    "subtopic": "Logistic regression coefficients",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does having a coupon raise the purchase probability by 0.7 (70 percentage points)?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "output": "Logistic regression for purchase (yes/no)\ncoefficient of has_coupon (0/1): 0.7"
+    },
+    "ai_claim": "Yes. The coefficient is 0.7, so having a coupon increases the probability of purchase by 0.7.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "has_coupon is 0 or 1."
+      },
+      {
+        "index": 2,
+        "text": "Its coefficient is 0.7."
+      },
+      {
+        "index": 3,
+        "text": "Coefficients give the change in probability per unit."
+      },
+      {
+        "index": 4,
+        "text": "So a coupon raises purchase probability by 0.7."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Reading a log-odds coefficient as a probability change",
+      "explanation": "Logistic regression is linear in the log-odds. A coefficient of 0.7 multiplies the odds by e^0.7 = 2.01. The change in probability depends on the starting point: from 10% (odds 0.111) to about 18%, from 50% to about 67%. It is never simply +0.7.",
+      "why_convincing": "In linear regression, coefficients are changes in the outcome."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the coupon doubles the odds (e^0.7 = 2.01). The probability change depends on the baseline, e.g. 10% -> 18%.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "e^0.7 = 2.01; odds 0.111 x 2.01 = 0.224, probability 0.224 / 1.224 = 18%",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2.01",
+          "18"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "From a baseline of 50%, +0.7 would give a probability of 1.2, which is impossible.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A probability cannot exceed 1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall what logistic regression models linearly."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats coefficients as probability changes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Coefficients are changes in log-odds; e^coef is an odds ratio."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute e^0.7."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 0.7 is a log-odds change, doubling the odds."
+      }
+    ],
+    "repair": "Report odds ratios (e^coef), or marginal effects at meaningful baselines.",
+    "debrief": "Interpret models in the space where they are linear. For logistic regression, that is log-odds.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-linear-logistic-regression-003",
+    "subject": "machine-learning",
+    "topic": "Linear & Logistic Regression",
+    "subtopic": "Coefficients of correlated features",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the negative coefficient on height_in show that, holding height_cm fixed, taller people weigh less?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "coefficients": {
+        "title": "Linear regression for body weight (kg)",
+        "columns": [
+          "feature",
+          "coefficient"
+        ],
+        "rows": [
+          [
+            "height_cm",
+            "1.84"
+          ],
+          [
+            "height_in",
+            "-2.35"
+          ]
+        ]
+      },
+      "note": "height_in is height_cm / 2.54, rounded to one decimal place."
+    },
+    "ai_claim": "Yes. The coefficient on height_in is negative, so an increase in height_in, with height_cm held fixed, lowers weight.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each coefficient shows the effect of its feature with the others held fixed."
+      },
+      {
+        "index": 2,
+        "text": "height_in has a negative coefficient."
+      },
+      {
+        "index": 3,
+        "text": "So more height_in, with height_cm fixed, means less weight."
+      },
+      {
+        "index": 4,
+        "text": "Taller people therefore weigh less, other things equal."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Interpreting coefficients of near-duplicate features",
+      "explanation": "height_in and height_cm measure the same thing, so 'height_in changes while height_cm is fixed' never happens (except for rounding noise). With near-perfect collinearity, the individual coefficients are unstable - they can take large opposite signs whose combination is sensible: per cm of height, 1.84 - 2.35 / 2.54 = 0.91 kg. Drop one of the duplicates before interpreting.",
+      "why_convincing": "'Holding other features fixed' is the textbook reading of coefficients."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the features are collinear, so each coefficient alone is meaningless. The combined effect is about 0.91 kg per cm of height. Remove one feature.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Combined effect per cm: 1.84 - 2.35 / 2.54 = 0.91 kg",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.91"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "height_in is a rescaled copy of height_cm.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "2.54"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Refitting on a bootstrap sample can flip both coefficients' signs."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how the two features are related."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 imagines changing one feature with the other fixed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Collinear features make individual coefficients unstable and uninterpretable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Combine the two coefficients into an effect per cm."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the features are duplicates. The combined effect is positive; drop one feature."
+      }
+    ],
+    "repair": "Remove one of the duplicate features (or use regularisation) before interpreting coefficients.",
+    "debrief": "Check feature correlations (or variance inflation factors) before interpreting coefficients. Duplicates split and distort effects.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-linear-logistic-regression-004",
+    "subject": "machine-learning",
+    "topic": "Linear & Logistic Regression",
+    "subtopic": "A high R-squared on curved data",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does R^2 = 0.85 show the linear model is appropriate for forecasting month 30?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "fit": "Users per month over 24 months grow roughly 12% per month.\nA straight-line fit has R^2 = 0.85.\nResiduals: positive at both ends, negative in the middle (a U-shape).",
+      "plan": "Use the straight line to forecast month 30."
+    },
+    "ai_claim": "Yes. An R^2 of 0.85 means the line explains 85% of the variation, so it is a good model for forecasting.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The linear model has R^2 = 0.85."
+      },
+      {
+        "index": 2,
+        "text": "85% of the variation is explained."
+      },
+      {
+        "index": 3,
+        "text": "A high R^2 means the model form is right."
+      },
+      {
+        "index": 4,
+        "text": "So it can forecast month 30."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Fitting a line to exponential growth",
+      "explanation": "A U-shaped residual pattern shows systematic misfit: the true curve is exponential, and the line underestimates the ends. Extrapolating to month 30 compounds the error, badly underestimating users. R^2 can be high for the wrong model form. Model log(users) against time (a straight line on the log scale), and check residual plots.",
+      "why_convincing": "0.85 sounds like a strong fit."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the residual pattern shows the wrong functional form. Fit log(users) against time instead.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Residuals are positive at both ends and negative in the middle.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "calculation",
+        "summary": "At 12% growth, users multiply by 1.12^6 = 1.97 from month 24 to 30, far above the line's projection.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.97"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The line predicts too few users at month 30."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the residual pattern."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 infers correct model form from R^2."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Systematic residual patterns mean the model form is wrong, whatever R^2 says."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare growth on a log scale."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: residuals show exponential growth. Model the log."
+      }
+    ],
+    "repair": "Regress log(users) on month and check that residuals look random.",
+    "debrief": "R^2 measures fit, not correctness of form. Residual plots reveal curvature and patterns that a single number hides.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-linear-logistic-regression-005",
+    "subject": "machine-learning",
+    "topic": "Linear & Logistic Regression",
+    "subtopic": "Regularisation strength in scikit-learn",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's note correct?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "strong = LogisticRegression(C=0.01).fit(X_train, y_train)\nweak   = LogisticRegression(C=100).fit(X_train, y_train)\n# AI note: C is the INVERSE of regularisation strength; C=0.01 regularises heavily and gives smaller coefficients."
+    },
+    "ai_claim": "Yes. In scikit-learn's LogisticRegression, C is the inverse of the regularisation strength, so C=0.01 applies strong L2 regularisation and shrinks coefficients, while C=100 barely regularises.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "LogisticRegression's objective weights the data term by C and keeps the penalty term fixed."
+      },
+      {
+        "index": 2,
+        "text": "Smaller C makes the penalty relatively more important."
+      },
+      {
+        "index": 3,
+        "text": "So C=0.01 is strongly regularised and C=100 weakly."
+      },
+      {
+        "index": 4,
+        "text": "The coefficients of the C=0.01 model are smaller in magnitude."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. C = 1 / lambda in scikit-learn's linear models; smaller C means stronger regularisation (Ridge and Lasso use alpha, where larger means stronger).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "abs(strong.coef_).sum() is much smaller than abs(weak.coef_).sum().",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "scikit-learn documents C as the inverse of regularisation strength.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how C appears in the objective."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 relates C to the penalty's weight."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "C = 1 / lambda: smaller C, stronger regularisation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the two models' coefficient sizes."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. C=0.01 is strongly regularised. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Hyperparameter conventions differ between libraries and models (C versus alpha). Knowing the direction prevents searching the wrong way.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

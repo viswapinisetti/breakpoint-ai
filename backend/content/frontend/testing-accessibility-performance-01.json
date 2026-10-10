@@ -1,0 +1,363 @@
+[
+  {
+    "id": "fe-testing-accessibility-performance-001",
+    "subject": "frontend",
+    "topic": "Testing, Accessibility & Performance",
+    "subtopic": "Colour contrast for body text",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the .help-text colour meet WCAG AA contrast for normal-size text?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": "body {\n  background: #ffffff;\n}\n.help-text {\n  color: #999999;\n  font-size: 14px;\n}"
+    },
+    "ai_claim": "Yes. #999999 is a medium grey that is clearly readable on white, so it meets the AA requirement.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "WCAG AA requires sufficient contrast between text and background."
+      },
+      {
+        "index": 2,
+        "text": "#999999 is a mid-grey."
+      },
+      {
+        "index": 3,
+        "text": "Mid-grey on white is comfortably readable."
+      },
+      {
+        "index": 4,
+        "text": "So the text meets AA."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Judging contrast by eye instead of by ratio",
+      "explanation": "WCAG AA requires a contrast ratio of at least 4.5:1 for normal text (14px is not large text). #999999 on #ffffff has a ratio of about 2.85:1, well short. Readability 'on my screen' is not the criterion; people with low vision and bright-light conditions are. #767676 is the lightest grey that reaches 4.5:1 on white.",
+      "why_convincing": "On a good monitor, in a dim room, the grey does look readable."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the ratio is about 2.85:1, below the 4.5:1 required. Use #767676 or darker.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "WCAG 1.4.3: normal text needs a contrast ratio of at least 4.5:1.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4.5"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "A contrast checker reports 2.85:1 for #999999 on #ffffff.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2.85"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The ratio is 2.85:1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Contrast is measured, not judged."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on how the colour looks."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "AA for normal text requires a ratio of 4.5:1, computed from relative luminance."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the two colours through a contrast checker."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the ratio is 2.85:1, below 4.5:1. Use #767676 or darker."
+      }
+    ],
+    "repair": "Darken the text to #767676 or darker.",
+    "debrief": "Accessibility criteria are measurable, which is their strength: contrast is a ratio, not an opinion. Use the checker in DevTools or Lighthouse instead of judging on your own display.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-testing-accessibility-performance-002",
+    "subject": "frontend",
+    "topic": "Testing, Accessibility & Performance",
+    "subtopic": "Querying by accessible role",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this test would also fail if the Save button lost its accessible name - for example, if it became an icon-only button with no label?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "test(\"saves the profile\", async () => {\n  render(<ProfileForm />);\n  await userEvent.click(screen.getByRole(\"button\", { name: \"Save\" }));\n  expect(await screen.findByText(\"Profile saved\")).toBeInTheDocument();\n});"
+    },
+    "ai_claim": "Yes. getByRole finds elements the way assistive technology does. If the button no longer has the accessible name 'Save', the query throws and the test fails, which catches an accessibility regression.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "getByRole('button', { name: 'Save' }) searches the accessibility tree."
+      },
+      {
+        "index": 2,
+        "text": "It matches only a button whose computed accessible name is 'Save'."
+      },
+      {
+        "index": 3,
+        "text": "An icon-only button without a label has no such name."
+      },
+      {
+        "index": 4,
+        "text": "So the query throws and the test fails."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Role-and-name queries test the accessible interface. A getByTestId query would still pass on an unlabelled icon button.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Replace the button text with an <svg> and no aria-label: getByRole throws 'Unable to find an accessible element with the role \"button\" and name \"Save\"'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "getByTestId('save-btn') would keep passing after the label is removed.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what getByRole's name option matches."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 depends on the computed accessible name."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Testing Library's role queries use the same role and name that screen readers expose."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Remove the button's text and run the test."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Role-and-name queries fail when the accessible name disappears. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Tests written against roles and accessible names double as accessibility checks. Queries by test id or CSS class verify the DOM, not what users - including screen reader users - can find.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-testing-accessibility-performance-003",
+    "subject": "frontend",
+    "topic": "Testing, Accessibility & Performance",
+    "subtopic": "Debouncing search input",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it correct that only one request is sent, for 'lamp'?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "const search = debounce((term) => {\n  fetch(`/api/search?q=${encodeURIComponent(term)}`);\n}, 300);\n\ninput.addEventListener(\"input\", e => search(e.target.value));\n// The user types 'lamp' quickly, about 80 ms between keys, then stops."
+    },
+    "ai_claim": "Yes. Each keystroke restarts the 300 ms timer. The gaps are only about 80 ms, so the timer fires once, 300 ms after the last key, with 'lamp'.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "debounce delays the call until 300 ms have passed with no new input."
+      },
+      {
+        "index": 2,
+        "text": "Every keystroke within 300 ms cancels the pending call and restarts the timer."
+      },
+      {
+        "index": 3,
+        "text": "The user pauses only after typing 'p'."
+      },
+      {
+        "index": 4,
+        "text": "So one request for 'lamp' is sent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. With a trailing debounce and gaps shorter than the delay, only the final value triggers a request - one call instead of four.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Typing 'lamp' with 80 ms gaps shows one request in the network panel, q=lamp.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "80"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the typing gaps with the debounce delay."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says each keystroke restarts the timer."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A trailing debounce fires once the input has been quiet for the full delay."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace the timer across the four keystrokes."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The 80 ms gaps keep resetting the 300 ms timer, so only 'lamp' is requested. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Debouncing trades a little latency for far fewer requests. It does not fix out-of-order responses on its own, so pair it with request cancellation for search-as-you-type.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-testing-accessibility-performance-004",
+    "subject": "frontend",
+    "topic": "Testing, Accessibility & Performance",
+    "subtopic": "Attributing a Lighthouse drop",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Did the analytics script cause the performance score to drop?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// Commit a1b2c3 adds one line to index.html:\n// <script src=\"https://cdn.example-analytics.com/tag.js\"></script>\n//\n// Lighthouse performance score, one run before and one run after:\n//   before: 92\n//   after:  78"
+    },
+    "ai_claim": "Yes. The commit only added the analytics script, and the score fell from 92 to 78, so the script caused the drop.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The commit's only change is the analytics script."
+      },
+      {
+        "index": 2,
+        "text": "The score was 92 before the commit and 78 after."
+      },
+      {
+        "index": 3,
+        "text": "Nothing else changed between the runs."
+      },
+      {
+        "index": 4,
+        "text": "So the script caused the 14-point drop."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether the difference is real or noise. With one run on each side, run-to-run variance (network, CPU load, throttling, extensions, third-party response times) can move Lighthouse scores by this much. We also do not know that the test conditions were identical.",
+    "resolving_scenarios": [
+      "Five runs each give 90-93 before and 76-80 after, under the same conditions: the script very likely caused the drop.",
+      "Repeated runs of the new commit vary between 77 and 92: the single 78 was largely noise."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "A single run on each side cannot separate the change's effect from variance. Step 3 assumes identical conditions and no noise. Run each version several times under fixed conditions (or compare traces) before attributing the drop.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Re-running the 'after' commit could score 91, which would make the 78 an outlier.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "78"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Repeated runs of the same commit can differ by more than 10 points."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how many measurements the conclusion rests on."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes nothing else changed between the runs."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Lab performance scores vary between runs; one sample per side cannot establish a cause."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what repeated runs of each version would show."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes no noise. Consistent repeated runs would support the claim; noisy ones would not. It cannot be decided from one run each."
+      }
+    ],
+    "repair": "Run Lighthouse several times per version under the same conditions and compare medians (or inspect the trace for the script's cost).",
+    "debrief": "Performance measurements are noisy, so a before/after pair is an anecdote, not evidence. Attribute regressions with repeated runs, medians and traces - and the script may still be guilty, which is why this is undecided rather than flawed.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

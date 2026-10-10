@@ -1,0 +1,468 @@
+[
+  {
+    "id": "dev-devsecops-001",
+    "subject": "devops",
+    "topic": "DevSecOps",
+    "subtopic": "Piping remote scripts into a shell",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is running the remote install script this way safe in a production image build?",
+    "artifact_type": "dockerfile",
+    "artifact": {
+      "language": "dockerfile",
+      "dockerfile": "RUN curl -sL https://get.some-tool.example/install.sh | bash\n# AI: \"It's the official installer over HTTPS, so it's safe.\""
+    },
+    "ai_claim": "Yes. It comes from the official site over HTTPS, so the script is authentic and safe.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The URL is the tool's official site."
+      },
+      {
+        "index": 2,
+        "text": "HTTPS protects the download in transit."
+      },
+      {
+        "index": 3,
+        "text": "So the script is authentic."
+      },
+      {
+        "index": 4,
+        "text": "Running it is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Executing unverified remote code at build time",
+      "explanation": "HTTPS protects only the transport. Whatever the server returns today is executed as root in the build - a compromised site, hijacked domain or changed script silently changes every image, and builds are not reproducible. Download a specific version, verify its checksum or signature, then run it (or use the distribution's package or a pinned release binary).",
+      "why_convincing": "It is the official method in the tool's documentation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the build executes whatever the server serves, unverified and unpinned. Pin a version and verify a checksum or signature.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If the vendor's site is compromised, every subsequent image build runs the attacker's script as root.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "RUN curl -fsSLo tool.tar.gz https://get.some-tool.example/v1.9.2/tool.tar.gz \\\n && echo \"<sha256>  tool.tar.gz\" | sha256sum -c - \\\n && tar -xzf tool.tar.gz -C /usr/local/bin",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A changed install script alters every new image without any code change."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what HTTPS does and does not guarantee."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates secure transport with trustworthy content."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Supply-chain security needs pinning and verification."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a compromised vendor website."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: content is unverified. Pin and verify."
+      }
+    ],
+    "repair": "Pin the version and verify its checksum or signature before executing.",
+    "debrief": "Build pipelines are supply chains. Every external input should be pinned and verified.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-devsecops-002",
+    "subject": "devops",
+    "topic": "DevSecOps",
+    "subtopic": "Scanning images once",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the team rely on January's scan to say the running image has no critical vulnerabilities today?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "pipeline": "- run: trivy image --exit-code 1 --severity CRITICAL acme/api:${{ github.sha }}\n# The image passed the scan when it was built in January and has run unchanged since.\n# AI: \"The image was scanned clean, so it has no critical vulnerabilities.\""
+    },
+    "ai_claim": "Yes. The image passed a critical-severity scan and has not changed since, so it still has no critical vulnerabilities.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The image was scanned at build time."
+      },
+      {
+        "index": 2,
+        "text": "It had no critical findings."
+      },
+      {
+        "index": 3,
+        "text": "The image has not changed."
+      },
+      {
+        "index": 4,
+        "text": "So it still has none."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Treating a point-in-time scan as permanent",
+      "explanation": "The image is unchanged, but knowledge about it is not: new CVEs are published daily against packages it already contains. A clean January scan says nothing about vulnerabilities disclosed since. Rescan deployed images continuously (registry or cluster scanning) and rebuild regularly with patched bases.",
+      "why_convincing": "An unchanged image feels like an unchanged risk."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: new CVEs are disclosed after the scan. Scan running images continuously and rebuild regularly.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Rescanning today reports CVE-2026-XXXX (CRITICAL) in openssl, published in March.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Schedule a daily scan of deployed images and a weekly rebuild on the latest patched base image.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A critical CVE published in March affects the unchanged image."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what changes after an image is built."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes vulnerability knowledge is fixed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Vulnerability databases grow continuously."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rescan the image today."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: new CVEs apply to old images. Scan continuously."
+      }
+    ],
+    "repair": "Continuously rescan deployed images and rebuild on patched bases.",
+    "debrief": "Security posture decays even when nothing changes. Scan what runs, not just what builds.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-devsecops-003",
+    "subject": "devops",
+    "topic": "DevSecOps",
+    "subtopic": "Admin credentials for CI",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is using AdministratorAccess for this CI deployment acceptable because the credentials are stored as secrets?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "pipeline": "# CI deploys a static site to one S3 bucket and invalidates one CloudFront distribution.\n# CI uses an IAM user with the AdministratorAccess policy.\n# AI: \"Admin access avoids permission errors, and the credentials are stored as CI secrets, so it's fine.\""
+    },
+    "ai_claim": "Yes. The credentials are protected as CI secrets, so broad permissions pose no real risk, and they prevent permission errors.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The pipeline needs AWS access."
+      },
+      {
+        "index": 2,
+        "text": "Admin access avoids permission errors."
+      },
+      {
+        "index": 3,
+        "text": "The keys are stored as encrypted CI secrets."
+      },
+      {
+        "index": 4,
+        "text": "So the setup is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 2,
+      "misconception": "Granting far more permission than the job needs",
+      "explanation": "The job needs to write one bucket and invalidate one distribution. If the CI system, a dependency, a workflow or a contributor is compromised, AdministratorAccess lets the attacker do anything in the account - delete databases, create users, mine crypto. Secret storage reduces the chance of leakage but not the impact. Grant a least-privilege policy scoped to those resources, and prefer short-lived OIDC credentials over long-lived keys.",
+      "why_convincing": "Admin access makes the pipeline 'just work'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a compromise would expose the whole account. Scope permissions to the bucket and distribution; use OIDC short-lived credentials.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Least privilege: grant only s3:PutObject/DeleteObject on the bucket and cloudfront:CreateInvalidation on the distribution.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Use GitHub OIDC to assume a role with a policy limited to arn:aws:s3:::acme-site/* and the one distribution.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A malicious dependency in the build deletes production databases."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List what the job actually needs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 trades security for convenience."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Limit the blast radius of any credential."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a compromised build dependency."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: admin access maximises damage. Use least privilege."
+      }
+    ],
+    "repair": "Use a narrowly scoped role assumed via OIDC with short-lived credentials.",
+    "debrief": "Credential protection reduces the chance of misuse; least privilege limits the damage when it happens anyway.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-devsecops-004",
+    "subject": "devops",
+    "topic": "DevSecOps",
+    "subtopic": "TLS terminated at the load balancer",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the traffic encrypted end to end?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "architecture": "# Browser --HTTPS--> load balancer --HTTP--> app servers (shared VPC with other teams' workloads)\n# AI: \"We use HTTPS, so traffic is encrypted end to end.\""
+    },
+    "ai_claim": "Yes. The site uses HTTPS, so all traffic is encrypted from the browser to the application.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Browsers connect over HTTPS."
+      },
+      {
+        "index": 2,
+        "text": "HTTPS encrypts traffic."
+      },
+      {
+        "index": 3,
+        "text": "So traffic is encrypted all the way."
+      },
+      {
+        "index": 4,
+        "text": "It is end-to-end encrypted."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming encryption continues past TLS termination",
+      "explanation": "TLS ends at the load balancer; from there to the app servers traffic is plain HTTP inside a shared network. Anyone with access to that network (a compromised workload, a misconfigured mirror) can read passwords and tokens. Re-encrypt to the backends (HTTPS or mTLS) - especially in shared or regulated environments.",
+      "why_convincing": "The browser shows a padlock, which suggests full encryption."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: traffic is plaintext between the load balancer and the servers. Use HTTPS or mTLS to the backends.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Packet capture on the VPC shows 'Authorization: Bearer ...' in plain HTTP between LB and app.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Configure the load balancer to use HTTPS to targets, with certificates on the app servers (or a service mesh with mTLS).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A compromised workload in the VPC can sniff login tokens."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where the TLS connection ends."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes encryption continues."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "TLS termination means decryption at that point."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the protocol between LB and servers."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the internal hop is plain HTTP. Re-encrypt."
+      }
+    ],
+    "repair": "Enable HTTPS/mTLS from the load balancer to the backends.",
+    "debrief": "'Encrypted in transit' should specify every hop. Termination points are where plaintext appears.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-devsecops-005",
+    "subject": "devops",
+    "topic": "DevSecOps",
+    "subtopic": "Signed images and admission control",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this prevents deploying images that did not come from the CI pipeline?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "policy": "# CI signs each image digest with cosign after tests pass.\n# The cluster's admission controller rejects any pod whose image is not signed by the CI key or is referenced by tag instead of digest."
+    },
+    "ai_claim": "Yes. Only images signed by CI's key are admitted, and requiring digests means the exact signed image runs, so an image built elsewhere - or a tag moved to a different image - is rejected.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "CI signs image digests after tests pass."
+      },
+      {
+        "index": 2,
+        "text": "The admission controller verifies the signature on every pod."
+      },
+      {
+        "index": 3,
+        "text": "Unsigned images, or images signed by other keys, are rejected."
+      },
+      {
+        "index": 4,
+        "text": "Requiring digests prevents a tag being repointed to an unsigned image."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Signing plus admission verification enforces provenance at deploy time, provided the signing key is protected (e.g. keyless signing with CI identity).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "kubectl run test --image=acme/api:latest -> denied: image must be referenced by digest and signed by ci@acme",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the cluster checks before running a pod."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 closes the tag loophole."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Provenance enforcement: sign in CI, verify at admission."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try deploying a locally built image."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Only CI-signed images can run. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Supply-chain controls are strongest at the point of deployment, where they cannot be skipped.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

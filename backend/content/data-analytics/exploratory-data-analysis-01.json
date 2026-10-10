@@ -1,0 +1,555 @@
+[
+  {
+    "id": "da-exploratory-data-analysis-001",
+    "subject": "data-analytics",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "Averages from tiny samples",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the chart support the headline that Garden is the best-rated category?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Bar chart: average product rating by category\nGarden 5.0 (2 reviews)\nKitchen 4.6 (1,240 reviews)\nToys 4.4 (860 reviews)",
+      "caption": "Headline: \"Garden is our best-rated category\""
+    },
+    "ai_claim": "Yes. Garden's average rating is 5.0, higher than every other category.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Garden averages 5.0."
+      },
+      {
+        "index": 2,
+        "text": "Kitchen averages 4.6 and Toys 4.4."
+      },
+      {
+        "index": 3,
+        "text": "5.0 is the highest average."
+      },
+      {
+        "index": 4,
+        "text": "So Garden is the best-rated category."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Comparing averages without considering sample size",
+      "explanation": "Garden's 5.0 comes from 2 reviews, which says almost nothing: two happy buyers produce a perfect score. Kitchen's 4.6 is based on 1,240 reviews and is far more reliable. Show sample sizes, set a minimum review count, or use a shrunk (Bayesian) average before ranking.",
+      "why_convincing": "The average itself is correct, and the bar is clearly the tallest."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 2 reviews cannot establish the best category. Require a minimum count or adjust averages for sample size.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Garden's average is based on 2 reviews, versus 1,240 for Kitchen.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2",
+          "1,240"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "One more 1-star Garden review would drop its average to 3.7.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3.7"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A single additional review changes Garden's rank completely."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at how many reviews each average is based on."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 ranks averages as if they were equally reliable."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Small samples produce extreme averages by chance."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine one more Garden review."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 2 reviews is too few to rank. Account for sample size."
+      }
+    ],
+    "repair": "Show review counts and exclude or shrink categories with few reviews.",
+    "debrief": "Extreme averages usually come from small samples. Whenever a chart ranks groups by an average, check the n behind each bar.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-exploratory-data-analysis-002",
+    "subject": "data-analytics",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "Percent of total",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What percentage of August revenue came from the app?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Revenue by channel, August (Rs lakh)",
+        "columns": [
+          "Channel",
+          "Revenue"
+        ],
+        "rows": [
+          [
+            "Website",
+            45
+          ],
+          [
+            "App",
+            30
+          ],
+          [
+            "Stores",
+            25
+          ]
+        ]
+      }
+    },
+    "ai_claim": "40. App revenue is 30 against a website revenue of 45 and stores 25; 30 / 75 = 40%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "App revenue is 30 lakh."
+      },
+      {
+        "index": 2,
+        "text": "The comparison base is the other online channel plus stores, 45 + 30 = 75."
+      },
+      {
+        "index": 3,
+        "text": "30 / 75 = 0.4."
+      },
+      {
+        "index": 4,
+        "text": "So 40% of revenue came from the app."
+      }
+    ],
+    "ai_final_answer": "40",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Using the wrong denominator",
+      "explanation": "Percentage of total revenue divides by the total of all channels: 45 + 30 + 25 = 100. Step 2 adds 45 and 30 (website and app) and calls it the base, so the app is compared with a partial total. The app's share is 30 / 100 = 30%.",
+      "why_convincing": "75 looks like a plausible total, and the division is done correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Total revenue is 100 lakh, so the app's share is 30%.",
+    "canonical_answer": "30",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "30 / (45 + 30 + 25) x 100 = 30",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "30"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Total August revenue is 100 lakh.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "100"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The three channels' shares must add up to 100%; with 40% for the app they would not."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the denominator should be for 'percentage of revenue'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 builds the base from only some channels."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A share of total divides by the sum of all parts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add up all three channels."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the total is 100, so the app's share is 30%."
+      }
+    ],
+    "repair": "",
+    "debrief": "Shares must add to 100%. A quick check - do the shares of all parts sum to one hundred? - catches a wrong denominator immediately.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 30 / (45 + 30 + 25) * 100",
+      "flawed_solver": "answer = 30 / (45 + 30) * 100"
+    }
+  },
+  {
+    "id": "da-exploratory-data-analysis-003",
+    "subject": "data-analytics",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "Simpson's paradox",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is variant B better than variant A for every kind of user?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "results": {
+        "title": "Checkout test results",
+        "columns": [
+          "Segment",
+          "Variant A",
+          "Variant B"
+        ],
+        "rows": [
+          [
+            "Mobile",
+            "50 / 1,000 = 5.0%",
+            "8 / 200 = 4.0%"
+          ],
+          [
+            "Desktop",
+            "40 / 200 = 20.0%",
+            "180 / 1,000 = 18.0%"
+          ],
+          [
+            "Overall",
+            "90 / 1,200 = 7.5%",
+            "188 / 1,200 = 15.7%"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. B converts 15.7% overall against A's 7.5%, more than double, so B is better for all users.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Overall, B converts 15.7% and A 7.5%."
+      },
+      {
+        "index": 2,
+        "text": "Both variants had 1,200 users."
+      },
+      {
+        "index": 3,
+        "text": "B's overall rate is far higher."
+      },
+      {
+        "index": 4,
+        "text": "So B is better for every kind of user."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Concluding segment-level superiority from the aggregate",
+      "explanation": "Within each segment A is better: 5.0% vs 4.0% on mobile, 20.0% vs 18.0% on desktop. B wins overall only because most of its users were on desktop, where everyone converts more. This is Simpson's paradox: the mix of segments, not the variant, drives the aggregate. The traffic split was unbalanced, so the test needs randomisation within segments.",
+      "why_convincing": "The overall numbers are correct and the gap is large."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: A beats B in both segments. B's overall lead comes from its desktop-heavy traffic mix.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Mobile: A 5.0% vs B 4.0%; desktop: A 20.0% vs B 18.0%.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "5.0",
+          "4.0"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Simpson's paradox: an aggregate trend can reverse within every subgroup when group sizes differ.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "On mobile, A converts 5.0% and B only 4.0%."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the variants within each segment."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 generalises from the overall rates."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Aggregates can reverse subgroup trends when the mix of subgroups differs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at how each variant's users split between mobile and desktop."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: A is better in both segments; B's lead comes from its traffic mix."
+      }
+    ],
+    "repair": "Compare within segments, and fix the randomisation so both variants get the same mix.",
+    "debrief": "Before trusting an overall comparison, check whether the groups have the same composition. When they differ, compare within segments.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-exploratory-data-analysis-004",
+    "subject": "data-analytics",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "Log-scale axes",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the straight line show that the company added the same number of users each year?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Line chart: annual users\ny axis: logarithmic (1k, 10k, 100k, 1M equally spaced)\n2022: 1,000  2023: 10,000  2024: 100,000  2025: 1,000,000\nThe line is perfectly straight.",
+      "caption": "Speaker note: \"A straight line - we added the same number of users every year.\""
+    },
+    "ai_claim": "Yes. A straight line means a constant increase, so the same number of users was added every year.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The line from 2022 to 2025 is straight."
+      },
+      {
+        "index": 2,
+        "text": "A straight line means equal steps each year."
+      },
+      {
+        "index": 3,
+        "text": "Equal steps mean the same number of users added."
+      },
+      {
+        "index": 4,
+        "text": "So growth was constant."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Reading a log axis as linear",
+      "explanation": "On a logarithmic axis, equal distances represent equal ratios. A straight line means the same growth factor each year - here 10x - not the same absolute increase. The additions were 9,000, then 90,000, then 900,000 users.",
+      "why_convincing": "On an ordinary axis, a straight line would indeed mean constant additions."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the axis is logarithmic, so the line means users multiplied by 10 each year: +9,000, +90,000, +900,000.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "10,000 - 1,000 = 9,000; 1,000,000 - 100,000 = 900,000",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "9,000",
+          "900,000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "On a log scale, equal vertical distances correspond to equal ratios.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The last year added 100 times as many users as the first."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the scale of the y axis."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 interprets straightness as on a linear axis."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "On a log axis, straight lines mean constant percentage growth."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Subtract consecutive years' user counts."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: on a log scale the line means 10x growth each year, not equal additions."
+      }
+    ],
+    "repair": "Label the log axis clearly, or describe growth as '10x per year'.",
+    "debrief": "Log scales are the right tool for exponential growth, but they change what shapes mean. Always read the axis before the line.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-exploratory-data-analysis-005",
+    "subject": "data-analytics",
+    "topic": "Exploratory Data Analysis",
+    "subtopic": "The IQR outlier fence",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Using the 1.5 x IQR rule, what is the upper fence above which delivery times count as outliers?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Delivery times (minutes), summary",
+        "columns": [
+          "Statistic",
+          "Value"
+        ],
+        "rows": [
+          [
+            "Q1",
+            20
+          ],
+          [
+            "Median",
+            28
+          ],
+          [
+            "Q3",
+            40
+          ],
+          [
+            "Max",
+            75
+          ]
+        ]
+      }
+    },
+    "ai_claim": "70. The IQR is 40 - 20 = 20, and the upper fence is Q3 + 1.5 x IQR = 40 + 30 = 70. The 75-minute delivery is therefore an outlier.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "IQR = Q3 - Q1 = 40 - 20 = 20."
+      },
+      {
+        "index": 2,
+        "text": "1.5 x IQR = 30."
+      },
+      {
+        "index": 3,
+        "text": "Upper fence = Q3 + 30 = 70."
+      },
+      {
+        "index": 4,
+        "text": "75 is above 70, so it is flagged as an outlier."
+      }
+    ],
+    "ai_final_answer": "70",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: the upper fence is 70 minutes, and 75 lies beyond it.",
+    "canonical_answer": "70",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "40 + 1.5 x (40 - 20) = 70",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "70"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Start with the interquartile range."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 adds 1.5 x IQR to Q3."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tukey's rule flags values above Q3 + 1.5 x IQR."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute IQR, then the fence."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The upper fence is 70, so 75 is an outlier. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The IQR rule is a robust way to flag unusual values because quartiles are not distorted by the outliers themselves. Flagged values still need investigation, not automatic deletion.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 40 + 1.5 * (40 - 20)"
+    }
+  }
+]

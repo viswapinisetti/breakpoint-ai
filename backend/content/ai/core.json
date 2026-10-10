@@ -1,0 +1,89 @@
+[
+  {
+    "id": "ai-rag-001",
+    "subject": "ai",
+    "topic": "RAG & Vector Search",
+    "subtopic": "Grounding and hallucination",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "An engineer proposes this architecture for a customer-support assistant and makes the claim below. Is the claim sound?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "design": "1. Embed the user question.\n2. Retrieve the top-5 most similar chunks from the policy document vector store.\n3. Insert those chunks into the prompt as context.\n4. Instruct the model: \"Answer using only the provided context.\"\n5. Return the model's answer to the customer."
+    },
+    "ai_claim": "Because every answer is generated from retrieved documents, this system cannot hallucinate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Retrieval grounds the model in real content from our own policy documents rather than parametric memory."
+      },
+      {
+        "index": 2,
+        "text": "The prompt explicitly instructs the model to answer only from the provided context."
+      },
+      {
+        "index": 3,
+        "text": "Therefore every sentence in the answer traces back to a retrieved document, and hallucination is structurally impossible."
+      }
+    ],
+    "ai_final_answer": "sound",
+    "simulated_confidence": 93,
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Treating retrieval as a guarantee of faithfulness rather than a reduction in risk",
+      "explanation": "Retrieval constrains what the model *sees*; it does not constrain what the model *writes*. Three gaps remain. Retrieval can return chunks that do not contain the answer - top-5 by similarity always returns five chunks, even when the store holds nothing relevant - and the model may then answer from parametric memory. The model can misread or over-generalise a chunk that is present. And a prompt instruction is a soft constraint the model can violate. Grounding lowers hallucination rates substantially; it does not make them impossible.",
+      "why_convincing": "Steps 1 and 2 describe real, effective mitigations, and the architecture is genuinely good practice. The leap is from 'much less likely' to 'structurally impossible' - a quantitative improvement restated as a categorical guarantee, which is easy to miss when every preceding step is true."
+    },
+    "canonical_solution": "The claim is not sound. Retrieval reduces hallucination but cannot eliminate it: (a) similarity search always returns k chunks, so an unanswerable question still yields context, and the model may fill the gap from memory; (b) the model can misinterpret or over-extend retrieved text; (c) 'answer only from context' is an instruction, not an enforced constraint. Mitigations - a similarity threshold with an explicit 'I don't know' path, citation of the supporting span for each claim, and a faithfulness check on the output - reduce risk further but still do not make it zero.",
+    "canonical_answer": "not sound",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A question with no answer in the corpus still retrieves five chunks.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "A prompt instruction is a soft constraint, not an enforcement mechanism.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Ask about a policy that does not exist. Top-5 retrieval still returns the five least-dissimilar chunks, and the model, instructed to answer, may synthesise a plausible policy that appears in no document."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Distinguish what the system controls from what it merely influences."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 are accurate. Check whether Step 3's conclusion actually follows from them."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Retrieval constrains the model's input. Nothing in this design constrains its output."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out what the system does when the answer is in none of the retrieved chunks."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 upgrades a risk reduction into a guarantee. Top-k retrieval always returns k chunks even when none are relevant, the model can misread what it does retrieve, and the instruction is soft. Hallucination becomes less likely, not impossible."
+      }
+    ],
+    "repair": "Step 3 should conclude that hallucination is substantially reduced but not eliminated. Add a similarity threshold below which the system answers 'I don't know', require per-claim citation of the supporting span, and run a faithfulness check comparing the answer against the retrieved context before returning it.",
+    "debrief": "Watch for arguments where every premise is true and the conclusion is one step stronger than they support. 'Grounded in retrieved documents' and 'cannot hallucinate' differ by a quantifier, and that difference decides whether you need a fallback path, citations, and output checking. In AI systems especially, ask what is *enforced* versus what is *encouraged*: a prompt instruction is encouragement, and safety arguments built on encouragement need a real check behind them.",
+    "validation_payload": {},
+    "truth_state": "flawed"
+  }
+]

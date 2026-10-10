@@ -1,0 +1,459 @@
+[
+  {
+    "id": "dl-deep-learning-project-001",
+    "subject": "deep-learning",
+    "topic": "Deep Learning Project",
+    "subtopic": "Near-duplicate images across splits",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 99.1% a realistic estimate of accuracy on photos of new products?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "data": "40,000 product photos; photographers take bursts of 5-10 nearly identical shots per product.\nSplit: random 80/20 by image.",
+      "result": "Validation accuracy 99.1%."
+    },
+    "ai_claim": "Yes. The validation images were not used for training, so 99.1% reflects performance on unseen photos.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "20% of images were held out."
+      },
+      {
+        "index": 2,
+        "text": "The model never trained on them."
+      },
+      {
+        "index": 3,
+        "text": "Unseen images represent new photos."
+      },
+      {
+        "index": 4,
+        "text": "So 99.1% is realistic."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Splitting near-duplicates across train and validation",
+      "explanation": "Each product has a burst of nearly identical shots, so a random split puts almost-copies of most validation images into training. The model recognises products it has effectively seen. Split by product (group split) so validation contains only products absent from training.",
+      "why_convincing": "The validation images are technically distinct files."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: near-duplicate shots of the same product sit in both splits. Split by product ID.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Products have bursts of 5-10 nearly identical photos.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "With a product-level split, validation accuracy is 88%.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "88"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Most validation images have a near-copy in the training set."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether validation images have near-copies in training."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates unseen files with new products."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Group related samples so they fall on the same side of the split."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Re-split by product."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: near-duplicates leak across the split. Split by product."
+      }
+    ],
+    "repair": "Use GroupShuffleSplit with product_id as the group.",
+    "debrief": "The unit of splitting should match the unit of generalisation. Here that unit is the product, not the photo.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-deep-learning-project-002",
+    "subject": "deep-learning",
+    "topic": "Deep Learning Project",
+    "subtopic": "Reporting the early-stopping metric",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 94.6% an unbiased estimate of accuracy on new data?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "process": "Train for up to 200 epochs; after each epoch compute validation accuracy; keep the best epoch.\nReport: \"Final accuracy 94.6%\" - the best validation accuracy observed."
+    },
+    "ai_claim": "Yes. The validation set was never used for gradient updates, so the best validation accuracy is an unbiased estimate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Gradients were computed only on the training set."
+      },
+      {
+        "index": 2,
+        "text": "Validation accuracy was measured each epoch."
+      },
+      {
+        "index": 3,
+        "text": "The best, 94.6%, was reported."
+      },
+      {
+        "index": 4,
+        "text": "Because validation data were not trained on, 94.6% is unbiased."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Reporting the maximum of a metric used for selection",
+      "explanation": "The validation set was used to choose the epoch - the maximum of 200 noisy measurements - so the reported value includes lucky noise and is optimistic. It is small here but real, and grows with more choices (epochs, hyperparameters, architectures) made on the same set. Report accuracy on a separate test set evaluated once.",
+      "why_convincing": "No gradient ever touched the validation set, which feels like enough."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: selecting the best of 200 evaluations biases the number upward. Report a separate test-set score.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If true accuracy is 94.0% at every epoch after 50, the maximum of 150 noisy measurements will exceed 94.0%.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "94.0"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "The held-out test set gives 93.8% for the selected checkpoint.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "93.8"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The test score comes out lower than the best validation score."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the reported number was chosen."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 ignores selection."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Data used for selection give optimistic estimates."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate the chosen checkpoint on a separate test set."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the reported value is a maximum over many evaluations."
+      }
+    ],
+    "repair": "Keep a test set untouched until the end and report its score once.",
+    "debrief": "Validation sets are for choosing; test sets are for reporting. Using one for both inflates results.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-deep-learning-project-003",
+    "subject": "deep-learning",
+    "topic": "Deep Learning Project",
+    "subtopic": "Overfitting one batch as a sanity check",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this is a useful sanity check, and that reaching near-zero loss suggests the model and training loop are wired correctly?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "batch = next(iter(train_loader))          # 32 examples\nfor step in range(500):\n    loss = loss_fn(model(batch[0]), batch[1])\n    opt.zero_grad(); loss.backward(); opt.step()\nprint(loss.item())   # 0.0003"
+    },
+    "ai_claim": "Yes. A working model and loop should be able to memorise 32 examples. Near-zero loss shows gradients flow, the loss is computed correctly and the optimiser updates the weights. If it could not fit one batch, something would be broken.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A correct setup can memorise a tiny dataset."
+      },
+      {
+        "index": 2,
+        "text": "Training repeatedly on one batch should drive the loss towards 0."
+      },
+      {
+        "index": 3,
+        "text": "Reaching 0.0003 shows the forward pass, loss, backward pass and optimiser all work together."
+      },
+      {
+        "index": 4,
+        "text": "Failure to fit would indicate a bug (wrong labels, detached graph, zero learning rate)."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. 'Overfit a single batch' is a standard debugging step before full training; it tests plumbing, not generalisation.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "loss: 2.31 at step 0 -> 0.0003 at step 500 on the same 32 examples",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.0003"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what this check can and cannot show."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 lists the bugs it would reveal."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Memorising a tiny batch tests the training machinery."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what happens if labels were misaligned."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It is a sound sanity check. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cheap checks - overfit one batch, check the initial loss (about ln(classes)), inspect a batch - catch most training bugs before expensive runs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-deep-learning-project-004",
+    "subject": "deep-learning",
+    "topic": "Deep Learning Project",
+    "subtopic": "Mixed precision",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this reduces activation memory and speeds up training while protecting small gradients from underflow?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "scaler = torch.cuda.amp.GradScaler()\nfor x, y in loader:\n    opt.zero_grad()\n    with torch.autocast(device_type=\"cuda\", dtype=torch.float16):\n        loss = loss_fn(model(x), y)\n    scaler.scale(loss).backward()\n    scaler.step(opt)\n    scaler.update()"
+    },
+    "ai_claim": "Yes. autocast runs suitable operations in float16, which roughly halves activation memory and uses faster tensor cores. GradScaler multiplies the loss before backward so small float16 gradients do not underflow, then unscales them before the optimiser step.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "autocast runs matrix multiplications and convolutions in float16."
+      },
+      {
+        "index": 2,
+        "text": "float16 activations use half the memory of float32."
+      },
+      {
+        "index": 3,
+        "text": "GradScaler scales the loss so tiny gradients stay representable in float16."
+      },
+      {
+        "index": 4,
+        "text": "Gradients are unscaled before the update, and the scale adapts over time."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Automatic mixed precision with loss scaling is the standard recipe for faster, lower-memory training on GPUs with tensor cores.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "float16 uses 2 bytes versus 4 for float32: half the activation memory.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2",
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate what autocast and GradScaler each do."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains the loss scaling."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "float16 has a small range, so tiny gradients can underflow without scaling."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare bytes per value in float16 and float32."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It describes AMP accurately. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Mixed precision is one of the cheapest speed-ups in deep learning; loss scaling is the detail that keeps it numerically safe.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-deep-learning-project-005",
+    "subject": "deep-learning",
+    "topic": "Deep Learning Project",
+    "subtopic": "Four GPUs, four times faster",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will training run about four times faster on 4 GPUs?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "plan": "Move training from 1 GPU to 4 GPUs with data parallelism.",
+      "unknown": "Whether the current run is limited by GPU compute, data loading (JPEG decoding on 8 CPU cores) or inter-GPU communication has not been profiled."
+    },
+    "ai_claim": "Yes. Each GPU processes a quarter of every batch, so the work is divided by four and training is four times faster.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Data parallelism splits each batch across the GPUs."
+      },
+      {
+        "index": 2,
+        "text": "Each GPU does a quarter of the work."
+      },
+      {
+        "index": 3,
+        "text": "The time per step is divided by four."
+      },
+      {
+        "index": 4,
+        "text": "So training is four times faster."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Where the bottleneck is. If GPU compute dominates, speed-up approaches 4x (minus communication overhead). If data loading on the CPU is already the limit, extra GPUs sit idle and speed-up is small. Gradient synchronisation also costs time, depending on model size and interconnect. No profile exists.",
+    "resolving_scenarios": [
+      "GPU-bound with fast NVLink interconnect: about 3.6-3.9x faster.",
+      "CPU data loading already saturated (GPU utilisation 35% on one GPU): little or no speed-up until the input pipeline is fixed."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The speed-up depends on the unprofiled bottleneck. Step 3 assumes GPU compute is the only cost.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If one GPU is only 35% utilised because JPEG decoding is the bottleneck, four GPUs cannot run faster than the data arrive.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "35"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A data-loading bottleneck caps the speed-up regardless of GPU count."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what currently limits training speed."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes all time is GPU computation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Speed-up is limited by the non-parallelised parts (Amdahl's law), including data loading and communication."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check GPU utilisation on one GPU."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes GPU-bound training. If so, near 4x; if data-bound, little gain. It cannot be decided."
+      }
+    ],
+    "repair": "Profile GPU utilisation and data-loader throughput first; fix input bottlenecks before adding GPUs.",
+    "debrief": "Scaling hardware helps only the part of the pipeline that is the bottleneck. Profile, then scale.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

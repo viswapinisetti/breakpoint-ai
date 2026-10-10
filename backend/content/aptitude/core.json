@@ -1,0 +1,1022 @@
+[
+  {
+    "id": "apt-pct-001",
+    "subject": "aptitude",
+    "topic": "Percentages, Profit/Loss & Discounts",
+    "subtopic": "Successive percentage change",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The price of a product is first decreased by 20% and later increased by 20%. If the original price was Rs 1,000, what is the final price?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The two changes are equal and opposite, so the final price returns to Rs 1,000.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "20% of Rs 1,000 = Rs 200."
+      },
+      {
+        "index": 2,
+        "text": "After the decrease: Rs 1,000 - Rs 200 = Rs 800."
+      },
+      {
+        "index": 3,
+        "text": "The increase is also 20%, which is Rs 200."
+      },
+      {
+        "index": 4,
+        "text": "Final price = Rs 800 + Rs 200 = Rs 1,000."
+      }
+    ],
+    "ai_final_answer": "1000",
+    "simulated_confidence": 96,
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Applying both percentage changes to the original base",
+      "explanation": "The second 20% must be computed on Rs 800, the value after the decrease, not on the original Rs 1,000. 20% of 800 is 160, so the final price is 960.",
+      "why_convincing": "Equal percentage values look symmetric, and the arithmetic in every other step is flawless. The mind treats '-20% then +20%' as additive cancellation because the two numbers are identical."
+    },
+    "canonical_solution": "Percentage changes are multiplicative: 1000 x 0.80 x 1.20 = 960. The decrease is applied to 1000, but the increase is applied to 800.",
+    "canonical_answer": "960",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Recompute the increase on the reduced base of 800.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "800",
+          "160",
+          "960"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Percentage changes compose multiplicatively when the base changes.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "960"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A 50% decrease followed by a 50% increase on 1000 gives 750, not 1000."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that every percentage in this solution is being taken of the same thing."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Look carefully at the transition from Step 2 to Step 3."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A percentage is always a percentage OF some base value. Ask what the base is each time."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute the 20% increase using the price that actually exists at that moment."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 takes 20% of the original 1,000 instead of the current 800. 20% of 800 is 160, so the final price is 960, not 1,000."
+      }
+    ],
+    "repair": "Replace Step 3 with '20% of Rs 800 = Rs 160', giving a final price of Rs 800 + Rs 160 = Rs 960.",
+    "debrief": "A percentage change is meaningless without its base. When a value changes, every later percentage must be recomputed on the new value. This is why a 20% loss followed by a 20% gain never restores the original amount: 0.8 x 1.2 = 0.96, a net 4% loss.",
+    "validation_payload": {
+      "solver": "answer = 1000 * 0.80 * 1.20",
+      "flawed_solver": "change = 1000 * 0.20\nafter_decrease = 1000 - change\nanswer = after_decrease + change"
+    },
+    "truth_state": "flawed",
+    "transfer_check": {
+      "question": "Rs 2,000 decreases by 10%, then increases by 10% of the reduced price. What is the final price?",
+      "answer": "1980",
+      "explanation": "2000 x 0.90 = 1800, and 10% of 1800 is 180, giving 1980. The second percentage is taken on the reduced price, not the original."
+    }
+  },
+  {
+    "id": "apt-tw-002",
+    "subject": "aptitude",
+    "topic": "Time & Work",
+    "subtopic": "Time and Work",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A can complete a task alone in 10 days and B alone in 15 days. They start working together, but A leaves after 3 days and B finishes the remaining work alone. How many days does the task take in total?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The task is completed in 6 days.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A's rate is 1/10 of the work per day and B's rate is 1/15 per day."
+      },
+      {
+        "index": 2,
+        "text": "Working together their combined rate is 1/10 + 1/15 = 1/6 per day."
+      },
+      {
+        "index": 3,
+        "text": "In the first 3 days they complete 3 x 1/6 = 1/2 of the work."
+      },
+      {
+        "index": 4,
+        "text": "The remaining 1/2 of the work is completed at 1/6 per day, taking 3 more days."
+      },
+      {
+        "index": 5,
+        "text": "Total time = 3 + 3 = 6 days."
+      }
+    ],
+    "ai_final_answer": "6",
+    "simulated_confidence": 94,
+    "failure": {
+      "category": "F03",
+      "location": 4,
+      "misconception": "Carrying the combined rate forward after one worker leaves",
+      "explanation": "After day 3 only B is working, so the remaining work proceeds at B's rate of 1/15 per day, not the combined 1/6. Half the work at 1/15 per day takes 7.5 days, giving 10.5 days in total.",
+      "why_convincing": "Steps 1 to 3 are perfectly correct, and the rate 1/6 has just been established and verified. Reusing it in Step 4 feels like continuity rather than an error."
+    },
+    "canonical_solution": "Combined rate 1/6 for 3 days completes 1/2 the work. The remaining 1/2 is done by B alone at 1/15 per day, requiring (1/2)/(1/15) = 7.5 days. Total = 3 + 7.5 = 10.5 days.",
+    "canonical_answer": "10.5",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Recompute the remaining work at B's solo rate.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "7.5",
+          "10.5"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Step 4 uses a combined rate although the premise says A has left.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "10.5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If the combined rate applied throughout, A leaving would have no effect at all on the total time, which is absurd."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether every assumption in this solution is still true at the moment it is used."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Something changes in the problem on day 3. Find where the solution accounts for it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A combined rate is only valid while both people are actually working."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute the time for the remaining half of the work using only B's rate."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 keeps using the combined rate 1/6 after A has left. The remaining half at B's rate of 1/15 takes 7.5 days, so the total is 10.5 days."
+      }
+    ],
+    "repair": "Step 4 should read: the remaining 1/2 of the work is done by B alone at 1/15 per day, taking (1/2)/(1/15) = 7.5 days. Total = 3 + 7.5 = 10.5 days.",
+    "debrief": "Rates are only valid while the conditions that produced them hold. When a participant leaves, joins, or changes pace, the rate must be recomputed from that moment. Watch for any solution that establishes a rate early and then reuses it after the scenario has changed.",
+    "validation_payload": {
+      "solver": "a = Fraction(1, 10)\nb = Fraction(1, 15)\ndone = 3 * (a + b)\nremaining = 1 - done\nanswer = float(3 + remaining / b)",
+      "flawed_solver": "a = Fraction(1, 10)\nb = Fraction(1, 15)\ncombined = a + b\ndone = 3 * combined\nremaining = 1 - done\nanswer = float(3 + remaining / combined)"
+    },
+    "truth_state": "flawed",
+    "transfer_check": {
+      "question": "P alone takes 12 days and Q alone 24 days. They work together for 4 days, then P leaves. How many more days does Q need to finish?",
+      "answer": "12",
+      "explanation": "Together they complete 1/12 + 1/24 = 1/8 per day, so 4 days finishes 1/2 the work. Q alone then works at 1/24 per day, so the remaining 1/2 takes (1/2)/(1/24) = 12 days. The rate changes the moment P leaves."
+    }
+  },
+  {
+    "id": "apt-log-003",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Syllogisms",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Premises: (1) All programmers are problem solvers. (2) Some problem solvers are musicians. Does the conclusion 'Some programmers are musicians' necessarily follow?",
+    "artifact_type": "logical_argument",
+    "ai_claim": "The conclusion definitely follows from the two premises.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Premise 1 places the entire set of programmers inside the set of problem solvers."
+      },
+      {
+        "index": 2,
+        "text": "Premise 2 establishes that the set of problem solvers overlaps with the set of musicians."
+      },
+      {
+        "index": 3,
+        "text": "Since programmers are problem solvers, and problem solvers overlap with musicians, programmers must share in that overlap."
+      },
+      {
+        "index": 4,
+        "text": "Therefore some programmers are musicians. The conclusion follows."
+      }
+    ],
+    "ai_final_answer": "follows",
+    "simulated_confidence": 91,
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Treating a partial overlap as if it must include an arbitrary subset",
+      "explanation": "Premise 2 guarantees that SOME problem solvers are musicians, but says nothing about WHICH ones. The musicians can lie entirely among the problem solvers who are not programmers, so the conclusion does not necessarily follow.",
+      "why_convincing": "The chain reads like valid transitivity, and the sets genuinely do overlap. The word 'some' feels like it distributes across any subset, but it does not."
+    },
+    "canonical_solution": "The conclusion does not necessarily follow. Construct a model: programmers = {1,2}, problem solvers = {1,2,3}, musicians = {3}. Both premises hold - all programmers are problem solvers, and problem solver 3 is a musician - yet no programmer is a musician.",
+    "canonical_answer": "does not follow",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A model satisfying both premises where no programmer is a musician.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "A particular premise does not distribute over an arbitrary subset.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Programmers = {Asha, Ravi}; problem solvers = {Asha, Ravi, Meera}; musicians = {Meera}. Both premises hold and no programmer is a musician."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the premises pin down WHICH problem solvers are the musicians."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is where the argument moves from overlap to a specific claim about programmers."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "'Some A are B' tells you an overlap exists somewhere in A. It does not tell you the overlap touches any particular part of A."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try to build a concrete set of people that satisfies both premises but makes the conclusion false."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes the overlap must include programmers. Take programmers = {1,2}, problem solvers = {1,2,3}, musicians = {3}: both premises hold, yet no programmer is a musician. The conclusion does not follow."
+      }
+    ],
+    "repair": "Step 3 should note that the musicians among the problem solvers may all be non-programmers. Since no premise forces the overlap to include programmers, the correct conclusion is that it does not necessarily follow.",
+    "debrief": "Syllogisms fail most often at the word 'some'. A particular premise asserts that an overlap exists, never where it sits. The reliable test is to build one concrete model in which every premise is true and the conclusion is false; if you can, the argument is invalid regardless of how natural the chain sounded.",
+    "validation_payload": {
+      "solver": "programmers = {1, 2}\nproblem_solvers = {1, 2, 3}\nmusicians = {3}\npremise1 = programmers <= problem_solvers\npremise2 = len(problem_solvers & musicians) > 0\nconclusion = len(programmers & musicians) > 0\nanswer = 'does not follow' if (premise1 and premise2 and not conclusion) else 'follows'",
+      "flawed_solver": "programmers = {1, 2}\nproblem_solvers = {1, 2, 3}\nmusicians = {3}\npremise1 = programmers <= problem_solvers\npremise2 = len(problem_solvers & musicians) > 0\nanswer = 'follows' if (premise1 and premise2) else 'does not follow'"
+    },
+    "truth_state": "flawed"
+  },
+  {
+    "id": "apt-di-004",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Percentage change from a table",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Using the quarterly revenue table below, calculate the percentage increase in revenue from Q2 to Q3.",
+    "artifact_type": "data_table",
+    "artifact": {
+      "caption": "Revenue by quarter (Rs lakh), FY 2024-25",
+      "columns": "Quarter,Revenue",
+      "rows": "Q1,2400|Q2,2500|Q3,3000|Q4,3150"
+    },
+    "ai_claim": "Revenue increased by 25% from Q2 to Q3.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "From the table, Q3 revenue is Rs 3,000 lakh."
+      },
+      {
+        "index": 2,
+        "text": "The earlier quarter's revenue is Rs 2,400 lakh."
+      },
+      {
+        "index": 3,
+        "text": "Absolute increase = 3,000 - 2,400 = Rs 600 lakh."
+      },
+      {
+        "index": 4,
+        "text": "Percentage increase = 600 / 2400 x 100 = 25%."
+      }
+    ],
+    "ai_final_answer": "25",
+    "simulated_confidence": 93,
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Reading the wrong row from the table",
+      "explanation": "Rs 2,400 lakh is Q1 revenue, not Q2. Q2 is Rs 2,500 lakh, so the increase is 500 on a base of 2500, which is 20%.",
+      "why_convincing": "Every arithmetic step after the misread is correct, and 25% is a clean round number that feels right. Nothing in the calculation itself looks wrong because the error happened while reading, not while computing."
+    },
+    "canonical_solution": "Q2 = 2500 and Q3 = 3000. Increase = 3000 - 2500 = 500. Percentage increase = 500/2500 x 100 = 20%.",
+    "canonical_answer": "20",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The table shows Q2 = 2500, not 2400.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2500",
+          "20"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "Recompute using the correct Q2 base.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "500",
+          "2500",
+          "20"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Before checking the arithmetic, check that every number came from the right place in the table."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Focus on Step 2 and compare it against the table."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In data interpretation, most errors happen while reading, not while calculating."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find the row labelled Q2 and read its value directly."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 uses Rs 2,400 lakh, which is Q1. Q2 is Rs 2,500 lakh, so the increase is 500/2500 = 20%, not 25%."
+      }
+    ],
+    "repair": "Step 2 should read 'Q2 revenue is Rs 2,500 lakh', giving an increase of 500 and a percentage increase of 500/2500 x 100 = 20%.",
+    "debrief": "In data interpretation the arithmetic is rarely the hard part - sourcing each number is. A confident calculation built on a misread cell produces a clean, plausible, wrong answer. Always trace every figure back to its exact row and column before trusting the result.",
+    "validation_payload": {
+      "solver": "q2 = 2500\nq3 = 3000\nanswer = (q3 - q2) / q2 * 100",
+      "flawed_solver": "q1 = 2400\nq3 = 3000\nanswer = (q3 - q1) / q1 * 100"
+    },
+    "truth_state": "flawed"
+  },
+  {
+    "id": "apt-spd-005",
+    "subject": "aptitude",
+    "topic": "Time, Speed & Distance",
+    "subtopic": "Relative speed",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Two trains of length 120 m and 180 m travel in the SAME direction on parallel tracks at 54 km/h and 36 km/h respectively. How long does the faster train take to completely overtake the slower one?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The overtaking takes 12 seconds.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Total distance to be covered = 120 + 180 = 300 m."
+      },
+      {
+        "index": 2,
+        "text": "Relative speed = 54 + 36 = 90 km/h."
+      },
+      {
+        "index": 3,
+        "text": "Converting: 90 x 1000/3600 = 25 m/s."
+      },
+      {
+        "index": 4,
+        "text": "Time = 300 / 25 = 12 seconds."
+      }
+    ],
+    "ai_final_answer": "12",
+    "simulated_confidence": 95,
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Adding speeds for same-direction motion",
+      "explanation": "Speeds are added only when objects move toward each other. For same-direction motion the relative speed is the difference: 54 - 36 = 18 km/h = 5 m/s, giving 300/5 = 60 seconds.",
+      "why_convincing": "Adding speeds is the far more common textbook case, so the shortcut is deeply rehearsed. Steps 1, 3 and 4 are all correct, and the unit conversion in Step 3 looks like careful work."
+    },
+    "canonical_solution": "Same direction means relative speed = 54 - 36 = 18 km/h = 5 m/s. Total length = 300 m. Time = 300/5 = 60 seconds.",
+    "canonical_answer": "60",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Recompute using the difference of speeds.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "18",
+          "5",
+          "60"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Same-direction relative speed is the difference, not the sum.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "60"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If both trains travelled at 54 km/h in the same direction, the sum rule would give a finite overtaking time, but a train can never overtake another moving at its own speed."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that the shortcut being used matches the situation described."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 chooses an operation. Ask whether that operation fits this problem."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Relative speed depends on direction: add for opposing motion, subtract for the same direction."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute the relative speed for two objects moving the same way, then redo the time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 adds the speeds, but both trains move in the same direction. Relative speed is 54 - 36 = 18 km/h = 5 m/s, so the time is 300/5 = 60 seconds."
+      }
+    ],
+    "repair": "Step 2 should read 'Relative speed = 54 - 36 = 18 km/h', which converts to 5 m/s and gives a time of 300/5 = 60 seconds.",
+    "debrief": "A shortcut is a compressed argument, and it carries the conditions under which it was derived. The add-the-speeds rule belongs to head-on motion. Ask what situation a formula was built for before applying it - a well-executed calculation on the wrong formula is one of the hardest errors to spot.",
+    "validation_payload": {
+      "solver": "relative = (54 - 36) * 1000 / 3600\nanswer = (120 + 180) / relative",
+      "flawed_solver": "relative = (54 + 36) * 1000 / 3600\nanswer = (120 + 180) / relative"
+    },
+    "truth_state": "flawed",
+    "transfer_check": {
+      "question": "Two trains of length 100 m and 200 m move in the SAME direction at 72 km/h and 36 km/h. How many seconds does the faster take to overtake the slower?",
+      "answer": "30",
+      "explanation": "Same direction means subtract: 72 - 36 = 36 km/h = 10 m/s. Total length 300 m, so 300/10 = 30 seconds."
+    }
+  },
+  {
+    "id": "apt-pl-006",
+    "subject": "aptitude",
+    "topic": "Percentages, Profit/Loss & Discounts",
+    "subtopic": "Profit and loss",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "An article is sold for Rs 1,200 at a profit of 20% ON THE SELLING PRICE. Find the cost price.",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The cost price is Rs 1,000.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Selling price = Rs 1,200 and the profit is 20%."
+      },
+      {
+        "index": 2,
+        "text": "Profit percentage is calculated on cost price, so SP = CP x 1.20."
+      },
+      {
+        "index": 3,
+        "text": "Therefore CP = 1200 / 1.20 = Rs 1,000."
+      }
+    ],
+    "ai_final_answer": "1000",
+    "simulated_confidence": 94,
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Defaulting to profit-on-cost when the problem specifies profit on selling price",
+      "explanation": "The question states the profit is on the SELLING PRICE. Profit = 20% of 1200 = 240, so CP = 1200 - 240 = 960.",
+      "why_convincing": "Profit is conventionally quoted on cost, so the default assumption is almost always right. The solution states the convention explicitly and confidently, which makes it read like a justification rather than an oversight."
+    },
+    "canonical_solution": "Profit is 20% of the selling price: 0.20 x 1200 = 240. Cost price = 1200 - 240 = Rs 960.",
+    "canonical_answer": "960",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Take the profit as 20% of SP and subtract.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "240",
+          "960"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Step 2 contradicts the wording of the question.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "960"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Re-read the question and check the solution honours every word of it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 makes a claim about what the percentage is taken on. Compare it with the question."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Profit can be quoted on cost price or on selling price, and the two give different answers."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 20% of Rs 1,200 and subtract it from the selling price."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes profit on cost, but the question says profit on selling price. Profit = 20% of 1200 = 240, so CP = 960."
+      }
+    ],
+    "repair": "Step 2 should read 'Profit = 20% of SP = 0.20 x 1200 = Rs 240', giving CP = 1200 - 240 = Rs 960.",
+    "debrief": "This is an interpretation failure, not a calculation failure. The arithmetic was flawless; the solution simply answered a slightly different question from the one asked. When a problem goes out of its way to specify a base, that specification is usually the entire point of the problem.",
+    "validation_payload": {
+      "solver": "sp = 1200\nprofit = 0.20 * sp\nanswer = sp - profit",
+      "flawed_solver": "sp = 1200\nanswer = sp / 1.20"
+    },
+    "truth_state": "flawed"
+  },
+  {
+    "id": "apt-prob-007",
+    "subject": "aptitude",
+    "topic": "Permutations, Combinations & Probability",
+    "subtopic": "Probability and counting",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Two fair dice are thrown. In how many of the 36 equally likely outcomes does the sum equal 7 OR at least one die show a 3?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "There are 17 such outcomes.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Outcomes with sum 7: (1,6), (2,5), (3,4), (4,3), (5,2), (6,1). That is 6 outcomes."
+      },
+      {
+        "index": 2,
+        "text": "Outcomes with at least one 3: 6 in the first die plus 6 in the second, minus the double-counted (3,3), giving 11 outcomes."
+      },
+      {
+        "index": 3,
+        "text": "The event is a union, so add the two counts: 6 + 11 = 17 outcomes."
+      }
+    ],
+    "ai_final_answer": "17",
+    "simulated_confidence": 96,
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Adding counts for a union without subtracting the intersection",
+      "explanation": "The two events overlap: (3,4) and (4,3) have sum 7 AND contain a 3. Inclusion-exclusion gives 6 + 11 - 2 = 15.",
+      "why_convincing": "Step 2 already applies inclusion-exclusion correctly for the double-counted (3,3), which makes the solution look like it is handling overlaps carefully. Having just done it once, the omission in Step 3 reads as though it has already been taken care of."
+    },
+    "canonical_solution": "By inclusion-exclusion: |sum 7| = 6, |at least one 3| = 11, and the intersection {(3,4), (4,3)} has 2 elements. Union = 6 + 11 - 2 = 15. Direct enumeration confirms 15.",
+    "canonical_answer": "15",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Name an outcome counted twice, such as (3,4).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "15"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "Apply inclusion-exclusion with the intersection of size 2.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2",
+          "15"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "(3,4) has sum 7 and contains a 3, so it is counted in both Step 1 and Step 2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether any single outcome could satisfy both conditions at once."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 combines two counts. Ask whether those two sets are disjoint."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "For a union, |A or B| = |A| + |B| - |A and B|. The last term vanishes only when the events cannot co-occur."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List every outcome that has sum 7 and also contains a 3, then correct the total."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 adds the counts without subtracting the overlap. (3,4) and (4,3) belong to both sets, so the answer is 6 + 11 - 2 = 15."
+      }
+    ],
+    "repair": "Step 3 should apply inclusion-exclusion: 6 + 11 - 2 = 15 outcomes, since (3,4) and (4,3) satisfy both conditions.",
+    "debrief": "Union counting fails whenever the events can co-occur, and the failure is invisible in the arithmetic - 6 + 11 = 17 is perfectly correct addition of the wrong quantities. Whenever you see counts combined, ask first whether the sets are disjoint. Enumerating a single shared element is enough to break the claim.",
+    "validation_payload": {
+      "solver": "count = 0\nfor a in range(1, 7):\n    for b in range(1, 7):\n        if a + b == 7 or a == 3 or b == 3:\n            count += 1\nanswer = count",
+      "flawed_solver": "sum_seven = 6\nat_least_one_three = 11\nanswer = sum_seven + at_least_one_three"
+    },
+    "truth_state": "flawed"
+  },
+  {
+    "id": "apt-net-008",
+    "subject": "aptitude",
+    "topic": "Percentages, Profit/Loss & Discounts",
+    "subtopic": "Net percentage effect",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A quantity of 400 is increased by 25% and the result is then decreased by 20%. What is the final value?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The final value is 400.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The quantity is first increased by 25%."
+      },
+      {
+        "index": 2,
+        "text": "It is then decreased by 20%."
+      },
+      {
+        "index": 3,
+        "text": "A rise of 25% followed by a fall of 20% cancel each other out, because successive percentage changes of comparable size offset one another."
+      },
+      {
+        "index": 4,
+        "text": "So the value is unchanged: the final value is 400."
+      }
+    ],
+    "ai_final_answer": "400",
+    "simulated_confidence": 92,
+    "answer_coincidentally_correct": true,
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Inventing a cancellation rule that happens to give the right number here",
+      "explanation": "There is no principle by which comparable percentage changes cancel. These two happen to cancel exactly because 1.25 x 0.80 = 1.00. Change the second figure to 25% and the same reasoning gives 400, but the true value is 375.",
+      "why_convincing": "The answer is correct, so every check a student performs on the result succeeds. Verifying the final number confirms nothing about the argument that produced it."
+    },
+    "canonical_solution": "Apply the changes multiplicatively: 400 x 1.25 x 0.80 = 400. The value is unchanged, but only because 1.25 x 0.80 equals exactly 1.00 - not because percentage changes cancel in general.",
+    "canonical_answer": "400",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A case where the stated rule fails.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "375"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Successive changes multiply; cancellation here is arithmetic coincidence.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.25",
+          "0.8"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "400 increased by 25% then decreased by 25% gives 375, not 400 - the same 'cancellation' reasoning would wrongly predict 400."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "The final answer here is correct. Ask whether the reasoning that produced it is."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a general principle. Test that principle on other numbers."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Successive percentage changes multiply. Whether they cancel depends on the exact factors, not on the sizes looking comparable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply Step 3's stated rule to a 25% rise followed by a 25% fall and see what it predicts."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3's cancellation rule is invented. These changes cancel only because 1.25 x 0.80 = 1.00 exactly. Under the same rule, +25% then -25% would give 400, but the real value is 375."
+      }
+    ],
+    "repair": "Step 3 should compute the combined factor: 1.25 x 0.80 = 1.00, so the value is unchanged. The conclusion is right, but it follows from the product of the factors, not from any cancellation principle.",
+    "debrief": "A correct answer is not evidence of correct reasoning. This solution reaches 400 through a rule that does not exist, and the rule fails the moment the numbers change. Verifying an output tells you nothing about the method - test the stated principle on a case where you already know the answer.",
+    "validation_payload": {
+      "solver": "answer = 400 * 1.25 * 0.80",
+      "flawed_solver": "original = 400\n# Flawed rule: comparable successive percentage changes cancel, so the value is unchanged.\nanswer = original"
+    },
+    "truth_state": "flawed"
+  },
+  {
+    "id": "apt-mark-009",
+    "subject": "aptitude",
+    "topic": "Percentages, Profit/Loss & Discounts",
+    "subtopic": "Markup and discount",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A shopkeeper buys an item for Rs 800, marks it up by 40%, and then offers a 25% discount on the marked price. What is the final selling price?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The final selling price is Rs 840.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Marked price = 800 x 1.40 = Rs 1,120."
+      },
+      {
+        "index": 2,
+        "text": "The discount is 25% of the MARKED price, not of the cost price: 0.25 x 1120 = Rs 280."
+      },
+      {
+        "index": 3,
+        "text": "Selling price = 1120 - 280 = Rs 840."
+      }
+    ],
+    "ai_final_answer": "840",
+    "simulated_confidence": 95,
+    "canonical_solution": "Marked price = 800 x 1.40 = 1120. Discount = 25% of 1120 = 280. Selling price = 1120 - 280 = 840. Equivalently 800 x 1.40 x 0.75 = 840.",
+    "canonical_answer": "840",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "The discount is taken on the marked price: 0.25 x 1120 = 280, and 1120 - 280 = 840.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1120",
+          "840"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the base used for each percentage in turn."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 is the step most likely to hide a base error. Verify it directly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A discount is taken on the marked price; a markup is taken on the cost price."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 800 x 1.40 x 0.75 independently and compare with the stated answer."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Step 2 uses the marked price as the discount base, exactly as it should. 800 x 1.40 x 0.75 = 840. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "This solution is correct, and Step 2 explicitly handles the base change that trips up most students. Approving valid work is as much a verification skill as detecting failure - a reviewer who challenges everything is no more useful than one who challenges nothing.",
+    "validation_payload": {
+      "solver": "answer = 800 * 1.40 * 0.75"
+    },
+    "truth_state": "valid"
+  },
+  {
+    "id": "apt-avg-010",
+    "subject": "aptitude",
+    "topic": "Averages, Ages & Partnerships",
+    "subtopic": "Averages",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The average of 10 numbers is 45. One number, 63, is removed from the set. What is the average of the remaining numbers?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The new average is 43.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Total of all 10 numbers = 45 x 10 = 450."
+      },
+      {
+        "index": 2,
+        "text": "After removing 63, the remaining total = 450 - 63 = 387."
+      },
+      {
+        "index": 3,
+        "text": "There are now 9 numbers, so the new average = 387 / 9 = 43."
+      }
+    ],
+    "ai_final_answer": "43",
+    "simulated_confidence": 91,
+    "canonical_solution": "Sum = 45 x 10 = 450. Removing 63 leaves 387 across 9 numbers, giving 387/9 = 43.",
+    "canonical_answer": "43",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Nine numbers remain: (450 - 63) / 9 = 387 / 9 = 43.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "387",
+          "43"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that the count of numbers is updated wherever it is used."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 changes the divisor. Verify that it should have."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Removing an element changes both the total and the count; both must be adjusted."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute 387 / 9 yourself and compare."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Both the total and the count were adjusted properly, and 387/9 = 43. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Removing an element from an average requires adjusting the total and the count together, and this solution does both. Note that the removed value being above the old average is exactly why the new average falls - a quick sanity check that costs nothing and catches most errors of this type.",
+    "validation_payload": {
+      "solver": "total = 45 * 10\nanswer = (total - 63) / 9"
+    },
+    "truth_state": "valid"
+  },
+  {
+    "id": "apt-spd-011",
+    "subject": "aptitude",
+    "topic": "Time, Speed & Distance",
+    "subtopic": "Average speed",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A vehicle travels part of a journey at 40 km/h and the rest at 60 km/h. What is its average speed for the whole journey?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The average speed is 50 km/h.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The two speeds for the journey are 40 km/h and 60 km/h."
+      },
+      {
+        "index": 2,
+        "text": "The average of two quantities is their sum divided by two."
+      },
+      {
+        "index": 3,
+        "text": "(40 + 60) / 2 = 50, so the average speed is 50 km/h."
+      }
+    ],
+    "ai_final_answer": "50",
+    "simulated_confidence": 93,
+    "truth_state": "insufficient_information",
+    "missing_information": "How long, or how far, the vehicle travelled at each speed. Average speed is total distance divided by total time, so without the time spent or distance covered at each speed the question cannot be answered.",
+    "resolving_scenarios": [
+      "Equal durations - one hour at each speed: total distance 100 km in 2 hours, average 50 km/h. The AI's answer happens to be right here.",
+      "Equal distances - 120 km at each speed: 3 hours + 2 hours = 5 hours for 240 km, average 48 km/h."
+    ],
+    "canonical_solution": "The question cannot be answered from the information given. Average speed is total distance divided by total time, not the mean of the two speeds. If the vehicle spends equal TIME at each speed the average is 50 km/h; if it covers equal DISTANCE at each speed the average is 240/5 = 48 km/h. Both are fully consistent with the problem as stated, so the missing fact - the split of time or distance - determines the answer.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Two readings consistent with the problem that give different averages.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "48"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Average speed is total distance over total time.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Equal distances of 120 km: 120/40 = 3 h and 120/60 = 2 h, so 240 km in 5 h = 48 km/h, not 50."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the problem gives you everything the method needs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states a rule for averaging. Ask what averaging speeds actually requires."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Average speed is total distance divided by total time. Neither is given here."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work the problem twice: once assuming equal time at each speed, once assuming equal distance. Compare."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "The problem cannot be answered as stated. Equal times give 50 km/h; equal distances give 240/5 = 48 km/h. Both fit the given facts, so the missing information is the split of time or distance."
+      }
+    ],
+    "repair": "State that the question is unanswerable as posed, and name what is needed: the time spent, or the distance covered, at each speed. 50 km/h is correct only under the additional assumption of equal durations.",
+    "debrief": "The mean of two speeds is not the average speed unless the vehicle spends equal time at each. Here the question simply does not supply the split, and two perfectly reasonable readings give different answers - which is the proof that the information is insufficient. Recognising an unanswerable question is a distinct skill from answering one: the failure mode it protects against is producing a confident number from data that cannot support it.",
+    "validation_payload": {
+      "solver": "equal_time = (40 + 60) / 2\nd = 120\nequal_distance = (2 * d) / (d / 40 + d / 60)\nanswer = 'insufficient information' if equal_time != equal_distance else str(equal_time)",
+      "insufficient_information": true
+    },
+    "transfer_check": {
+      "question": "A cyclist rides equal DISTANCES at 20 km/h and 30 km/h. What is the average speed?",
+      "answer": "24",
+      "explanation": "Equal distances, so use total distance over total time: 2d / (d/20 + d/30) = 24 km/h. Note this is not the mean of 20 and 30."
+    }
+  }
+]

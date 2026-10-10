@@ -1,0 +1,469 @@
+[
+  {
+    "id": "mlo-ml-lifecycle-reproducibility-001",
+    "subject": "mlops",
+    "topic": "ML Lifecycle & Reproducibility",
+    "subtopic": "Recording a mutable data path",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can model v7's training be reproduced from this log?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Training run log for fraud model v7:\n  data: s3://acme-ml/fraud/latest.csv\n  code: commit 4e1c9a2\nThe file latest.csv is overwritten every night by the ETL job.\nAI: \"The run is reproducible: we logged the data path and the commit.\""
+    },
+    "ai_claim": "Yes. The log records exactly which data file and which code commit were used, so the run can be reproduced.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The log records the data path."
+      },
+      {
+        "index": 2,
+        "text": "It records the code commit."
+      },
+      {
+        "index": 3,
+        "text": "Data plus code determine the model."
+      },
+      {
+        "index": 4,
+        "text": "So the run is reproducible."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 1,
+      "misconception": "Logging a path whose contents change",
+      "explanation": "latest.csv is overwritten nightly, so the path identifies a location, not the data. A month later it contains different rows, and retraining from it produces a different model. Record an immutable data version: a content hash, an object version ID, or a snapshot (e.g. DVC or a dated, write-once copy).",
+      "why_convincing": "A precise S3 path looks like a precise record."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the file behind the path changes nightly. Log an immutable data version (hash or snapshot).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "day 1: latest.csv = 1.2M rows; day 30: latest.csv = 1.5M rows, different content, same path",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Reproducibility requires immutable references to data, code, environment and configuration.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Retraining next month uses different data under the same path."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the file at that path ever changes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 records a location."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Reproducible runs reference immutable data versions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider the nightly ETL overwrite."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: the path's contents change. Log a data version."
+      }
+    ],
+    "repair": "Snapshot training data and log its hash or version ID.",
+    "debrief": "Paths name places; hashes name contents. Reproducibility needs the latter.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ml-lifecycle-reproducibility-002",
+    "subject": "mlops",
+    "topic": "ML Lifecycle & Reproducibility",
+    "subtopic": "Unpinned library versions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the serving container reliably load the pickled model after weekly rebuilds?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "requirements.txt:\n  scikit-learn>=1.0\n  pandas\nThe model is pickled after training and loaded by the serving container, which is rebuilt weekly.\nAI: \"Any recent scikit-learn can load the pickle, so this setup is reliable.\""
+    },
+    "ai_claim": "Yes. scikit-learn 1.0 or newer is installed each time, and newer versions can load models from older ones, so loading is reliable.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model was pickled with scikit-learn >= 1.0."
+      },
+      {
+        "index": 2,
+        "text": "The serving image installs scikit-learn >= 1.0."
+      },
+      {
+        "index": 3,
+        "text": "Newer versions are backward compatible."
+      },
+      {
+        "index": 4,
+        "text": "So the pickle always loads."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on unpinned versions for serialised models",
+      "explanation": "Pickled scikit-learn estimators are not guaranteed to load across versions: internal attributes change, and loading may fail or warn and behave differently. A weekly rebuild can pull a new version at any time. Pin exact versions for training and serving (a lock file), store the environment with the model, and consider portable formats (ONNX) for serving.",
+      "why_convincing": "Libraries are usually backward compatible for code, which is easy to over-generalise to serialised objects."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: pickles are version-sensitive and the rebuild can change the version. Pin exact versions and record them with the model.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "scikit-learn warns 'Trying to unpickle estimator from version 1.3.2 when using version 1.5.0 ... might lead to breaking code or invalid results'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Serialised models must be loaded with the library versions they were trained with (or a portable format).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A weekly rebuild installs a new major version and loading fails."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what version the rebuilt image installs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes backward compatibility for pickles."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Serialised objects depend on exact library internals."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Load an old pickle with a newer version."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: pickles are version-sensitive. Pin versions."
+      }
+    ],
+    "repair": "Pin exact versions with a lock file, shared by training and serving; store them in model metadata.",
+    "debrief": "A model artifact is code plus data plus environment. Version all three.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ml-lifecycle-reproducibility-003",
+    "subject": "mlops",
+    "topic": "ML Lifecycle & Reproducibility",
+    "subtopic": "Seeds and GPU nondeterminism",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will two runs produce bit-identical weights?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Training script sets random.seed(0), np.random.seed(0) and torch.manual_seed(0), then trains on a GPU with cuDNN autotuning enabled and atomic-add-based operations.\nAI: \"With all seeds set, two runs produce bit-identical weights.\""
+    },
+    "ai_claim": "Yes. Every random number generator is seeded, so the runs follow identical paths and produce identical weights.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Python, NumPy and PyTorch are seeded."
+      },
+      {
+        "index": 2,
+        "text": "All random choices repeat."
+      },
+      {
+        "index": 3,
+        "text": "The same data are processed in the same order."
+      },
+      {
+        "index": 4,
+        "text": "So weights are bit-identical."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 2,
+      "misconception": "Assuming seeds control all sources of nondeterminism",
+      "explanation": "Seeds fix random number streams, but GPU training has other nondeterminism: cuDNN autotuning can pick different algorithms per run, and atomic floating-point additions happen in varying order, so results differ slightly and diverge over training. For bit-level reproducibility, disable autotuning (torch.backends.cudnn.benchmark = False), enable torch.use_deterministic_algorithms(True), set CUBLAS_WORKSPACE_CONFIG, and accept some slowdown - or define reproducibility as 'statistically equivalent' results.",
+      "why_convincing": "Seeding is the textbook recipe for reproducibility."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: GPU kernels and autotuning add nondeterminism beyond the seeds. Enable deterministic algorithms if bit-identical results are needed.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "run 1 epoch 10 loss 0.41327; run 2 epoch 10 loss 0.41338 with the same seeds",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.41327"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "PyTorch documents that completely reproducible results are not guaranteed on GPUs without deterministic settings.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Two seeded runs end with slightly different weights."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List sources of randomness besides random number generators."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes seeds cover everything."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "GPU parallelism and algorithm selection can be nondeterministic."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare losses from two seeded runs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: GPU operations add nondeterminism. Use deterministic settings."
+      }
+    ],
+    "repair": "Set cudnn.benchmark = False and use_deterministic_algorithms(True), or define tolerance-based reproducibility.",
+    "debrief": "Decide what reproducibility means for you - bit-identical or statistically equivalent - and configure for it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ml-lifecycle-reproducibility-004",
+    "subject": "mlops",
+    "topic": "ML Lifecycle & Reproducibility",
+    "subtopic": "Notebooks run out of order",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will running the notebook top to bottom reproduce AUC 0.91?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "The final metrics in model_v3.ipynb (AUC 0.91) came from cells run in the order 1, 2, 5, 3, 4, 5 during a day of exploration.\nCell 3 filters out a customer segment; cell 5 trains and evaluates.\nAI: \"Running the notebook top to bottom will reproduce AUC 0.91.\""
+    },
+    "ai_claim": "Yes. The notebook contains all the code, so running it from top to bottom reproduces the same result.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "All the code is in the notebook."
+      },
+      {
+        "index": 2,
+        "text": "Running every cell executes all the code."
+      },
+      {
+        "index": 3,
+        "text": "The same code gives the same result."
+      },
+      {
+        "index": 4,
+        "text": "So AUC 0.91 is reproduced."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 2,
+      "misconception": "Assuming a notebook's saved output matches a clean run",
+      "explanation": "Notebook results depend on execution order and hidden state. The reported AUC came from cell 5 running once before and once after the filter in cell 3, with variables left over from the first run. A top-to-bottom run follows a different sequence and can give a different AUC. Restart and run all before recording results, or move training into scripts/pipelines.",
+      "why_convincing": "The notebook looks like a complete, linear record."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the result depended on out-of-order execution and hidden state. Restart-and-run-all before reporting; use scripted pipelines.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Restart kernel and run all -> AUC 0.87",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0.87"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Results should come from a clean, top-to-bottom execution (or a script).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A clean run gives a different AUC."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the execution order that produced the result."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes order does not matter."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Notebook kernels keep state between cell executions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Restart and run all."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: hidden state and order affected the result."
+      }
+    ],
+    "repair": "Restart-and-run-all before recording metrics; move production training into scripts.",
+    "debrief": "Notebooks are for exploration. Anything you report should come from a clean, ordered run.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ml-lifecycle-reproducibility-005",
+    "subject": "mlops",
+    "topic": "ML Lifecycle & Reproducibility",
+    "subtopic": "A reproducible training record",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this record makes the run reproducible?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Each training run records:\n- git commit of the training code and config file\n- data snapshot ID (content hash) for train, validation and test\n- container image digest with pinned dependencies\n- random seeds and deterministic flags\n- hardware type\nAll are stored with the model in the registry."
+    },
+    "ai_claim": "Yes. It pins every input to training - code, config, data, environment, randomness and hardware - by immutable identifiers, so the run can be repeated and audited.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Code and config are pinned by commit."
+      },
+      {
+        "index": 2,
+        "text": "Data are pinned by content hash."
+      },
+      {
+        "index": 3,
+        "text": "The environment is pinned by image digest."
+      },
+      {
+        "index": 4,
+        "text": "Seeds, deterministic flags and hardware cover the remaining variation."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Immutable references to all inputs are the basis of reproducible, auditable ML.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "registry entry v18 -> commit 9b2f..., data sha256:4c1..., image sha256:77a..., seed 42",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "42"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List every input that affects the model."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 covers randomness and hardware."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Reproducibility requires immutable references to all inputs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check whether anything could change between reruns."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. All inputs are pinned. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "A good training record answers 'what exactly produced this model?' months later.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

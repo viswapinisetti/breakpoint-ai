@@ -1,0 +1,521 @@
+[
+  {
+    "id": "prg-apis-json-001",
+    "subject": "programming",
+    "topic": "APIs & JSON",
+    "subtopic": "JSON object keys are strings",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The inventory service caches stock counts keyed by product ID, such as {101: 5, 102: 0}. Does roundtrip({101: 5, 102: 0}) return True?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "import json\n\ndef cache_put(store, key, value):\n    store[key] = json.dumps(value)\n\ndef cache_get(store, key):\n    return json.loads(store[key])\n\ndef roundtrip(value):\n    store = {}\n    cache_put(store, \"stock\", value)\n    return cache_get(store, \"stock\") == value"
+    },
+    "ai_claim": "Yes. JSON stores the dictionary and loads it back unchanged.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "cache_put serialises the dictionary with json.dumps."
+      },
+      {
+        "index": 2,
+        "text": "cache_get parses the string back with json.loads."
+      },
+      {
+        "index": 3,
+        "text": "JSON round-trips dictionaries exactly, so the loaded value equals the original."
+      },
+      {
+        "index": 4,
+        "text": "roundtrip({101: 5, 102: 0}) returns True."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming JSON preserves non-string dictionary keys",
+      "explanation": "JSON object keys are always strings. json.dumps turns 101 into \"101\", and json.loads gives back {'101': 5, '102': 0}, which is not equal to {101: 5, 102: 0}. roundtrip returns False. Convert keys back on load, or cache a structure that is JSON-native.",
+      "why_convincing": "For dicts with string keys - the common case - the round trip really is exact, so it looks like a general guarantee."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "json.dumps converts integer keys to strings; json.loads cannot know they were integers. The loaded dict is {'101': 5, '102': 0}, so the comparison is False. Rebuild the keys with int(), or store a list of [id, count] pairs.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "roundtrip({101: 5, 102: 0}) returns False; the loaded dict is {'101': 5, '102': 0}.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "101"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "json.dumps({101: 5}) == '{\"101\": 5}' -> json.loads gives {'101': 5}",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "101"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "json.loads(json.dumps({1: 'a'})) == {'1': 'a'}, not {1: 'a'}."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what JSON allows as an object key."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims JSON round-trips any dictionary exactly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In JSON, every object key is a string."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print json.loads(json.dumps({101: 5}))."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: integer keys come back as strings, so roundtrip returns False. Convert the keys back or change the structure."
+      }
+    ],
+    "repair": "In cache_get, rebuild the keys: `{int(k): v for k, v in json.loads(store[key]).items()}`.",
+    "debrief": "Serialisation formats have their own type systems, and data that crosses one can change type silently. JSON has no integer keys, no tuples, no sets and no dates. Whenever data is serialised and read back, test the round trip with the real types, not only strings.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "check",
+      "ai_code": "import json\n\ndef cache_put(store, key, value):\n    store[key] = json.dumps(value)\n\ndef cache_get(store, key):\n    return json.loads(store[key])\n\ndef roundtrip(value):\n    store = {}\n    cache_put(store, \"stock\", value)\n    return cache_get(store, \"stock\") == value\n\n# test wrapper: builds the dict inside the sandbox so int keys survive\ndef check(pairs):\n    return roundtrip(dict(pairs))",
+      "reference_code": "import copy\n\ndef roundtrip(value):\n    store = {\"stock\": copy.deepcopy(value)}\n    return copy.deepcopy(store[\"stock\"]) == value\n\n# test wrapper: builds the dict inside the sandbox so int keys survive\ndef check(pairs):\n    return roundtrip(dict(pairs))",
+      "test_inputs": [
+        "([['a', 1]],)",
+        "([],)",
+        "([[101, 5], [102, 0]],)"
+      ],
+      "counterexample_input": "([[101, 5], [102, 0]],)"
+    }
+  },
+  {
+    "id": "prg-apis-json-002",
+    "subject": "programming",
+    "topic": "APIs & JSON",
+    "subtopic": "Numbers sent as strings",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The payments API returns prices as JSON strings, as shown. Does order_total return 1150 for this response body?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "import json\n\ndef order_total(body):\n    items = json.loads(body)[\"items\"]\n    return sum(item[\"price\"] for item in items)",
+      "api_response": "{\"items\": [{\"price\": \"450\"}, {\"price\": \"700\"}]}"
+    },
+    "ai_claim": "Yes. It parses the body and adds 450 and 700 to get 1150.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "json.loads turns the body into a dictionary with an items list."
+      },
+      {
+        "index": 2,
+        "text": "Each item's price is read from item['price']."
+      },
+      {
+        "index": 3,
+        "text": "sum adds the prices: 450 + 700 = 1150."
+      },
+      {
+        "index": 4,
+        "text": "order_total returns 1150."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Treating JSON strings as numbers",
+      "explanation": "In the response, each price is a JSON string (\"450\"), so item['price'] is the Python str '450'. sum starts from 0 and cannot add an int and a str, so it raises TypeError. Convert with int() (or Decimal) first.",
+      "why_convincing": "The digits look like numbers, and many APIs do send numbers; the quotation marks are easy to read past."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The prices arrive as strings, so sum raises TypeError: unsupported operand type(s) for +: 'int' and 'str'. Use sum(int(item['price']) for item in items), which gives 1150.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "order_total(body) raises TypeError instead of returning 1150.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1150"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "return sum(int(item[\"price\"]) for item in items)",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1150"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "sum(['450', '700']) raises TypeError."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the exact JSON types in the response."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 reads the price. What Python type does it have?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A JSON value in quotation marks is a string, whatever characters it contains."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate type(json.loads(body)['items'][0]['price'])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 overlooks the quotes: prices are strings, so sum raises TypeError. Convert them with int() first."
+      }
+    ],
+    "repair": "Use `sum(int(item[\"price\"]) for item in items)`.",
+    "debrief": "An API's JSON types are part of its contract, and '450' is not 450. Code written against assumed types works in examples typed by hand and breaks on the real response. Read a real response, or the schema, before writing the parsing code, and convert types explicitly at the boundary.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "order_total",
+      "ai_code": "import json\n\ndef order_total(body):\n    items = json.loads(body)[\"items\"]\n    return sum(item[\"price\"] for item in items)",
+      "reference_code": "import json\n\ndef order_total(body):\n    return sum(int(item[\"price\"]) for item in json.loads(body)[\"items\"])",
+      "test_inputs": [
+        "('{\"items\": []}',)",
+        "('{\"items\": [{\"price\": \"450\"}, {\"price\": \"700\"}]}',)"
+      ],
+      "counterexample_input": "('{\"items\": [{\"price\": \"450\"}, {\"price\": \"700\"}]}',)"
+    }
+  },
+  {
+    "id": "prg-apis-json-003",
+    "subject": "programming",
+    "topic": "APIs & JSON",
+    "subtopic": "Serialising dates",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does order_payload(7) return a JSON string for the order?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "import json\nimport datetime\n\ndef order_payload(order_id):\n    return json.dumps({\"id\": order_id, \"created\": datetime.date(2026, 9, 1)})"
+    },
+    "ai_claim": "Yes. json.dumps serialises the dictionary, including the date, into a JSON string.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The payload dictionary holds the order id and its creation date."
+      },
+      {
+        "index": 2,
+        "text": "json.dumps converts Python objects into their JSON representations."
+      },
+      {
+        "index": 3,
+        "text": "The date is written in its standard form, such as \"2026-09-01\"."
+      },
+      {
+        "index": 4,
+        "text": "order_payload(7) returns a JSON string."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming json.dumps can serialise dates",
+      "explanation": "The json module handles only dict, list, str, int, float, bool and None. A datetime.date is not serialisable, so json.dumps raises TypeError: Object of type date is not JSON serializable. Convert it first with .isoformat().",
+      "why_convincing": "Dates print nicely and many web frameworks serialise them automatically, so it is easy to assume the standard json module does too."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "json.dumps raises TypeError for datetime.date. Use datetime.date(2026, 9, 1).isoformat() (giving \"2026-09-01\"), or pass default=str to json.dumps.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "order_payload(7) raises TypeError: Object of type date is not JSON serializable.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "7"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "\"created\": datetime.date(2026, 9, 1).isoformat()",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "json.dumps({'d': datetime.date(2026, 9, 1)}) raises TypeError."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which Python types json.dumps supports."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a conversion for dates."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The json module serialises only basic types: dict, list, str, numbers, booleans and None."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call order_payload(7)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: json.dumps cannot serialise a date and raises TypeError. Convert it with .isoformat()."
+      }
+    ],
+    "repair": "Use `\"created\": datetime.date(2026, 9, 1).isoformat()`.",
+    "debrief": "The standard json module is deliberately minimal, and frameworks that 'just handle' dates hide that. Any type outside JSON's six needs an explicit representation, and choosing it - ISO 8601 for dates - is part of designing the API. Test serialisation with every field type the payload carries.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "order_payload",
+      "ai_code": "import json\nimport datetime\n\ndef order_payload(order_id):\n    return json.dumps({\"id\": order_id, \"created\": datetime.date(2026, 9, 1)})",
+      "reference_code": "import json\nimport datetime\n\ndef order_payload(order_id):\n    return json.dumps({\"id\": order_id, \"created\": datetime.date(2026, 9, 1).isoformat()})",
+      "test_inputs": [
+        "(7,)",
+        "(0,)"
+      ],
+      "counterexample_input": "(7,)"
+    }
+  },
+  {
+    "id": "prg-apis-json-004",
+    "subject": "programming",
+    "topic": "APIs & JSON",
+    "subtopic": "Responses without a body",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After a successful delete, does delete_cart return True?",
+    "artifact_type": "function",
+    "artifact": {
+      "language": "python",
+      "code": "import requests\n\ndef delete_cart(base, cart_id):\n    resp = requests.delete(f\"{base}/carts/{cart_id}\", timeout=10)\n    resp.raise_for_status()\n    return resp.json()[\"deleted\"]",
+      "api_docs": "DELETE /carts/{id} -> 204 No Content on success; 404 if the cart does not exist."
+    },
+    "ai_claim": "Yes. raise_for_status passes for a successful response, and the JSON body's 'deleted' field is True.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "requests.delete sends the request and waits up to 10 seconds."
+      },
+      {
+        "index": 2,
+        "text": "raise_for_status raises only for 4xx and 5xx responses, so a successful delete continues."
+      },
+      {
+        "index": 3,
+        "text": "A successful DELETE returns a JSON body such as {\"deleted\": true}."
+      },
+      {
+        "index": 4,
+        "text": "delete_cart returns True."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming every successful response has a JSON body",
+      "explanation": "The API documents 204 No Content for a successful delete: the body is empty. resp.json() on an empty body raises a JSON decoding error (requests.exceptions.JSONDecodeError), so the function crashes after a successful delete. Check resp.status_code == 204 and return True.",
+      "why_convincing": "Most endpoints the developer used return JSON, and steps 1 and 2 are correct, so step 3 reads like the natural continuation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "A 204 response has no body, so resp.json() raises a decoding error instead of returning a dict. Return `resp.status_code == 204` (after raise_for_status) instead of parsing a body that does not exist.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "204 No Content -> resp.text == '' -> resp.json() raises JSONDecodeError",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "204"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "resp.raise_for_status()\nreturn resp.status_code == 204",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "204"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "For a 204 response, resp.json() raises requests.exceptions.JSONDecodeError."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare step 3 with the API documentation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 describes the response body of a successful delete."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "204 No Content means the response has no body at all."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what resp.json() does when the body is empty."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 contradicts the docs: success is 204 with no body, so resp.json() raises. Return resp.status_code == 204 instead."
+      }
+    ],
+    "repair": "Replace the last line with `return resp.status_code == 204`.",
+    "debrief": "Status codes carry meaning beyond 'success or failure', and 204 promises an empty body. Code that assumes a shape instead of reading the documentation fails precisely on the happy path. Check the documented response for each status code before parsing it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-apis-json-005",
+    "subject": "programming",
+    "topic": "APIs & JSON",
+    "subtopic": "Canonical JSON for signatures",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Two services sign requests by hashing canonical(d). Does same_signature(a, b) return True exactly when a and b have the same keys and the same values (of the same types), regardless of key order, including in nested dictionaries?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "import json\n\ndef canonical(d):\n    return json.dumps(d, sort_keys=True, separators=(\",\", \":\"))\n\ndef same_signature(a, b):\n    return canonical(a) == canonical(b)"
+    },
+    "ai_claim": "Yes. sort_keys=True orders keys at every level, and fixed separators remove whitespace differences.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "json.dumps with sort_keys=True writes every object's keys in sorted order."
+      },
+      {
+        "index": 2,
+        "text": "Sorting applies recursively, so nested dictionaries are ordered too."
+      },
+      {
+        "index": 3,
+        "text": "separators=(',', ':') removes optional whitespace, so formatting cannot differ."
+      },
+      {
+        "index": 4,
+        "text": "Equal content therefore gives an identical string, and different content a different one."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct for JSON-safe values of the same types: sort_keys orders keys at every nesting level and the compact separators fix formatting, so the canonical strings match exactly when the content matches. (1 and 1.0 would differ, which is why the question specifies the same types.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "same_signature({'b': 1, 'a': {'y': 2, 'x': 3}}, {'a': {'x': 3, 'y': 2}, 'b': 1}) is True.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether key sorting reaches nested dictionaries."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 is the claim that decides the nested case."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "json.dumps(sort_keys=True) sorts the keys of every dictionary it serialises, at every level."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare two nested dicts with the same content in different orders."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Sorting is recursive and the separators are fixed, so equal content gives equal strings. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Signing requires a canonical form, and the classic bug is forgetting that key order or whitespace can vary. Here both are fixed, and at every nesting level. The caveat worth knowing is type sensitivity: 1 and 1.0 serialise differently, so canonical forms should be applied to normalised data.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "same_signature",
+      "ai_code": "import json\n\ndef canonical(d):\n    return json.dumps(d, sort_keys=True, separators=(\",\", \":\"))\n\ndef same_signature(a, b):\n    return canonical(a) == canonical(b)",
+      "reference_code": "def same_signature(a, b):\n    return a == b",
+      "test_inputs": [
+        "({'b': 1, 'a': {'y': 2, 'x': 3}}, {'a': {'x': 3, 'y': 2}, 'b': 1})",
+        "({'a': 1}, {'a': 2})",
+        "({}, {})"
+      ]
+    }
+  }
+]

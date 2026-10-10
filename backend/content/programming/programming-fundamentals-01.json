@@ -1,0 +1,441 @@
+[
+  {
+    "id": "prg-programming-fundamentals-001",
+    "subject": "programming",
+    "topic": "Programming Fundamentals",
+    "subtopic": "Floor division of negatives",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The docstring promises truncation toward zero. Does to_minutes(seconds) truncate toward zero for every integer input, including negative durations?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def to_minutes(seconds):\n    \"\"\"Whole minutes, truncating toward zero.\"\"\"\n    return seconds // 60"
+    },
+    "ai_claim": "Yes. // discards the fractional part, which is truncation toward zero for every input.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "`//` divides and discards the fractional part of the result."
+      },
+      {
+        "index": 2,
+        "text": "For 125 seconds, 125 // 60 = 2, dropping the leftover 5 seconds."
+      },
+      {
+        "index": 3,
+        "text": "Dropping the fractional part is truncation toward zero, so negative inputs such as -90 give -1."
+      },
+      {
+        "index": 4,
+        "text": "to_minutes truncates toward zero for every integer input."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Treating floor division as truncation",
+      "explanation": "Python's // is floor division: it rounds toward negative infinity. For positive numbers that looks like truncation, but -90 // 60 is -2, not -1. Truncation toward zero needs int(seconds / 60) or math.trunc.",
+      "why_convincing": "Every positive example behaves exactly like truncation, and most people only ever test positive durations. The word 'discards' in step 1 describes the positive case and quietly becomes a rule."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "`//` floors, so to_minutes(-90) returns -2 while truncation toward zero gives -1. The function is correct only for non-negative input. Use int(seconds / 60) (or math.trunc(seconds / 60)) to match the docstring.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "to_minutes(-90) returns -2; truncation toward zero requires -1.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-90",
+          "-2",
+          "-1"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "return int(seconds / 60)",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "to_minutes(-90) returns -2, but truncating -1.5 toward zero gives -1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the function on inputs of every sign, not only positive ones."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 extends a claim from positive numbers to negative ones."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Python's // rounds toward negative infinity, not toward zero."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute -90 // 60 by hand and compare it with truncating -1.5."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: // is floor division, so to_minutes(-90) returns -2, not -1. Use int(seconds / 60) to truncate toward zero."
+      }
+    ],
+    "repair": "Replace the body with `return int(seconds / 60)` (or math.trunc), which truncates toward zero for negative inputs too.",
+    "debrief": "Floor and truncation agree on every positive number, which is exactly why the difference survives testing. Operators are defined by their behaviour on the whole input domain, and a docstring promise is only verified when the edge of that domain - here, negative values - is tested. When a function handles signed numbers, always include a negative case.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "to_minutes",
+      "ai_code": "def to_minutes(seconds):\n    \"\"\"Whole minutes, truncating toward zero.\"\"\"\n    return seconds // 60",
+      "reference_code": "def to_minutes(seconds):\n    return int(seconds / 60)",
+      "test_inputs": [
+        "(125,)",
+        "(0,)",
+        "(60,)",
+        "(-90,)"
+      ],
+      "counterexample_input": "(-90,)"
+    }
+  },
+  {
+    "id": "prg-programming-fundamentals-002",
+    "subject": "programming",
+    "topic": "Programming Fundamentals",
+    "subtopic": "Comparing floating-point totals",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A billing screen uses check(a, b, total) to confirm that two rupee amounts add up to a total. Does it return True for check(0.1, 0.2, 0.3)?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def check(a, b, total):\n    return a + b == total"
+    },
+    "ai_claim": "Yes. 0.1 + 0.2 equals 0.3, so check returns True.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "check adds a and b and compares the result with total."
+      },
+      {
+        "index": 2,
+        "text": "For whole numbers such as check(1, 2, 3) the comparison is exact."
+      },
+      {
+        "index": 3,
+        "text": "Python stores 0.1, 0.2 and 0.3 exactly as written, so 0.1 + 0.2 == 0.3 is True."
+      },
+      {
+        "index": 4,
+        "text": "check(0.1, 0.2, 0.3) returns True."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 3,
+      "misconception": "Assuming decimal fractions are stored exactly as binary floats",
+      "explanation": "0.1, 0.2 and 0.3 have no exact binary representation. 0.1 + 0.2 evaluates to 0.30000000000000004, so the == comparison is False. Money should use integer paise, decimal.Decimal, or a tolerance such as math.isclose.",
+      "why_convincing": "On paper 0.1 + 0.2 = 0.3 is obviously true, and whole-number tests pass. The failure lives below the level of the source code, in how floats are represented."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "0.1 + 0.2 == 0.3 is False in Python because binary floats cannot represent these decimals exactly (0.1 + 0.2 = 0.30000000000000004). check returns False. Compare with math.isclose, or store money as integer paise or Decimal.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "check(0.1, 0.2, 0.3) returns False, because 0.1 + 0.2 = 0.30000000000000004.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.30000000000000004"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "return math.isclose(a + b, total)",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "0.1 + 0.2 evaluates to 0.30000000000000004, so check(0.1, 0.2, 0.3) is False."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider how the computer stores the numbers, not how they look on paper."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 makes a claim about how 0.1, 0.2 and 0.3 are stored."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Most decimal fractions cannot be represented exactly as binary floating-point numbers."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate 0.1 + 0.2 in Python and look at every digit of the result."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 0.1 + 0.2 is 0.30000000000000004 in floating point, so check returns False. Use math.isclose, Decimal or integer paise for money."
+      }
+    ],
+    "repair": "Use `return math.isclose(a + b, total)`, or store amounts as integer paise (or Decimal) so the comparison is exact.",
+    "debrief": "Floating-point numbers are binary approximations, and == compares approximations exactly. Code that looks algebraically true can be false at run time. For money, the professional habit is to avoid floats entirely - integer paise or Decimal - and for measured quantities to compare within a tolerance. Test equality checks with decimals, not only with whole numbers.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "check",
+      "ai_code": "def check(a, b, total):\n    return a + b == total",
+      "reference_code": "import math\ndef check(a, b, total):\n    return math.isclose(a + b, total)",
+      "test_inputs": [
+        "(1, 2, 3)",
+        "(0.5, 0.25, 0.75)",
+        "(0.1, 0.2, 0.3)"
+      ],
+      "counterexample_input": "(0.1, 0.2, 0.3)"
+    }
+  },
+  {
+    "id": "prg-programming-fundamentals-003",
+    "subject": "programming",
+    "topic": "Programming Fundamentals",
+    "subtopic": "Augmented assignment typo",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does cart_total(prices) return the sum of all the prices in the list?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def cart_total(prices):\n    total = 0\n    for price in prices:\n        total =+ price\n    return total"
+    },
+    "ai_claim": "Yes. The loop adds every price to total and returns the sum.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "total starts at 0."
+      },
+      {
+        "index": 2,
+        "text": "The loop visits every price in the list."
+      },
+      {
+        "index": 3,
+        "text": "`total =+ price` adds each price to the running total."
+      },
+      {
+        "index": 4,
+        "text": "cart_total returns the sum of the prices."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Reading `=+` as `+=`",
+      "explanation": "`total =+ price` is `total = (+price)`: plain assignment of the price with a unary plus. Each iteration overwrites total, so the function returns the last price. cart_total([100, 250, 40]) returns 40, not 390. The operator needed is `+=`.",
+      "why_convincing": "`=+` and `+=` differ only in character order, the code runs without errors, and a one-item cart gives the right answer."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "`=+` assigns +price instead of adding, so total ends up as the last price. cart_total([100, 250, 40]) returns 40. Replace it with `total += price` (or use sum(prices)).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "cart_total([100, 250, 40]) returns 40 instead of 390.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "40",
+          "390"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "total: 0 -> 100 -> 250 -> 40",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "40"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "cart_total([100, 250, 40]) returns 40."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Trace the value of total through a list with more than one price."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Look carefully at the operator in step 3."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "`x =+ y` is parsed as `x = +y`: assignment, not accumulation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run cart_total([100, 250, 40]) by hand and record total after each iteration."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 misreads `=+` as `+=`. Each iteration replaces total with the current price, so the function returns the last price: 40 instead of 390."
+      }
+    ],
+    "repair": "Change `total =+ price` to `total += price`, or return sum(prices).",
+    "debrief": "Some bugs are one transposed character, and they survive because the code still runs and simple cases still pass - a single-item cart is correct by accident. Tracing a variable through a multi-element input is the fastest way to catch accumulation bugs. Choose test inputs where the right answer differs from every partial answer.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "cart_total",
+      "ai_code": "def cart_total(prices):\n    total = 0\n    for price in prices:\n        total =+ price\n    return total",
+      "reference_code": "def cart_total(prices):\n    return sum(prices)",
+      "test_inputs": [
+        "([100],)",
+        "([],)",
+        "([100, 250, 40],)"
+      ],
+      "counterexample_input": "([100, 250, 40],)"
+    }
+  },
+  {
+    "id": "prg-programming-fundamentals-004",
+    "subject": "programming",
+    "topic": "Programming Fundamentals",
+    "subtopic": "Identity versus equality",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "same_order(a, b) checks whether two integer order IDs, received from different API calls, are equal. Does it correctly report equality for every pair of IDs?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def same_order(a, b):\n    return a is b"
+    },
+    "ai_claim": "Yes. `is` returns True when both IDs have the same value, and the small IDs we tested compare correctly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The function compares the two IDs with `is`."
+      },
+      {
+        "index": 2,
+        "text": "`is` returns True when both sides have the same value."
+      },
+      {
+        "index": 3,
+        "text": "Small IDs such as 5 or 100 compare equal, as expected."
+      },
+      {
+        "index": 4,
+        "text": "So same_order correctly reports whether two IDs are equal."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Confusing identity (`is`) with equality (`==`)",
+      "explanation": "`is` checks whether two names refer to the same object, not whether the values are equal. CPython caches small integers (-5 to 256), so small IDs appear to work, but two separately created 1000s are different objects: same_order(1000, 1000) returns False.",
+      "why_convincing": "The tests that were run used small numbers, which happen to be cached, so `is` behaves like == for them. The difference only appears for realistic order IDs."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "`is` compares object identity. CPython reuses objects only for small integers, so equal large IDs created separately (for example 1000 and 1000 parsed from two API responses) are different objects and `a is b` is False. Use `a == b`.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "same_order(1000, 1000) returns False for two separately created IDs.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1000"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "return a == b",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Two order IDs of 1000 created separately: `a == b` is True, `a is b` is False."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test with order IDs of a realistic size."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 defines what `is` checks. Verify that definition."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "`is` tests whether two references point to the same object; `==` tests whether values are equal."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare two separately created 1000s with `is` and with `==`."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: `is` tests identity. Small integers are cached, so they seem to work, but same_order(1000, 1000) is False. Use ==."
+      }
+    ],
+    "repair": "Replace `a is b` with `a == b`.",
+    "debrief": "Tests that only use small numbers hid this bug, because CPython caches small integers and `is` then happens to agree with ==. Identity is the right tool for None and for sentinels; values need ==. When a test passes, ask whether the inputs were representative - here, real order IDs are much larger than 256.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "same_order",
+      "ai_code": "def same_order(a, b):\n    return a is b",
+      "reference_code": "def same_order(a, b):\n    return a == b",
+      "test_inputs": [
+        "(5, 5)",
+        "(100, 100)",
+        "(1000, 1000)",
+        "(7, 8)"
+      ],
+      "counterexample_input": "(1000, 1000)"
+    }
+  }
+]

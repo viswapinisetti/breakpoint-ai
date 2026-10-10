@@ -1,0 +1,374 @@
+[
+  {
+    "id": "mlo-data-model-versioning-001",
+    "subject": "mlops",
+    "topic": "Data & Model Versioning",
+    "subtopic": "Versioning models but not data",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does versioning models and code give full reproducibility?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "The model registry stores every model version with its code commit.\nTraining data is read from a live database table that is updated continuously.\nAI: \"Model versioning gives us full reproducibility.\""
+    },
+    "ai_claim": "Yes. Each model version is stored with its code commit, so any model can be reproduced.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every model version is stored."
+      },
+      {
+        "index": 2,
+        "text": "Each is linked to its code commit."
+      },
+      {
+        "index": 3,
+        "text": "Code determines how the model is trained."
+      },
+      {
+        "index": 4,
+        "text": "So any model can be reproduced."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Leaving training data unversioned",
+      "explanation": "Code determines how to train; data determines what is learned. The live table has changed since each model was trained, so rerunning the commit produces a different model, and investigating a past model's behaviour is impossible. Snapshot the training data (or record a point-in-time query with a versioned warehouse) for every model version.",
+      "why_convincing": "Code versioning is familiar from software engineering, where it is sufficient."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the data behind each model is not versioned. Snapshot training data per model version.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Retraining model v12's commit today uses 8 months of newer rows and gives different predictions.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "8"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "An ML model is a function of code and data; both must be versioned.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An audit of v12's decisions cannot recover its training data."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what else determines a trained model."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats code as the whole recipe."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models depend on data as much as code."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider retraining an old commit today."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: data are unversioned. Snapshot them."
+      }
+    ],
+    "repair": "Snapshot training data (or use time-travel queries) and link the version to each model.",
+    "debrief": "In ML, data is source code. Version it with the same discipline.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-data-model-versioning-002",
+    "subject": "mlops",
+    "topic": "Data & Model Versioning",
+    "subtopic": "A DVC pointer without the data",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can teammates retrieve the training data with dvc pull?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "$ dvc add data/train.parquet\n$ git add data/train.parquet.dvc .gitignore\n$ git commit -m 'track training data' && git push\n# 'dvc push' was never run\nAI: \"The data is versioned, so teammates can get it with dvc pull.\""
+    },
+    "ai_claim": "Yes. The data is tracked by DVC and the pointer file is in Git, so teammates can pull it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "dvc add tracks the file."
+      },
+      {
+        "index": 2,
+        "text": "The .dvc pointer is committed and pushed."
+      },
+      {
+        "index": 3,
+        "text": "Teammates clone the repository."
+      },
+      {
+        "index": 4,
+        "text": "dvc pull retrieves the data."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 4,
+      "misconception": "Pushing the pointer but not the data",
+      "explanation": "The .dvc file only records the data's hash. The data itself lives in the local DVC cache until dvc push uploads it to the remote. Without that, teammates' dvc pull fails (the remote has no object with that hash), and if the author's laptop is lost, so is the data. Run dvc push (automate it in a pre-push hook or CI check).",
+      "why_convincing": "Git push feels like it publishes everything."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the data was never pushed to the DVC remote. Run dvc push.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "teammate: dvc pull -> 'ERROR: failed to pull data from the cloud - 1 file failed'",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "DVC stores hashes in Git and file contents in the DVC remote; both must be pushed.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The data exists only on the author's laptop."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where DVC stores the actual file contents."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes the remote has the data."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Git holds pointers; the DVC remote holds data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run dvc pull on a fresh clone."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the data was never pushed. Run dvc push."
+      }
+    ],
+    "repair": "Run dvc push; add a hook or CI check that verifies remote availability.",
+    "debrief": "Pointer-based versioning has two halves. Publishing one without the other creates references to nothing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-data-model-versioning-003",
+    "subject": "mlops",
+    "topic": "Data & Model Versioning",
+    "subtopic": "Content-addressed versions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Datasets are stored under their SHA-256 content hash (s3://acme-data/sha256/4c1f.../). Training runs reference datasets only by hash.\nAI: \"A given hash always refers to exactly the same bytes, so a run's data reference can never silently change.\""
+    },
+    "ai_claim": "Yes. The storage key is derived from the content, so different content gets a different hash. A reference by hash therefore always points to identical data.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The hash is computed from the dataset's bytes."
+      },
+      {
+        "index": 2,
+        "text": "Any change to the bytes changes the hash."
+      },
+      {
+        "index": 3,
+        "text": "So a hash identifies exactly one version."
+      },
+      {
+        "index": 4,
+        "text": "References by hash cannot silently change."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Content addressing makes data references immutable and verifiable (you can recompute the hash to check integrity).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "editing one row -> new hash 9ae2... -> new location; old runs still reference 4c1f...",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the storage key is chosen."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 is the key property."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Content-addressed storage names data by its contents."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Change one row and compute the hash."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Hash references are immutable. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Content addressing is how Git, Docker and DVC make references trustworthy.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-data-model-versioning-004",
+    "subject": "mlops",
+    "topic": "Data & Model Versioning",
+    "subtopic": "Personal data kept in every version",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the deletion request fulfilled by deleting the customer from the live database?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Customer datasets with names, phone numbers and purchase histories are versioned forever (every weekly snapshot is kept).\nA customer submits a data-deletion request under the applicable privacy law.\nAI: \"We delete them from the live database, so the request is fulfilled.\""
+    },
+    "ai_claim": "Yes. The customer's record is removed from the live database, which is where their data is stored, so the request is fulfilled.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The customer's data is in the live database."
+      },
+      {
+        "index": 2,
+        "text": "The record is deleted."
+      },
+      {
+        "index": 3,
+        "text": "The data is no longer stored."
+      },
+      {
+        "index": 4,
+        "text": "So the request is fulfilled."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Forgetting personal data kept in dataset versions",
+      "explanation": "Every weekly snapshot still contains the customer's name, phone and history, and models trained on them may memorise details. Keeping them indefinitely conflicts with the deletion request and with data-minimisation principles. Design versioning for privacy: pseudonymise identifiers before snapshotting, set retention periods, and have a process to purge or rewrite snapshots (and retrain affected models) when deletion is required.",
+      "why_convincing": "The live database is where 'the data' feels like it lives."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: copies remain in every retained snapshot. Pseudonymise before versioning, set retention, and purge snapshots when required.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "snapshots 2025-01 through 2026-08 each contain the customer's row: 86 copies",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "86"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Deletion obligations apply to all copies of personal data, including backups and dataset versions (subject to law-specific exceptions).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A data scientist loads an old snapshot and sees the customer's phone number."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List every place the customer's data exists."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 considers only the live database."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Versioned datasets and trained models are also copies of personal data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the snapshots that contain the customer."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: every snapshot still holds the data."
+      }
+    ],
+    "repair": "Pseudonymise before snapshotting, apply retention limits, and support purging from versions.",
+    "debrief": "Immutable history and the right to deletion pull in opposite directions. Resolve the tension in the design, before the first request arrives.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

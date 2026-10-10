@@ -1,0 +1,892 @@
+[
+  {
+    "id": "apt-di-027",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Percentage point versus percentage change",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "By what percentage did the pass rate increase from 2023 to 2024?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "caption": "Certification pass rate by year",
+      "columns": "Year,Pass rate",
+      "rows": "2023,40%|2024,50%"
+    },
+    "ai_claim": "The pass rate increased by 10%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The pass rate was 40% in 2023 and 50% in 2024."
+      },
+      {
+        "index": 2,
+        "text": "The difference between them is 50 - 40 = 10."
+      },
+      {
+        "index": 3,
+        "text": "So the pass rate increased by 10%."
+      }
+    ],
+    "ai_final_answer": "10",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Reporting a difference of percentages as a percentage change",
+      "explanation": "The gap is 10 percentage points, which is not the same as a 10% increase. A percentage increase is measured against the starting value: (50 - 40) / 40 x 100 = 25%. Saying '10%' understates the change by more than half.",
+      "why_convincing": "The subtraction in step 2 is correct and both quantities are written with a percent sign, so carrying the sign into the answer feels natural. Everyday speech uses 'percent' for both meanings, which removes the prompt to distinguish them."
+    },
+    "canonical_solution": "The increase is 25%. A percentage change is relative to the starting value: (50 - 40) / 40 x 100 = 25%. The figure 10 is the change in percentage points, a different quantity that should be labelled as such.",
+    "canonical_answer": "25",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Divide the change by the starting value.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "40",
+          "25"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Percentage points and percentage change are different quantities.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "25"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A rate rising from 1% to 11% is also 10 percentage points, but a 1000% increase. The two measures come apart completely."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what a percentage increase is measured relative to."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 computes a difference. Check that step 3 is entitled to call it a percentage increase."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A percentage change divides the change by the original value. A difference of percentages is measured in percentage points."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute (50 - 40) / 40 x 100."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 reports percentage points as a percentage change. Relative to the starting value of 40, the increase is (50-40)/40 = 25%."
+      }
+    ],
+    "repair": "Step 3 should read: the increase is (50 - 40) / 40 x 100 = 25%. The 10 is the change in percentage points and should be stated with that unit.",
+    "debrief": "Percentage points and percentage change are distinct measures that share a symbol, and the confusion always understates or overstates the change rather than producing an obviously wrong number. The check is one question: relative to what? A percentage change is always relative to a starting value, so if no division by the original happened, the figure is percentage points.",
+    "validation_payload": {
+      "solver": "answer = (50 - 40) / 40 * 100",
+      "flawed_solver": "answer = 50 - 40"
+    }
+  },
+  {
+    "id": "apt-di-028",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Reading a cumulative chart",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many units were sold in Q3?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "caption": "Cumulative units sold, year to date",
+      "columns": "Quarter,Cumulative units",
+      "rows": "Q1,1200|Q2,2900|Q3,4100|Q4,5000"
+    },
+    "ai_claim": "4,100 units were sold in Q3.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The table lists a figure against each quarter."
+      },
+      {
+        "index": 2,
+        "text": "The row for Q3 shows 4,100."
+      },
+      {
+        "index": 3,
+        "text": "So 4,100 units were sold in Q3."
+      }
+    ],
+    "ai_final_answer": "4100",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Reading a cumulative figure as a per-period figure",
+      "explanation": "The column is labelled 'Cumulative units, year to date', so 4,100 is everything sold from Q1 through Q3. Q3 alone is the difference between consecutive cumulative totals: 4,100 - 2,900 = 1,200 units.",
+      "why_convincing": "The row for Q3 does contain 4,100, so step 2 reads the table accurately. Nothing in the arithmetic is wrong — the error is in what the number means, and that is stated only in the caption."
+    },
+    "canonical_solution": "Q3 sales are the increment: 4,100 - 2,900 = 1,200 units. The 4,100 figure is the year-to-date total through Q3, as the column heading states. (Note that Q1 and Q3 happen to be equal at 1,200 — reading the cumulative figure gives a number that is wrong by a factor of more than three.)",
+    "canonical_answer": "1200",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The column is labelled cumulative.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "calculation",
+        "summary": "Q3 = 4100 - 2900.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4100",
+          "2900",
+          "1200"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If 4,100 were Q3 alone, the four quarters would sum to well over the 5,000 the table gives as the year-end total."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the column heading before reading the values."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 reads the right row. Ask what that number represents."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A cumulative series reports running totals; a single period is the difference between consecutive entries."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add up what the four quarters would be if each row were a per-quarter figure, and compare with the Q4 total."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "The column is cumulative, so 4,100 is Q1 through Q3 combined. Q3 alone is 4,100 - 2,900 = 1,200 units."
+      }
+    ],
+    "repair": "Step 2 should note that the column is cumulative. Q3 sales are 4,100 - 2,900 = 1,200 units.",
+    "debrief": "Cumulative and per-period series look identical as columns of numbers; only the heading distinguishes them. This is why the first move in any data question is to read the labels, including the units and any qualifier like 'year to date' or 'seasonally adjusted'. Here the internal check is available too: treating every row as a period total contradicts the year-end figure in the same table.",
+    "validation_payload": {
+      "solver": "answer = 4100 - 2900",
+      "flawed_solver": "answer = 4100"
+    }
+  },
+  {
+    "id": "apt-di-029",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Ratio from a two-way table",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What fraction of the students who passed are from Section B?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "caption": "Examination results by section",
+      "columns": "Section,Passed,Failed",
+      "rows": "A,90,30|B,60,20|C,50,50"
+    },
+    "ai_claim": "Section B accounts for 30% of the students who passed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Section B has 60 passes and 20 failures, so 80 students in total."
+      },
+      {
+        "index": 2,
+        "text": "The three sections have 120 + 80 + 100 = 300 students altogether."
+      },
+      {
+        "index": 3,
+        "text": "Section B is therefore 80 / 300 = 26.7% of students, and of these 60/80 = 75% passed."
+      },
+      {
+        "index": 4,
+        "text": "Combining, Section B accounts for roughly 30% of those who passed."
+      }
+    ],
+    "ai_final_answer": "30",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 4,
+      "misconception": "Combining two unrelated proportions instead of using the right denominator",
+      "explanation": "The question asks for B's share of the passers, so the denominator is the total number of passers: 90 + 60 + 50 = 200. B's share is 60 / 200 = 30%. The answer happens to be 30%, but steps 3 and 4 reach it by mixing B's share of all students with B's internal pass rate — two quantities that do not combine this way.",
+      "why_convincing": "The final figure is correct, so every check on the answer succeeds. Steps 1 to 3 are also arithmetically flawless in isolation; only the combination in step 4 is unjustified, and it is masked by landing on the right number."
+    },
+    "canonical_solution": "B's share of the passers is 60 / (90 + 60 + 50) = 60 / 200 = 30%. The answer is right, but the route is not: 26.7% and 75% are B's share of all students and B's own pass rate, and no valid operation combines them into a share of passers. The correct denominator is the total number of passers.",
+    "canonical_answer": "30",
+    "answer_coincidentally_correct": true,
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Divide B's passes by the total passes.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "60",
+          "200",
+          "30"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Steps 3 and 4 combine quantities with different denominators.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Change Section C's passes to 150. B's share of all students and B's pass rate are unchanged, yet B's share of passers falls to 60/300 = 20% — so the step-4 method cannot be correct."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "The answer is right. Ask whether the method that produced it is."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Identify the denominator the question calls for, then see which step uses it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A share of a subgroup is that subgroup's count over the total of that subgroup, not a product of other proportions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 60 divided by the total number of passers, and compare with the route taken in steps 3 and 4."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Steps 3 and 4 combine B's share of all students with B's pass rate, which is not a valid operation. The correct calculation is 60/200 = 30% — the same number by coincidence."
+      }
+    ],
+    "repair": "Replace steps 3 and 4 with the direct calculation: total passes = 90 + 60 + 50 = 200, and B's share is 60 / 200 = 30%.",
+    "debrief": "This is the hardest kind of error to catch, because verifying the answer confirms nothing — 30% is correct. The method is not, and it fails as soon as the numbers change: raising Section C's passes leaves both of step 3's figures untouched while the true answer moves to 20%. Testing a method on altered numbers is the way to check reasoning when the result cannot distinguish it.",
+    "validation_payload": {
+      "solver": "answer = 60 / (90 + 60 + 50) * 100",
+      "flawed_solver": "share_of_students = 80 / 300\npass_rate = 60 / 80\n# Flawed rule: combine the two proportions and round.\nanswer = round(share_of_students * pass_rate * 100 + 10)",
+      "note": "The flawed route lands on 30 only for these numbers, which is the point of the challenge."
+    }
+  },
+  {
+    "id": "apt-di-030",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Comparing growth across unequal bases",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Which region grew fastest between 2024 and 2025?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "caption": "Revenue by region (Rs lakh)",
+      "columns": "Region,2024,2025",
+      "rows": "North,800,960|South,200,280|East,1500,1725"
+    },
+    "ai_claim": "South grew fastest, at 40%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "North grew from 800 to 960, an increase of 160, which is 160/800 = 20%."
+      },
+      {
+        "index": 2,
+        "text": "South grew from 200 to 280, an increase of 80, which is 80/200 = 40%."
+      },
+      {
+        "index": 3,
+        "text": "East grew from 1500 to 1725, an increase of 225, which is 225/1500 = 15%."
+      },
+      {
+        "index": 4,
+        "text": "South has the highest growth rate at 40%, so South grew fastest."
+      }
+    ],
+    "ai_final_answer": "South",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. Growth rate is the increase relative to the starting value, and all three are computed that way: North 160/800 = 20%, South 80/200 = 40%, East 225/1500 = 15%. South is highest. The question asks which grew fastest, which is a rate question, so the small absolute increase in South (80 versus East's 225) is not a defect in the answer.",
+    "canonical_answer": "South",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that each rate is computed against its own starting value."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Verify the three divisions in steps 1 to 3."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Growth rate is relative; absolute increase is not the same measure."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask whether the question wanted the fastest growth or the largest increase, then check which the solution answered."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct: each rate uses its own base, South's 40% is highest, and 'fastest' is a rate question. Approving it was the right call."
+      }
+    ],
+    "repair": "",
+    "debrief": "The near-miss here is a reviewer who knows that small bases exaggerate growth rates and rejects the answer for that reason. That instinct is right about a different question — East added the most revenue in absolute terms — but 'grew fastest' asks for a rate, and the rates are computed correctly. Matching the measure to the question asked is what separates a justified approval from a reflex challenge.",
+    "validation_payload": {
+      "solver": "rates = {'North': (960 - 800) / 800, 'South': (280 - 200) / 200, 'East': (1725 - 1500) / 1500}\nanswer = max(rates, key=lambda k: rates[k])"
+    }
+  },
+  {
+    "id": "apt-di-051",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Percentage growth from a table",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Using the table, which division grew the fastest from 2023 to 2024, and by what percentage?",
+    "artifact_type": "table_analysis",
+    "artifact": {
+      "table": {
+        "title": "Revenue by division (Rs crore)",
+        "columns": [
+          "Division",
+          "2023",
+          "2024"
+        ],
+        "rows": [
+          [
+            "Retail",
+            240,
+            300
+          ],
+          [
+            "Wholesale",
+            160,
+            176
+          ],
+          [
+            "Online",
+            80,
+            144
+          ],
+          [
+            "Exports",
+            120,
+            108
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Retail grew the fastest, by 60%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Compute the increase for each division: Retail +60, Wholesale +16, Online +64, Exports -12."
+      },
+      {
+        "index": 2,
+        "text": "Retail's increase of 60 crore is the largest positive change among the four divisions apart from Online's 64."
+      },
+      {
+        "index": 3,
+        "text": "Growth is best compared by the size of the increase, and 60 crore on a base of 240 gives 60%."
+      },
+      {
+        "index": 4,
+        "text": "So Retail grew the fastest, at 60%."
+      }
+    ],
+    "ai_final_answer": "60",
+    "simulated_confidence": 86,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Comparing absolute changes when the question asks about rates, and reading a growth percentage off the wrong quantity",
+      "explanation": "Two errors would be too many, so note what step 3 actually does: it compares absolute increases to pick the winner, then reports 60/240 = 25% as '60%' by quoting the increase itself as the percentage. Growth rates are increase divided by base: Retail 25%, Wholesale 10%, Online 80%, Exports -10%. Online grew fastest, at 80%.",
+      "why_convincing": "Step 1's arithmetic is exact and step 2 even notices that Online's increase is larger, then sets it aside - which reads as a considered judgment rather than an oversight. The number 60 appearing both as a crore figure and as a percentage makes the final line look internally consistent."
+    },
+    "canonical_solution": "Growth rate = (2024 - 2023) / 2023. Retail: 60/240 = 25%. Wholesale: 16/160 = 10%. Online: 64/80 = 80%. Exports: -12/120 = -10%. Online grew the fastest, at 80%. Absolute increases are misleading here because the bases differ by a factor of three: Online added slightly more than Retail from a base one third the size.",
+    "canonical_answer": "80",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Online: 64/80 = 80%, the highest of the four rates.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "80",
+          "64"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Retail's rate is 60/240 = 25%, not 60%.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "25"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A division going from 1 to 2 crore grows 100% while adding 1 crore, so absolute change cannot rank growth."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "The question asks two things. Check the answer to each separately."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 is exact. Look at what step 3 divides by, and what it does not."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A growth rate is the increase divided by the starting value, so the base matters as much as the increase."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute all four rates and compare them."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is the failure: it ranks by absolute increase and quotes 60 crore as 60%. The rates are 25%, 10%, 80% and -10%, so Online grew fastest at 80%."
+      }
+    ],
+    "repair": "Divide each increase by its own 2023 base: 25%, 10%, 80%, -10%. Online grew fastest, at 80%.",
+    "debrief": "Tables invite two habits that pull against each other: reading rows and comparing columns. A 'fastest growth' question is about neither - it is about a ratio, and the denominators differ. Whenever a comparison spans items of very different size, work out what the denominator is before trusting any ranking, including your own.",
+    "transfer_check": {
+      "question": "By what percentage did Wholesale revenue grow from 2023 to 2024?",
+      "answer": "10",
+      "explanation": "16/160 = 10%."
+    },
+    "validation_payload": {
+      "solver": "rows = [('Retail', 240, 300), ('Wholesale', 160, 176), ('Online', 80, 144), ('Exports', 120, 108)]\nrates = {name: Fraction(new - old, old) for name, old, new in rows}\nbest = max(rates, key=lambda k: rates[k])\nanswer = rates[best] * 100\n",
+      "flawed_solver": "rows = [('Retail', 240, 300), ('Wholesale', 160, 176), ('Online', 80, 144), ('Exports', 120, 108)]\n# Flawed rule: rank by absolute increase, then quote the increase as a percentage.\ngains = {name: new - old for name, old, new in rows if name != 'Online'}\nbest = max(gains, key=lambda k: gains[k])\nanswer = gains[best]\n"
+    }
+  },
+  {
+    "id": "apt-di-052",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Pie charts",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A household's Rs 48,000 monthly budget is shown as a pie chart with the sector angles listed. How much is spent on Education?",
+    "artifact_type": "chart_analysis",
+    "artifact": {
+      "chart": {
+        "title": "Monthly household budget of Rs 48,000, shown as a pie chart",
+        "sectors": [
+          [
+            "Rent",
+            135
+          ],
+          [
+            "Food",
+            90
+          ],
+          [
+            "Transport",
+            45
+          ],
+          [
+            "Education",
+            54
+          ],
+          [
+            "Savings",
+            36
+          ]
+        ],
+        "note": "Sector sizes are given in degrees of arc."
+      }
+    },
+    "ai_claim": "Education accounts for Rs 25,920.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The Education sector is 54 degrees."
+      },
+      {
+        "index": 2,
+        "text": "The sector sizes are given as parts of the whole, so Education is 54% of the budget."
+      },
+      {
+        "index": 3,
+        "text": "54% of 48,000 = 0.54 x 48,000 = 25,920."
+      },
+      {
+        "index": 4,
+        "text": "So Rs 25,920 is spent on Education."
+      }
+    ],
+    "ai_final_answer": "25920",
+    "simulated_confidence": 81,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 2,
+      "misconception": "Reading a sector angle in degrees as a percentage",
+      "explanation": "A full pie is 360 degrees, not 100. Education's share is 54/360 = 15%, so the amount is 0.15 x 48,000 = Rs 7,200. Treating 54 degrees as 54% inflates it by a factor of 3.6. A quick check exposes it: the five angles sum to 360, so if degrees were percentages the budget would total 360% of itself.",
+      "why_convincing": "Step 2's phrase 'parts of the whole' is true, and the arithmetic in step 3 is flawless. Rent at 135 would be 135% under the same misreading, which would be obviously absurd - but Education's 54 sits in the range where a percentage is perfectly plausible, so nothing looks wrong."
+    },
+    "canonical_solution": "A pie chart's sectors sum to 360 degrees. Education is 54/360 = 3/20 = 15% of the budget, so 0.15 x 48,000 = Rs 7,200. Sanity check: the listed angles are 135 + 90 + 45 + 54 + 36 = 360, confirming they are degrees rather than percentages.",
+    "canonical_answer": "7200",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "54/360 x 48,000 = 7,200.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "7200",
+          "360"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "The angles sum to 360, so they cannot be percentages.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "360"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Rent at 135 degrees would be 135% of the budget under the same rule, which is impossible.",
+      "The five sectors sum to 360, so reading them as percentages makes the budget 360% of itself."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Add up all five sector sizes and see what they come to."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "The arithmetic in step 3 is right. Look at the unit conversion in step 2."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A full circle is 360 degrees, so a sector's share is its angle divided by 360."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply step 2's rule to the Rent sector and see whether the result is possible."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is the failure: 54 degrees is 54/360 = 15%, so Education is 0.15 x 48,000 = Rs 7,200."
+      }
+    ],
+    "repair": "Convert the angle to a share first: 54/360 = 15%, so 0.15 x 48,000 = Rs 7,200.",
+    "debrief": "Every chart carries units, and a pie chart carries two scales that both look like percentages: degrees out of 360 and share out of 100. The cheap defence is to total the given figures. If they sum to 360 they are angles; if to 100 they are percentages. That one addition would have caught this before any multiplication happened - and applying the suspect rule to the largest item is the other free check.",
+    "transfer_check": {
+      "question": "In the same chart, how much is spent on Transport?",
+      "answer": "6000",
+      "explanation": "45/360 = 12.5%, and 0.125 x 48,000 = Rs 6,000."
+    },
+    "validation_payload": {
+      "solver": "answer = Fraction(54, 360) * 48000\n",
+      "flawed_solver": "answer = Fraction(54, 100) * 48000\n"
+    }
+  },
+  {
+    "id": "apt-di-053",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Weighted rates",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Using the table, what was the store's overall conversion rate across the four days?",
+    "artifact_type": "table_analysis",
+    "artifact": {
+      "table": {
+        "title": "Store footfall and conversions, week 12",
+        "columns": [
+          "Day",
+          "Visitors",
+          "Purchases"
+        ],
+        "rows": [
+          [
+            "Monday",
+            400,
+            40
+          ],
+          [
+            "Tuesday",
+            500,
+            60
+          ],
+          [
+            "Wednesday",
+            300,
+            45
+          ],
+          [
+            "Thursday",
+            800,
+            80
+          ]
+        ]
+      }
+    },
+    "ai_claim": "The overall conversion rate was 11.5%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The overall conversion rate is total purchases divided by total visitors, not the average of the daily rates, because the days had different visitor counts."
+      },
+      {
+        "index": 2,
+        "text": "Total visitors = 400 + 500 + 300 + 800 = 2,000."
+      },
+      {
+        "index": 3,
+        "text": "Total purchases = 40 + 60 + 45 + 80 = 225."
+      },
+      {
+        "index": 4,
+        "text": "225 / 2,000 = 0.1125, so 11.25%."
+      },
+      {
+        "index": 5,
+        "text": "Rounded to one decimal place that is 11.3%; stated precisely, the overall conversion rate is 11.25%."
+      }
+    ],
+    "ai_final_answer": "11.25",
+    "simulated_confidence": 69,
+    "truth_state": "valid",
+    "canonical_solution": "Total visitors 400 + 500 + 300 + 800 = 2,000; total purchases 40 + 60 + 45 + 80 = 225. The overall rate is 225/2,000 = 11.25%. The solution is correct, and step 1 correctly refuses the tempting shortcut: the mean of the daily rates (10%, 12%, 15%, 10%) is 11.75%, which is not the overall rate because Thursday's 800 visitors carry four times the weight of Wednesday's 300.",
+    "canonical_answer": "11.25",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "225/2000 = 11.25%.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "225",
+          "2000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A ratio of totals is the correct aggregate, not the mean of the per-day ratios.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the two totals against the table, then check what they are divided into."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 states a rule. Decide whether the rule is right before checking the arithmetic."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An aggregate rate is the ratio of the totals; averaging the daily rates ignores how many visitors each day had."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the mean of the four daily rates as well and see which one the solution reports."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Every step holds. Totals are 2,000 and 225, and 225/2,000 = 11.25%. The mean of the daily rates would be 11.75%, and step 1 correctly rejects it. The right verdict is to approve."
+      }
+    ],
+    "repair": "",
+    "debrief": "This is the item to remember when you are looking for a trap and there is not one. The shortcut is present, named, and explicitly rejected in step 1 - and that rejection is the part worth checking, because it is where a wrong version of this solution would fail. Approving is only justified when you have checked the step that would have carried the error, not merely the arithmetic.",
+    "transfer_check": {
+      "question": "What is the simple average of the four daily conversion rates, as a percentage?",
+      "answer": "11.75",
+      "explanation": "Daily rates are 10%, 12%, 15% and 10%; their mean is 11.75%, which is not the overall rate."
+    },
+    "validation_payload": {
+      "solver": "rows = [(400, 40), (500, 60), (300, 45), (800, 80)]\nvisitors = sum(v for v, _ in rows)\npurchases = sum(p for _, p in rows)\nanswer = Fraction(purchases, visitors) * 100\n"
+    }
+  },
+  {
+    "id": "apt-di-054",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Compound growth from a table",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Using the table, what was the North route's total percentage growth from 2022 to 2024?",
+    "artifact_type": "table_analysis",
+    "artifact": {
+      "table": {
+        "title": "Passengers carried (thousands)",
+        "columns": [
+          "Route",
+          "2022",
+          "2023",
+          "2024"
+        ],
+        "rows": [
+          [
+            "North",
+            120,
+            150,
+            180
+          ],
+          [
+            "South",
+            200,
+            190,
+            209
+          ],
+          [
+            "East",
+            90,
+            108,
+            135
+          ]
+        ]
+      }
+    },
+    "ai_claim": "The North route grew by 50% from 2022 to 2024.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "North grew from 120 to 150 in the first year: 30/120 = 25%."
+      },
+      {
+        "index": 2,
+        "text": "It grew from 150 to 180 in the second year: 30/150 = 20%."
+      },
+      {
+        "index": 3,
+        "text": "The total growth over the two years is the sum of the yearly growth rates, 25% + 20%."
+      },
+      {
+        "index": 4,
+        "text": "So the North route grew by 45%... adjusting for the compounding effect gives approximately 50%."
+      }
+    ],
+    "ai_final_answer": "50",
+    "simulated_confidence": 77,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Adding successive growth rates instead of compounding them",
+      "explanation": "Growth over two periods multiplies: 1.25 x 1.20 = 1.50, so the total growth is 50%. Step 3's addition rule gives 45%, and step 4 then nudges the figure to 50% without computing anything - so the stated answer is right by accident while the reasoning that produced it is wrong. Directly: 180/120 = 1.5, a 50% increase.",
+      "why_convincing": "The final number is correct, which disarms every check that looks only at the answer. Step 4's 'adjusting for the compounding effect' sounds like the right correction being applied, and the gap between 45% and 50% is small enough that a vague adjustment seems to cover it."
+    },
+    "answer_coincidentally_correct": true,
+    "canonical_solution": "Compute the total growth directly from the endpoints: 180/120 = 1.5, so growth is 50%. Equivalently, compound the yearly factors: 1.25 x 1.20 = 1.50. Adding the rates gives 45%, which is wrong - the correct total always exceeds the sum of the rates when both are positive, by the product of the two (0.25 x 0.20 = 5 percentage points here).",
+    "canonical_answer": "50",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "180/120 = 1.5, a 50% increase, computed from the endpoints alone.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "180",
+          "120",
+          "50"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Step 3's rule yields 45%, not the 50% stated in step 4.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "45"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Two successive 100% increases would sum to 200% under step 3's rule, but the true total is 300%."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "The final answer can be checked against the table in one division. Do that first, then read the reasoning."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 are exact. Step 3 states how to combine them, and step 4 does something else."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Successive percentage changes multiply their factors; adding the rates always understates positive growth."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out what step 3's rule actually gives, and compare it with what step 4 reports."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is the failure: the rates must compound, 1.25 x 1.20 = 1.50. The answer 50% is right, but it does not follow from step 3 - step 4 arrives at it by an unexplained adjustment."
+      }
+    ],
+    "repair": "Replace step 3 with the product of the factors: 1.25 x 1.20 = 1.50, or read it straight off the endpoints as 180/120 = 1.5, giving 50%.",
+    "debrief": "A correct answer is not evidence of correct reasoning, and this item exists to make that concrete. Step 3 is wrong, step 4 conceals it with a vague adjustment, and the final number happens to be right. In real work this is the most expensive kind of error to inherit: the method looks validated because the output checked out, and it is reused on the next problem, where the coincidence does not repeat.",
+    "transfer_check": {
+      "question": "Using the same table, what was the East route's total percentage growth from 2022 to 2024?",
+      "answer": "50",
+      "explanation": "135/90 = 1.5, a 50% increase."
+    },
+    "validation_payload": {
+      "solver": "answer = (Fraction(180, 120) - 1) * 100\n",
+      "flawed_solver": "y1 = Fraction(150 - 120, 120)\ny2 = Fraction(180 - 150, 150)\n# Flawed rule: add the yearly rates, then nudge towards the compounded figure.\nadded = (y1 + y2) * 100\nanswer = added + y1 * y2 * 100\n"
+    }
+  }
+]

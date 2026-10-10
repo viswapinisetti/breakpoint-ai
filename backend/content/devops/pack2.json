@@ -1,0 +1,88 @@
+[
+  {
+    "id": "dev-ci-002",
+    "subject": "devops",
+    "topic": "CI/CD",
+    "subtopic": "Job dependencies and conditions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this pipeline. Does it guarantee that deployment only happens when the tests pass?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "file": ".github/workflows/deploy.yml",
+      "pipeline": "jobs:\n  build:\n    runs-on: ubuntu-latest\n    steps: [...]\n\n  test:\n    needs: build\n    runs-on: ubuntu-latest\n    steps: [...]\n\n  deploy:\n    needs: [build, test]\n    if: always()\n    runs-on: ubuntu-latest\n    steps:\n      - run: ./deploy.sh production"
+    },
+    "ai_claim": "Deployment is gated on the tests: it lists `test` in `needs`, so it cannot run unless the tests have passed.",
+    "ai_solution": [
+      {"index": 1, "text": "The `test` job declares `needs: build`, so it runs only after a successful build."},
+      {"index": 2, "text": "The `deploy` job declares `needs: [build, test]`, so both must complete before it starts."},
+      {"index": 3, "text": "`needs` establishes a dependency on those jobs succeeding, so deploy is gated on the test result."},
+      {"index": 4, "text": "The pipeline therefore cannot deploy a build whose tests failed."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Reading `needs` as a success gate while `if: always()` overrides it",
+      "explanation": "`needs` normally implies success, but `if: always()` explicitly overrides that condition — it tells the runner to execute the job whatever the upstream result. The dependency still controls ordering, so deploy waits for the tests; it just does not care whether they passed. Remove `if: always()`, or make it `if: success()`.",
+      "why_convincing": "Steps 1 and 2 are correct, and `needs` genuinely is the success gate in the default case. The `if: always()` line reads as a scheduling detail rather than a security-relevant override, and it sits below the `needs` line where a reviewer has already formed their conclusion."
+    },
+    "canonical_solution": "No. `if: always()` overrides the implicit success requirement that `needs` carries. Deploy will wait for `test` to finish and then run regardless of whether it passed or failed. Remove the `if` line entirely (the default is `success()`), or state it explicitly as `if: success()`.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "rule", "summary": "`if: always()` overrides the implicit success condition of `needs`.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "trace", "summary": "Trace a failing test job through to deploy.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["If `test` exits non-zero, `deploy` still runs: `always()` evaluates true on failure, cancellation and success alike."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Read every key on the deploy job, not only `needs`."},
+      {"level": 2, "kind": "direction", "text": "Step 3 claims `needs` gates on success. Check whether anything else on that job changes the condition."},
+      {"level": 3, "kind": "concept", "text": "`needs` controls ordering and implies success only while the default `if` applies."},
+      {"level": 4, "kind": "strong", "text": "Look up what `always()` evaluates to when an upstream job has failed."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 misses `if: always()`, which overrides the success requirement. Deploy waits for the tests and then runs whatever their result. Use `if: success()` or drop the line."}
+    ],
+    "repair": "Delete `if: always()` from the deploy job (the default condition is `success()`), or replace it with `if: success()` to state the gate explicitly.",
+    "debrief": "One key can silently invert the meaning of another. `needs` looks like the gate, and it is — until an `if` overrides it. The habit worth building for configuration: when you conclude that something is enforced, find every key on the same object that could change that conclusion, rather than stopping at the one that confirms it. Order matters too — a reviewer who reads `needs` first has usually made up their mind by the time they reach `if`.",
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-img-003",
+    "subject": "devops",
+    "topic": "Docker",
+    "subtopic": "Layer caching and build order",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this Dockerfile. Does copying the manifest before the source code genuinely improve rebuild times?",
+    "artifact_type": "dockerfile",
+    "artifact": {
+      "file": "Dockerfile",
+      "dockerfile": "FROM python:3.12-slim\nWORKDIR /app\n\nCOPY requirements.txt .\nRUN pip install --no-cache-dir -r requirements.txt\n\nCOPY . .\nCMD [\"python\", \"-m\", \"app\"]"
+    },
+    "ai_claim": "Yes. Copying requirements.txt on its own before the rest of the source means the dependency layer is reused whenever only application code has changed.",
+    "ai_solution": [
+      {"index": 1, "text": "Docker caches each instruction as a layer and invalidates a layer when its inputs change."},
+      {"index": 2, "text": "`COPY requirements.txt .` changes only when the dependency list changes."},
+      {"index": 3, "text": "The `pip install` layer depends on that COPY, so it is reused as long as requirements.txt is unchanged."},
+      {"index": 4, "text": "`COPY . .` comes afterwards, so editing application code invalidates only that final layer and the install is not repeated."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. This is the standard dependency-caching pattern. Cache invalidation cascades forward from the first changed instruction, so placing the rarely-changing dependency manifest and its install before the frequently-changing source means a code edit invalidates only the final COPY. Reversing the order — `COPY . .` before the install — would re-run pip on every code change.",
+    "canonical_answer": "yes",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what invalidates a layer, and what happens to the layers after it."},
+      {"level": 2, "kind": "direction", "text": "Step 4 draws the conclusion. Check that it follows from how cache invalidation propagates."},
+      {"level": 3, "kind": "concept", "text": "Invalidation cascades forward: once a layer is invalidated, every later layer is rebuilt."},
+      {"level": 4, "kind": "strong", "text": "Trace what happens when only a .py file changes, instruction by instruction."},
+      {"level": 5, "kind": "reveal", "text": "This Dockerfile is correct. Placing the manifest and install before the source is the standard caching pattern, and a code edit invalidates only the final COPY. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "Cache-ordering claims are checkable by tracing invalidation forward from the first changed input. Here the reasoning holds. It is worth noticing what would break it: reversing the two COPY instructions, or adding a step above the install whose inputs change on every build — either would re-run pip every time. Being able to say why a configuration is correct, and what would make it incorrect, is a stronger position than simply passing it.",
+    "validation_payload": {}
+  }
+]

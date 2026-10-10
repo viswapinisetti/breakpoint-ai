@@ -1,0 +1,480 @@
+[
+  {
+    "id": "dl-rnn-lstm-sequence-models-001",
+    "subject": "deep-learning",
+    "topic": "RNN, LSTM & Sequence Models",
+    "subtopic": "batch_first",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the LSTM process 64 sequences of 50 time steps each?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "lstm = nn.LSTM(input_size=10, hidden_size=32)      # batch_first defaults to False\nx = torch.randn(64, 50, 10)      # (batch=64, seq_len=50, features=10)\nout, (h, c) = lstm(x)"
+    },
+    "ai_claim": "Yes. The input is 64 sequences of length 50 with 10 features, so the LSTM processes 64 sequences of 50 steps.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "x has shape (64, 50, 10)."
+      },
+      {
+        "index": 2,
+        "text": "That is 64 sequences, 50 steps, 10 features."
+      },
+      {
+        "index": 3,
+        "text": "The LSTM reads it in that layout."
+      },
+      {
+        "index": 4,
+        "text": "So it processes 64 sequences of 50 steps."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Assuming the default tensor layout is batch-first",
+      "explanation": "nn.LSTM defaults to batch_first=False, expecting (seq_len, batch, features). It reads x as 64 time steps of a batch of 50 sequences - mixing examples across time. No error is raised because the feature dimension matches. Pass batch_first=True (or permute x).",
+      "why_convincing": "Most data loaders produce batch-first tensors."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the LSTM reads x as (seq_len=64, batch=50). Use nn.LSTM(..., batch_first=True).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "out.shape is (64, 50, 32), and h.shape is (1, 50, 32): 50 'sequences'.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "50"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "time step t uses x[t], which is the t-th example of the batch, not its t-th step.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The final hidden state has 50 entries, not 64."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the default layout nn.LSTM expects."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes batch-first."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "PyTorch RNNs default to (seq, batch, feature)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Inspect h.shape."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without batch_first=True, dimensions are misread."
+      }
+    ],
+    "repair": "Construct the LSTM with `batch_first=True`.",
+    "debrief": "Layout mismatches that keep sizes compatible fail silently. Check the documented layout and assert shapes.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-rnn-lstm-sequence-models-002",
+    "subject": "deep-learning",
+    "topic": "RNN, LSTM & Sequence Models",
+    "subtopic": "Final states of padded sequences",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does h[-1] represent each sentence after reading its real tokens?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# sentences of lengths 3 to 40 are right-padded with zeros to length 40\nout, (h, c) = lstm(padded)        # batch_first=True\nsentence_vec = h[-1]              # used as each sentence's representation"
+    },
+    "ai_claim": "Yes. h is the final hidden state after the whole sequence, so it summarises each sentence.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The LSTM reads each padded sentence."
+      },
+      {
+        "index": 2,
+        "text": "h holds the hidden state after the last step."
+      },
+      {
+        "index": 3,
+        "text": "The last step is the end of the sentence."
+      },
+      {
+        "index": 4,
+        "text": "So h summarises each sentence."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Taking the final state after padding",
+      "explanation": "For a 3-token sentence, the LSTM runs 37 more steps over padding zeros, so h reflects mostly padding and the real content is diluted. Use pack_padded_sequence (so the LSTM stops at each true length) or gather the output at each sentence's last real position.",
+      "why_convincing": "For the longest sentences, the final step really is the end."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: short sentences are followed by many padding steps. Pack the sequences with their lengths.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "3-token sentence: steps 4-40 process padding before h is taken.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "37"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "Adding 10 more padding tokens changes h for short sentences.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The representation of a sentence changes with how much padding it has."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the steps after a short sentence ends."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates the last step with the sentence end."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Packed sequences make RNNs stop at each true length."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Change the padding length and compare h."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: h comes after padding steps. Pack the sequences."
+      }
+    ],
+    "repair": "Use `pack_padded_sequence(padded, lengths, batch_first=True, enforce_sorted=False)` before the LSTM.",
+    "debrief": "Padding is a batching convenience that the model must be told to ignore - via packing in RNNs or masks in transformers.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-rnn-lstm-sequence-models-003",
+    "subject": "deep-learning",
+    "topic": "RNN, LSTM & Sequence Models",
+    "subtopic": "Long-range dependencies in a vanilla RNN",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the vanilla RNN easily learn a dependency spanning 500 steps?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "rnn = nn.RNN(input_size=64, hidden_size=128, nonlinearity=\"tanh\")\n# Task: predict a label that depends on the first token of 500-token sequences.\n# AI note: \"An RNN has memory, so it will easily carry the first token's information 500 steps.\""
+    },
+    "ai_claim": "Yes. RNNs keep a hidden state that carries information forward at every step, so the first token's information reaches the end.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The hidden state is updated at every step."
+      },
+      {
+        "index": 2,
+        "text": "It carries information from earlier steps."
+      },
+      {
+        "index": 3,
+        "text": "So information from step 1 is still available at step 500."
+      },
+      {
+        "index": 4,
+        "text": "The RNN learns the dependency easily."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming recurrent memory preserves long-range information",
+      "explanation": "Gradients flow back through 500 applications of the recurrent weights and tanh derivatives, so they vanish (or explode), and the network cannot learn to keep the first token's information. In practice vanilla RNNs learn dependencies of tens of steps at most. LSTMs/GRUs (gated memory) or attention handle long ranges far better.",
+      "why_convincing": "The hidden state does carry information forward in principle."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: vanishing gradients prevent learning a 500-step dependency. Use an LSTM/GRU or attention.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "If each step scales the gradient by 0.9, after 500 steps it is 0.9^500 = 1.3 x 10^-23.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.9"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "On a synthetic 'copy the first token' task, the RNN stays at chance accuracy; an LSTM learns it.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The RNN's accuracy stays at chance for long sequences."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about the gradient path from step 500 to step 1."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes information survives 500 updates."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Repeated multiplication makes gradients vanish over long sequences."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 0.9^500."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: gradients vanish over 500 steps. Use gated units or attention."
+      }
+    ],
+    "repair": "Use an LSTM or GRU (or a transformer).",
+    "debrief": "Being able to represent a dependency and being able to learn it are different. Gating and attention make long-range learning feasible.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-rnn-lstm-sequence-models-004",
+    "subject": "deep-learning",
+    "topic": "RNN, LSTM & Sequence Models",
+    "subtopic": "Perplexity on training text",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does perplexity 1.9 on this text show the model predicts new text well?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "report": "Character-level LSTM language model trained on a 5 MB novel corpus.\nPerplexity evaluated on the same 5 MB: 1.9",
+      "claim_in_report": "\"The model predicts new text almost perfectly.\""
+    },
+    "ai_claim": "Yes. Perplexity 1.9 is very low, meaning the model is rarely uncertain, so it predicts new text well.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Perplexity measures how uncertain the model is."
+      },
+      {
+        "index": 2,
+        "text": "1.9 is very low."
+      },
+      {
+        "index": 3,
+        "text": "Low uncertainty means good prediction."
+      },
+      {
+        "index": 4,
+        "text": "So it predicts new text well."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 1,
+      "misconception": "Evaluating a language model on its training text",
+      "explanation": "The perplexity was computed on the training corpus, which the model can partly memorise. It says nothing about new text. Evaluate on held-out text from the same distribution (and on text from other sources); held-out perplexity is typically much higher.",
+      "why_convincing": "A low perplexity is genuinely impressive when computed correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: perplexity on training text measures memorisation. Report held-out perplexity.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Held-out perplexity on unseen chapters is 3.4.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "3.4"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "The evaluation data are the training data.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "On a different novel, the model's perplexity is much higher."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which text the perplexity was computed on."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 uses the training corpus for evaluation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Generalisation must be measured on held-out data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute perplexity on unseen chapters."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: training-set perplexity reflects memorisation."
+      }
+    ],
+    "repair": "Hold out chapters (or whole books) for validation and test perplexity.",
+    "debrief": "Language models are especially prone to memorisation. Held-out perplexity is the only meaningful comparison.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-rnn-lstm-sequence-models-005",
+    "subject": "deep-learning",
+    "topic": "RNN, LSTM & Sequence Models",
+    "subtopic": "The LSTM forget gate",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's reading of the gate values correct?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "# LSTM cell update: c_t = f_t * c_{t-1} + i_t * g_t\n# At some step: f_t = 0.99, i_t = 0.01 (element-wise, for one memory cell)\n# AI note: \"This cell is holding on to its memory: it keeps 99% of the old value and adds almost nothing new.\""
+    },
+    "ai_claim": "Yes. The forget gate multiplies the old cell state, so f = 0.99 keeps 99% of it, and the input gate i = 0.01 lets in very little new content. The cell is preserving its memory.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "c_t = f_t x c_{t-1} + i_t x g_t."
+      },
+      {
+        "index": 2,
+        "text": "f_t = 0.99 scales the previous cell state by 0.99."
+      },
+      {
+        "index": 3,
+        "text": "i_t = 0.01 scales the new candidate g_t by 0.01."
+      },
+      {
+        "index": 4,
+        "text": "So the cell mostly keeps its previous value."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Despite its name, a forget gate near 1 means 'remember'. This additive, gated update is what lets gradients flow over long spans.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "With c_{t-1} = 2 and g_t = -1: c_t = 0.99 x 2 + 0.01 x (-1) = 1.97",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "1.97"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Substitute the gate values into the update."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 interprets the forget gate."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A forget gate value near 1 preserves the cell state."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute c_t for example values."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The cell keeps its memory. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The LSTM's additive cell update, controlled by gates, is its key idea: memory persists when the forget gate is near 1.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

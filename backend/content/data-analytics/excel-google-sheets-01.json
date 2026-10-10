@@ -1,0 +1,634 @@
+[
+  {
+    "id": "da-excel-google-sheets-001",
+    "subject": "data-analytics",
+    "topic": "Excel / Google Sheets",
+    "subtopic": "Relative references when filling down",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After filling D2's formula down, what value does D3 show?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Sheet: invoices",
+        "columns": [
+          "Row",
+          "B (price)",
+          "C",
+          "D (tax)"
+        ],
+        "rows": [
+          [
+            1,
+            "",
+            "18%",
+            ""
+          ],
+          [
+            2,
+            1000,
+            "",
+            "=B2*C1"
+          ],
+          [
+            3,
+            500,
+            "",
+            "(filled down from D2)"
+          ],
+          [
+            4,
+            2000,
+            "",
+            "(filled down from D2)"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "90. The formula multiplies the price by the 18% tax rate in C1, so D3 = 500 x 18% = 90.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "D2 contains =B2*C1."
+      },
+      {
+        "index": 2,
+        "text": "Filling down copies the formula to D3."
+      },
+      {
+        "index": 3,
+        "text": "D3 multiplies B3 by the tax rate in C1."
+      },
+      {
+        "index": 4,
+        "text": "500 x 18% = 90."
+      }
+    ],
+    "ai_final_answer": "90",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 3,
+      "misconception": "Forgetting that relative references shift when copied",
+      "explanation": "C1 is a relative reference, so filling down shifts it by one row: D3 becomes =B3*C2. C2 is empty, which counts as 0, so D3 shows 0 (and D4 shows 0 too). The tax rate needs an absolute reference: =B2*$C$1.",
+      "why_convincing": "D2 itself is correct, so the pattern looks right before it is copied."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "D3 contains =B3*C2 = 500 x 0 = 0. Use =B2*$C$1 before filling down.",
+    "canonical_answer": "0",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "D3 = B3 * C2 = 500 * 0 = 0",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Relative references adjust when a formula is copied; $ makes a reference absolute.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "D4 also shows 0 instead of 360."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Work out what formula ends up in D3."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the reference to C1 stays fixed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Relative references move with the copied formula; $C$1 does not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Click D3 and read its formula."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: D3 contains =B3*C2, and C2 is empty, so it shows 0. Use $C$1."
+      }
+    ],
+    "repair": "Write `=B2*$C$1` in D2, then fill down.",
+    "debrief": "Every spreadsheet formula that points at a fixed input (a rate, a target, an exchange rate) needs an absolute reference. Click into a copied cell to check what it actually references.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 500 * 0",
+      "flawed_solver": "answer = 500 * 0.18"
+    }
+  },
+  {
+    "id": "da-excel-google-sheets-002",
+    "subject": "data-analytics",
+    "topic": "Excel / Google Sheets",
+    "subtopic": "AVERAGE and blank cells",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What does =AVERAGE(B2:B6) return?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Weekly sales (Rs thousands); blank = store closed",
+        "columns": [
+          "Week",
+          "Sales"
+        ],
+        "rows": [
+          [
+            1,
+            100
+          ],
+          [
+            2,
+            200
+          ],
+          [
+            3,
+            ""
+          ],
+          [
+            4,
+            300
+          ],
+          [
+            5,
+            ""
+          ]
+        ]
+      },
+      "formula": "=AVERAGE(B2:B6)"
+    },
+    "ai_claim": "120. The five cells add up to 600, and 600 / 5 = 120.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The range B2:B6 has five cells."
+      },
+      {
+        "index": 2,
+        "text": "Their total is 100 + 200 + 300 = 600."
+      },
+      {
+        "index": 3,
+        "text": "AVERAGE divides by the number of cells, 5."
+      },
+      {
+        "index": 4,
+        "text": "600 / 5 = 120."
+      }
+    ],
+    "ai_final_answer": "120",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Assuming AVERAGE counts blank cells as zeros",
+      "explanation": "AVERAGE ignores empty cells and averages only the cells that contain numbers: 600 / 3 = 200. (Cells containing 0 would be counted.) Whether closed weeks should count is a business decision; the formula as written returns 200.",
+      "why_convincing": "Five rows are visible, so dividing by 5 looks natural."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "AVERAGE ignores blanks: (100 + 200 + 300) / 3 = 200.",
+    "canonical_answer": "200",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "600 / 3 = 200",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "200"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "AVERAGE ignores empty cells and text; it counts cells containing 0.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Typing 0 into the blank cells would change the result to 120."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which cells AVERAGE counts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 divides by all five cells."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "AVERAGE skips empty cells but includes zeros."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the cells that contain numbers."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: blanks are ignored, so the divisor is 3 and the result is 200."
+      }
+    ],
+    "repair": "",
+    "debrief": "Blank and zero mean different things to spreadsheet functions. Decide which the data should contain - closed (blank) or no sales (0) - because averages depend on it.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (100 + 200 + 300) / 3",
+      "flawed_solver": "answer = (100 + 200 + 300) / 5"
+    }
+  },
+  {
+    "id": "da-excel-google-sheets-003",
+    "subject": "data-analytics",
+    "topic": "Excel / Google Sheets",
+    "subtopic": "Numbers stored as text",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What does =SUM(B2:B4) return?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Imported from a CSV export",
+        "columns": [
+          "Order",
+          "Amount (Rs)"
+        ],
+        "rows": [
+          [
+            "A-1",
+            500
+          ],
+          [
+            "A-2",
+            "'1,200  (left-aligned: stored as text)"
+          ],
+          [
+            "A-3",
+            300
+          ]
+        ]
+      },
+      "formula": "=SUM(B2:B4)"
+    },
+    "ai_claim": "2,000. The amounts are 500, 1,200 and 300, which add up to 2,000.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The column lists three order amounts."
+      },
+      {
+        "index": 2,
+        "text": "They are 500, 1,200 and 300."
+      },
+      {
+        "index": 3,
+        "text": "SUM adds all the values in the range."
+      },
+      {
+        "index": 4,
+        "text": "500 + 1,200 + 300 = 2,000."
+      }
+    ],
+    "ai_final_answer": "2000",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Not noticing numbers stored as text",
+      "explanation": "The CSV import stored '1,200' as text (note the left alignment and the thousands separator). SUM ignores text in ranges, so it returns 500 + 300 = 800 with no error. Convert the column to numbers (VALUE, or Text to Columns) and check that alignment is consistent.",
+      "why_convincing": "The cell displays 1,200, so it looks like a number."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "SUM skips the text value, returning 800. Convert the column to numbers before summing.",
+    "canonical_answer": "800",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "SUM counts only numeric cells: 500 + 300 = 800",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "800"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "B3 is left-aligned text, not a number.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "=ISNUMBER(B3) returns FALSE."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at how B3 is aligned."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every cell is numeric."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "SUM silently ignores text, even text that looks like a number."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test B3 with ISNUMBER."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: B3 is text, so SUM returns 800. Convert the column to numbers."
+      }
+    ],
+    "repair": "Convert the column with VALUE() or Data > Text to Columns, then SUM.",
+    "debrief": "Imports are the main source of numbers stored as text. They fail silently in SUM and AVERAGE, so check alignment or use ISNUMBER after every import.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 500 + 300",
+      "flawed_solver": "answer = 500 + 1200 + 300"
+    }
+  },
+  {
+    "id": "da-excel-google-sheets-004",
+    "subject": "data-analytics",
+    "topic": "Excel / Google Sheets",
+    "subtopic": "COUNT only counts numbers",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What does =COUNT(A2:A51) return?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Survey responses (50 rows)",
+        "columns": [
+          "Row",
+          "A (respondent name)",
+          "B (score 1-5)"
+        ],
+        "rows": [
+          [
+            2,
+            "Asha",
+            4
+          ],
+          [
+            3,
+            "Ben",
+            5
+          ],
+          [
+            "...",
+            "...",
+            "..."
+          ],
+          [
+            51,
+            "Zoya",
+            3
+          ]
+        ]
+      },
+      "formula": "=COUNT(A2:A51)"
+    },
+    "ai_claim": "50. There are 50 respondents in A2:A51, and COUNT counts them.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Column A lists one respondent per row."
+      },
+      {
+        "index": 2,
+        "text": "Rows 2 to 51 hold 50 respondents."
+      },
+      {
+        "index": 3,
+        "text": "COUNT counts the entries in the range."
+      },
+      {
+        "index": 4,
+        "text": "So it returns 50."
+      }
+    ],
+    "ai_final_answer": "50",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Using COUNT on text",
+      "explanation": "COUNT counts only cells that contain numbers. Column A holds names, so COUNT(A2:A51) returns 0. COUNTA counts non-empty cells (50), and COUNT(B2:B51) counts numeric scores.",
+      "why_convincing": "The function's name suggests it counts entries of any kind."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "COUNT ignores text, so it returns 0. Use COUNTA(A2:A51) for 50.",
+    "canonical_answer": "0",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Names are text, so COUNT finds 0 numeric cells.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "COUNT counts numbers; COUNTA counts non-empty cells.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "=COUNTA(A2:A51) returns 50."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which kinds of values COUNT includes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes COUNT counts any entry."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "COUNT counts numeric cells only."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare COUNT and COUNTA on the name column."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: COUNT ignores text, so it returns 0. Use COUNTA."
+      }
+    ],
+    "repair": "Use `=COUNTA(A2:A51)`.",
+    "debrief": "Spreadsheet counting functions differ by what they count: COUNT (numbers), COUNTA (non-empty), COUNTBLANK, COUNTIF (criteria). Choose by the data type in the range.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 0",
+      "flawed_solver": "answer = 50"
+    }
+  },
+  {
+    "id": "da-excel-google-sheets-005",
+    "subject": "data-analytics",
+    "topic": "Excel / Google Sheets",
+    "subtopic": "XLOOKUP matches exactly by default",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What does the formula return?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Price list (not sorted)",
+        "columns": [
+          "A (code)",
+          "B (price)"
+        ],
+        "rows": [
+          [
+            "P-101",
+            100
+          ],
+          [
+            "P-107",
+            700
+          ],
+          [
+            "P-104",
+            400
+          ],
+          [
+            "P-102",
+            200
+          ]
+        ]
+      },
+      "formula": "=XLOOKUP(\"P-104\", A2:A5, B2:B5)"
+    },
+    "ai_claim": "400. XLOOKUP defaults to an exact match and does not need sorted data, so it finds P-104 and returns its price, 400.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "XLOOKUP searches A2:A5 for 'P-104'."
+      },
+      {
+        "index": 2,
+        "text": "Its default match mode is exact match."
+      },
+      {
+        "index": 3,
+        "text": "Exact matching works on unsorted data."
+      },
+      {
+        "index": 4,
+        "text": "P-104 is in the third row, so it returns 400."
+      }
+    ],
+    "ai_final_answer": "400",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 400. Unlike VLOOKUP, whose default is approximate match (which needs sorted data), XLOOKUP defaults to exact match.",
+    "canonical_answer": "400",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "P-104 is paired with 400.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "400"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "XLOOKUP's match_mode defaults to 0, exact match.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check XLOOKUP's default match mode."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states the default."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "XLOOKUP defaults to exact match, unlike VLOOKUP's approximate default."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find P-104 in the list."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. XLOOKUP finds the exact match and returns 400. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Lookup defaults differ between functions, and the difference matters on unsorted data. Knowing XLOOKUP's exact-match default is what makes this answer reliable.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = {'P-101': 100, 'P-107': 700, 'P-104': 400, 'P-102': 200}['P-104']"
+    }
+  }
+]

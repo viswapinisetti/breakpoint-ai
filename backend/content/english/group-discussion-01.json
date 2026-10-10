@@ -1,0 +1,442 @@
+[
+  {
+    "id": "eng-group-discussion-001",
+    "subject": "english",
+    "topic": "Group Discussion",
+    "subtopic": "Talking the most",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this a sound strategy for a group discussion?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "GD tip shared by a student: \"The person who speaks the most wins the group discussion. Grab every chance to talk and don't let others finish.\""
+    },
+    "ai_claim": "Yes. Evaluators notice active participants, so speaking the most and taking every opportunity gives the best result.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Evaluators watch who participates."
+      },
+      {
+        "index": 2,
+        "text": "Speaking more makes you more visible."
+      },
+      {
+        "index": 3,
+        "text": "Visibility earns marks."
+      },
+      {
+        "index": 4,
+        "text": "So speaking the most wins."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Equating quantity of speech with quality of contribution",
+      "explanation": "Evaluators typically assess the content of contributions, listening, building on others' points, structure and leadership - not airtime. Dominating and interrupting are usually marked down as poor teamwork. A few well-reasoned, relevant contributions, plus inviting quieter members and summarising, score better.",
+      "why_convincing": "Participation matters, so more of it seems better."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: quality, listening and collaboration matter more than airtime; interrupting is penalised.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A candidate who spoke three times with clear, evidence-backed points and a final summary was selected over one who spoke constantly.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "GD evaluation criteria usually include content, communication, listening and teamwork.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Interrupting others is marked as poor teamwork."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what evaluators actually assess."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes visibility alone earns marks."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Contribution quality and teamwork outweigh airtime."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a candidate who interrupts constantly."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: quality and collaboration matter more."
+      }
+    ],
+    "repair": "Make fewer, stronger points; build on others; invite quieter members; summarise.",
+    "debrief": "Group discussions reward the behaviours of good colleagues, not the loudest voice.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-group-discussion-002",
+    "subject": "english",
+    "topic": "Group Discussion",
+    "subtopic": "Agreeing with everyone",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will agreeing with everyone without adding points score well?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "GD topic: 'Should companies allow permanent work from home?'\nA candidate responds to every point with 'I completely agree with everyone' and adds nothing else.\nAI: \"Agreeing with everyone shows excellent teamwork and will score well.\""
+    },
+    "ai_claim": "Yes. Agreeing shows the candidate is a team player, which evaluators value highly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Evaluators value teamwork."
+      },
+      {
+        "index": 2,
+        "text": "Agreeing shows cooperation."
+      },
+      {
+        "index": 3,
+        "text": "The candidate agrees with everyone."
+      },
+      {
+        "index": 4,
+        "text": "So they score well on teamwork."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Mistaking agreement for contribution",
+      "explanation": "Teamwork in a GD means advancing the discussion together - building on points, adding evidence, respectfully disagreeing, connecting ideas. Agreeing with everyone (including opposing views) adds no content and signals a lack of opinion or understanding. Agree specifically and extend: 'Building on Priya's point about hiring, remote work widens the talent pool, but...'",
+      "why_convincing": "Being agreeable is a genuine social virtue."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: blanket agreement adds no content. Build on points with your own reasoning and evidence.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "Agreeing with both 'yes' and 'no' speakers means holding contradictory positions.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "\"Building on Priya's point, remote work widens our hiring pool - but new joiners may need two office days for training.\"",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The candidate agrees with speakers on opposite sides."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the candidate added to the discussion."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats agreement as contribution."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Teamwork means advancing the discussion, not just agreeing."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider agreeing with both sides of a debate."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: agreement without substance adds nothing."
+      }
+    ],
+    "repair": "Agree specifically, then extend with a new point or evidence.",
+    "debrief": "Collaboration is building, not echoing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-group-discussion-003",
+    "subject": "english",
+    "topic": "Group Discussion",
+    "subtopic": "Summarising the discussion",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this is a strong contribution?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "With two minutes left, a candidate says: \"Let me summarise. We agreed remote work reduces commuting and widens hiring. The concerns were onboarding and collaboration. Most of us suggested a hybrid model with in-office days for new joiners.\""
+    },
+    "ai_claim": "Yes. A balanced summary that captures benefits, concerns and the emerging conclusion shows listening, clarity and leadership, and helps the group finish with a clear outcome.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The summary covers both sides."
+      },
+      {
+        "index": 2,
+        "text": "It reflects what others said, showing listening."
+      },
+      {
+        "index": 3,
+        "text": "It states the group's emerging conclusion."
+      },
+      {
+        "index": 4,
+        "text": "It helps the discussion end clearly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Accurate, balanced summaries are highly valued in GDs as evidence of listening and leadership.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Summarising shows listening, synthesis and leadership.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the summary shows about the candidate."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 connects the summary to listening."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Synthesis is a key discussion skill."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check whether both sides are represented."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The summary is a strong contribution. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "A fair summary is often the most valuable single contribution in a group discussion.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-group-discussion-004",
+    "subject": "english",
+    "topic": "Group Discussion",
+    "subtopic": "Building on others' points",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this is effective group-discussion behaviour?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Candidate: \"Adding to Rahul's point about costs - the savings on office rent could fund better home-office equipment, which addresses the productivity concern Ananya raised.\""
+    },
+    "ai_claim": "Yes. It credits a peer, adds a new idea and links it to another participant's concern, which moves the discussion forward collaboratively.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "It acknowledges Rahul's point."
+      },
+      {
+        "index": 2,
+        "text": "It adds a new idea: redirect savings to equipment."
+      },
+      {
+        "index": 3,
+        "text": "It connects to Ananya's concern."
+      },
+      {
+        "index": 4,
+        "text": "So it advances the discussion collaboratively."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Referencing others, adding substance and connecting ideas are hallmarks of strong GD participation.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Effective contributions build on and connect others' ideas while adding new substance.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count what the contribution adds."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 links two participants' points."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Building and connecting ideas shows teamwork and thinking."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare with 'I agree with Rahul'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It is effective participation. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Name, build, connect: a simple pattern for contributions that help the group and stand out.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-group-discussion-005",
+    "subject": "english",
+    "topic": "Group Discussion",
+    "subtopic": "Did Ravi perform well",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Did Ravi perform well in the group discussion?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "An observer's notes about Ravi in a 15-minute GD: \"Opened the discussion. Spoke four times.\"\nNo notes were taken on what he said, how others responded, or how he interacted."
+    },
+    "ai_claim": "Yes. He opened the discussion and spoke four times, which shows initiative and active participation, so he performed well.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Ravi opened the discussion."
+      },
+      {
+        "index": 2,
+        "text": "He spoke four times in 15 minutes."
+      },
+      {
+        "index": 3,
+        "text": "Opening and speaking show initiative."
+      },
+      {
+        "index": 4,
+        "text": "So he performed well."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The quality of his contributions and his interaction with others. Opening and speaking four times say nothing about whether his points were relevant and well reasoned, or whether he listened, built on others and avoided interrupting.",
+    "resolving_scenarios": [
+      "Ravi opened with a clear framing, made three well-supported points and invited a quiet participant to speak: he performed well.",
+      "Ravi opened with an off-topic statement and repeated the same point four times, interrupting others: he performed poorly."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The notes record quantity, not quality. Step 3 assumes opening and frequency mean good performance.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Four repetitive, off-topic interruptions would also be recorded as 'spoke four times'.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "four"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An aggressive participant can open and speak often."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the notes do not record."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 infers quality from frequency."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Performance depends on content and interaction, not counts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider off-topic contributions."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is unsupported. Good content means good performance; poor content does not. It cannot be decided."
+      }
+    ],
+    "repair": "Record the content of contributions and interactions, not just their number.",
+    "debrief": "Evaluate contributions by substance and behaviour; counting turns is not enough.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

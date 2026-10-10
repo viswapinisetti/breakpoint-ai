@@ -1,0 +1,474 @@
+[
+  {
+    "id": "ai-computer-vision-001",
+    "subject": "ai",
+    "topic": "Computer Vision",
+    "subtopic": "Daytime training, night-time use",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the team expect performance close to mAP 0.89 at night?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "A pedestrian detector was trained and tested on 50,000 daytime street images (test mAP 0.89).\nPlan: deploy it on night-time CCTV footage."
+    },
+    "ai_claim": "Yes. The model reached 0.89 on held-out images, so it detects pedestrians reliably and will work at night too.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Test mAP is 0.89."
+      },
+      {
+        "index": 2,
+        "text": "Test images were held out."
+      },
+      {
+        "index": 3,
+        "text": "Pedestrians look the same day or night."
+      },
+      {
+        "index": 4,
+        "text": "So night-time performance will be similar."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming the visual conditions do not matter",
+      "explanation": "Night footage has low light, noise, glare from headlights and often infrared greyscale - all absent from training. Pedestrians do not look the same to a model trained only on daylight. Evaluate on labelled night footage and add night data (or domain adaptation) before deployment.",
+      "why_convincing": "The objects are the same; the conditions are what changed."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: night footage is a different visual domain. Evaluate on night data and train with it.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "All 50,000 training and test images are daytime.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "50,000"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "In infrared CCTV, pedestrians appear as bright greyscale shapes unlike any training image.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Night test mAP is 0.52."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the training conditions with deployment conditions."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes appearance is unchanged."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Visual domain shift (lighting, sensor) degrades vision models."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test on night footage."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: night images differ greatly. Evaluate and train on them."
+      }
+    ],
+    "repair": "Collect and label night footage for evaluation and training.",
+    "debrief": "Vision models learn pixels, not concepts. Lighting, sensors and weather are part of the input distribution.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-computer-vision-002",
+    "subject": "ai",
+    "topic": "Computer Vision",
+    "subtopic": "IoU and detection thresholds",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the prediction count as a correct detection under this benchmark?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "Ground-truth box: x 0-10, y 0-10.\nPredicted box: x 5-15, y 0-10.\nThe benchmark counts a detection as correct at IoU >= 0.5.\nAI: \"The boxes overlap substantially, so this is a correct detection.\""
+    },
+    "ai_claim": "Yes. Half of the ground-truth box is covered by the prediction, so the overlap meets the 0.5 threshold.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The boxes overlap in x from 5 to 10."
+      },
+      {
+        "index": 2,
+        "text": "Half of the ground-truth box is covered."
+      },
+      {
+        "index": 3,
+        "text": "That is an overlap of 0.5."
+      },
+      {
+        "index": 4,
+        "text": "So it counts as correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Confusing coverage with intersection over union",
+      "explanation": "IoU divides the intersection by the union, not by the ground-truth area. Intersection = 5 x 10 = 50; union = 100 + 100 - 50 = 150; IoU = 0.33, below 0.5. The detection counts as a false positive (and the object as missed).",
+      "why_convincing": "Half the ground truth really is covered."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "IoU = 50 / 150 = 0.33 < 0.5, so it is not a correct detection.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Intersection 50, union 150, IoU 0.33.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.33"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "IoU = area(A intersect B) / area(A union B).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The union is 150, not 100."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute the union of the two boxes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 divides by the wrong area."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "IoU uses the union as the denominator."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 50 / (100 + 100 - 50)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: IoU is 0.33, below 0.5."
+      }
+    ],
+    "repair": "Compute IoU correctly: intersection / union.",
+    "debrief": "Detection metrics depend on precise overlap definitions. Coverage of the ground truth ignores how much the prediction spills outside it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-computer-vision-003",
+    "subject": "ai",
+    "topic": "Computer Vision",
+    "subtopic": "Shortcut learning",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does AUC 0.95 show the model recognises pneumonia?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "A pneumonia classifier trained on X-rays from two hospitals reaches AUC 0.95.\nSaliency maps show the model focuses on a metal token in the image corner that differs between hospitals. Hospital B treats far more pneumonia cases.\nAI: \"AUC 0.95 shows the model has learned to recognise pneumonia.\""
+    },
+    "ai_claim": "Yes. The model separates pneumonia from normal X-rays with AUC 0.95, so it has learned to recognise pneumonia.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "AUC is 0.95 on the test set."
+      },
+      {
+        "index": 2,
+        "text": "The test set contains pneumonia and normal X-rays."
+      },
+      {
+        "index": 3,
+        "text": "High AUC means the model separates the classes using disease features."
+      },
+      {
+        "index": 4,
+        "text": "So it recognises pneumonia."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Assuming high accuracy means the intended features were learned",
+      "explanation": "The model can separate classes by recognising which hospital an image came from (the corner token), because hospital B has more pneumonia cases. That shortcut works on test data from the same hospitals and fails elsewhere. Test on images from a new hospital, mask the token, and inspect what the model uses.",
+      "why_convincing": "The AUC is real and high."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the model may be detecting the hospital, not the disease. Validate on an external hospital with the token masked.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Saliency focuses on the corner token that identifies the hospital.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "On a third hospital's X-rays, AUC drops to 0.68.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.68"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Masking the corner token lowers performance sharply."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at what the model attends to."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes disease features were used."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models exploit any feature correlated with the label, including artefacts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate on a new hospital."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the model may use the hospital token as a shortcut."
+      }
+    ],
+    "repair": "Mask artefacts, balance cases across hospitals, and validate externally.",
+    "debrief": "Shortcut learning is common in vision. External validation is the most reliable way to detect it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-computer-vision-004",
+    "subject": "ai",
+    "topic": "Computer Vision",
+    "subtopic": "Counting with a classifier",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this classifier will give the number of cars in each photo?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "explanation": "Task: count the number of cars in each parking-lot photo.\nPlan: fine-tune an image classifier with classes '0-10 cars', '11-50 cars', '51+ cars' and report the class."
+    },
+    "ai_claim": "Yes. The classifier learns to recognise how full the lot looks, so its output tells you how many cars there are.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The classifier is trained on labelled photos."
+      },
+      {
+        "index": 2,
+        "text": "It learns what lots with different numbers of cars look like."
+      },
+      {
+        "index": 3,
+        "text": "Its predicted class gives the car count."
+      },
+      {
+        "index": 4,
+        "text": "So it counts cars."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Using a coarse classifier for a counting task",
+      "explanation": "The classifier outputs a bin, not a count: '11-50 cars' cannot distinguish 12 from 49. Counting needs object detection (count the boxes), density-map regression, or a model trained to output a number.",
+      "why_convincing": "The classifier is related to 'how many', so it seems to answer the question."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: it outputs coarse bins. Use object detection (count boxes) or count regression.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A photo with 12 cars and one with 49 get the same output.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "12",
+          "49"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Choose the model type to match the output required: counts need detection or regression.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The output cannot say whether there are 12 or 49 cars."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the model outputs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats a bin as a count."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Match the model's output type to the task."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider photos with 12 and 49 cars."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: bins are not counts. Use detection or regression."
+      }
+    ],
+    "repair": "Use an object detector and count detections, or train a density/count regression model.",
+    "debrief": "Task framing decides model type: classification, detection, segmentation and regression answer different questions.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-computer-vision-005",
+    "subject": "ai",
+    "topic": "Computer Vision",
+    "subtopic": "Segmentation for area measurement",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that segmentation, not bounding-box detection, is the appropriate approach here?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "explanation": "Task: measure the area of skin lesions in dermatology photos to track growth.\nPlan: use a segmentation model that labels each pixel as lesion or skin, then compute area from the pixel count and the image scale."
+    },
+    "ai_claim": "Yes. A bounding box includes skin around irregular lesions, inflating the area. Segmentation outlines the lesion pixel by pixel, so pixel counts times the known scale give its actual area.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Lesions are irregularly shaped."
+      },
+      {
+        "index": 2,
+        "text": "A bounding box covers the lesion plus surrounding skin."
+      },
+      {
+        "index": 3,
+        "text": "Segmentation classifies each pixel, tracing the lesion's outline."
+      },
+      {
+        "index": 4,
+        "text": "Pixel count x area per pixel gives the lesion's area."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Area measurement needs per-pixel masks; boxes overestimate irregular shapes. (A scale reference in each photo is required to convert pixels to mm^2.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "For a circular lesion, the bounding box area is 4/pi = 1.27 times the true area.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1.27"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare a box with the shape it contains."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 explains why boxes overestimate."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Segmentation outputs masks; detection outputs boxes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute box area versus circle area."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Segmentation measures area; boxes inflate it. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Choose the output granularity the task needs: labels, boxes or masks.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

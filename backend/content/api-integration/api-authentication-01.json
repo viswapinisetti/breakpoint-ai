@@ -1,0 +1,458 @@
+[
+  {
+    "id": "api-api-authentication-001",
+    "subject": "api-integration",
+    "topic": "API Authentication",
+    "subtopic": "API keys in URLs",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Since the request uses HTTPS, is the API key safe from leaking?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "request": "GET https://maps.partner.example/v1/geocode?address=MG+Road&key=sk_live_8f2c91d4"
+    },
+    "ai_claim": "Yes. HTTPS encrypts the whole request, including the URL, so the key cannot be seen by anyone else.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The request uses HTTPS."
+      },
+      {
+        "index": 2,
+        "text": "TLS encrypts the request line, including the query string."
+      },
+      {
+        "index": 3,
+        "text": "Network observers cannot read the key."
+      },
+      {
+        "index": 4,
+        "text": "So the key cannot leak."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 4,
+      "misconception": "Equating encryption in transit with secrecy everywhere",
+      "explanation": "TLS protects the URL on the network, but URLs are stored in plain text at both ends: web server and proxy access logs, APM tools, browser history, and Referer headers sent to other sites. Keys in query strings routinely leak through these. Send keys in a header (e.g. Authorization or X-API-Key), where logs typically do not record them.",
+      "why_convincing": "Steps 1-3 are correct; the leak happens outside the network path."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: URLs end up in logs, history and Referer headers. Send the key in a request header instead.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "A typical access log line records the full URL: GET /v1/geocode?address=MG+Road&key=sk_live_8f2c91d4.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Clicking a link on a page loaded from this URL can send it in the Referer header.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The key appears in the partner's and the proxy's access logs."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List the places a URL is recorded outside the network."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 generalises from encryption in transit."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "URLs are logged by servers, proxies and browsers even under HTTPS."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at an access log for this request."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: HTTPS protects transit only; URLs are logged. Send the key in a header."
+      }
+    ],
+    "repair": "Send the key in a header such as `X-API-Key` or `Authorization`, and rotate any key that has appeared in URLs.",
+    "debrief": "HTTPS protects data in transit, not data at rest. Treat URLs as public and put credentials in headers.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-api-authentication-002",
+    "subject": "api-integration",
+    "topic": "API Authentication",
+    "subtopic": "Basic auth is encoding, not encryption",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the Basic scheme hide the password from anyone who sees this header?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "request": "GET /reports\nAuthorization: Basic YXNoYTpzM2NyZXQ="
+    },
+    "ai_claim": "Yes. The credentials are encoded, so the password cannot be read from the header.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Basic authentication combines the username and password."
+      },
+      {
+        "index": 2,
+        "text": "It encodes them with Base64."
+      },
+      {
+        "index": 3,
+        "text": "The encoded value hides the password."
+      },
+      {
+        "index": 4,
+        "text": "So anyone who sees the header cannot read the password."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating Base64 as encryption",
+      "explanation": "Base64 is a reversible encoding with no key. Decoding YXNoYTpzM2NyZXQ= gives asha:s3cret immediately. Basic authentication is only safe over HTTPS, and the header must never be logged.",
+      "why_convincing": "The encoded value looks scrambled."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: Base64 decodes to 'asha:s3cret' instantly. Use Basic auth only over HTTPS and keep the header out of logs.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "base64.b64decode('YXNoYTpzM2NyZXQ=') returns b'asha:s3cret'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "RFC 7617: Basic credentials are the Base64 encoding of user-id:password, which provides no confidentiality.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Decoding the header reveals the password."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try decoding the header value."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes encoding hides the password."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Base64 is reversible without any key."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run base64.b64decode on the value."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: Base64 is not encryption; the password is readable. Rely on HTTPS."
+      }
+    ],
+    "repair": "Use Basic auth only over HTTPS, never log the header, and prefer tokens where possible.",
+    "debrief": "Encoding changes representation; encryption requires a key. Credentials in any encoding are plain text to anyone who sees them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-api-authentication-003",
+    "subject": "api-integration",
+    "topic": "API Authentication",
+    "subtopic": "Caching client-credentials tokens",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this avoids requesting a token on every API call, and avoids sending expired tokens?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "_token, _expires_at = None, 0\n\ndef access_token():\n    global _token, _expires_at\n    if _token is None or time.time() > _expires_at - 60:\n        r = httpx.post(TOKEN_URL, data={\"grant_type\": \"client_credentials\",\n                                         \"client_id\": CID, \"client_secret\": SECRET}, timeout=5)\n        r.raise_for_status()\n        body = r.json()\n        _token = body[\"access_token\"]\n        _expires_at = time.time() + body[\"expires_in\"]\n    return _token"
+    },
+    "ai_claim": "Yes. The token is cached until 60 seconds before it expires, so most calls reuse it; the 60-second margin means a token is refreshed before it can expire mid-request.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The first call fetches a token and records when it expires."
+      },
+      {
+        "index": 2,
+        "text": "Later calls reuse the cached token while more than 60 seconds remain."
+      },
+      {
+        "index": 3,
+        "text": "Once fewer than 60 seconds remain, a new token is fetched."
+      },
+      {
+        "index": 4,
+        "text": "So calls rarely hit the token endpoint and never send a token that is about to expire."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Caching tokens for their lifetime, with a safety margin for clock skew and request time, is the standard client-credentials pattern. (In a multi-threaded app, add a lock so only one refresh happens at a time.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "expires_in 3600 -> reuse for about 3,540 s -> refresh at t = 3,540",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3600",
+          "60"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check when a new token is requested."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on the 60-second margin."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tokens should be reused until shortly before expiry."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace calls at t = 0, 1,000 and 3,550 seconds with expires_in 3600."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The token is reused and refreshed 60 s early. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Requesting a token per call wastes latency and can hit the provider's rate limits; using it to the last second risks expiry mid-request. A cached token with a margin avoids both.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-api-authentication-004",
+    "subject": "api-integration",
+    "topic": "API Authentication",
+    "subtopic": "401 versus 403",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that refreshing Ben's token and retrying will not fix this?",
+    "artifact_type": "api_response",
+    "artifact": {
+      "request": "DELETE /projects/31\nAuthorization: Bearer <valid, unexpired token for user Ben>",
+      "response": "HTTP/1.1 403 Forbidden\n{\"error\": \"insufficient_scope\", \"required\": \"projects:delete\"}"
+    },
+    "ai_claim": "Yes. 403 means the server knows who Ben is but he lacks permission (the projects:delete scope). A fresh token with the same scopes still lacks it. Refreshing helps with 401, which means missing or invalid credentials.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "401 Unauthorized means the credentials are missing, invalid or expired."
+      },
+      {
+        "index": 2,
+        "text": "403 Forbidden means the credentials are valid but not allowed to do this."
+      },
+      {
+        "index": 3,
+        "text": "The body says the token lacks the projects:delete scope."
+      },
+      {
+        "index": 4,
+        "text": "A refreshed token has the same scopes, so the retry would also get 403."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. 403 with insufficient_scope needs a token granted the projects:delete scope (new consent or a different role), not a refresh.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The 403 body names the missing scope, projects:delete.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "403"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "refresh -> new token with the same scopes -> DELETE -> 403 again",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "403"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare what 401 and 403 mean."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 depends on refresh preserving scopes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "401 is about authentication; 403 is about authorisation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Read the error body."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. 403 is a permission problem that a refresh cannot fix. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Handling 401 and 403 differently avoids pointless retry loops: refresh on 401, request more permission (or report) on 403.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-api-authentication-005",
+    "subject": "api-integration",
+    "topic": "API Authentication",
+    "subtopic": "Reusing a refresh token",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will refresh() keep working every time it is called with the same stored refresh token?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "# The app stores the refresh token from the first login.\ndef refresh():\n    r = httpx.post(TOKEN_URL, data={\"grant_type\": \"refresh_token\",\n                                     \"refresh_token\": STORED_REFRESH_TOKEN,\n                                     \"client_id\": CID}, timeout=5)\n    return r.json()[\"access_token\"]\n\n# The response also contains a refresh_token field, which the code ignores.\n# The provider's refresh-token settings are not shown."
+    },
+    "ai_claim": "Yes. A refresh token stays valid until it expires, so the same stored token can be used for every refresh.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The refresh token was issued at login."
+      },
+      {
+        "index": 2,
+        "text": "Each call exchanges it for a new access token."
+      },
+      {
+        "index": 3,
+        "text": "The refresh token remains valid across uses."
+      },
+      {
+        "index": 4,
+        "text": "So refresh() keeps working until the refresh token expires."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether the provider rotates refresh tokens. With rotation, each refresh returns a new refresh token and invalidates the old one (and reusing the old one may revoke the whole session). Without rotation, the same token can be reused until it expires. The provider's configuration is not shown.",
+    "resolving_scenarios": [
+      "Rotation disabled: the stored refresh token can be reused for every refresh until it expires.",
+      "Rotation enabled: the second call is rejected with invalid_grant, and the provider may revoke the session as a suspected replay."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the provider's refresh-token rotation, which is not given. Step 3 assumes no rotation. Saving the refresh_token from each response works in both cases.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "With rotation on, the second refresh() returns 400 invalid_grant.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "400"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Under rotation, the reused token is rejected."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the refresh response contains."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a property of the provider's tokens."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Many OAuth providers rotate refresh tokens, making each one single-use."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider the provider with rotation on and off."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes no rotation. Without rotation it works; with rotation the second call fails. It cannot be decided."
+      }
+    ],
+    "repair": "Store the new refresh_token from every refresh response.",
+    "debrief": "OAuth behaviour varies by provider configuration. Code that always saves the latest refresh token works under both policies; code that assumes one policy depends on a setting it cannot see.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

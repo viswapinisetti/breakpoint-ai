@@ -1,0 +1,20 @@
+# Python
+backend/.venv/
+__pycache__/
+*.py[cod]
+backend/*.db
+backend/.env
+
+# Node
+frontend/node_modules/
+frontend/dist/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Bulk authoring working files (backend/scripts/bulk_author.py)
+backend/content_review/
+backend/content_rejected/

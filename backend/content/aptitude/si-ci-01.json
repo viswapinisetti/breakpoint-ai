@@ -1,0 +1,519 @@
+[
+    {
+        "id": "apt-si-ci-001",
+        "subject": "aptitude",
+        "topic": "SI & CI",
+        "subtopic": "Half-yearly compounding",
+        "difficulty": "2",
+        "challenge_mode": "trust_or_challenge",
+        "question": "Rs 25,000 is invested for 1 year at 12% per annum, compounded half-yearly. What is the amount at the end of the year?",
+        "artifact_type": "numeric_solution",
+        "artifact": {},
+        "ai_claim": "The amount after one year is Rs 28,000.",
+        "ai_solution": [
+            {
+                "index": 1,
+                "text": "The principal is Rs 25,000 and the stated annual rate is 12%."
+            },
+            {
+                "index": 2,
+                "text": "For the one-year investment, interest = 12% of Rs 25,000 = Rs 3,000."
+            },
+            {
+                "index": 3,
+                "text": "Amount = Rs 25,000 + Rs 3,000 = Rs 28,000."
+            }
+        ],
+        "ai_final_answer": "28000",
+        "simulated_confidence": 95,
+        "truth_state": "flawed",
+        "failure": {
+            "category": "F07",
+            "location": 2,
+            "misconception": "Using the annual rate once despite half-yearly compounding",
+            "explanation": "Half-yearly compounding requires a 6% rate for each of two half-years. The amount is 25000 x 1.06 x 1.06 = 28090, not 28000.",
+            "why_convincing": "The investment lasts exactly one year, so applying the quoted 12% once feels natural. The subtlety is that the compounding frequency changes both the rate per period and the number of periods."
+        },
+        "missing_information": "",
+        "resolving_scenarios": [],
+        "answer_coincidentally_correct": false,
+        "canonical_solution": "A nominal annual rate of 12% compounded half-yearly gives 6% per half-year and two compounding periods in one year. Therefore the amount is 25000 x (1.06)^2 = 28090.",
+        "canonical_answer": "28090",
+        "valid_evidence": [
+            {
+                "type": "calculation",
+                "summary": "Recompute the amount using 6% for each of two half-years.",
+                "must_reference_step": 2,
+                "must_contain_values": [
+                    "25000",
+                    "6",
+                    "2",
+                    "28090"
+                ]
+            },
+            {
+                "type": "rule",
+                "summary": "For half-yearly compounding, halve the annual rate and double the number of yearly periods.",
+                "must_reference_step": 2,
+                "must_contain_values": [
+                    "12",
+                    "6",
+                    "2"
+                ]
+            }
+        ],
+        "counterexamples": [
+            "On Rs 100 at 12% per annum compounded half-yearly for one year, two 6% increases give Rs 112.36, not Rs 112."
+        ],
+        "hints": [
+            {
+                "level": 1,
+                "kind": "attention",
+                "text": "Check how the stated annual rate should be converted when compounding occurs more than once a year."
+            },
+            {
+                "level": 2,
+                "kind": "direction",
+                "text": "Focus on the rate used in Step 2."
+            },
+            {
+                "level": 3,
+                "kind": "concept",
+                "text": "With half-yearly compounding, each period uses half the nominal annual rate, and one year contains two periods."
+            },
+            {
+                "level": 4,
+                "kind": "strong",
+                "text": "Apply the half-year rate to the principal, then apply the same rate again to the new amount."
+            },
+            {
+                "level": 5,
+                "kind": "reveal",
+                "text": "Step 2 breaks by applying 12% once. The correct periodic rate is 6% for two half-years, so 25000 x 1.06^2 = 28090."
+            }
+        ],
+        "repair": "Replace Step 2 with two half-yearly compounding periods at 6% each: Rs 25,000 x 1.06 x 1.06 = Rs 28,090.",
+        "debrief": "The one-year duration makes a single 12% calculation look reasonable, but compounding frequency changes the calculation. A nominal 12% annual rate compounded half-yearly means 6% is credited twice, and the second credit is earned on the already increased balance. The decisive evidence is the two-period multiplication, which gives 28090. A reliable verification habit is to write the rate per compounding period and the number of periods before doing any compound-interest arithmetic.",
+        "transfer_check": {
+            "question": "Rs 10,000 is invested for 1 year at 10% per annum, compounded half-yearly. What is the amount?",
+            "answer": "11025",
+            "explanation": "The half-year rate is 5% and there are two periods: 10000 x 1.05^2 = 11025."
+        },
+        "validation_payload": {
+            "solver": "principal = 25000\nhalf_year_rate = Fraction(6, 100)\nanswer = principal * (1 + half_year_rate) ** 2",
+            "flawed_solver": "principal = 25000\nannual_rate = Fraction(12, 100)\ninterest = principal * annual_rate\nanswer = principal + interest"
+        }
+    },
+    {
+        "id": "apt-si-ci-002",
+        "subject": "aptitude",
+        "topic": "SI & CI",
+        "subtopic": "CI and SI difference",
+        "difficulty": "3",
+        "challenge_mode": "trust_or_challenge",
+        "question": "Rs 37,500 is invested for 2 years at 8% per annum. By how much does compound interest, compounded annually, exceed simple interest?",
+        "artifact_type": "numeric_solution",
+        "artifact": {},
+        "ai_claim": "Compound interest exceeds simple interest by Rs 240.",
+        "ai_solution": [
+            {
+                "index": 1,
+                "text": "For two years at the same annual rate, the excess of compound interest over simple interest is the second-year interest earned on the first year's interest."
+            },
+            {
+                "index": 2,
+                "text": "First-year interest = 8% of Rs 37,500 = Rs 3,000."
+            },
+            {
+                "index": 3,
+                "text": "Extra second-year interest = 8% of Rs 3,000 = Rs 240."
+            },
+            {
+                "index": 4,
+                "text": "Therefore compound interest exceeds simple interest by Rs 240."
+            }
+        ],
+        "ai_final_answer": "240",
+        "simulated_confidence": 91,
+        "truth_state": "valid",
+        "failure": null,
+        "missing_information": "",
+        "resolving_scenarios": [],
+        "answer_coincidentally_correct": false,
+        "canonical_solution": "Simple interest for two years is 37500 x 0.08 x 2 = 6000. Under annual compounding, the first year's Rs 3000 interest also earns 8% in the second year, adding Rs 240 beyond simple interest. Thus the difference is 240. Equivalently, CI = 37500 x (1.08^2 - 1) = 6240, and 6240 - 6000 = 240.",
+        "canonical_answer": "240",
+        "valid_evidence": [
+            {
+                "type": "calculation",
+                "summary": "Verify that the first year's Rs 3,000 interest earns Rs 240 in the second year.",
+                "must_reference_step": 3,
+                "must_contain_values": [
+                    "3000",
+                    "8",
+                    "240"
+                ]
+            },
+            {
+                "type": "calculation",
+                "summary": "Compute SI and CI independently and compare them.",
+                "must_reference_step": 4,
+                "must_contain_values": [
+                    "6000",
+                    "6240",
+                    "240"
+                ]
+            }
+        ],
+        "counterexamples": [],
+        "hints": [
+            {
+                "level": 1,
+                "kind": "attention",
+                "text": "Check whether the shortcut isolates exactly what compounding adds beyond simple interest."
+            },
+            {
+                "level": 2,
+                "kind": "direction",
+                "text": "Verify the move from Step 2 to Step 3."
+            },
+            {
+                "level": 3,
+                "kind": "concept",
+                "text": "Over two annual periods, the only extra amount in compound interest is interest earned in year 2 on the interest credited after year 1."
+            },
+            {
+                "level": 4,
+                "kind": "strong",
+                "text": "Compute simple interest and compound interest separately, then compare their difference with the shortcut."
+            },
+            {
+                "level": 5,
+                "kind": "reveal",
+                "text": "Every step is correct. SI is 6000 and CI is 6240, so the difference is 240. Approving the solution is the right call."
+            }
+        ],
+        "repair": "",
+        "debrief": "The shortcut can look suspicious because it skips the full compound-interest formula, but it is exact for two years at a fixed annual rate. Simple interest earns only on principal; compound interest earns the same principal interest plus one extra layer in year 2 on year 1's interest. Independent calculation gives SI = 6000 and CI = 6240, confirming the Rs 240 difference. A useful verification habit is to test a shortcut against the full definition before rejecting or approving it.",
+        "transfer_check": {
+            "question": "Rs 50,000 is invested for 2 years at 6% per annum. By how much does annual compound interest exceed simple interest?",
+            "answer": "180",
+            "explanation": "First-year interest is 3000, and 6% of 3000 is 180. That is the two-year excess of CI over SI."
+        },
+        "validation_payload": {
+            "solver": "principal = 37500\nrate = Fraction(8, 100)\nsi = principal * rate * 2\nci = principal * (1 + rate) ** 2 - principal\nanswer = ci - si"
+        }
+    },
+    {
+        "id": "apt-si-ci-003",
+        "subject": "aptitude",
+        "topic": "SI & CI",
+        "subtopic": "Recovering principal",
+        "difficulty": "3",
+        "challenge_mode": "trust_or_challenge",
+        "question": "At simple interest, a sum amounts to Rs 17,400 after 2 years and Rs 21,000 after 5 years. What was the principal?",
+        "artifact_type": "numeric_solution",
+        "artifact": {},
+        "ai_claim": "The principal was Rs 15,960.",
+        "ai_solution": [
+            {
+                "index": 1,
+                "text": "The amount rises by Rs 21,000 - Rs 17,400 = Rs 3,600 between the two observations."
+            },
+            {
+                "index": 2,
+                "text": "Spread this Rs 3,600 increase over the full 5-year duration: yearly interest = Rs 3,600 / 5 = Rs 720."
+            },
+            {
+                "index": 3,
+                "text": "Interest earned in the first 2 years = 2 x Rs 720 = Rs 1,440."
+            },
+            {
+                "index": 4,
+                "text": "Principal = Rs 17,400 - Rs 1,440 = Rs 15,960."
+            }
+        ],
+        "ai_final_answer": "15960",
+        "simulated_confidence": 93,
+        "truth_state": "flawed",
+        "failure": {
+            "category": "F05",
+            "location": 2,
+            "misconception": "Dividing an amount difference by the total time instead of the interval between observations",
+            "explanation": "The Rs 3,600 increase occurs from year 2 to year 5, a span of 3 years, so yearly interest is 3600/3 = 1200. The first two years earn Rs 2,400, giving principal 17400 - 2400 = 15000.",
+            "why_convincing": "The later observation is labelled 'after 5 years', which makes 5 an attractive divisor. The subtraction is correct, so it is easy to overlook that the difference represents only the time separating the two observations."
+        },
+        "missing_information": "",
+        "resolving_scenarios": [],
+        "answer_coincidentally_correct": false,
+        "canonical_solution": "Under simple interest, the amount increases by the same amount each year. From year 2 to year 5 the amount rises by 21000 - 17400 = 3600 over 3 years, so yearly interest is 1200. Interest for the first 2 years is 2400, hence the principal is 17400 - 2400 = 15000.",
+        "canonical_answer": "15000",
+        "valid_evidence": [
+            {
+                "type": "calculation",
+                "summary": "Divide the Rs 3,600 increase by the 3-year gap, then remove two years of interest from Rs 17,400.",
+                "must_reference_step": 2,
+                "must_contain_values": [
+                    "3600",
+                    "3",
+                    "1200",
+                    "2400",
+                    "15000"
+                ]
+            },
+            {
+                "type": "counterexample",
+                "summary": "Check whether the AI's Rs 720 yearly interest can reproduce the stated amount at year 5.",
+                "must_reference_step": 2,
+                "must_contain_values": [
+                    "720",
+                    "19560",
+                    "21000"
+                ]
+            }
+        ],
+        "counterexamples": [
+            "With principal Rs 15,960 and yearly simple interest Rs 720, the amount after 5 years would be Rs 19,560, not the stated Rs 21,000."
+        ],
+        "hints": [
+            {
+                "level": 1,
+                "kind": "attention",
+                "text": "Check what span of time is represented by the difference between the two stated amounts."
+            },
+            {
+                "level": 2,
+                "kind": "direction",
+                "text": "Inspect the divisor used in Step 2."
+            },
+            {
+                "level": 3,
+                "kind": "concept",
+                "text": "For simple interest, the difference between amounts at two dates equals the constant yearly interest multiplied by the time gap between those dates."
+            },
+            {
+                "level": 4,
+                "kind": "strong",
+                "text": "Use the number of years from the first observation to the second, not the age of the later observation."
+            },
+            {
+                "level": 5,
+                "kind": "reveal",
+                "text": "Step 2 uses 5 years, but Rs 3,600 is the increase from year 2 to year 5, only 3 years. Yearly interest is 1200, so the principal is 15000."
+            }
+        ],
+        "repair": "Replace Step 2 with 'The observations are 3 years apart, so yearly interest = Rs 3,600 / 3 = Rs 1,200.' Then two years' interest is Rs 2,400 and the principal is Rs 15,000.",
+        "debrief": "The subtraction in Step 1 is correct, which makes the next division feel routine. The trap is assigning the wrong time interval to that difference. Rs 3,600 is not the interest over the first five years; it is the increase between the year-2 and year-5 amounts, so it covers only three years. Dividing by three gives yearly interest of 1200 and principal 15000. When comparing two observations, verify the interval attached to the difference before converting it to a rate.",
+        "transfer_check": {
+            "question": "At simple interest, a sum amounts to Rs 24,000 after 3 years and Rs 28,000 after 7 years. What is the principal?",
+            "answer": "21000",
+            "explanation": "The Rs 4,000 increase occurs over 4 years, so yearly interest is 1000. Three years' interest is 3000, giving principal 24000 - 3000 = 21000."
+        },
+        "validation_payload": {
+            "solver": "amount_2 = 17400\namount_5 = 21000\nyearly_interest = Fraction(amount_5 - amount_2, 5 - 2)\nanswer = amount_2 - 2 * yearly_interest",
+            "flawed_solver": "amount_2 = 17400\namount_5 = 21000\nyearly_interest = Fraction(amount_5 - amount_2, 5)\nanswer = amount_2 - 2 * yearly_interest"
+        }
+    },
+    {
+        "id": "apt-si-ci-004",
+        "subject": "aptitude",
+        "topic": "SI & CI",
+        "subtopic": "Compounding frequency",
+        "difficulty": "4",
+        "challenge_mode": "trust_or_challenge",
+        "question": "Rs 40,000 is invested for 1 year at a nominal rate of 12% per annum, compounded periodically. What is the maturity amount?",
+        "artifact_type": "numeric_solution",
+        "artifact": {},
+        "ai_claim": "The maturity amount is Rs 44,944.",
+        "ai_solution": [
+            {
+                "index": 1,
+                "text": "The principal is Rs 40,000 and the nominal annual rate is 12%."
+            },
+            {
+                "index": 2,
+                "text": "Use half-yearly compounding, so the periodic rate is 6% and there are 2 periods."
+            },
+            {
+                "index": 3,
+                "text": "Amount = Rs 40,000 x (1.06)^2 = Rs 44,944."
+            }
+        ],
+        "ai_final_answer": "44944",
+        "simulated_confidence": 96,
+        "truth_state": "insufficient_information",
+        "failure": null,
+        "missing_information": "The compounding frequency is not specified. A nominal annual rate alone does not determine the periodic rate or number of compounding periods, so different allowed frequencies produce different maturity amounts.",
+        "resolving_scenarios": [
+            "If interest is compounded annually, the amount is 40000 x 1.12 = 44800.",
+            "If interest is compounded half-yearly, the amount is 40000 x 1.06^2 = 44944."
+        ],
+        "answer_coincidentally_correct": false,
+        "canonical_solution": "The maturity amount cannot be determined uniquely because the compounding frequency is missing. Annual compounding gives 40000 x 1.12 = 44800, while half-yearly compounding gives 40000 x 1.06^2 = 44944. Both use the stated nominal rate of 12% per annum and are consistent with periodic compounding, but they give different amounts.",
+        "canonical_answer": "insufficient information",
+        "valid_evidence": [
+            {
+                "type": "calculation",
+                "summary": "Compute two maturity amounts using two different compounding frequencies consistent with the wording.",
+                "must_reference_step": 2,
+                "must_contain_values": [
+                    "44800",
+                    "44944"
+                ]
+            },
+            {
+                "type": "rule",
+                "summary": "A nominal annual rate needs a compounding frequency to determine the rate per period and number of periods.",
+                "must_reference_step": 2,
+                "must_contain_values": [
+                    "12"
+                ]
+            }
+        ],
+        "counterexamples": [
+            "Annual compounding gives Rs 44,800, while half-yearly compounding gives Rs 44,944; both match the stated 12% nominal annual rate."
+        ],
+        "hints": [
+            {
+                "level": 1,
+                "kind": "attention",
+                "text": "Check whether every input needed for a compound-interest calculation is actually specified."
+            },
+            {
+                "level": 2,
+                "kind": "direction",
+                "text": "Step 2 chooses a compounding schedule. Look for where that schedule came from."
+            },
+            {
+                "level": 3,
+                "kind": "concept",
+                "text": "A nominal annual rate does not by itself fix the periodic rate; the compounding frequency is also required."
+            },
+            {
+                "level": 4,
+                "kind": "strong",
+                "text": "Recompute the maturity amount once with annual compounding and once with half-yearly compounding."
+            },
+            {
+                "level": 5,
+                "kind": "reveal",
+                "text": "Step 2 assumes half-yearly compounding without support. Annual compounding gives 44800 and half-yearly gives 44944, so the question has insufficient information."
+            }
+        ],
+        "repair": "Specify the compounding frequency, such as annually, half-yearly or quarterly. Without that fact, no unique maturity amount can be computed.",
+        "debrief": "The arithmetic in the AI's chosen scenario is correct, which makes the answer look settled. The unsupported move is choosing half-yearly compounding when the question says only that compounding is periodic. With a nominal annual rate, frequency determines both the periodic rate and the number of periods. Annual compounding gives 44800, while half-yearly gives 44944. When a formula needs several parameters, trace each one to the prompt; if two permitted values produce different answers, the information is insufficient.",
+        "transfer_check": null,
+        "validation_payload": {
+            "solver": "principal = 40000\nannual = principal * (1 + Fraction(12, 100))\nhalf_yearly = principal * (1 + Fraction(6, 100)) ** 2\nanswer = 'insufficient information' if annual != half_yearly else annual",
+            "insufficient_information": true
+        }
+    },
+    {
+        "id": "apt-si-ci-005",
+        "subject": "aptitude",
+        "topic": "SI & CI",
+        "subtopic": "Compound debt payments",
+        "difficulty": "5",
+        "challenge_mode": "trust_or_challenge",
+        "question": "A debt of Rs 100,000 is compounded annually at 10%. The borrower pays Rs 55,000 at the end of year 1 and Rs 30,000 at the end of year 2. What balance remains immediately after the second payment?",
+        "artifact_type": "numeric_solution",
+        "artifact": {},
+        "ai_claim": "The remaining balance is Rs 36,000.",
+        "ai_solution": [
+            {
+                "index": 1,
+                "text": "Without payments, the debt after 2 years would be Rs 100,000 x (1.10)^2 = Rs 121,000."
+            },
+            {
+                "index": 2,
+                "text": "The two payments total Rs 55,000 + Rs 30,000 = Rs 85,000."
+            },
+            {
+                "index": 3,
+                "text": "Because both payments reduce the same debt, subtract their total from the two-year compounded debt: Rs 121,000 - Rs 85,000 = Rs 36,000."
+            },
+            {
+                "index": 4,
+                "text": "So the balance immediately after the second payment is Rs 36,000."
+            }
+        ],
+        "ai_final_answer": "36000",
+        "simulated_confidence": 89,
+        "truth_state": "flawed",
+        "failure": {
+            "category": "F07",
+            "location": 3,
+            "misconception": "Treating payments made at different times as if both were made at the end",
+            "explanation": "The Rs 55,000 payment at the end of year 1 reduces the balance before year-2 interest is charged. The balance goes 100000 to 110000, then to 55000 after payment, then to 60500 after year-2 interest, and finally to 30500 after the second payment.",
+            "why_convincing": "Compounding the original debt for two years and subtracting the total paid is algebraically tidy, and the payment total is correct. The hidden issue is that money removed after year 1 cannot continue accruing interest during year 2."
+        },
+        "missing_information": "",
+        "resolving_scenarios": [],
+        "answer_coincidentally_correct": false,
+        "canonical_solution": "After year 1, the debt is 100000 x 1.10 = 110000. The Rs 55,000 payment reduces it to 55000. During year 2 that balance grows to 55000 x 1.10 = 60500. Subtracting the Rs 30,000 payment made at the end of year 2 leaves 30500.",
+        "canonical_answer": "30500",
+        "valid_evidence": [
+            {
+                "type": "calculation",
+                "summary": "Trace the balance year by year, applying each payment at the time it occurs.",
+                "must_reference_step": 3,
+                "must_contain_values": [
+                    "110000",
+                    "55000",
+                    "60500",
+                    "30000",
+                    "30500"
+                ]
+            },
+            {
+                "type": "rule",
+                "summary": "A payment reduces the principal on which all later compound interest is calculated.",
+                "must_reference_step": 3,
+                "must_contain_values": [
+                    "55000",
+                    "10"
+                ]
+            }
+        ],
+        "counterexamples": [
+            "The Rs 55,000 paid after year 1 would otherwise earn 10% interest in year 2. Ignoring that timing overstates the final debt by Rs 5,500: Rs 36,000 - Rs 5,500 = Rs 30,500."
+        ],
+        "hints": [
+            {
+                "level": 1,
+                "kind": "attention",
+                "text": "Track when each cash flow changes the balance on which later interest is charged."
+            },
+            {
+                "level": 2,
+                "kind": "direction",
+                "text": "Examine the aggregation of the two payments in Step 3."
+            },
+            {
+                "level": 3,
+                "kind": "concept",
+                "text": "Under compound interest, a payment changes the base for every interest period that follows it."
+            },
+            {
+                "level": 4,
+                "kind": "strong",
+                "text": "Build a year-by-year balance: add one year's interest, apply the first payment, then repeat for year 2."
+            },
+            {
+                "level": 5,
+                "kind": "reveal",
+                "text": "Step 3 treats the year-1 payment as if it stayed in the debt for another year. The correct timeline leaves 55000 after year 1, then 60500 before the second payment, and 30500 after it."
+            }
+        ],
+        "repair": "Replace Step 3 with a timeline: after year 1 the debt is Rs 110,000, then Rs 55,000 after the first payment; after year-2 interest it is Rs 60,500, and after the Rs 30,000 payment it is Rs 30,500.",
+        "debrief": "Adding the payments first is tempting because both ultimately reduce the same debt, but compound interest is path-dependent when cash flows occur between compounding dates. The Rs 55,000 paid after year 1 must be removed before year-2 interest is calculated; otherwise the solution charges another 10% on money that is no longer owed. A year-by-year balance trace gives 30500. For any compound-interest problem with deposits or withdrawals, place every cash flow on a timeline before applying the next interest factor.",
+        "transfer_check": {
+            "question": "A debt of Rs 60,000 carries 8% compound interest per year. A payment of Rs 20,000 is made after year 1 and Rs 10,000 after year 2. What balance remains after the second payment?",
+            "answer": "38384",
+            "explanation": "After year 1: 60000 x 1.08 = 64800, then payment leaves 44800. After year 2: 44800 x 1.08 = 48384, then the second payment leaves 38384."
+        },
+        "validation_payload": {
+            "solver": "balance = 100000\nbalance *= 1 + Fraction(10, 100)\nbalance -= 55000\nbalance *= 1 + Fraction(10, 100)\nbalance -= 30000\nanswer = balance",
+            "flawed_solver": "debt_after_two_years = 100000 * (1 + Fraction(10, 100)) ** 2\ntotal_payments = 55000 + 30000\nanswer = debt_after_two_years - total_payments"
+        }
+    }
+]

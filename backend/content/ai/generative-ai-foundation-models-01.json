@@ -1,0 +1,446 @@
+[
+  {
+    "id": "ai-generative-ai-foundation-models-001",
+    "subject": "ai",
+    "topic": "Generative AI & Foundation Models",
+    "subtopic": "A citation that looks real",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the citation trustworthy because it includes authors, year, journal, volume and pages?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "Student asks an LLM (no web access) for sources on microplastics in rice.\nModel: \"See Kulkarni, R. & Mehta, S. (2021). 'Microplastic accumulation in paddy soils of the Godavari delta.' Journal of Environmental Soil Science, 14(3), 211-229.\"\nA library search finds no such article, journal issue or page range."
+    },
+    "ai_claim": "Yes. The citation is complete and specific, with authors, a year, a journal and page numbers, which shows it is a real paper.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The citation names two authors."
+      },
+      {
+        "index": 2,
+        "text": "It gives a year, journal, volume, issue and pages."
+      },
+      {
+        "index": 3,
+        "text": "Specific details indicate a real source."
+      },
+      {
+        "index": 4,
+        "text": "So the citation is trustworthy."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F14",
+      "location": 3,
+      "misconception": "Treating specific-looking details as evidence of existence",
+      "explanation": "Language models generate text that looks like a citation because citations follow predictable patterns, not because they look them up. Without retrieval, the model can fabricate plausible authors, titles and page ranges. The library search confirms it does not exist. Verify every citation in a database (DOI, Google Scholar) before using it.",
+      "why_convincing": "Fabricated citations are formatted exactly like real ones."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: specificity is not evidence. The library search shows the paper does not exist - a hallucinated citation.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "A library search finds no such article, issue or page range.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Model outputs without retrieval must be verified against authoritative sources.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The DOI lookup for this citation returns nothing."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the model produced the citation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats detail as proof."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models generate plausible text; they do not retrieve records unless connected to a source."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Search a library database for the title."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the citation is fabricated. Verify every source."
+      }
+    ],
+    "repair": "Use a retrieval-backed tool and verify citations by DOI or database search.",
+    "debrief": "Plausibility is what generative models optimise. Verification is the reader's job.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-generative-ai-foundation-models-002",
+    "subject": "ai",
+    "topic": "Generative AI & Foundation Models",
+    "subtopic": "Knowledge cutoffs",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the user rely on the model's answer as today's rate?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "A user asks a chat model (training data up to a cutoff, no browsing tool): \"What is today's repo rate set by the RBI?\"\nModel answers confidently with a specific rate and says it is current."
+    },
+    "ai_claim": "Yes. The model answered confidently with a specific figure, so it knows the current rate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model gives a specific rate."
+      },
+      {
+        "index": 2,
+        "text": "It states that the rate is current."
+      },
+      {
+        "index": 3,
+        "text": "It was trained on financial information."
+      },
+      {
+        "index": 4,
+        "text": "So the answer is today's rate."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming the model knows events after its training data",
+      "explanation": "Without a browsing or data tool, the model only knows what was in its training data up to its cutoff. Policy rates change at scheduled meetings, so its figure may be outdated; its confidence says nothing about recency. Check an authoritative current source (the RBI website) or give the model a live data tool.",
+      "why_convincing": "The model was trained on relevant data and sounds authoritative."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the model cannot know rate changes after its cutoff. Check the RBI's current announcement.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "A model without tools cannot access information after its training cutoff.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "If the RBI changed the rate last month, the model's 'current' figure is wrong.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A rate change after the cutoff is unknown to the model."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where the model's information comes from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes training data are up to date."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Knowledge stops at the training cutoff unless tools provide fresh data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a rate change after the cutoff."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the model cannot know recent changes. Check a live source."
+      }
+    ],
+    "repair": "Answer time-sensitive questions from live sources or tools, and state dates.",
+    "debrief": "For anything that changes - prices, rates, news, laws - ask 'as of when?' before trusting a model's answer.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-generative-ai-foundation-models-003",
+    "subject": "ai",
+    "topic": "Generative AI & Foundation Models",
+    "subtopic": "One model, many tasks",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's explanation correct?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "A team uses one pretrained foundation model for three tasks: classifying support tickets (few-shot prompting), extracting invoice fields (structured-output prompting) and drafting replies (lightly fine-tuned).\nAI: \"This is the main advantage of foundation models: broad pretraining lets one model be adapted to many tasks with little task-specific data.\""
+    },
+    "ai_claim": "Yes. Pretraining on broad data gives general capabilities, and prompting or light fine-tuning adapts them to each task, so one model serves many tasks with little labelled data.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model is pretrained on broad, diverse data."
+      },
+      {
+        "index": 2,
+        "text": "That gives general language capabilities."
+      },
+      {
+        "index": 3,
+        "text": "Prompting and light fine-tuning specialise it per task."
+      },
+      {
+        "index": 4,
+        "text": "So one model covers many tasks with little task data."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. This adaptability is the defining property of foundation models. Each adapted use still needs its own evaluation.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Three tasks are served by one pretrained model with prompting or light fine-tuning.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what makes a model a 'foundation' model."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 describes adaptation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Foundation models are broadly pretrained and adapted downstream."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare with training three separate models from scratch."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It describes foundation-model adaptation accurately. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Adaptability is the benefit; shared failure modes (one model's weaknesses in every task) are the cost.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-generative-ai-foundation-models-004",
+    "subject": "ai",
+    "topic": "Generative AI & Foundation Models",
+    "subtopic": "Text inside generated images",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's advice sound?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "Request to an image generator: a poster reading exactly \"Grand Opening - 14 March - 50% Off\".\nAI advice: \"Image generators often misspell or distort exact text, so add the text afterwards in a design tool, or check carefully and regenerate.\""
+    },
+    "ai_claim": "Yes. Image models generate pixels that resemble text rather than typesetting strings, so exact wording and numbers can come out wrong. Adding text in a design tool guarantees accuracy.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Image generators produce pixels, not characters."
+      },
+      {
+        "index": 2,
+        "text": "Text-like shapes can be misspelled or have wrong digits."
+      },
+      {
+        "index": 3,
+        "text": "Posters need exact dates and discounts."
+      },
+      {
+        "index": 4,
+        "text": "Adding text separately guarantees correctness."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Even models that render text well can make errors; for exact text, typeset it separately or verify every character.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A generated poster reading '14 Match - 5O% Off' would mislead customers.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "14"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about how image models represent text."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 proposes a reliable workaround."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Exact strings are better handled by tools that typeset text."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a wrong digit in the discount."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The advice is sound. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Combine generative tools with deterministic ones where exactness matters.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-generative-ai-foundation-models-005",
+    "subject": "ai",
+    "topic": "Generative AI & Foundation Models",
+    "subtopic": "Is this image AI-generated",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the photo AI-generated?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "An AI-image detector reports 0.62 for a news photo (\"0 = real, 1 = AI-generated\").\nThe detector's documentation does not describe calibration or accuracy on this kind of image.\nAI: \"0.62 means the photo is AI-generated.\""
+    },
+    "ai_claim": "Yes. The detector's score is above 0.5, so the photo is more likely AI-generated than not.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The detector outputs 0.62."
+      },
+      {
+        "index": 2,
+        "text": "Scores run from 0 (real) to 1 (AI)."
+      },
+      {
+        "index": 3,
+        "text": "0.62 is above 0.5."
+      },
+      {
+        "index": 4,
+        "text": "So the photo is AI-generated."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether the score is calibrated and how accurate the detector is on this kind of image. A score of 0.62 may not mean a 62% probability; detectors often have high false-positive rates on compressed or edited real photos and miss images from newer generators. Provenance data (C2PA metadata, source, original file) are also unknown.",
+    "resolving_scenarios": [
+      "The detector is well calibrated on news photos and the original has no camera provenance: the photo is somewhat more likely than not to be AI-generated.",
+      "The detector flags 30% of heavily compressed real news photos above 0.6: 0.62 is typical of a real, recompressed image."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "A single uncalibrated score cannot settle authenticity. Step 3 treats the score as a probability and 0.5 as a decision rule without evidence.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If the detector gives 30% of recompressed real photos scores above 0.6, 0.62 is weak evidence.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "30"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Real photos that were recompressed can score 0.62."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 0.62 actually means for this detector."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats the score as a calibrated probability."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Detector outputs need calibration data and error rates to interpret."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider false-positive rates on compressed real photos."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes calibration. It may or may not be AI-generated. It cannot be decided from the score alone."
+      }
+    ],
+    "repair": "Seek provenance (original file, C2PA metadata, source) and use detectors with published error rates.",
+    "debrief": "Detector scores are evidence of unknown strength until their calibration and error rates are known.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

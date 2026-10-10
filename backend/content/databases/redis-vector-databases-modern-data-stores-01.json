@@ -1,0 +1,497 @@
+[
+  {
+    "id": "db-redis-vector-databases-modern-data-stores-001",
+    "subject": "databases",
+    "topic": "Redis, Vector Databases & Modern Data Stores",
+    "subtopic": "Redis persistence defaults",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "With these default settings, is it true that no acknowledged order can be lost if the Redis server crashes?",
+    "artifact_type": "schema",
+    "artifact": {
+      "config": "redis.conf: default settings\n  save 3600 1 300 100 60 10000\n  appendonly no",
+      "plan": "Use Redis as the only store for customer orders."
+    },
+    "ai_claim": "Yes. Redis writes data to disk, so after a crash it reloads everything and no acknowledged order is lost.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Redis keeps data in memory for speed."
+      },
+      {
+        "index": 2,
+        "text": "It also saves data to disk."
+      },
+      {
+        "index": 3,
+        "text": "Every acknowledged write is on disk before the crash."
+      },
+      {
+        "index": 4,
+        "text": "So all orders are restored on restart."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming every write is persisted immediately",
+      "explanation": "With these settings Redis persists only through periodic RDB snapshots (for example, every 60 seconds if 10,000 keys changed). The append-only file is off. Writes acknowledged after the last snapshot exist only in memory and are lost in a crash. Enable appendonly yes (with appendfsync everysec or always) and treat Redis durability as a deliberate choice.",
+      "why_convincing": "Redis does save to disk, so step 2 is true - just not on every write."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Snapshotting loses every write since the last snapshot, which can be minutes of orders. Enable AOF or use a durable primary database.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An order acknowledged 30 seconds after the last snapshot is gone after a crash.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "30"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "appendonly yes\nappendfsync everysec",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Orders written between snapshots are lost."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check when, exactly, Redis writes to disk with these settings."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims every acknowledged write is already on disk."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "RDB snapshots are periodic; only the AOF logs each write."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider an order written just after a snapshot."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without AOF, writes since the last snapshot are lost. Enable AOF or use a durable store."
+      }
+    ],
+    "repair": "Enable AOF (`appendonly yes`, `appendfsync everysec`) or keep orders in a durable database.",
+    "debrief": "Durability is configurable in Redis, and the defaults favour speed. 'It saves to disk' and 'every acknowledged write survives a crash' are very different promises. For data you cannot lose, check the fsync policy.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-redis-vector-databases-modern-data-stores-002",
+    "subject": "databases",
+    "topic": "Redis, Vector Databases & Modern Data Stores",
+    "subtopic": "Cache-aside and stale reads",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After update_price(7, 499) runs, will every later get_price(7) return 499?",
+    "artifact_type": "sql",
+    "artifact": {
+      "language": "python",
+      "code": "def get_price(pid):\n    cached = redis.get(f\"price:{pid}\")\n    if cached is not None:\n        return cached\n    price = db.query_one(\"SELECT price FROM products WHERE id = %s\", pid)\n    redis.set(f\"price:{pid}\", price, ex=3600)\n    return price\n\ndef update_price(pid, new_price):\n    db.execute(\"UPDATE products SET price = %s WHERE id = %s\", new_price, pid)"
+    },
+    "ai_claim": "Yes. The database is the source of truth, and update_price writes the new price there, so reads return 499.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "update_price writes 499 to the products table."
+      },
+      {
+        "index": 2,
+        "text": "get_price reads the price."
+      },
+      {
+        "index": 3,
+        "text": "The database now holds 499."
+      },
+      {
+        "index": 4,
+        "text": "So get_price(7) returns 499."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Ignoring the cache layer on reads",
+      "explanation": "get_price reads the cache first, not the database. If price:7 was cached before the update, reads keep returning the old price for up to an hour, until the key expires. update_price must delete (or overwrite) the cache key after writing to the database.",
+      "why_convincing": "The database is indeed the source of truth, and after an hour the answer would be right."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not while a cached value exists: reads return the old price for up to 3,600 seconds. Delete price:{pid} in update_price after the database write.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "get_price(7) caches 399 -> update_price(7, 499) -> get_price(7) hits the cache -> 399",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "499"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "db.execute(...); redis.delete(f\"price:{pid}\")",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A price cached before the update is served for up to an hour."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where get_price looks first."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says get_price reads 'the price'. From where?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In cache-aside, writes must invalidate the cached copy, or reads return stale data until expiry."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call get_price(7) before and after the update."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: get_price returns the cached value, which update_price never invalidates. Delete the key on update."
+      }
+    ],
+    "repair": "In update_price, call `redis.delete(f\"price:{pid}\")` after the database write.",
+    "debrief": "Every cache introduces a second copy of the data, and every write path must account for it. 'The database is correct' does not make the application correct if reads come from the cache. For each write, ask which cached keys it invalidates.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-redis-vector-databases-modern-data-stores-003",
+    "subject": "databases",
+    "topic": "Redis, Vector Databases & Modern Data Stores",
+    "subtopic": "INCR then EXPIRE",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this limiter always reset every user's count within 60 seconds, so a user is never blocked for longer than a minute?",
+    "artifact_type": "sql",
+    "artifact": {
+      "language": "python",
+      "code": "def allow(user_id):\n    key = f\"rate:{user_id}\"\n    count = redis.incr(key)\n    if count == 1:\n        redis.expire(key, 60)      # start a 60-second window\n    return count <= 100"
+    },
+    "ai_claim": "Yes. The first request in a window sets a 60-second expiry, so the counter always disappears after at most a minute.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "INCR creates the key with value 1 on the first request."
+      },
+      {
+        "index": 2,
+        "text": "When count is 1, EXPIRE sets a 60-second lifetime."
+      },
+      {
+        "index": 3,
+        "text": "Every key therefore expires within 60 seconds of being created."
+      },
+      {
+        "index": 4,
+        "text": "So no user is blocked for more than a minute."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming two separate commands always both run",
+      "explanation": "INCR and EXPIRE are separate round trips. If the process crashes, times out or loses its connection after INCR returns 1 but before EXPIRE runs, the key exists with no expiry. Later requests see count > 1 and never set an expiry, so the counter grows forever and the user is blocked permanently. Make it atomic: SET key 0 EX 60 NX followed by INCR in a MULTI, or a Lua script.",
+      "why_convincing": "The failure window is tiny, so the code works in every normal test."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not always: a failure between INCR and EXPIRE leaves a key with no TTL, blocking the user permanently once it passes 100. Use an atomic pipeline or a Lua script.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "INCR -> 1 -> process dies -> key has no TTL -> later INCRs return 2, 3, ... -> never expires",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Run INCR and EXPIRE (NX) in one MULTI/EXEC or a Lua script.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A crash after the first INCR leaves a counter that never expires."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what happens if the process stops between the two commands."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes EXPIRE always follows the first INCR."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Two commands from a client are not atomic unless grouped (MULTI/EXEC or Lua)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Simulate a crash right after INCR returns 1."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: if EXPIRE never runs, the key has no TTL and the count never resets. Make the two commands atomic."
+      }
+    ],
+    "repair": "Execute INCR and EXPIRE atomically (MULTI/EXEC, or a Lua script that sets the TTL when the count is 1).",
+    "debrief": "Any invariant that relies on two separate commands both succeeding can be broken by a failure between them. Rare failures in high-volume systems happen daily. Group dependent commands atomically, and ask what state a crash between them would leave.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-redis-vector-databases-modern-data-stores-004",
+    "subject": "databases",
+    "topic": "Redis, Vector Databases & Modern Data Stores",
+    "subtopic": "Dot product versus cosine similarity",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the top result of this dot-product search the document with the highest cosine similarity to q?",
+    "artifact_type": "query_plan",
+    "artifact": {
+      "query_vector": "q = [1, 0]",
+      "documents": {
+        "title": "embeddings (not normalised)",
+        "columns": [
+          "doc",
+          "vector"
+        ],
+        "rows": [
+          [
+            "A",
+            "[3, 3]"
+          ],
+          [
+            "B",
+            "[0.9, 0.1]"
+          ]
+        ]
+      },
+      "index": "vector index configured with metric = dot_product"
+    },
+    "ai_claim": "Yes. Dot product and cosine similarity both measure how similar two vectors are, so they rank documents the same way.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Dot product: A gives 3, B gives 0.9."
+      },
+      {
+        "index": 2,
+        "text": "So the dot-product search returns A first."
+      },
+      {
+        "index": 3,
+        "text": "Cosine similarity also measures vector similarity."
+      },
+      {
+        "index": 4,
+        "text": "So A is also the most similar by cosine."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating dot product and cosine as equivalent on unnormalised vectors",
+      "explanation": "Cosine similarity divides the dot product by both vectors' lengths, so it measures direction only. A's cosine with q is 3 / (1 x 4.24) = 0.71; B's is 0.9 / (1 x 0.906) = 0.99. B points almost exactly the same way as q, but A wins the dot product because it is longer. The two metrics agree only when vectors are normalised to length 1.",
+      "why_convincing": "For normalised embeddings - which many models produce - the two rankings really are identical."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Dot product ranks A first (3 vs 0.9), but cosine ranks B first (0.99 vs 0.71). Normalise the vectors or configure the index with the cosine metric.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "cos(q, A) = 0.71; cos(q, B) = 0.99",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.71",
+          "0.99"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "B has the smaller dot product but the higher cosine similarity.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A longer vector can win on dot product while pointing in a less similar direction."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute both metrics for A and B."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the two measures always agree."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Cosine similarity ignores vector length; dot product does not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide each dot product by the vectors' lengths."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: cosine ranks B first (0.99 vs 0.71). The metrics agree only for normalised vectors."
+      }
+    ],
+    "repair": "Normalise all embeddings to unit length, or set the index metric to cosine.",
+    "debrief": "Vector databases let you choose the distance metric, and the choice changes results when vectors are not normalised. Check whether your embedding model outputs unit vectors and that the index metric matches how the model was trained.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-redis-vector-databases-modern-data-stores-005",
+    "subject": "databases",
+    "topic": "Redis, Vector Databases & Modern Data Stores",
+    "subtopic": "Approximate nearest-neighbour search",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's explanation of this observation correct?",
+    "artifact_type": "query_plan",
+    "artifact": {
+      "index": "HNSW index over 10 million embeddings",
+      "settings": "ef_search = 40, top_k = 10",
+      "observation": "Compared with an exact brute-force search, about 1 in 20 queries is missing one true top-10 neighbour."
+    },
+    "ai_claim": "Yes, this is expected. HNSW is approximate: it trades a small loss of recall for speed. Raising ef_search increases recall at the cost of latency.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "HNSW navigates a graph of vectors instead of comparing the query with every vector."
+      },
+      {
+        "index": 2,
+        "text": "The search explores a limited candidate list (ef_search), so it can miss a true neighbour that is not reachable along the explored path."
+      },
+      {
+        "index": 3,
+        "text": "Recall below 100% is expected behaviour, not a bug."
+      },
+      {
+        "index": 4,
+        "text": "A larger ef_search explores more candidates, improving recall and increasing query time."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Approximate nearest-neighbour indexes such as HNSW give no guarantee of exact results; recall is tuned with parameters like ef_search (and M at build time), trading accuracy for latency.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "At ef_search = 40, about 19 in 20 queries return the exact top 10; raising ef_search increases that share.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "40"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what 'approximate' means for this kind of index."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 explains how a true neighbour can be missed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "ANN indexes trade exactness for speed; their accuracy is measured as recall against brute force."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what ef_search controls."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. HNSW is approximate, recall under 100% is expected, and ef_search trades recall against latency. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Vector indexes are usually approximate, and 'missing' results are part of the contract. The right response is to measure recall against exact search and tune parameters to the accuracy the application needs - which is exactly what the claim describes.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

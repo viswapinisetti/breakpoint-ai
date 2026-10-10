@@ -1,0 +1,137 @@
+[
+  {
+    "id": "api-page-001",
+    "subject": "api-integration",
+    "topic": "REST APIs",
+    "subtopic": "Pagination",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this integration fetch all customer records?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "resp = requests.get(\"https://api.vendor.com/v1/customers\", headers=auth)\ncustomers = resp.json()[\"data\"]\nprint(f\"Synced {len(customers)} customers\")",
+      "api_response": "{\n  \"data\": [ ... 100 items ... ],\n  \"meta\": { \"page\": 1, \"per_page\": 100, \"total\": 2847, \"total_pages\": 29 }\n}"
+    },
+    "ai_claim": "Yes — the endpoint returns the customers collection and the code reads the full data array, so all records are synced.",
+    "ai_solution": [
+      {"index": 1, "text": "The request targets the customers collection endpoint and authenticates correctly."},
+      {"index": 2, "text": "The response is parsed and the `data` array is extracted, which is where the vendor puts the records."},
+      {"index": 3, "text": "The whole `data` array is read, with no filter or slice applied, so nothing is dropped."},
+      {"index": 4, "text": "All customer records are therefore synced."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 4,
+      "misconception": "Reading the whole of one page and concluding it is the whole collection",
+      "explanation": "The response metadata says total 2,847 across 29 pages; this request retrieves page 1 only. Nothing in the code drops records from what it received — it simply never asks for pages 2 to 29. The sync silently covers 100 of 2,847 customers and reports success.",
+      "why_convincing": "Step 3 is true and feels like the completeness check: no filter, no slice, nothing discarded. The missing records were never fetched, so no line of code looks wrong, and the log line prints a plausible number."
+    },
+    "canonical_solution": "No. The response metadata reports total 2,847 over 29 pages, and this code requests only page 1, so it syncs 100 records. Loop until the pages are exhausted — request page 2, 3, … while `page < total_pages`, accumulating `data` — or follow the vendor's cursor if one is provided.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "data_point", "summary": "meta.total is 2847 across 29 pages.", "must_reference_step": 4, "must_contain_values": ["2847", "29"]},
+      {"type": "test_case", "summary": "Run the sync against the vendor's 2847 customers: 2847 expected, 100 synced.", "must_reference_step": 4, "must_contain_values": ["100", "2847"]}
+    ],
+    "counterexamples": ["The response itself reports total_pages 29 while exactly one request was made."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Read the response metadata, not only the data array."},
+      {"level": 2, "kind": "direction", "text": "Step 3 is true about what was received. Step 4 makes a claim about what exists."},
+      {"level": 3, "kind": "concept", "text": "A collection endpoint returns one page. Completeness requires iterating until the pages run out."},
+      {"level": 4, "kind": "strong", "text": "Compare len(data) with meta.total."},
+      {"level": 5, "kind": "reveal", "text": "Step 4 confuses one full page with the full collection. meta says 2,847 records over 29 pages; this code fetches page 1 and syncs 100."}
+    ],
+    "repair": "Iterate the pages: request with an increasing `page` parameter while `page <= meta.total_pages`, extending the accumulated list each time, and assert the final count equals `meta.total` before reporting success.",
+    "debrief": "Pagination bugs are silent by construction — no error, no exception, a plausible count in the log. The response usually tells you it is incomplete, in metadata the code never reads. Whenever an integration reports a total, compare it against what the API said was available; a sync that cannot state that comparison has not verified anything.",
+    "validation_payload": {}
+  },
+  {
+    "id": "api-retry-002",
+    "subject": "api-integration",
+    "topic": "API Security, Rate Limits & Error Handling",
+    "subtopic": "Retry conditions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this retry policy correct?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "for attempt in range(5):\n    resp = requests.post(url, json=payload, headers=auth)\n    if resp.status_code == 200:\n        return resp.json()\n    time.sleep(2 ** attempt)\nraise SyncError(\"failed after 5 attempts\")"
+    },
+    "ai_claim": "Yes — it retries with exponential backoff and gives up after five attempts, which is the standard resilient pattern.",
+    "ai_solution": [
+      {"index": 1, "text": "The loop bounds the work at five attempts, so it cannot retry forever."},
+      {"index": 2, "text": "`2 ** attempt` gives 1, 2, 4, 8 second delays — exponential backoff, which avoids hammering a struggling service."},
+      {"index": 3, "text": "A non-200 response triggers a retry, so transient failures are absorbed."},
+      {"index": 4, "text": "This is the standard resilient retry pattern and is correct."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Retrying every non-success status rather than only the retryable ones",
+      "explanation": "This retries 400 and 422 — malformed payloads that will fail identically five times — and, worse, retries 401 and 403, which can lock an account. It also ignores 429's `Retry-After` header and retries POST without an idempotency key, so a request that timed out after the server processed it may be applied twice. Retry 429 and 5xx only.",
+      "why_convincing": "Steps 1 and 2 are correct and describe genuine best practice, so the code carries the shape of a resilient client. \"Retry on failure\" also sounds obviously right; the distinction between transient and permanent failure is the part that has to be added deliberately."
+    },
+    "canonical_solution": "No. Retry only transient failures: 429 and 5xx. A 4xx other than 429 will fail identically on every attempt, wasting the budget and risking lockout on 401/403. Honour `Retry-After` on 429 rather than using your own backoff, add jitter to avoid synchronised retries, and send an idempotency key on POST so a retried request cannot double-apply.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "counterexample", "summary": "A 422 from a malformed payload is retried five times.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "test_case", "summary": "Return a 401 from a stub: it is retried five times and can lock the account, although only 429 and 5xx are worth retrying.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["A payload missing a required field returns 422. It is retried five times over 15 seconds and fails identically each time."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask which failures a retry could possibly fix."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are correct. Step 3 decides what triggers a retry — check that condition."},
+      {"level": 3, "kind": "concept", "text": "Retries help with transient failures. A permanent failure returns the same result every time."},
+      {"level": 4, "kind": "strong", "text": "List the status codes this loop retries, and mark which could succeed on a second attempt."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 retries every non-200, including 400, 422, 401 and 403 — none of which a retry can fix, and 401/403 can trigger lockout. Retry 429 and 5xx only."}
+    ],
+    "repair": "Retry only on 429 and 5xx: `if resp.status_code == 200: return ...` / `if resp.status_code not in (429, 500, 502, 503, 504): raise ...`. Honour `Retry-After` on 429, add jitter to the backoff, and send an idempotency key on POST.",
+    "debrief": "\"Retry on failure\" collapses a distinction that matters: a transient failure may succeed next time, a permanent one will not. Retrying permanent failures wastes the budget, delays the real error, and on auth codes can escalate the problem. And on a non-idempotent POST, a retry after a timeout can apply the operation twice — so the retry policy and the idempotency design are one decision, not two.",
+    "validation_payload": {}
+  },
+  {
+    "id": "api-webhook-003",
+    "subject": "api-integration",
+    "topic": "Webhooks",
+    "subtopic": "Signature verification",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this webhook handler's verification correct?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "@router.post(\"/webhooks/vendor\")\nasync def handle(request: Request):\n    raw = await request.body()          # exact bytes, before parsing\n    sig = request.headers[\"X-Vendor-Signature\"]\n    expected = hmac.new(SECRET, raw, hashlib.sha256).hexdigest()\n    if not hmac.compare_digest(sig, expected):\n        raise HTTPException(401)\n    event = json.loads(raw)\n    if seen(event[\"id\"]):\n        return {\"status\": \"duplicate ignored\"}\n    process(event)\n    return {\"status\": \"ok\"}"
+    },
+    "ai_claim": "Yes — it verifies the HMAC over the raw body with a constant-time comparison before parsing, and deduplicates by event id.",
+    "ai_solution": [
+      {"index": 1, "text": "The signature is computed over the exact raw bytes received, not over a re-serialised object, so key order and whitespace cannot change the digest."},
+      {"index": 2, "text": "`hmac.compare_digest` is constant-time, so the comparison does not leak the expected signature through timing."},
+      {"index": 3, "text": "Verification happens before `json.loads`, so unverified input is never parsed into application objects."},
+      {"index": 4, "text": "The event id is checked against previously seen ids, so redelivery does not double-process."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. All four properties hold: HMAC over raw bytes (re-serialising before verifying is the classic mistake and is avoided), constant-time comparison, verify-then-parse ordering, and idempotent handling by event id. (A timestamp check to bound replay of old-but-valid deliveries would strengthen it further, but its absence is a refinement rather than a defect in what is claimed.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Check what exactly is signed, and when verification happens relative to parsing."},
+      {"level": 2, "kind": "direction", "text": "Step 1 claims the raw bytes are used. Confirm that from the code."},
+      {"level": 3, "kind": "concept", "text": "HMAC must be computed over the exact bytes received; re-serialising changes the digest."},
+      {"level": 4, "kind": "strong", "text": "Check the order: is anything parsed or acted on before the comparison succeeds?"},
+      {"level": 5, "kind": "reveal", "text": "This handler is correct: raw-byte HMAC, constant-time comparison, verify before parse, and deduplication by event id. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "Webhook handlers usually fail in one of four specific ways — signing a re-serialised body, using `==` for the comparison, parsing before verifying, or processing redeliveries twice. This one avoids all four. Approving it means checking each property against the code rather than reacting to the general sense that webhooks are risky, and being able to name the residual gap (replay of old valid deliveries) without inflating it into a defect.",
+    "validation_payload": {}
+  }
+]

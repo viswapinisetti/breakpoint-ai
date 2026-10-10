@@ -1,0 +1,523 @@
+[
+  {
+    "id": "dsa-graphs-001",
+    "subject": "dsa",
+    "topic": "Graphs",
+    "subtopic": "Depth-first search without a visited set",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does reachable(graph, start) return every node reachable from start, for any directed graph?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def reachable(graph, start):\n    result = [start]\n    for nxt in graph.get(start, []):\n        result += reachable(graph, nxt)\n    return sorted(set(result))"
+    },
+    "ai_claim": "Yes. It recursively collects start and everything reachable from its neighbours.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The start node is reachable from itself."
+      },
+      {
+        "index": 2,
+        "text": "Every node reachable from a neighbour is reachable from start."
+      },
+      {
+        "index": 3,
+        "text": "The recursion visits each neighbour and collects what it can reach."
+      },
+      {
+        "index": 4,
+        "text": "So reachable returns every reachable node for any graph."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Recursing without remembering visited nodes",
+      "explanation": "Nothing records which nodes have been visited. In a graph with a cycle, such as A -> B -> A, the recursion goes A, B, A, B, ... forever, until Python raises RecursionError. Graph traversal needs a visited set.",
+      "why_convincing": "On trees and acyclic graphs the recursion terminates and returns the right answer, and those are the easiest test graphs to draw."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "With a cycle, the recursion never ends and raises RecursionError. Track visited nodes (a set) and skip nodes already seen.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "reachable({'A': ['B'], 'B': ['A']}, 'A') raises RecursionError.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "reachable(A) -> reachable(B) -> reachable(A) -> ...",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "reachable({'A': ['B'], 'B': ['A']}, 'A') never finishes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the function on a graph with a cycle."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 recurses into every neighbour. What stops it from revisiting a node?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Graphs, unlike trees, can lead back to a node already visited."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace reachable on A -> B -> A."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without a visited set, a cycle makes the recursion infinite. Keep a set of visited nodes."
+      }
+    ],
+    "repair": "Keep a `seen` set; only visit neighbours not already in it.",
+    "debrief": "Tree algorithms silently rely on the absence of cycles, and applying them to graphs is the most common traversal bug. The visited set is what turns a tree walk into a graph walk. Always include a cycle in graph test data.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "reachable",
+      "ai_code": "def reachable(graph, start):\n    result = [start]\n    for nxt in graph.get(start, []):\n        result += reachable(graph, nxt)\n    return sorted(set(result))",
+      "reference_code": "def reachable(graph, start):\n    seen, stack = {start}, [start]\n    while stack:\n        node = stack.pop()\n        for nxt in graph.get(node, []):\n            if nxt not in seen:\n                seen.add(nxt)\n                stack.append(nxt)\n    return sorted(seen)",
+      "test_inputs": [
+        "({'A': ['B'], 'B': []}, 'A')",
+        "({'A': ['B'], 'B': ['A']}, 'A')"
+      ],
+      "counterexample_input": "({'A': ['B'], 'B': ['A']}, 'A')"
+    }
+  },
+  {
+    "id": "dsa-graphs-002",
+    "subject": "dsa",
+    "topic": "Graphs",
+    "subtopic": "Breadth-first search on weighted edges",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For graph = {'A': [['B', 10], ['C', 1]], 'C': [['B', 1]]}, does cheapest(graph, 'A', 'B') return the minimum total cost from A to B?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "from collections import deque\n\ndef cheapest(graph, src, dst):\n    \"\"\"graph: node -> list of [neighbour, cost]. Returns the minimum total cost.\"\"\"\n    queue = deque([(src, 0)])\n    seen = {src}\n    while queue:\n        node, cost = queue.popleft()\n        if node == dst:\n            return cost\n        for nxt, w in graph.get(node, []):\n            if nxt not in seen:\n                seen.add(nxt)\n                queue.append((nxt, cost + w))\n    return None"
+    },
+    "ai_claim": "Yes. Breadth-first search finds the shortest path from A to B, so it returns the minimum cost.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "BFS explores nodes in order of their distance from the source."
+      },
+      {
+        "index": 2,
+        "text": "The first time it reaches B, it has found the shortest path."
+      },
+      {
+        "index": 3,
+        "text": "The cost of that path is the minimum cost."
+      },
+      {
+        "index": 4,
+        "text": "cheapest(graph, 'A', 'B') returns the minimum cost."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Using BFS where edges have different weights",
+      "explanation": "BFS finds the path with the fewest edges, which is the cheapest only when all edges cost the same. Here the direct edge A -> B costs 10, but A -> C -> B costs 1 + 1 = 2. BFS reaches B first via the direct edge and returns 10. Weighted shortest paths need Dijkstra's algorithm.",
+      "why_convincing": "'Shortest path' and 'BFS' are strongly associated, and step 2 is true for unweighted graphs."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "BFS minimises the number of edges, not their total weight. It returns 10, but the cheapest route is A -> C -> B with cost 2. Use Dijkstra's algorithm.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "cheapest(graph, 'A', 'B') returns 10; A -> C -> B costs 2.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10",
+          "2"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "queue: (B, 10), (C, 1) -> pop B -> return 10",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A -> C -> B costs 2, but the function returns 10."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what 'shortest' means for BFS."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says BFS finds the cheapest path. Cheapest by what measure?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "BFS minimises the number of edges; weighted costs need Dijkstra's algorithm."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the cost of A -> B with A -> C -> B."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong for weighted graphs: BFS returns the fewest-edge path (cost 10), not the cheapest (cost 2). Use Dijkstra."
+      }
+    ],
+    "repair": "Use Dijkstra's algorithm with a priority queue ordered by total cost.",
+    "debrief": "Every shortest-path algorithm minimises something specific: BFS minimises hops, Dijkstra minimises total non-negative weight. Choosing the algorithm is choosing the measure. Test with a graph where the fewest-hop path is not the cheapest.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "cheapest",
+      "ai_code": "from collections import deque\n\ndef cheapest(graph, src, dst):\n    \"\"\"graph: node -> list of [neighbour, cost]. Returns the minimum total cost.\"\"\"\n    queue = deque([(src, 0)])\n    seen = {src}\n    while queue:\n        node, cost = queue.popleft()\n        if node == dst:\n            return cost\n        for nxt, w in graph.get(node, []):\n            if nxt not in seen:\n                seen.add(nxt)\n                queue.append((nxt, cost + w))\n    return None",
+      "reference_code": "import heapq\n\ndef cheapest(graph, src, dst):\n    dist = {src: 0}\n    h = [(0, src)]\n    while h:\n        d, node = heapq.heappop(h)\n        if node == dst:\n            return d\n        if d > dist.get(node, d):\n            continue\n        for nxt, w in graph.get(node, []):\n            nd = d + w\n            if nd < dist.get(nxt, float('inf')):\n                dist[nxt] = nd\n                heapq.heappush(h, (nd, nxt))\n    return None",
+      "test_inputs": [
+        "({'A': [['B', 1]]}, 'A', 'B')",
+        "({'A': [['B', 10], ['C', 1]], 'C': [['B', 1]]}, 'A', 'B')"
+      ],
+      "counterexample_input": "({'A': [['B', 10], ['C', 1]], 'C': [['B', 1]]}, 'A', 'B')"
+    }
+  },
+  {
+    "id": "dsa-graphs-003",
+    "subject": "dsa",
+    "topic": "Graphs",
+    "subtopic": "Topological order from a DFS",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For graph = {'a': ['c'], 'b': ['a'], 'c': []} (b must come before a, and a before c), does topo(graph) return an order in which every task comes before the tasks that depend on it?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def topo(graph):\n    \"\"\"graph: task -> tasks that depend on it. Returns an order where every task\n    comes before the tasks that depend on it.\"\"\"\n    order, seen = [], set()\n\n    def visit(n):\n        if n in seen:\n            return\n        seen.add(n)\n        order.append(n)\n        for m in graph.get(n, []):\n            visit(m)\n\n    for n in sorted(graph):\n        visit(n)\n    return order"
+    },
+    "ai_claim": "Yes. Each task is added before the tasks it leads to, so every task comes before its dependents.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "visit(n) adds n to the order and then visits the tasks that depend on n."
+      },
+      {
+        "index": 2,
+        "text": "So each task is added before its dependents are visited."
+      },
+      {
+        "index": 3,
+        "text": "Therefore every task appears before its dependents in the order."
+      },
+      {
+        "index": 4,
+        "text": "topo returns a valid topological order."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Using DFS pre-order as a topological order",
+      "explanation": "Adding a node when it is first reached only guarantees it precedes the nodes discovered from it in that visit. The outer loop visits 'a' first (alphabetical), giving a, c, and then 'b', which must precede 'a', lands last: [a, c, b]. A correct DFS topological sort appends each node after all its dependents (post-order) and reverses the result.",
+      "why_convincing": "Pre-order does put each node before its descendants within one DFS tree, so the rule looks proven by step 2."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Pre-order can place a task after a prerequisite visited earlier from another root: for this graph, topo returns [a, c, b], violating b -> a. Use post-order and reverse it (or Kahn's algorithm).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "topo returns ['a', 'c', 'b']; b must come before a.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "visit a -> order [a], visit c -> [a, c]; then visit b -> [a, c, b]",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "For {'a': ['c'], 'b': ['a'], 'c': []}, the result is ['a', 'c', 'b']."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test a graph where the alphabetically first task has a prerequisite."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 generalises from one DFS visit to the whole order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Pre-order only orders nodes within one visit; post-order reversed is a valid topological order."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace topo on the given graph."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 'b' is visited after 'a' and lands after it, violating b -> a. Use reversed post-order."
+      }
+    ],
+    "repair": "Append n after visiting its dependents (post-order) and return the reversed order.",
+    "debrief": "Topological sorting via DFS is correct only in post-order: a node is finished after everything that depends on it, so reversing the finish order works. Pre-order looks similar and passes simple chains. Test with several starting points and a prerequisite that is visited late.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "is_valid",
+      "ai_code": "def topo(graph):\n    \"\"\"graph: task -> tasks that depend on it. Returns an order where every task\n    comes before the tasks that depend on it.\"\"\"\n    order, seen = [], set()\n\n    def visit(n):\n        if n in seen:\n            return\n        seen.add(n)\n        order.append(n)\n        for m in graph.get(n, []):\n            visit(m)\n\n    for n in sorted(graph):\n        visit(n)\n    return order\n\ndef is_valid(graph):\n    pos = {n: i for i, n in enumerate(topo(graph))}\n    return all(pos[u] < pos[v] for u in graph for v in graph[u])",
+      "reference_code": "def topo(graph):\n    \"\"\"graph: task -> tasks that depend on it. Returns an order where every task\n    comes before the tasks that depend on it.\"\"\"\n    order, seen = [], set()\n\n    def visit(n):\n        if n in seen:\n            return\n        seen.add(n)\n        for m in graph.get(n, []):\n            visit(m)\n        order.append(n)\n\n    for n in sorted(graph):\n        visit(n)\n    return order[::-1]\n\ndef is_valid(graph):\n    pos = {n: i for i, n in enumerate(topo(graph))}\n    return all(pos[u] < pos[v] for u in graph for v in graph[u])",
+      "test_inputs": [
+        "({'a': ['b'], 'b': []},)",
+        "({'a': ['c'], 'b': ['a'], 'c': []},)"
+      ],
+      "counterexample_input": "({'a': ['c'], 'b': ['a'], 'c': []},)"
+    }
+  },
+  {
+    "id": "dsa-graphs-004",
+    "subject": "dsa",
+    "topic": "Graphs",
+    "subtopic": "Counting edges in an undirected graph",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For the undirected graph {'A': ['B', 'C'], 'B': ['A'], 'C': ['A']}, does count_edges return 2, the number of edges?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def count_edges(graph):\n    \"\"\"graph: undirected; each edge is listed under both of its endpoints.\"\"\"\n    return sum(len(nbrs) for nbrs in graph.values())"
+    },
+    "ai_claim": "Yes. It adds up every node's neighbours, and each neighbour is one edge.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each entry in a node's neighbour list is an edge from that node."
+      },
+      {
+        "index": 2,
+        "text": "Adding up the list lengths counts every edge."
+      },
+      {
+        "index": 3,
+        "text": "A has 2 neighbours, B has 1 and C has 1."
+      },
+      {
+        "index": 4,
+        "text": "So count_edges returns the number of edges, 2."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Counting each undirected edge twice",
+      "explanation": "In this representation every undirected edge appears in both endpoints' lists: A-B under A and under B. Summing the list lengths counts each edge twice, so count_edges returns 4. Divide the sum by 2.",
+      "why_convincing": "Step 3's arithmetic is right, and 'each neighbour is an edge' is true for directed graphs."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The sum of degrees is twice the number of edges (the handshake lemma). count_edges returns 4; the graph has 2 edges. Return the sum // 2.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "2 + 1 + 1 = 4 = 2 x (number of edges)",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "count_edges({'A': ['B', 'C'], 'B': ['A'], 'C': ['A']}) returns 4.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A single edge A-B gives count_edges({'A': ['B'], 'B': ['A']}) = 2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count how many times the edge A-B appears in the adjacency lists."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats each list entry as a separate edge."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In an undirected adjacency list, each edge is stored under both of its endpoints."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute count_edges for a graph with a single edge."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: every edge is listed twice, so the sum is 4. Divide by 2."
+      }
+    ],
+    "repair": "Return `sum(len(n) for n in graph.values()) // 2`.",
+    "debrief": "The handshake lemma - the degrees sum to twice the edge count - is a quick consistency check for any undirected graph. Representation decides what a list entry means, and here it means 'an endpoint', not 'an edge'. Test with a one-edge graph.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "count_edges",
+      "ai_code": "def count_edges(graph):\n    \"\"\"graph: undirected; each edge is listed under both of its endpoints.\"\"\"\n    return sum(len(nbrs) for nbrs in graph.values())",
+      "reference_code": "def count_edges(graph):\n    \"\"\"graph: undirected; each edge is listed under both of its endpoints.\"\"\"\n    return sum(len(nbrs) for nbrs in graph.values()) // 2",
+      "test_inputs": [
+        "({},)",
+        "({'A': ['B', 'C'], 'B': ['A'], 'C': ['A']},)"
+      ],
+      "counterexample_input": "({'A': ['B', 'C'], 'B': ['A'], 'C': ['A']},)"
+    }
+  },
+  {
+    "id": "dsa-graphs-005",
+    "subject": "dsa",
+    "topic": "Graphs",
+    "subtopic": "Three-colour cycle detection",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does has_cycle(graph) return True exactly when the directed graph contains a cycle - including not being fooled by a diamond such as {'a': ['b', 'c'], 'b': ['d'], 'c': ['d'], 'd': []}?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def has_cycle(graph):\n    WHITE, GREY, BLACK = 0, 1, 2\n    colour = {}\n\n    def visit(n):\n        colour[n] = GREY\n        for m in graph.get(n, []):\n            c = colour.get(m, WHITE)\n            if c == GREY:\n                return True\n            if c == WHITE and visit(m):\n                return True\n        colour[n] = BLACK\n        return False\n\n    return any(colour.get(n, WHITE) == WHITE and visit(n) for n in list(graph))"
+    },
+    "ai_claim": "Yes. A GREY node is on the current DFS path, so reaching one means a cycle; BLACK nodes are finished and safe to reach again.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "WHITE nodes are unvisited, GREY nodes are on the current recursion path, BLACK nodes are fully explored."
+      },
+      {
+        "index": 2,
+        "text": "An edge to a GREY node closes a path back to one of its own ancestors: a cycle."
+      },
+      {
+        "index": 3,
+        "text": "An edge to a BLACK node, as when the diamond's second path reaches d, is not a cycle, because d's exploration has finished."
+      },
+      {
+        "index": 4,
+        "text": "Every node is started if still WHITE, so every cycle is found, and diamonds are not reported."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The GREY/BLACK distinction separates back edges (cycles) from cross or forward edges (no cycle). A two-colour 'visited' check would wrongly report the diamond.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "diamond: a GREY -> b GREY -> d GREY -> d BLACK -> b BLACK -> c GREY -> d is BLACK, not a cycle",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the diamond case specifically."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains why reaching a finished node is not a cycle."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Only an edge back to a node on the current path forms a cycle."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace the diamond graph and track each node's colour."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. GREY marks the current path, so only true back edges report a cycle; BLACK nodes can be revisited safely. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Directed cycle detection needs three states, not two, because reaching an already-visited node is only a cycle if that node is still on the current path. The diamond is the test that separates a correct implementation from a simple 'visited' check.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "has_cycle",
+      "ai_code": "def has_cycle(graph):\n    WHITE, GREY, BLACK = 0, 1, 2\n    colour = {}\n\n    def visit(n):\n        colour[n] = GREY\n        for m in graph.get(n, []):\n            c = colour.get(m, WHITE)\n            if c == GREY:\n                return True\n            if c == WHITE and visit(m):\n                return True\n        colour[n] = BLACK\n        return False\n\n    return any(colour.get(n, WHITE) == WHITE and visit(n) for n in list(graph))",
+      "reference_code": "def has_cycle(graph):\n    nodes = set(graph) | {m for ns in graph.values() for m in ns}\n    indeg = {n: 0 for n in nodes}\n    for ns in graph.values():\n        for m in ns:\n            indeg[m] += 1\n    ready = [n for n in nodes if indeg[n] == 0]\n    seen = 0\n    while ready:\n        n = ready.pop()\n        seen += 1\n        for m in graph.get(n, []):\n            indeg[m] -= 1\n            if indeg[m] == 0:\n                ready.append(m)\n    return seen < len(nodes)",
+      "test_inputs": [
+        "({'a': ['b'], 'b': ['c'], 'c': []},)",
+        "({'a': ['b'], 'b': ['a']},)",
+        "({'a': ['b', 'c'], 'b': ['d'], 'c': ['d'], 'd': []},)",
+        "({'a': ['a']},)"
+      ]
+    }
+  }
+]

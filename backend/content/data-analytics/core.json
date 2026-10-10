@@ -1,0 +1,261 @@
+[
+  {
+    "id": "da-avg-001",
+    "subject": "data-analytics",
+    "topic": "Statistics for Analytics",
+    "subtopic": "Unweighted average of group averages",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Using the table below, what is the company-wide average order value?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "caption": "Average order value by region, Q3",
+      "columns": "Region,Orders,Average order value",
+      "rows": "North,12000,Rs 450|South,3000,Rs 900|East,1000,Rs 1200"
+    },
+    "ai_claim": "The company-wide average order value is Rs 850.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The three regional averages are Rs 450, Rs 900 and Rs 1,200."
+      },
+      {
+        "index": 2,
+        "text": "The company-wide average is the average of the regional averages."
+      },
+      {
+        "index": 3,
+        "text": "(450 + 900 + 1200) / 3 = 2550 / 3 = Rs 850."
+      }
+    ],
+    "ai_final_answer": "850",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Averaging group averages without weighting by group size",
+      "explanation": "The regions have very different order counts, so each average represents a different number of orders. The company-wide average is total revenue over total orders: (12000x450 + 3000x900 + 1000x1200) / 16000 = 9,300,000 / 16,000 = Rs 581.25. North dominates and pulls the true average far below Rs 850.",
+      "why_convincing": "Step 3's arithmetic is flawless and Rs 850 sits plausibly among the three figures. The Orders column is right there in the table but plays no part in the calculation, and nothing about the result looks wrong."
+    },
+    "canonical_solution": "Weight by order count. Total revenue = 12,000x450 + 3,000x900 + 1,000x1,200 = 5,400,000 + 2,700,000 + 1,200,000 = 9,300,000. Total orders = 16,000. Average = 9,300,000 / 16,000 = Rs 581.25, not Rs 850.",
+    "canonical_answer": "581.25",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Weighted average using the order counts.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "9300000",
+          "16000",
+          "581.25"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The Orders column shows the groups are very unequal.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "12000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "North alone contributes 12,000 of 16,000 orders. An unweighted mean gives it the same influence as East's 1,000 orders."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether every column in the table is used by the calculation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states a method. Ask when that method is valid."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Averaging averages is only correct when the groups are equal in size."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Reconstruct total revenue and total orders, then divide."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 ignores the Orders column. Weighting gives 9,300,000 / 16,000 = Rs 581.25, not Rs 850 — North's 12,000 orders dominate."
+      }
+    ],
+    "repair": "Step 2 should read: the company-wide average is total revenue divided by total orders. That gives 9,300,000 / 16,000 = Rs 581.25.",
+    "debrief": "An unused column in a summary table is a warning sign. Group averages are only averageable when the groups are the same size, and the counts sitting next to them are what tells you they are not. Reconstruct the totals and divide once — that is both the correct method and the check.",
+    "validation_payload": {
+      "solver": "answer = (12000*450 + 3000*900 + 1000*1200) / 16000",
+      "flawed_solver": "answer = (450 + 900 + 1200) / 3"
+    }
+  },
+  {
+    "id": "da-chart-002",
+    "subject": "data-analytics",
+    "topic": "Tableau / Visualization Principles",
+    "subtopic": "Truncated axes",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this description of the chart accurate?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Bar chart, 'Customer satisfaction by quarter'\nY axis runs from 78 to 82\nQ1 79.1   Q2 79.8   Q3 80.4   Q4 81.0",
+      "caption": "Slide title: \"Satisfaction climbing sharply\""
+    },
+    "ai_claim": "The chart shows satisfaction climbing sharply — the Q4 bar is roughly three times the height of the Q1 bar.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The bars increase in height from Q1 through Q4."
+      },
+      {
+        "index": 2,
+        "text": "Visually, the Q4 bar is about three times the height of the Q1 bar."
+      },
+      {
+        "index": 3,
+        "text": "A threefold increase in bar height represents a large rise in satisfaction, so the slide title is justified."
+      }
+    ],
+    "ai_final_answer": "accurate",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Reading bar height as proportional to value when the axis does not start at zero",
+      "explanation": "The y axis runs 78 to 82, so the bars encode only the amount above 78. The real change is 79.1 to 81.0 — 1.9 points, about 2.4% — while the heights above the truncated baseline are 1.1 and 3.0, a ratio near three. The visual ratio is an artifact of the axis, not a property of the data.",
+      "why_convincing": "Steps 1 and 2 are accurate descriptions of the image. The failure is in reading a proportion off a chart whose baseline is not zero, and the axis labels are the smallest text on the slide."
+    },
+    "canonical_solution": "Not accurate. With the axis truncated at 78, bar heights represent the excess above 78, not the values. Satisfaction moved from 79.1 to 81.0 — a rise of 1.9 points, roughly 2.4%. The threefold visual difference is produced entirely by the axis choice. On a zero-based axis the four bars would look nearly identical.",
+    "canonical_answer": "not accurate",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The axis starts at 78, not 0.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "78"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "The real change is 81.0 - 79.1 = 1.9 points.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.9"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Redraw with the axis from 0 to 100 and the four bars are visually indistinguishable."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the axis range before reading the bars."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 describe the picture correctly. Step 3 converts height into meaning."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Bar height is proportional to value only when the axis starts at zero."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the actual change from the labelled values and compare with the visual impression."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 reads a proportion off a truncated axis. The axis starts at 78, so the bars show the excess above 78. The real rise is 1.9 points, about 2.4%."
+      }
+    ],
+    "repair": "Step 3 should note the truncated axis and quote the actual change: 79.1 to 81.0, a rise of 1.9 points (about 2.4%). If the small change matters, say so in the text rather than manufacturing it with the axis.",
+    "debrief": "Truncated axes are the most common way an honest dataset produces a dishonest impression — and note that nothing here is fabricated: every number is real and every bar is drawn correctly. The distortion lives in the mapping from data to pixels. Always read the axis bounds first, then decide what the shape is entitled to mean.",
+    "validation_payload": {}
+  },
+  {
+    "id": "da-kpi-003",
+    "subject": "data-analytics",
+    "topic": "Business Metrics & KPIs",
+    "subtopic": "Metric definition",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this KPI definition sound?",
+    "artifact_type": "kpi_definition",
+    "artifact": {
+      "definition": "Monthly Active Users (MAU) = count of distinct user_ids with at least one session_start event in the trailing 30 days, evaluated daily in UTC.\n\nExcludes: internal staff accounts (flagged is_staff), automated test accounts, and sessions shorter than 2 seconds.\nDeleted users remain counted for months in which they were active."
+    },
+    "ai_claim": "The definition is sound: the population, the event, the window, the timezone and the exclusions are all specified.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The counted entity is a distinct user_id, so repeat sessions by one person do not inflate the number."
+      },
+      {
+        "index": 2,
+        "text": "The qualifying event and the window are both stated explicitly — session_start, trailing 30 days — so the metric is reproducible."
+      },
+      {
+        "index": 3,
+        "text": "The timezone is fixed to UTC, so the boundary of a day is unambiguous."
+      },
+      {
+        "index": 4,
+        "text": "Exclusions are enumerated, and the treatment of deleted users is stated, so historical figures do not silently change."
+      }
+    ],
+    "ai_final_answer": "sound",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "canonical_solution": "Sound. The definition specifies everything needed to reproduce the number: the entity, the qualifying event, the window, the evaluation cadence, the timezone, the exclusions, and the retroactivity rule. The last of these is what most definitions omit — stating that deleted users stay counted for months they were active means a historical MAU does not drift when the user table changes.",
+    "canonical_answer": "sound",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether two analysts working from this definition alone would produce the same number."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Check for the usual gaps: undefined window, unstated timezone, unspecified exclusions, retroactive changes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A metric definition is sound when it is reproducible and stable over time."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what happens to last March's MAU when a user deletes their account today."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This definition is sound: entity, event, window, cadence, timezone, exclusions and the retroactivity rule are all specified. Approving it was the right call."
+      }
+    ],
+    "repair": "",
+    "debrief": "Most KPI definitions fail on the question nobody asks: does a historical figure change when the underlying records do? Stating that deleted users remain counted for months they were active is what makes this metric stable, and it is the clause a hurried reviewer skims past. The test to apply: could two analysts, given only this text, compute the same number — and would it still be that number next year?",
+    "validation_payload": {}
+  }
+]

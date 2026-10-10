@@ -1,0 +1,482 @@
+[
+  {
+    "id": "prg-object-oriented-programming-001",
+    "subject": "programming",
+    "topic": "Object-Oriented Programming",
+    "subtopic": "Class attributes shared across instances",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does second_cart_items('pen') return an empty list, since only the first cart had an item added?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "class Cart:\n    items = []\n\n    def add(self, item):\n        self.items.append(item)\n\ndef second_cart_items(item):\n    a, b = Cart(), Cart()\n    a.add(item)\n    return b.items"
+    },
+    "ai_claim": "Yes. Each Cart has its own items list, so the second cart is still empty.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Cart defines items = [] as the starting list for a cart."
+      },
+      {
+        "index": 2,
+        "text": "Each new Cart instance gets its own copy of that list."
+      },
+      {
+        "index": 3,
+        "text": "Adding 'pen' to cart a changes only a's list."
+      },
+      {
+        "index": 4,
+        "text": "So second_cart_items('pen') returns []."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Treating a class attribute as a per-instance attribute",
+      "explanation": "items = [] in the class body is a class attribute: one list shared by every instance. self.items.append mutates that shared list, so cart b sees 'pen' too. Per-instance lists must be created in __init__ (self.items = []).",
+      "why_convincing": "Reading `items = []` inside the class looks like declaring a field, as in many other languages."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "A class-level `items = []` is a single list shared by all instances, so b.items is ['pen']. Create the list in __init__: self.items = [].",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "second_cart_items('pen') returns ['pen'].",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "def __init__(self): self.items = []",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After a.add('pen'), b.items is ['pen']."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where the items list is created, and how many times."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 claims each instance gets its own copy."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Attributes assigned in the class body belong to the class and are shared by all instances."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add an item to one cart and print the other cart's items."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: items is one shared class attribute, so cart b also contains 'pen'. Create the list in __init__."
+      }
+    ],
+    "repair": "Remove the class attribute and add `def __init__(self): self.items = []`.",
+    "debrief": "In Python, the class body runs once, so a mutable value there is shared by every instance. Code in this style looks like a field declaration from Java or C#, which is why it slips through review. Test object state with two instances, never one.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "second_cart_items",
+      "ai_code": "class Cart:\n    items = []\n\n    def add(self, item):\n        self.items.append(item)\n\ndef second_cart_items(item):\n    a, b = Cart(), Cart()\n    a.add(item)\n    return b.items",
+      "reference_code": "class Cart:\n    def __init__(self):\n        self.items = []\n\n    def add(self, item):\n        self.items.append(item)\n\ndef second_cart_items(item):\n    a, b = Cart(), Cart()\n    a.add(item)\n    return b.items",
+      "test_inputs": [
+        "('pen',)",
+        "('book',)"
+      ],
+      "counterexample_input": "('pen',)"
+    }
+  },
+  {
+    "id": "prg-object-oriented-programming-002",
+    "subject": "programming",
+    "topic": "Object-Oriented Programming",
+    "subtopic": "Defining __eq__ without __hash__",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does unique_points([[1, 2], [1, 2], [3, 4]]) return 2, the number of distinct points?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "class Point:\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __eq__(self, other):\n        return (self.x, self.y) == (other.x, other.y)\n\ndef unique_points(coords):\n    return len({Point(x, y) for x, y in coords})"
+    },
+    "ai_claim": "Yes. The set removes duplicates using __eq__, leaving two distinct points.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Point defines __eq__ so that points with the same coordinates compare equal."
+      },
+      {
+        "index": 2,
+        "text": "A set keeps one copy of values that compare equal."
+      },
+      {
+        "index": 3,
+        "text": "The two (1, 2) points are equal, so the set keeps one of them plus (3, 4)."
+      },
+      {
+        "index": 4,
+        "text": "unique_points returns 2."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Assuming a set deduplicates using __eq__ alone",
+      "explanation": "Sets need hashable elements. Defining __eq__ without __hash__ sets __hash__ to None, so Point instances are unhashable and building the set raises TypeError. Adding __hash__ = hash((x, y)) makes it work and return 2.",
+      "why_convincing": "Equality feels like the whole story of 'same value', and the error only appears at run time when the set is built."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "A class that defines __eq__ but not __hash__ is unhashable in Python 3, so the set comprehension raises TypeError: unhashable type: 'Point'. Define __hash__ consistently with __eq__, for example `return hash((self.x, self.y))`.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "unique_points([[1, 2], [1, 2], [3, 4]]) raises TypeError: unhashable type.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "def __hash__(self): return hash((self.x, self.y))",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "{Point(1, 2)} raises TypeError: unhashable type: 'Point'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what a set requires of its elements beyond equality."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes how a set detects duplicates."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Sets use hashing; defining __eq__ without __hash__ makes instances unhashable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try to put a single Point into a set."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is incomplete: sets need __hash__. Defining only __eq__ makes Point unhashable, so the call raises TypeError. Add a __hash__ based on (x, y)."
+      }
+    ],
+    "repair": "Add `def __hash__(self): return hash((self.x, self.y))` to Point.",
+    "debrief": "Equality and hashing are a pair: containers that find things fast (sets, dict keys) hash first and compare second. Python enforces the pair by removing __hash__ when you override __eq__. When a class defines equality, check that hashing matches it - or use @dataclass(frozen=True), which generates both.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "unique_points",
+      "ai_code": "class Point:\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __eq__(self, other):\n        return (self.x, self.y) == (other.x, other.y)\n\ndef unique_points(coords):\n    return len({Point(x, y) for x, y in coords})",
+      "reference_code": "class Point:\n    def __init__(self, x, y):\n        self.x, self.y = x, y\n\n    def __eq__(self, other):\n        return (self.x, self.y) == (other.x, other.y)\n\n    def __hash__(self):\n        return hash((self.x, self.y))\n\ndef unique_points(coords):\n    return len({Point(x, y) for x, y in coords})",
+      "test_inputs": [
+        "([[1, 2], [1, 2], [3, 4]],)",
+        "([[0, 0]],)"
+      ],
+      "counterexample_input": "([[1, 2], [1, 2], [3, 4]],)"
+    }
+  },
+  {
+    "id": "prg-object-oriented-programming-003",
+    "subject": "programming",
+    "topic": "Object-Oriented Programming",
+    "subtopic": "Encapsulated withdrawals",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does withdraw refuse any amount larger than the balance and otherwise reduce the balance by exactly the amount?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "class Account:\n    def __init__(self, balance):\n        self._balance = balance\n\n    @property\n    def balance(self):\n        return self._balance\n\n    def withdraw(self, amount):\n        if amount > self._balance:\n            raise ValueError(\"insufficient funds\")\n        self._balance -= amount\n\ndef run(start, amount):\n    acc = Account(start)\n    try:\n        acc.withdraw(amount)\n    except ValueError:\n        return \"refused\"\n    return acc.balance"
+    },
+    "ai_claim": "Yes. Amounts above the balance raise ValueError, and any other amount is subtracted.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "withdraw raises ValueError when amount is greater than the balance."
+      },
+      {
+        "index": 2,
+        "text": "Otherwise it subtracts amount from _balance."
+      },
+      {
+        "index": 3,
+        "text": "Withdrawing exactly the whole balance is allowed and leaves 0."
+      },
+      {
+        "index": 4,
+        "text": "The balance property exposes the updated value, so the behaviour matches the requirement."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The guard uses `amount > self._balance`, so amounts up to and including the balance are allowed and larger ones are refused; the subtraction is exact for integer amounts. run(100, 30) = 70, run(100, 100) = 0, run(100, 150) = 'refused'.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "run(100, 30) = 70, run(100, 100) = 0 and run(100, 150) = 'refused'.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "70",
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the boundary where the amount equals the balance."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 makes a claim about withdrawing the exact balance."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "`>` excludes equality, so an amount equal to the balance passes the guard."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate run(100, 100) and run(100, 101)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The guard refuses only amounts above the balance, and exact withdrawals leave 0. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Boundary conditions such as > versus >= deserve a deliberate check, and here the check confirms the intended behaviour: withdrawing the full balance is allowed. Encapsulation through a read-only property also means callers cannot bypass the guard by assigning to balance directly. Verify the boundary explicitly and the approval is earned.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "run",
+      "ai_code": "class Account:\n    def __init__(self, balance):\n        self._balance = balance\n\n    @property\n    def balance(self):\n        return self._balance\n\n    def withdraw(self, amount):\n        if amount > self._balance:\n            raise ValueError(\"insufficient funds\")\n        self._balance -= amount\n\ndef run(start, amount):\n    acc = Account(start)\n    try:\n        acc.withdraw(amount)\n    except ValueError:\n        return \"refused\"\n    return acc.balance",
+      "reference_code": "def run(start, amount):\n    return \"refused\" if amount > start else start - amount",
+      "test_inputs": [
+        "(100, 30)",
+        "(100, 100)",
+        "(100, 150)"
+      ]
+    }
+  },
+  {
+    "id": "prg-object-oriented-programming-004",
+    "subject": "programming",
+    "topic": "Object-Oriented Programming",
+    "subtopic": "super() and the method resolution order",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does order() return ['Logged', 'Timed', 'Base']?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "class Base:\n    def describe(self):\n        return [\"Base\"]\n\nclass Logged(Base):\n    def describe(self):\n        return [\"Logged\"] + super().describe()\n\nclass Timed(Base):\n    def describe(self):\n        return [\"Timed\"] + super().describe()\n\nclass Service(Logged, Timed):\n    pass\n\ndef order():\n    return Service().describe()"
+    },
+    "ai_claim": "Yes. super() follows Service's method resolution order, Logged -> Timed -> Base, so each class appears once.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Service inherits from Logged and Timed, in that order."
+      },
+      {
+        "index": 2,
+        "text": "Its method resolution order is Service, Logged, Timed, Base."
+      },
+      {
+        "index": 3,
+        "text": "super() inside Logged calls the next class in that order, which is Timed, not Base."
+      },
+      {
+        "index": 4,
+        "text": "Timed then calls Base, so order() returns ['Logged', 'Timed', 'Base']."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The MRO of Service is Service, Logged, Timed, Base, object. super() means 'next in the MRO of the instance', so Logged's super() reaches Timed, and Timed's reaches Base: ['Logged', 'Timed', 'Base'].",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Service.__mro__: Service, Logged, Timed, Base, object",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Step 3 contradicts a common mental model of super(). Check which is right."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "The key claim is in step 3: which class super() in Logged calls."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "super() follows the method resolution order of the object's class, not the class where it is written."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print Service.__mro__ and follow it."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Logged's super() goes to Timed in Service's MRO, and each class appears exactly once. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Many people read super() as 'my parent', which would make Logged call Base and skip Timed. Python's super() actually means 'the next class in the MRO of this object', which is what lets cooperative multiple inheritance work. When an explanation contradicts your intuition, check it against the language's actual rule before challenging it.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "order",
+      "ai_code": "class Base:\n    def describe(self):\n        return [\"Base\"]\n\nclass Logged(Base):\n    def describe(self):\n        return [\"Logged\"] + super().describe()\n\nclass Timed(Base):\n    def describe(self):\n        return [\"Timed\"] + super().describe()\n\nclass Service(Logged, Timed):\n    pass\n\ndef order():\n    return Service().describe()",
+      "reference_code": "def order():\n    return ['Logged', 'Timed', 'Base']",
+      "test_inputs": [
+        "()"
+      ]
+    }
+  },
+  {
+    "id": "prg-object-oriented-programming-005",
+    "subject": "programming",
+    "topic": "Object-Oriented Programming",
+    "subtopic": "Equality of subclass instances",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What does print(a == b) output?",
+    "artifact_type": "class_design",
+    "artifact": {
+      "language": "python",
+      "code": "from pricing import Price\n\nclass Money(Price):\n    def __init__(self, amount, currency=\"INR\"):\n        super().__init__(amount)\n        self.currency = currency\n\na = Money(500)\nb = Money(500)\nprint(a == b)"
+    },
+    "ai_claim": "It prints True: both objects have amount 500 and currency INR, so they are equal.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "a and b are both created with amount 500 and currency 'INR'."
+      },
+      {
+        "index": 2,
+        "text": "Price is a value class that compares instances by their amount, as pricing classes do."
+      },
+      {
+        "index": 3,
+        "text": "Money only adds a currency, and both currencies are INR."
+      },
+      {
+        "index": 4,
+        "text": "So a == b is True."
+      }
+    ],
+    "ai_final_answer": "True",
+    "simulated_confidence": 93,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The definition of Price from the pricing module. Money does not define __eq__, so == uses whatever Price provides. If Price defines value equality (for example, it is a dataclass), the objects compare equal; if it is a plain class, == falls back to identity.",
+    "resolving_scenarios": [
+      "Price is a @dataclass with an amount field: its generated __eq__ compares amounts for same-class objects, so a == b prints True.",
+      "Price is a plain class with no __eq__: == falls back to object identity, and a and b are different objects, so it prints False."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Money defines no __eq__, so equality comes from Price, whose code is not shown. A dataclass Price would make a == b True; a plain class would make it False, because default equality is identity. The output cannot be determined from what is given.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If Price is a plain class without __eq__, Money(500) == Money(500) is False, because == falls back to identity.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If Price is `class Price: def __init__(self, amount): self.amount = amount`, then Money(500) == Money(500) is False."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find where == for Money objects is actually defined."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes Price's behaviour. Look for Price's code."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Without a custom __eq__, Python compares objects by identity."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out the result twice: once with Price as a dataclass, once as a plain class."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes how Price compares objects, but its code is not shown. A dataclass Price gives True; a plain class gives False. It cannot be decided."
+      }
+    ],
+    "repair": "Show Price's definition, or define __eq__ (and __hash__) on Money explicitly, comparing amount and currency.",
+    "debrief": "Behaviour inherited from code you cannot see is an assumption, however conventional it sounds. Here the whole answer lives in Price, which the reasoning described instead of reading. When a result depends on an unseen definition, the verification step is to find that definition - and if you cannot, the honest verdict is that it cannot be decided.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

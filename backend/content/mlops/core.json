@@ -1,0 +1,135 @@
+[
+  {
+    "id": "mlo-mon-001",
+    "subject": "mlops",
+    "topic": "Model Monitoring & Drift",
+    "subtopic": "Service health versus model quality",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this monitoring setup detect model degradation?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "config": "Alerts:\n  - p99 inference latency > 400 ms for 5 minutes\n  - HTTP 5xx rate > 1% for 5 minutes\n  - pod restarts > 3 in 10 minutes\n  - GPU utilisation > 90% for 15 minutes\n  - prediction volume drops > 50% week on week"
+    },
+    "ai_claim": "Yes — latency, errors, restarts, saturation and volume are all monitored, so degradation will be caught.",
+    "ai_solution": [
+      {"index": 1, "text": "Latency and error-rate alerts detect a failing or slow service."},
+      {"index": 2, "text": "Restart and GPU-utilisation alerts detect resource problems before they become outages."},
+      {"index": 3, "text": "The volume alert detects an upstream integration silently breaking."},
+      {"index": 4, "text": "Together these cover the ways the system can degrade, so model degradation will be caught."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 4,
+      "misconception": "Treating service health as a proxy for model quality",
+      "explanation": "Every alert measures the serving infrastructure. A model whose accuracy has collapsed still responds in 40 ms, returns HTTP 200, does not restart, and serves normal volume — so nothing fires. Detecting model degradation needs different signals: input feature drift, prediction distribution shift, and delayed ground-truth accuracy once labels arrive.",
+      "why_convincing": "Every listed alert is genuinely useful and the list looks thorough. The reasoning is comprehensive about the dimension it covers, and the gap is a whole dimension rather than a missing item — which is far harder to notice than an obvious omission."
+    },
+    "canonical_solution": "No. These are all service-health signals. A degraded model is indistinguishable from a healthy one on every one of them: it answers fast, returns 200, and serves the usual volume while being wrong. Add model-quality monitoring: input feature drift against the training distribution, prediction distribution shift, and accuracy computed against ground truth once labels arrive — plus an alert on the labelling pipeline itself, since delayed labels are how quality monitoring silently stops working.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "counterexample", "summary": "A model predicting a constant value passes every alert.", "must_reference_step": 4, "must_contain_values": []},
+      {"type": "rule", "summary": "Service health and model quality are independent dimensions.", "must_reference_step": 4, "must_contain_values": []}
+    ],
+    "counterexamples": ["A model that returns the majority class for every request is fast, error-free, stable and serves full volume. Not one alert fires."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what each alert actually measures."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 to 3 are correct about what they cover. Ask what they have in common."},
+      {"level": 3, "kind": "concept", "text": "Service health and model quality are independent. A model can be badly wrong while perfectly healthy."},
+      {"level": 4, "kind": "strong", "text": "Imagine the model's accuracy halving overnight. Work through which alert notices."},
+      {"level": 5, "kind": "reveal", "text": "Step 4 treats service health as covering model quality. Every alert measures infrastructure; a wrong-but-fast model trips none of them. Add drift and ground-truth accuracy monitoring."}
+    ],
+    "repair": "Add model-quality signals alongside the service ones: input feature drift versus the training distribution, prediction distribution shift, and accuracy against ground truth as labels arrive — with an alert on the label pipeline so quality monitoring cannot fail silently.",
+    "debrief": "The most dangerous monitoring gap is a whole missing dimension rather than a missing metric, because the dashboard looks complete and every light is green. For any ML system, ask separately: how would I know the service is broken, and how would I know the model is wrong? If both answers point at the same alerts, only one of them is really monitored.",
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-skew-002",
+    "subject": "mlops",
+    "topic": "ML Pipelines",
+    "subtopic": "Training-serving skew",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this explanation of the production accuracy drop correct?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "situation": "Offline evaluation: 91% accuracy. Production: 74%. Same model artifact, same model version.",
+      "pipeline": "Training features: computed in the nightly Spark job from the warehouse, using a 30-day trailing window.\nServing features: computed in the request path from the online store, using whatever events have arrived.",
+      "note": "Event ingestion into the online store lags by up to 45 minutes."
+    },
+    "ai_claim": "The gap is training-serving skew: the same feature is computed by two different code paths over different data windows, so the model sees different inputs in production than it was trained on.",
+    "ai_solution": [
+      {"index": 1, "text": "The model artifact and version are identical in both settings, so the model itself is not the variable."},
+      {"index": 2, "text": "Training features come from a batch job with a complete 30-day window; serving features come from an online store with up to 45 minutes of ingestion lag."},
+      {"index": 3, "text": "So the same named feature is computed by two implementations over different data, and recent events are missing at serving time."},
+      {"index": 4, "text": "The model therefore receives inputs whose distribution differs from training, which explains a large accuracy drop without any change to the model."}
+    ],
+    "ai_final_answer": "correct",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. This is the textbook diagnosis: two implementations of the same feature over different windows, plus ingestion lag that removes recent events at serving time. The reasoning also correctly eliminates the model as a variable first, since the artifact and version are identical. The standard remedy is a shared feature definition used by both paths — a feature store with point-in-time-correct training data — and logging served feature vectors so training and serving can be compared directly.",
+    "canonical_answer": "correct",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Establish what differs between the two settings before explaining why."},
+      {"level": 2, "kind": "direction", "text": "Step 1 rules out the model. Check whether step 3 identifies a real difference."},
+      {"level": 3, "kind": "concept", "text": "Training-serving skew arises when the same feature is produced by different code or over different data."},
+      {"level": 4, "kind": "strong", "text": "Ask what a 45-minute ingestion lag does to a recency-sensitive feature at request time."},
+      {"level": 5, "kind": "reveal", "text": "This diagnosis is correct: two implementations, two windows, and ingestion lag removing recent events. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "A good diagnosis eliminates variables before proposing a cause, and this one does it in the right order — same artifact, same version, so the model is not what changed. Training-serving skew is the leading explanation for a large offline-online gap, and the structural fix is one definition used by both paths rather than two implementations kept in sync by discipline.",
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ver-003",
+    "subject": "mlops",
+    "topic": "Data & Model Versioning",
+    "subtopic": "Reproducibility",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this setup make training runs reproducible?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "config": "Each run records:\n  - git commit of the training repository\n  - Docker image digest for the training environment\n  - hyperparameters, as a JSON blob\n  - random seed\n  - metrics and the resulting model artifact\n\nTraining data is read from: s3://data-lake/features/latest/"
+    },
+    "ai_claim": "Yes — code, environment, hyperparameters and seed are all pinned, so a run can be reproduced exactly.",
+    "ai_solution": [
+      {"index": 1, "text": "The git commit pins the training code exactly."},
+      {"index": 2, "text": "The image digest pins the environment, including library versions, so numerical behaviour is stable."},
+      {"index": 3, "text": "Hyperparameters and the random seed are recorded, so the stochastic elements are controlled."},
+      {"index": 4, "text": "Code, environment, configuration and randomness are all pinned, so a run is reproducible."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 4,
+      "misconception": "Pinning every input except the data",
+      "explanation": "`features/latest/` is a moving pointer. Re-running the same commit, image, hyperparameters and seed a week later reads different data and produces a different model. Four of the five inputs are pinned and the fifth — the largest one — is not. The fix is to record an immutable dataset reference: a snapshot path, a version id, or a content hash of the exact files read.",
+      "why_convincing": "The list is thorough and includes the items reproducibility checklists usually name, so it reads as careful engineering. The data path is one line of configuration rather than an entry in the recorded metadata, and `latest` is such a common convention that it does not register as unpinned."
+    },
+    "canonical_solution": "No. The data is not versioned: `features/latest/` resolves to whatever is current at run time, so an identical configuration yields a different model on a different day. Record an immutable reference — a timestamped snapshot path, a dataset version id, or a content hash of the files read — and have the run read that reference rather than a moving pointer.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "data_point", "summary": "The data path is features/latest/, a moving pointer rather than a snapshot, version id or content hash.", "must_reference_step": 4, "must_contain_values": []},
+      {"type": "counterexample", "summary": "The same configuration re-run later trains on different data.", "must_reference_step": 4, "must_contain_values": []}
+    ],
+    "counterexamples": ["Re-run the identical commit, image, hyperparameters and seed a week later. The features under `latest/` have changed, and the resulting model differs."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "List every input to a training run, then check each is pinned."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 to 3 pin code, environment and configuration. Ask what else the run consumes."},
+      {"level": 3, "kind": "concept", "text": "Reproducibility requires every input pinned, and data is an input."},
+      {"level": 4, "kind": "strong", "text": "Ask what `latest/` resolves to on two different days."},
+      {"level": 5, "kind": "reveal", "text": "Step 4 omits the data. `features/latest/` is a moving pointer, so an identical configuration trains on different data later. Record an immutable dataset reference."}
+    ],
+    "repair": "Replace the moving pointer with an immutable reference — a timestamped snapshot such as `features/2026-09-06/`, a dataset version id, or a content hash — and record it alongside the commit and image digest.",
+    "debrief": "Reproducibility checklists tend to enumerate the artifacts engineers control directly — code, environment, config, seed — and to treat data as context rather than input. It is the largest input. The test is mechanical: list everything the run reads, and for each ask whether re-running next month would read exactly the same bytes. A path containing `latest` answers that question by itself.",
+    "validation_payload": {}
+  }
+]

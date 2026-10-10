@@ -1,0 +1,478 @@
+[
+  {
+    "id": "fe-typescript-001",
+    "subject": "frontend",
+    "topic": "TypeScript",
+    "subtopic": "Types are erased at runtime",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The code compiles without errors. Does that guarantee formatPrice receives a number at runtime?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "typescript",
+      "code": "type Product = { price: number };\nfunction formatPrice(price: number): string {\n  return \"Rs \" + price.toFixed(2);\n}\n\nasync function show() {\n  const res = await fetch(\"/api/product/7\");\n  const data = await res.json();          // server sends { \"price\": \"499\" }\n  label.textContent = formatPrice(data.price);\n}"
+    },
+    "ai_claim": "Yes. formatPrice declares price: number, and TypeScript refuses to compile a call with a non-number, so price is always a number.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "formatPrice's parameter is typed number."
+      },
+      {
+        "index": 2,
+        "text": "TypeScript checks every call to formatPrice."
+      },
+      {
+        "index": 3,
+        "text": "The code compiles, so data.price must be a number."
+      },
+      {
+        "index": 4,
+        "text": "So price.toFixed(2) is always safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating compile-time types as runtime guarantees",
+      "explanation": "res.json() returns Promise<any>, and any switches type checking off, so data.price is accepted wherever a number is expected. TypeScript's types are erased when compiled; nothing checks the server's response. The server sends '499' (a string), and '499'.toFixed throws TypeError. Validate external data at runtime (for example with zod) or convert it explicitly.",
+      "why_convincing": "The annotation looks like a contract, and for values created inside the program it effectively is one."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. The value comes from JSON typed as any, so the compiler cannot check it. At runtime price is '499' and toFixed throws. Validate or convert the response.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "With the server sending { \"price\": \"499\" }, formatPrice throws TypeError: price.toFixed is not a function.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "499"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "const price = Number(data.price); if (Number.isNaN(price)) throw new Error('bad price');",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A string price from the server compiles and then crashes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find where data.price gets its type."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes compiling proves the runtime type."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "res.json() returns any, and types are erased at runtime."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the code with the server's actual response."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: data is any, so nothing checks it. The string '499' crashes toFixed. Validate the response."
+      }
+    ],
+    "repair": "Validate API responses at runtime (a schema library, or explicit checks and conversion).",
+    "debrief": "TypeScript checks your code, not your data. Anything crossing a boundary - JSON, localStorage, URL parameters - arrives unchecked, often typed as any. Validate at the boundary so the types inside are true.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-typescript-002",
+    "subject": "frontend",
+    "topic": "TypeScript",
+    "subtopic": "typeof null is 'object'",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Under strict mode, does this compile, and is tags.length safe because typeof narrows tags to string[]?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "typescript",
+      "code": "function count(tags: string[] | null): number {\n  if (typeof tags === \"object\") {\n    return tags.length;\n  }\n  return 0;\n}"
+    },
+    "ai_claim": "Yes. typeof tags === 'object' narrows the union to string[], so tags.length is safe and the code compiles.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "tags is either string[] or null."
+      },
+      {
+        "index": 2,
+        "text": "Arrays are objects, so typeof tags === 'object' is true for arrays."
+      },
+      {
+        "index": 3,
+        "text": "null is not an object, so the check excludes it."
+      },
+      {
+        "index": 4,
+        "text": "Inside the if, tags is string[] and tags.length is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Forgetting that typeof null is 'object'",
+      "explanation": "In JavaScript, typeof null is 'object', so the check does not exclude null. TypeScript knows this and keeps tags as string[] | null inside the if, reporting 'tags' is possibly 'null'. At runtime, count(null) would throw. Use if (tags !== null) or if (Array.isArray(tags)).",
+      "why_convincing": "null feels like 'no object', and the historical quirk of typeof null is easy to forget."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It does not compile: typeof null === 'object', so tags may still be null (error TS18047). Narrow with tags !== null or Array.isArray(tags).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "tsc --strict reports: 'tags' is possibly 'null'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "if (Array.isArray(tags)) { return tags.length; }",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "typeof null evaluates to 'object'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Evaluate typeof null."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the check excludes null."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "typeof null returns 'object', a long-standing JavaScript quirk."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compile the function with --strict."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: typeof null is 'object', so tags may still be null. Use Array.isArray or tags !== null."
+      }
+    ],
+    "repair": "Narrow with `Array.isArray(tags)` or `tags !== null`.",
+    "debrief": "Type narrowing follows JavaScript's real runtime semantics, quirks included. TypeScript caught this one; in plain JavaScript it would have been a runtime crash on null.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-typescript-003",
+    "subject": "frontend",
+    "topic": "TypeScript",
+    "subtopic": "Indexing an array can return undefined",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "This compiles under strict mode. Does that mean initial([]) cannot throw?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "typescript",
+      "code": "function initial(names: string[]): string {\n  const first: string = names[0];\n  return first.toUpperCase();\n}\n\ninitial([]);"
+    },
+    "ai_claim": "Yes. names[0] is typed string, so TypeScript guarantees first is a string and toUpperCase is safe.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "names is string[]."
+      },
+      {
+        "index": 2,
+        "text": "names[0] has type string."
+      },
+      {
+        "index": 3,
+        "text": "Strict mode would flag any possibly-undefined value."
+      },
+      {
+        "index": 4,
+        "text": "So first is always a string and toUpperCase cannot throw."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Trusting index access types on possibly empty arrays",
+      "explanation": "By default, indexing string[] gives string, not string | undefined, even though the index may be out of range; --strict does not change this. For an empty array names[0] is undefined, and undefined.toUpperCase() throws TypeError. Enable noUncheckedIndexedAccess to make TypeScript report it, or check the length.",
+      "why_convincing": "strict sounds like it should include every null-safety check, and it includes most of them."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It can throw: names[0] is undefined for an empty array, though typed string. Check names.length (and enable noUncheckedIndexedAccess).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "initial([]) throws TypeError: Cannot read properties of undefined (reading 'toUpperCase').",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Without noUncheckedIndexedAccess, T[] index access has type T, not T | undefined.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "initial([]) crashes although the code compiles."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test with an empty array."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes strict mode checks index access."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Index access on arrays is typed without undefined unless noUncheckedIndexedAccess is on."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call initial([])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: strict does not cover index access, so initial([]) throws. Check the length."
+      }
+    ],
+    "repair": "Guard with `if (names.length === 0) return ''`, and enable noUncheckedIndexedAccess.",
+    "debrief": "Type systems trade soundness for convenience in known places, and array indexing is a big one. Knowing where TypeScript's guarantees stop tells you which edge cases still need tests.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-typescript-004",
+    "subject": "frontend",
+    "topic": "TypeScript",
+    "subtopic": "Excess property checks",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it true that both calls fail to compile because the objects have a property, label, that Point does not declare?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "typescript",
+      "code": "type Point = { x: number; y: number };\nfunction plot(p: Point) { /* ... */ }\n\nconst reading = { x: 3, y: 4, label: \"A\" };\nplot(reading);                            // line 5\nplot({ x: 3, y: 4, label: \"A\" });        // line 6"
+    },
+    "ai_claim": "Yes. TypeScript rejects objects with properties that are not in the type, so both calls are errors.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Point declares only x and y."
+      },
+      {
+        "index": 2,
+        "text": "Both arguments have an extra property, label."
+      },
+      {
+        "index": 3,
+        "text": "TypeScript rejects extra properties."
+      },
+      {
+        "index": 4,
+        "text": "So lines 5 and 6 are both compile errors."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Overgeneralising excess property checks",
+      "explanation": "TypeScript is structurally typed: any value with at least x and y is a Point. The excess property check is an extra rule that applies only to fresh object literals written directly where the type is expected. Line 6 is an error; line 5 passes a variable, so it compiles.",
+      "why_convincing": "Line 6 really is an error, and it looks identical to line 5."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Only line 6 fails. Structural typing accepts reading (it has x and y); excess property checks apply only to object literals.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "tsc reports an error on line 6 only.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Excess property checking applies to object literals assigned directly to a typed target.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "plot(reading) compiles."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare passing a variable with passing an object literal."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a general rule about extra properties."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "TypeScript is structural; the excess property check is limited to fresh object literals."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compile the two calls separately."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: only the literal on line 6 is rejected; line 5 compiles."
+      }
+    ],
+    "repair": "Understand the rule: structural compatibility allows extra properties except in fresh object literals.",
+    "debrief": "Structural typing checks shape, not names or exact property sets. The excess property check is a typo catcher for literals, not an exactness guarantee.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-typescript-005",
+    "subject": "frontend",
+    "topic": "TypeScript",
+    "subtopic": "Exhaustive checks with never",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After the triangle variant was added to Shape, does this code fail to compile until area handles it?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "typescript",
+      "code": "type Shape =\n  | { kind: \"circle\"; r: number }\n  | { kind: \"square\"; side: number }\n  | { kind: \"triangle\"; base: number; h: number };  // newly added\n\nfunction area(s: Shape): number {\n  switch (s.kind) {\n    case \"circle\": return Math.PI * s.r ** 2;\n    case \"square\": return s.side ** 2;\n    default: {\n      const unhandled: never = s;\n      return unhandled;\n    }\n  }\n}"
+    },
+    "ai_claim": "Yes. In the default branch s has the unhandled triangle type, which cannot be assigned to never, so tsc reports an error there.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "switch (s.kind) narrows s in each case."
+      },
+      {
+        "index": 2,
+        "text": "After the circle and square cases, the remaining type is the triangle variant."
+      },
+      {
+        "index": 3,
+        "text": "Assigning it to a variable of type never is an error."
+      },
+      {
+        "index": 4,
+        "text": "So compilation fails until a triangle case is added."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The never assignment turns 'forgot a case' into a compile error that points at the switch. Once a triangle case is added, the default branch's type is never and it compiles.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "tsc reports: Type '{ kind: \"triangle\"; ... }' is not assignable to type 'never'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Discriminated unions narrow on the tag; only an exhausted union leaves type never.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Work out the type of s in the default branch."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 depends on narrowing by the kind property."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Every handled case removes a member from the union; only never is assignable to never."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compile the code."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The unhandled triangle type is not assignable to never, so it fails to compile. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The never check is how TypeScript enforces exhaustive handling of discriminated unions. It converts a runtime bug (an unhandled variant) into a compile-time error at the exact place that needs updating.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

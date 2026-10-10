@@ -1,0 +1,453 @@
+[
+  {
+    "id": "dev-cloud-fundamentals-001",
+    "subject": "devops",
+    "topic": "Cloud Fundamentals",
+    "subtopic": "Public buckets for convenience",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is public read access acceptable because the object names are random?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# Bucket 'acme-customer-docs' stores customers' uploaded ID documents.\n# Policy: public read on all objects, 'so the app can show them without signed URLs'.\n# AI: \"It's fine - the object names are long random UUIDs, so nobody can guess them.\""
+    },
+    "ai_claim": "Yes. The UUID names are unguessable, so only people with a link can find the documents.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Objects are named with random UUIDs."
+      },
+      {
+        "index": 2,
+        "text": "UUIDs cannot be guessed."
+      },
+      {
+        "index": 3,
+        "text": "Only people with links can access them."
+      },
+      {
+        "index": 4,
+        "text": "So public read is acceptable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Security through obscure URLs for sensitive data",
+      "explanation": "Public objects are readable by anyone who obtains a URL - from browser history, logs, referrer headers, shared links or a listing misconfiguration - with no expiry, audit or revocation. For identity documents, keep the bucket private and serve objects through short-lived presigned URLs issued after an authorisation check.",
+      "why_convincing": "Random names genuinely resist guessing."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: leaked URLs give permanent access to ID documents. Keep the bucket private and use short-lived presigned URLs.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A URL logged by a third-party analytics script lets anyone download the document indefinitely.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Block public access on the bucket; generate presigned GET URLs valid for 5 minutes after checking the user's permission.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A shared link is forwarded and the document remains accessible forever."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how URLs can leak."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes URLs stay secret."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Sensitive data needs authorisation and expiry, not obscurity."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider logs and referrer headers."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: URLs leak. Use private buckets with presigned URLs."
+      }
+    ],
+    "repair": "Block public access; serve via presigned URLs after authorisation.",
+    "debrief": "Obscurity is not access control. Sensitive objects need authentication, expiry and audit.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-cloud-fundamentals-002",
+    "subject": "devops",
+    "topic": "Cloud Fundamentals",
+    "subtopic": "One availability zone",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this deployment highly available?",
+    "artifact_type": "k8s_manifest",
+    "artifact": {
+      "language": "bash",
+      "command": "# Architecture: 3 app servers and the primary database, all in ap-south-1a.\n# AI: \"We're on the cloud, so this is highly available.\""
+    },
+    "ai_claim": "Yes. It runs on a major cloud provider with three app servers, so it is highly available.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The cloud provider has a strong reliability record."
+      },
+      {
+        "index": 2,
+        "text": "There are three app servers."
+      },
+      {
+        "index": 3,
+        "text": "If one fails, the others continue."
+      },
+      {
+        "index": 4,
+        "text": "So the deployment is highly available."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 1,
+      "misconception": "Relying on the cloud without spreading across failure domains",
+      "explanation": "All servers and the database share one availability zone, so a zone-level outage (power, networking) takes everything down at once, and the single primary database is a single point of failure regardless. High availability requires spreading app servers across at least two zones behind a load balancer and running the database with a multi-AZ standby.",
+      "why_convincing": "Multiple servers and a big provider sound resilient."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a single zone and a single database are shared failure points. Spread across AZs and use a multi-AZ database.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An outage in ap-south-1a stops all three servers and the database together.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "App servers in 1a, 1b and 1c behind a load balancer; database with a synchronous standby in another AZ.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "One zone outage causes a full outage."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the servers have in common."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 relies on the provider rather than the architecture."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Availability comes from redundancy across independent failure domains."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a zone outage."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: everything shares one zone. Spread across AZs."
+      }
+    ],
+    "repair": "Distribute across multiple AZs and use a multi-AZ database.",
+    "debrief": "The cloud provides building blocks for availability; the architecture has to use them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-cloud-fundamentals-003",
+    "subject": "devops",
+    "topic": "Cloud Fundamentals",
+    "subtopic": "Auto scaling across zones",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this setup survives the loss of one instance or one zone and handles load increases automatically?",
+    "artifact_type": "k8s_manifest",
+    "artifact": {
+      "language": "bash",
+      "command": "# Auto Scaling group: min 2, desired 2, max 10 instances across ap-south-1a and ap-south-1b\n# Scale out when average CPU > 60% for 5 minutes; health checks from the load balancer replace unhealthy instances."
+    },
+    "ai_claim": "Yes. With a minimum of 2 across two zones, losing an instance or a zone leaves capacity serving traffic while the group launches replacements; the CPU policy adds instances up to 10 as load rises.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "At least 2 instances run, spread over two zones."
+      },
+      {
+        "index": 2,
+        "text": "Load-balancer health checks detect failed instances, which are replaced."
+      },
+      {
+        "index": 3,
+        "text": "If a zone fails, the other zone keeps serving while new instances launch."
+      },
+      {
+        "index": 4,
+        "text": "Sustained CPU above 60% triggers scale-out up to 10."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct, provided a single instance can carry the traffic briefly during replacement (min 2 is the smallest redundant configuration).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "zone 1b fails -> 1 healthy instance in 1a serves -> group launches replacements in 1a -> back to 2",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Trace a zone failure."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 relies on health checks."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Redundancy across zones plus automatic replacement gives resilience."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider whether one instance can handle the load briefly."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The setup tolerates an instance or zone loss. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Elasticity and redundancy are complementary: scaling handles load, spreading handles failures.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-cloud-fundamentals-004",
+    "subject": "devops",
+    "topic": "Cloud Fundamentals",
+    "subtopic": "What stopped instances cost",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right about the charges?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# A developer stops (not terminates) 20 test EC2 instances, each with a 200 GB gp3 EBS volume, over a long holiday.\n# AI: \"Stopping ends compute charges, but the EBS volumes are still billed while they exist.\""
+    },
+    "ai_claim": "Yes. Stopped instances do not incur compute (instance-hour) charges, but their attached EBS volumes continue to be billed for provisioned storage, as do any Elastic IPs left associated with stopped instances.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Stopping an instance ends instance-hour billing."
+      },
+      {
+        "index": 2,
+        "text": "Its EBS volumes persist."
+      },
+      {
+        "index": 3,
+        "text": "EBS is billed per provisioned GB-month."
+      },
+      {
+        "index": 4,
+        "text": "So storage charges continue: 20 x 200 GB."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Stopped instances still accrue storage (and some IP) charges; terminate or snapshot and delete volumes to stop them.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "20 volumes x 200 GB = 4,000 GB-month of gp3 storage billed while stopped",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "4,000"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate compute from storage billing."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains how EBS is billed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Storage persists (and is billed) independently of the instance's state."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the total provisioned storage."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Storage is still billed. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cloud costs follow resources, not activity. Stopped does not mean free.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-cloud-fundamentals-005",
+    "subject": "devops",
+    "topic": "Cloud Fundamentals",
+    "subtopic": "Will serverless be cheaper",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will moving to serverless reduce the monthly cost?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# Current: 2 always-on VMs at a fixed monthly cost.\n# Proposal: move the API to serverless functions (billed per request and per GB-second).\n# The traffic pattern (requests per month, duration, peaks) has not been measured."
+    },
+    "ai_claim": "Yes. Serverless charges only for actual use and never for idle time, so it will be cheaper than always-on VMs.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "VMs cost money even when idle."
+      },
+      {
+        "index": 2,
+        "text": "Serverless bills only per request."
+      },
+      {
+        "index": 3,
+        "text": "Paying only for use is cheaper."
+      },
+      {
+        "index": 4,
+        "text": "So serverless will reduce cost."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The traffic profile. Serverless is cheaper for low or spiky traffic with lots of idle time; for steady, high traffic, per-request and per-GB-second charges can exceed the cost of two fully used VMs. Request volume, duration and memory are unknown.",
+    "resolving_scenarios": [
+      "The API serves 200,000 short requests a month, mostly during office hours: serverless costs a small fraction of two always-on VMs.",
+      "The API serves 300 million requests a month at steady load with 500 ms durations: per-request and compute charges exceed the VM cost."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on traffic volume and shape, which have not been measured. Step 3 assumes paying per use is always cheaper.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "At steady high volume, 300 million requests x 0.5 s x 1 GB of billed compute can cost more than two VMs.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "300"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "High steady traffic makes per-request billing expensive."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how much traffic the API gets and when."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 generalises from idle time."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Cost comparisons depend on utilisation and volume."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Model both low and high traffic."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes idle-heavy traffic. Low traffic favours serverless; steady high traffic may not. It cannot be decided."
+      }
+    ],
+    "repair": "Measure traffic, then model both options' monthly cost.",
+    "debrief": "Pricing models reward different traffic shapes. Measure before migrating for cost reasons.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

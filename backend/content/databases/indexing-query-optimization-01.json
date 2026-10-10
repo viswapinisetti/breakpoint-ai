@@ -1,0 +1,376 @@
+[
+  {
+    "id": "db-indexing-query-optimization-001",
+    "subject": "databases",
+    "topic": "Indexing & Query Optimization",
+    "subtopic": "Functions on an indexed column",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The users table has 5 million rows. Will this lookup use idx_email to find the row quickly?",
+    "artifact_type": "query_plan",
+    "artifact": {
+      "schema": "CREATE INDEX idx_email ON users (email);",
+      "query": "SELECT * FROM users\nWHERE LOWER(email) = 'asha@example.com';"
+    },
+    "ai_claim": "Yes. There is an index on email, and the query filters on email, so the database uses the index instead of scanning the table.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "idx_email is a B-tree index on the email column."
+      },
+      {
+        "index": 2,
+        "text": "The WHERE clause filters on email."
+      },
+      {
+        "index": 3,
+        "text": "The planner can use the index for a filter on the indexed column."
+      },
+      {
+        "index": 4,
+        "text": "So the lookup is an index search, not a full scan."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 2,
+      "misconception": "Wrapping an indexed column in a function",
+      "explanation": "The index stores email values, not LOWER(email) values. The filter is on the expression LOWER(email), so the planner cannot search the index and scans all 5 million rows, computing LOWER for each. Create an expression index on LOWER(email), or store emails already lowercased.",
+      "why_convincing": "The column name appears in the WHERE clause, so the index looks relevant."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The query filters on LOWER(email), which the plain index does not contain, so it does a sequential scan. Add CREATE INDEX idx_email_lower ON users (LOWER(email)).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "EXPLAIN shows Seq Scan on users with Filter: lower(email) = 'asha@example.com'.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "CREATE INDEX idx_email_lower ON users (LOWER(email));",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "EXPLAIN reports a sequential scan, not an index scan."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare what the index stores with what the WHERE clause compares."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says the query filters on email. Look closely at the expression."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A B-tree index can be searched only for the exact expression it was built on."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run EXPLAIN on the query."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the filter is on LOWER(email), which idx_email does not index, so the table is scanned. Add an expression index."
+      }
+    ],
+    "repair": "Create an index on `LOWER(email)`, or normalise emails to lowercase on insert and compare directly.",
+    "debrief": "Indexes serve expressions, not column names. Functions, casts and arithmetic on an indexed column (LOWER(x), x + 1, DATE(created_at)) usually defeat the index. Either index the expression or rewrite the predicate so the bare column is compared.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-indexing-query-optimization-002",
+    "subject": "databases",
+    "topic": "Indexing & Query Optimization",
+    "subtopic": "Leading wildcards",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will idx_last make this search fast on a large table, the same way it speeds up LIKE 'John%'?",
+    "artifact_type": "query_plan",
+    "artifact": {
+      "schema": "CREATE INDEX idx_last ON users (last_name);",
+      "query": "SELECT * FROM users\nWHERE last_name LIKE '%son';"
+    },
+    "ai_claim": "Yes. LIKE on an indexed column uses the B-tree index, whichever end of the pattern the wildcard is on.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "idx_last orders last names alphabetically."
+      },
+      {
+        "index": 2,
+        "text": "LIKE 'John%' can jump to names starting with John."
+      },
+      {
+        "index": 3,
+        "text": "LIKE '%son' is also a pattern on last_name."
+      },
+      {
+        "index": 4,
+        "text": "So the index narrows the search in the same way."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 4,
+      "misconception": "Expecting a sorted index to help with suffix matching",
+      "explanation": "A B-tree is sorted by the beginning of the value. A fixed prefix ('John%') maps to one contiguous range of the index. A leading wildcard ('%son') means matching names are scattered throughout, so the index cannot narrow the search and the table (or the whole index) is scanned. Use a trigram index (pg_trgm) or store a reversed column for suffix searches.",
+      "why_convincing": "Both queries use LIKE on the same column, and one of them really is fast."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "A leading wildcard prevents a range search, so the query scans. Use a trigram GIN index, or index reverse(last_name) and search for a reversed prefix.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "EXPLAIN shows a sequential scan for LIKE '%son' but an index range scan for LIKE 'John%'.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Johnson, Anderson and Wilson are spread across the alphabet, so no single index range contains them.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'Anderson' and 'Wilson' match but sit far apart in the sorted index."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about where matching names sit in an alphabetically sorted list."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes both patterns narrow the search the same way."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A B-tree can find a range only when the pattern fixes the beginning of the value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Locate Anderson, Johnson and Wilson in a sorted list of names."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: a leading wildcard scatters matches across the index, so it scans. Use a trigram index or a reversed column."
+      }
+    ],
+    "repair": "Add a trigram index (`CREATE INDEX ... USING gin (last_name gin_trgm_ops)`) or a reversed-string index for suffix search.",
+    "debrief": "An index is useful only when the question maps to a contiguous region of its sort order. Prefix search does; suffix and substring search do not. Before trusting an index, picture where the matching entries sit in the sorted structure.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-indexing-query-optimization-003",
+    "subject": "databases",
+    "topic": "Indexing & Query Optimization",
+    "subtopic": "An index that also sorts",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the database answer this query by reading about 10 index entries, without sorting customer 7's orders?",
+    "artifact_type": "query_plan",
+    "artifact": {
+      "schema": "CREATE INDEX idx_cust_created ON orders (customer_id, created_at);",
+      "query": "SELECT * FROM orders\nWHERE customer_id = 7\nORDER BY created_at DESC\nLIMIT 10;"
+    },
+    "ai_claim": "Yes. Within customer_id = 7, the index is already sorted by created_at, so the database reads it backwards and stops after 10 rows.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The index is sorted by customer_id, then by created_at."
+      },
+      {
+        "index": 2,
+        "text": "customer_id = 7 selects one contiguous range of the index."
+      },
+      {
+        "index": 3,
+        "text": "Inside that range, entries are ordered by created_at, and a B-tree can be read in either direction."
+      },
+      {
+        "index": 4,
+        "text": "Reading backwards from the end of the range gives the newest orders first, so it stops after 10."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. An equality on the leading column followed by ORDER BY on the next column is satisfied directly by the composite index, with no separate sort, and LIMIT stops the scan early.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "EXPLAIN shows Limit -> Index Scan Backward using idx_cust_created, with no Sort node.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the order of entries within customer 7's range."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on the second index column."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In a composite index, rows with the same leading value are sorted by the next column."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Picture the index entries for customer_id = 7."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The index provides customer 7's orders already sorted by created_at, so a backward scan returns the newest 10 without sorting. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Composite indexes can serve both the filter and the sort, but only when the equality columns come first and the sort column follows. That is why column order in an index matters, and why this query needs no sort step.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-indexing-query-optimization-004",
+    "subject": "databases",
+    "topic": "Indexing & Query Optimization",
+    "subtopic": "Indexing a low-selectivity column",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will adding idx_active make this query substantially faster?",
+    "artifact_type": "query_plan",
+    "artifact": {
+      "schema": "users: 10,000,000 rows\nis_active = true for 98% of rows",
+      "query": "CREATE INDEX idx_active ON users (is_active);\n\nSELECT * FROM users WHERE is_active = true;"
+    },
+    "ai_claim": "Yes. With an index on is_active, the database can look up the active users directly instead of scanning the whole table.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Without an index, the query scans all 10 million rows."
+      },
+      {
+        "index": 2,
+        "text": "idx_active lists the rows for each value of is_active."
+      },
+      {
+        "index": 3,
+        "text": "The planner uses the index to find the active rows."
+      },
+      {
+        "index": 4,
+        "text": "So the query reads fewer rows and runs much faster."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 4,
+      "misconception": "Expecting an index to help when most rows match",
+      "explanation": "The query returns 98% of the table - 9.8 million rows. Fetching them via the index would add a random page read per row on top of reading the index, which is slower than one sequential scan, so the planner ignores the index. Indexes pay off when a query selects a small fraction of rows. (A partial index on the rare value, WHERE is_active = false, could help queries for inactive users.)",
+      "why_convincing": "'Add an index' is the standard fix for slow queries, and step 1 is true."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No meaningful gain: the query must read 9.8 million rows either way, and the planner prefers a sequential scan. The index only adds write cost.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "98% of 10,000,000 rows match: 9,800,000 rows must be read regardless.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "98"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "EXPLAIN still chooses Seq Scan on users after the index is created.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The planner keeps using a sequential scan once the index exists."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Work out how many rows the query returns."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes the index means fewer rows are read."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An index helps only when it lets the database skip most of the table."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare 9.8 million random lookups with one sequential scan."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: 98% of rows match, so the index cannot reduce the work and the planner ignores it."
+      }
+    ],
+    "repair": "Drop the index; if queries target the rare inactive users, use a partial index WHERE is_active = false.",
+    "debrief": "Selectivity decides whether an index helps. For predicates that match a large share of the table, a sequential scan wins, and the index only slows down writes. Check the fraction of rows a predicate selects before adding an index.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

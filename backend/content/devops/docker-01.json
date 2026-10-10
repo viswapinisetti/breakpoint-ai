@@ -1,0 +1,390 @@
+[
+  {
+    "id": "dev-docker-001",
+    "subject": "devops",
+    "topic": "Docker",
+    "subtopic": "Unpinned base images",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this Dockerfile produce reproducible builds?",
+    "artifact_type": "dockerfile",
+    "artifact": {
+      "language": "dockerfile",
+      "dockerfile": "FROM python:latest\nCOPY requirements.txt .\nRUN pip install -r requirements.txt\nCOPY . .\nCMD [\"python\", \"app.py\"]\n# AI: \"Using latest keeps us current, and the build is reproducible because the Dockerfile doesn't change.\""
+    },
+    "ai_claim": "Yes. The Dockerfile is unchanged between builds, so every build produces the same image, and latest keeps it up to date.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The Dockerfile text is the same each time."
+      },
+      {
+        "index": 2,
+        "text": "The same instructions produce the same image."
+      },
+      {
+        "index": 3,
+        "text": "python:latest keeps the base current."
+      },
+      {
+        "index": 4,
+        "text": "So builds are reproducible."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 2,
+      "misconception": "Depending on a moving base-image tag",
+      "explanation": "python:latest points to whatever image was most recently published: a new Python minor or major version, or a different Debian base, can arrive between builds. The same Dockerfile then builds a different image, and dependencies that compiled yesterday may fail today. Pin a specific tag (python:3.12.6-slim-bookworm) or, strictest, a digest (@sha256:...), and update deliberately.",
+      "why_convincing": "The Dockerfile's text really is unchanged."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: latest moves, so builds change over time. Pin a version tag or digest.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "January build: Python 3.12; after a new release, the same Dockerfile builds on Python 3.13 and a C extension fails to install",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3.13"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "FROM python:3.12.6-slim-bookworm",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A rebuild of an old commit produces a different image."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 'latest' points to over time."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes identical instructions give identical images."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Reproducible builds pin their inputs, including base images."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rebuild after a new Python release."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the base image changes. Pin it."
+      }
+    ],
+    "repair": "Pin the base image to a specific version (or digest) and update it on purpose.",
+    "debrief": "Every unpinned input makes builds a function of time. Pin base images like dependencies.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-docker-002",
+    "subject": "devops",
+    "topic": "Docker",
+    "subtopic": "Shell-form ENTRYPOINT and signals",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will server.py receive SIGTERM and shut down gracefully on docker stop?",
+    "artifact_type": "dockerfile",
+    "artifact": {
+      "language": "dockerfile",
+      "dockerfile": "FROM python:3.12-slim\nCOPY . /app\nWORKDIR /app\nENTRYPOINT python server.py      # shell form\n# server.py finishes in-flight requests when it receives SIGTERM\n# AI: \"On docker stop, the server receives SIGTERM and shuts down gracefully.\""
+    },
+    "ai_claim": "Yes. docker stop sends SIGTERM to the container, the server receives it and finishes in-flight requests.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "docker stop sends SIGTERM."
+      },
+      {
+        "index": 2,
+        "text": "The container's process receives it."
+      },
+      {
+        "index": 3,
+        "text": "server.py handles SIGTERM gracefully."
+      },
+      {
+        "index": 4,
+        "text": "So shutdown is graceful."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Using the shell form, which does not forward signals",
+      "explanation": "The shell form runs the command as a child of /bin/sh -c, so /bin/sh is PID 1 and receives the SIGTERM; it does not pass signals to server.py. After the 10-second grace period, Docker sends SIGKILL, cutting off in-flight requests. Use the exec form, ENTRYPOINT [\"python\", \"server.py\"], so the server is PID 1 (or add an init such as tini).",
+      "why_convincing": "The difference between the two forms is only brackets and quotes."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: with shell form, sh is PID 1 and does not forward SIGTERM; the server is SIGKILLed after 10 s. Use the exec form.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Docker docs: the shell form of ENTRYPOINT runs as a subcommand of /bin/sh -c, which does not pass signals.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "ENTRYPOINT [\"python\", \"server.py\"]",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "docker stop takes 10 seconds and in-flight requests fail."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which process is PID 1."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the server receives the signal."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Shell-form commands run under /bin/sh -c."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Time docker stop and watch the logs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: sh receives SIGTERM and does not forward it. Use the exec form."
+      }
+    ],
+    "repair": "Use exec-form ENTRYPOINT/CMD, or an init process like tini.",
+    "debrief": "Graceful shutdown starts with the right PID 1. Exec form is the default choice for containers.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-docker-003",
+    "subject": "devops",
+    "topic": "Docker",
+    "subtopic": "Running as root",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is running the app as root inside the container harmless?",
+    "artifact_type": "dockerfile",
+    "artifact": {
+      "language": "dockerfile",
+      "dockerfile": "FROM node:20-slim\nWORKDIR /app\nCOPY . .\nRUN npm ci --omit=dev\nCMD [\"node\", \"server.js\"]\n# no USER instruction\n# AI: \"Containers are isolated, so running as root inside is harmless.\""
+    },
+    "ai_claim": "Yes. The container isolates the process from the host, so root inside the container cannot affect anything outside.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The app runs in a container."
+      },
+      {
+        "index": 2,
+        "text": "Containers isolate processes from the host."
+      },
+      {
+        "index": 3,
+        "text": "Root inside is confined to the container."
+      },
+      {
+        "index": 4,
+        "text": "So it is harmless."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Treating container isolation as complete",
+      "explanation": "Containers share the host kernel. Root in a container is root on the host unless user namespaces are used, so a kernel or runtime vulnerability, a mounted host path or an over-privileged setting lets a compromised app escalate to the host. Inside the container, root can also modify the app's own files. Run as a non-root user (node images include one: USER node) and drop capabilities.",
+      "why_convincing": "Containers do provide meaningful isolation, which is easy to overestimate."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: container root maps to host root by default, so escapes are far more damaging. Add USER node.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Least privilege: run container processes as a non-root user.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "COPY --chown=node:node . .\nUSER node\nCMD [\"node\", \"server.js\"]",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A mounted host directory can be modified with root permissions."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether containers have their own kernel."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes complete isolation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Containers share the host kernel; root inside is host root without user namespaces."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a container escape or a mounted host path."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: root in containers is risky. Run as a non-root user."
+      }
+    ],
+    "repair": "Add a non-root USER, and drop unnecessary capabilities.",
+    "debrief": "Containers are one layer of defence. Least privilege inside them limits what a compromise can do.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-docker-004",
+    "subject": "devops",
+    "topic": "Docker",
+    "subtopic": "apt-get update in its own layer",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the separate apt-get update layer keep package lists fresh on later builds?",
+    "artifact_type": "dockerfile",
+    "artifact": {
+      "language": "dockerfile",
+      "dockerfile": "FROM debian:bookworm-slim\nRUN apt-get update\nRUN apt-get install -y curl libpq5\n# Months later a teammate adds a package:\n# RUN apt-get install -y curl libpq5 imagemagick\n# AI: \"Each build runs apt-get update first, so the package lists are always fresh.\""
+    },
+    "ai_claim": "Yes. apt-get update is the first RUN, so every build refreshes the package lists before installing.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "apt-get update refreshes the package lists."
+      },
+      {
+        "index": 2,
+        "text": "It runs before the install step."
+      },
+      {
+        "index": 3,
+        "text": "Every build executes it."
+      },
+      {
+        "index": 4,
+        "text": "So installs always use fresh lists."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Letting the build cache reuse a stale update layer",
+      "explanation": "Docker caches each RUN layer. The 'RUN apt-get update' line never changes, so its months-old cached layer is reused; only the modified install line reruns, against stale package lists. Installs then fail (versions no longer on the mirror) or get outdated packages. Combine them: RUN apt-get update && apt-get install -y ... && rm -rf /var/lib/apt/lists/*.",
+      "why_convincing": "Reading the Dockerfile top to bottom suggests update always runs first."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the cached update layer is reused, so installs use stale lists. Put update and install in the same RUN.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "build: 'RUN apt-get update' -> CACHED (from 5 months ago); 'RUN apt-get install ... imagemagick' -> 404 Not Found for a package file",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "404"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "RUN apt-get update && apt-get install -y --no-install-recommends curl libpq5 imagemagick && rm -rf /var/lib/apt/lists/*",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The build fails with 404 errors from the package mirror."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether Docker re-runs unchanged instructions."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every build executes the update."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Unchanged RUN lines are served from the build cache."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for 'CACHED' in the build output."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the update layer is cached. Combine update and install."
+      }
+    ],
+    "repair": "Combine apt-get update and install in one RUN, and clean the lists.",
+    "debrief": "Layer caching is keyed on the instruction text. Commands that must run together belong in one RUN.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

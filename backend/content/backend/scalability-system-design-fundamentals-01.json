@@ -1,0 +1,463 @@
+[
+  {
+    "id": "be-scalability-system-design-fundamentals-001",
+    "subject": "backend",
+    "topic": "Scalability & System Design Fundamentals",
+    "subtopic": "In-memory sessions behind a load balancer",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do users stay logged in as they move between pages?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "sessions = {}   # session_id -> user_id, kept in process memory\n\n@app.post(\"/login\")\ndef login(...):\n    sid = secrets.token_urlsafe()\n    sessions[sid] = user.id\n    ...\n\n# Deployment: 3 instances behind a round-robin load balancer."
+    },
+    "ai_claim": "Yes. The session is stored at login and looked up on each request, so the user stays logged in.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Login stores the session id in the sessions dict."
+      },
+      {
+        "index": 2,
+        "text": "The browser sends the session id on each request."
+      },
+      {
+        "index": 3,
+        "text": "Each request looks the id up in sessions."
+      },
+      {
+        "index": 4,
+        "text": "So the user stays logged in."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on state that exists in only one instance",
+      "explanation": "sessions lives in the memory of the instance that handled the login. Round-robin sends the next request to another instance, whose dict does not have the id, so the user appears logged out on roughly two requests out of three - and everyone is logged out on each deploy. Store sessions in a shared store (Redis or the database) or use signed tokens.",
+      "why_convincing": "With one instance, in development, it works perfectly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the other instances do not have the session. Keep sessions in Redis or the database.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "login on instance A -> next request on B -> sessions on B lacks sid -> 401",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "401"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Horizontally scaled services must keep shared state outside individual instances.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Refreshing the page alternates between logged in and logged out."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which instance handles the request after login."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the lookup sees the stored session."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Each instance has its own memory; a round-robin balancer spreads requests across them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace login on instance A and the next request on instance B."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the session exists only on the login instance. Use a shared session store."
+      }
+    ],
+    "repair": "Store sessions in Redis or the database (or use stateless signed tokens).",
+    "debrief": "Stateless application instances are what make horizontal scaling work. Any state in process memory must move to a shared store before a second instance is added.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-scalability-system-design-fundamentals-002",
+    "subject": "backend",
+    "topic": "Scalability & System Design Fundamentals",
+    "subtopic": "Scaling the wrong tier",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will quadrupling the app servers make /reports about four times faster?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "# Measurements for GET /reports (p50 latency 1.2 s):\n#   app CPU: 15%\n#   time in database query: 1.1 s of the 1.2 s\n#   database CPU: 95%\n# Plan: go from 2 to 8 app servers."
+    },
+    "ai_claim": "Yes. Four times as many servers share the work, so each request is handled about four times faster.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "There will be 8 app servers instead of 2."
+      },
+      {
+        "index": 2,
+        "text": "The load is divided among more servers."
+      },
+      {
+        "index": 3,
+        "text": "Each server handles a quarter of the previous load."
+      },
+      {
+        "index": 4,
+        "text": "So requests complete about four times faster."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Scaling a component that is not the bottleneck",
+      "explanation": "Nearly all the latency - 1.1 of 1.2 seconds - is the database query, and the database CPU is at 95% while app CPU sits at 15%. More app servers do not make the query faster; they may send more concurrent queries to an already saturated database and make it slower. Optimise the query, add indexes or caching, or scale the database.",
+      "why_convincing": "More servers genuinely help when the app tier is the bottleneck."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the database is the bottleneck, so latency stays about 1.1 s or worse. Fix the query or scale the database.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "1.1 s of 1.2 s is database time; the app part is 0.1 s at most",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.1",
+          "0.1"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Throughput and latency are limited by the bottleneck resource; scaling other tiers does not remove it.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "With 8 servers, the database is still at 95% CPU and latency is unchanged."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at where the 1.2 seconds is spent."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes the app servers are the limiting factor."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Speed-up comes only from improving the bottleneck."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare app CPU with database CPU."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the database accounts for 1.1 s and is saturated. Scale or optimise the database."
+      }
+    ],
+    "repair": "Profile and optimise the report query (indexes, pre-aggregation, caching) or scale the database.",
+    "debrief": "Measure before scaling. The limiting resource decides whether an investment helps; here the numbers point clearly at the database.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-scalability-system-design-fundamentals-003",
+    "subject": "backend",
+    "topic": "Scalability & System Design Fundamentals",
+    "subtopic": "Read replicas and replication lag",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right about the benefits and the limitation of this plan?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "# Traffic: 95% reads, 5% writes. Primary database CPU is at 85%.\n# Plan: add two asynchronous read replicas; send product-catalog reads to them;\n#       keep writes and 'read-your-own-write' pages (order confirmation) on the primary."
+    },
+    "ai_claim": "Yes. Most load is reads, so moving catalog reads to replicas relieves the primary. Because replication is asynchronous, replicas can be slightly behind, which is why pages that must show the user's own new write stay on the primary.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "95% of the queries are reads, which replicas can serve."
+      },
+      {
+        "index": 2,
+        "text": "Moving catalog reads off the primary frees most of its capacity."
+      },
+      {
+        "index": 3,
+        "text": "Asynchronous replicas can lag the primary by milliseconds or more."
+      },
+      {
+        "index": 4,
+        "text": "Order confirmation reads from the primary, so users always see the order they just placed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Read replicas scale read-heavy workloads, and routing read-your-own-write paths to the primary handles replication lag. Slightly stale catalog data is acceptable.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "place order on primary -> confirmation read from primary -> order visible; catalog read from replica -> may lag slightly",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Asynchronous replication provides eventual consistency; replicas may serve stale data.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what fraction of the load replicas can take."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 identifies the trade-off."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Replicas scale reads but lag behind writes; consistency-sensitive reads should use the primary."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Follow a user who places an order and views the confirmation."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Replicas relieve the read load, and consistency-sensitive reads stay on the primary. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Every scaling technique trades something. The plan names the trade-off of read replicas - staleness - and routes around it where it matters.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-scalability-system-design-fundamentals-004",
+    "subject": "backend",
+    "topic": "Scalability & System Design Fundamentals",
+    "subtopic": "Queues absorb spikes",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that during a signup spike this keeps /signup fast, at the cost of welcome emails possibly arriving later?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/signup\")\ndef signup(data: SignupIn):\n    user = users.create(data)\n    queue.enqueue(send_welcome_email, user.id)   # a worker sends it\n    return {\"id\": user.id}\n\n# Before: the endpoint called the email provider directly (about 800 ms)."
+    },
+    "ai_claim": "Yes. Signup no longer waits for the email provider, so it responds quickly even under load. Workers work through the queue at their own pace, so emails may be delayed during a spike, but they are not lost.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The endpoint only writes the user and enqueues a job."
+      },
+      {
+        "index": 2,
+        "text": "The 800 ms email call is no longer part of the request."
+      },
+      {
+        "index": 3,
+        "text": "During a spike, jobs build up in the queue."
+      },
+      {
+        "index": 4,
+        "text": "Workers drain the queue, so emails arrive later but are still sent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A queue decouples the request from slow work and absorbs bursts; the cost is latency for the background work. (The job should be idempotent and enqueued after the user is committed.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "request: create user + enqueue (a few ms) -> respond; worker later: send email (800 ms)",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "800"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate the request's latency from the email's latency."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 removes the slow call from the request path."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Queues trade immediate processing for resilience to bursts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Simulate 1,000 signups in a minute."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The request stays fast, and emails are delayed rather than lost. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Moving slow, non-essential work to a queue is one of the most effective scaling moves. The claim states both the benefit and the trade-off accurately.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-scalability-system-design-fundamentals-005",
+    "subject": "backend",
+    "topic": "Scalability & System Design Fundamentals",
+    "subtopic": "Will the cache carry the load",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "With the cache in place, will the database stay within its 2,000 queries per second at 10,000 requests per second?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "# Target: 10,000 requests/second for GET /products/{id}\n# The database can sustain about 2,000 queries/second.\n# Plan: add a Redis cache in front of the product lookup.\n# The cache hit ratio for this traffic has not been measured."
+    },
+    "ai_claim": "Yes. Redis serves most product lookups from memory, so the database only sees a small fraction of the traffic, well under 2,000 queries per second.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Requests check Redis first."
+      },
+      {
+        "index": 2,
+        "text": "Most requests are cache hits."
+      },
+      {
+        "index": 3,
+        "text": "Only misses reach the database."
+      },
+      {
+        "index": 4,
+        "text": "So the database load is well under 2,000 queries per second."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The cache hit ratio. The database receives 10,000 x (1 - hit ratio) queries per second, so the answer depends entirely on it: the plan must reach at least 80% hits. The ratio has not been measured, and it depends on how concentrated traffic is across products and on the TTL.",
+    "resolving_scenarios": [
+      "Hit ratio 90%: 10,000 x 0.10 = 1,000 queries/s reach the database, within capacity.",
+      "Hit ratio 70%: 10,000 x 0.30 = 3,000 queries/s, exceeding the database's 2,000."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the hit ratio, which is unknown. Step 2 assumes it. The database stays within capacity only if at least 80% of requests hit the cache.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "At a 70% hit ratio the database receives 3,000 queries/s, above its 2,000 limit.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "70",
+          "3,000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Long-tail product traffic can keep the hit ratio low."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Express the database load as a formula."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes a hit ratio without a measurement."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Database load = request rate x miss ratio."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the load at 90% and 70% hit ratios."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes the hit ratio. At 90% the database copes; at 70% it does not. It cannot be decided without measuring."
+      }
+    ],
+    "repair": "Measure the hit ratio on real traffic (or replay logs) before relying on the cache; the plan needs at least 80%.",
+    "debrief": "Capacity planning with caches hinges on the hit ratio, and 'most requests hit' is an assumption until it is measured. Do the arithmetic and state the threshold the plan depends on.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

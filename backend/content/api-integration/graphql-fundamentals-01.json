@@ -1,0 +1,479 @@
+[
+  {
+    "id": "api-graphql-fundamentals-001",
+    "subject": "api-integration",
+    "topic": "GraphQL Fundamentals",
+    "subtopic": "GraphQL errors with HTTP 200",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does checking resp.ok tell the client whether the query succeeded?",
+    "artifact_type": "api_response",
+    "artifact": {
+      "request": "query { order(id: 42) { id total } }",
+      "response": "HTTP/1.1 200 OK\n\n{\n  \"data\": { \"order\": null },\n  \"errors\": [ { \"message\": \"Not authorised to view order 42\", \"path\": [\"order\"] } ]\n}",
+      "client": "if (resp.ok) showOrder((await resp.json()).data.order);"
+    },
+    "ai_claim": "Yes. The server returns 200 only when the request succeeds, so resp.ok means the order was loaded.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The server responded with 200."
+      },
+      {
+        "index": 2,
+        "text": "resp.ok is true for 2xx statuses."
+      },
+      {
+        "index": 3,
+        "text": "A 200 response means the query succeeded."
+      },
+      {
+        "index": 4,
+        "text": "So the order was loaded."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Applying REST status semantics to GraphQL",
+      "explanation": "GraphQL servers commonly return 200 for any request they could execute, reporting failures in the errors array, sometimes with partial data. Here data.order is null and errors explains why, so showOrder receives null. Clients must check errors (and handle partial results), not just the HTTP status.",
+      "why_convincing": "In REST APIs, a 200 does mean success."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the 200 response contains an error and order is null. Check the errors array before using data.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The body has errors[0].message 'Not authorised to view order 42' and data.order is null.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "42"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "resp.ok is true while data.order is null.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "showOrder(null) is called and the page crashes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the whole response body, not just the status."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 applies the REST meaning of 200."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "GraphQL reports errors in the body, often with status 200."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the errors field."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: GraphQL returned an error inside a 200. Check the errors array."
+      }
+    ],
+    "repair": "Treat a non-empty errors array as failure (or partial success) and check fields for null before use.",
+    "debrief": "GraphQL moves error reporting from the transport into the payload. Clients need a standard response handler that inspects errors on every request.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-graphql-fundamentals-002",
+    "subject": "api-integration",
+    "topic": "GraphQL Fundamentals",
+    "subtopic": "One request, many database queries",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Since the client makes a single GraphQL request, does the server run only one or two database queries?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "# Query:  { orders(last: 100) { id customer { name } } }\n\nresolvers = {\n  \"Query\": {\"orders\": lambda _, info, last: db.orders.latest(last)},        # 1 SQL query\n  \"Order\": {\"customer\": lambda order, info: db.customers.get(order.customer_id)},  # SQL per call\n}"
+    },
+    "ai_claim": "Yes. GraphQL fetches everything the client needs in one request, so the data is loaded with one or two queries.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The client sends one GraphQL request."
+      },
+      {
+        "index": 2,
+        "text": "The server resolves orders with one query."
+      },
+      {
+        "index": 3,
+        "text": "GraphQL loads related data together with it."
+      },
+      {
+        "index": 4,
+        "text": "So one or two database queries run."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Equating one HTTP request with one database query",
+      "explanation": "GraphQL calls the customer resolver once per order, and each call runs its own query: 1 query for orders plus 100 for customers - the N+1 problem, moved to the server. Batch the lookups with a DataLoader (one query for all customer ids per request).",
+      "why_convincing": "Fewer HTTP round trips is a real GraphQL benefit, and it is easy to extend it to the database."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the per-field resolver runs 100 separate customer queries, 101 in total. Use a DataLoader to batch them.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "orders resolver: 1 query -> Order.customer resolver called 100 times -> 100 queries",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "100"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The SQL log shows 101 queries for one GraphQL request.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "101"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The query log shows one customer SELECT per order."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count how many times the customer resolver runs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes related data is loaded together automatically."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Field resolvers run once per parent object unless batched."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Resolve 100 orders and count queries."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the resolver runs per order, making 101 queries. Batch with a DataLoader."
+      }
+    ],
+    "repair": "Use a DataLoader that collects customer ids during a request and loads them in one query.",
+    "debrief": "GraphQL makes clients efficient and puts the burden on resolvers. Batching (DataLoader) is standard practice in every production GraphQL server.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-graphql-fundamentals-003",
+    "subject": "api-integration",
+    "topic": "GraphQL Fundamentals",
+    "subtopic": "Unbounded query depth",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Since every field requires login, can outside users not overload the server with queries like this?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "query": "query {\n  user(id: 1) {\n    friends { friends { friends { friends { friends { name } } } } }\n  }\n}",
+      "server": "Public GraphQL endpoint; every field requires a logged-in user; no depth or complexity limits."
+    },
+    "ai_claim": "Yes. Only logged-in users can query, so strangers cannot send expensive queries, and the server is protected.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every field requires authentication."
+      },
+      {
+        "index": 2,
+        "text": "Anonymous requests are rejected."
+      },
+      {
+        "index": 3,
+        "text": "Only real users can run queries."
+      },
+      {
+        "index": 4,
+        "text": "So the server cannot be overloaded."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Treating authentication as protection against expensive queries",
+      "explanation": "Anyone can sign up, and one account suffices. With 100 friends each, five nesting levels touch 100^5 = 10 billion nodes, from a single request. Authentication identifies the caller; it does not bound cost. Add depth and complexity limits, pagination limits on lists, timeouts and rate limits per user.",
+      "why_convincing": "Authentication is a real barrier, and normal users never write such queries."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: any authenticated user can send an exponentially expensive query. Enforce depth and complexity limits and per-user rate limits.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "With 100 friends per user, five levels of nesting is 100^5 = 10,000,000,000 nodes.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10,000,000,000"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "A free account sends the query in a loop and saturates the database.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "One signed-up user takes the API down."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how hard it is to become a logged-in user."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes logged-in users will not send expensive queries."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Cost limits are needed regardless of authentication."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Estimate the size of the result with 100 friends per user."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: any account can send the query. Add depth/complexity limits and rate limits."
+      }
+    ],
+    "repair": "Configure maximum query depth and complexity, cap list sizes, and rate-limit per user.",
+    "debrief": "GraphQL lets clients choose the shape and size of the work. The server must set limits, because the query language itself does not.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-graphql-fundamentals-004",
+    "subject": "api-integration",
+    "topic": "GraphQL Fundamentals",
+    "subtopic": "Nullable fields",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is user.email.toLowerCase() safe for every user?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "javascript",
+      "code": "# Schema\ntype User {\n  id: ID!\n  name: String!\n  email: String\n}\n\n// Client\nconst { user } = (await gql(`{ user(id: 5) { name email } }`)).data;\nsendReceipt(user.email.toLowerCase());"
+    },
+    "ai_claim": "Yes. The schema defines email on User, so every user returned has an email.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The User type declares an email field."
+      },
+      {
+        "index": 2,
+        "text": "The query requests it."
+      },
+      {
+        "index": 3,
+        "text": "Every user returned includes an email."
+      },
+      {
+        "index": 4,
+        "text": "So toLowerCase is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Reading a nullable field as guaranteed",
+      "explanation": "In GraphQL, types are nullable unless marked with !. name: String! is guaranteed; email: String may be null - for example, a user who signed up by phone. user.email.toLowerCase() then throws TypeError. Check for null (user.email?.toLowerCase()) or handle the missing email.",
+      "why_convincing": "The ! convention is the reverse of many languages, where types are non-null by default."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: email is nullable (no !), so it can be null and the call throws. Handle null.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The schema marks name as String! but email as String (nullable).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "For a phone-only user, data.user.email is null and the call throws TypeError.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A user without an email crashes sendReceipt."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare how name and email are declared."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a declared field is always present."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In GraphQL, only types marked with ! are non-null."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Query a user who signed up without an email."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: email is nullable. Check for null before using it."
+      }
+    ],
+    "repair": "Use `user.email?.toLowerCase()` and handle users without an email.",
+    "debrief": "The schema is precise about nullability: read the ! marks. Generated TypeScript types will reflect them too, which is why typed GraphQL clients catch this at compile time.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-graphql-fundamentals-005",
+    "subject": "api-integration",
+    "topic": "GraphQL Fundamentals",
+    "subtopic": "Aliases for the same field",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this returns both products in one response, under the keys cheap and pricey?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "query": "query {\n  cheap:  product(id: 101) { name price }\n  pricey: product(id: 202) { name price }\n}"
+    },
+    "ai_claim": "Yes. Aliases rename fields in the result, so the same field, product, can be requested twice with different arguments; the response has data.cheap and data.pricey.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Without aliases, two product fields would conflict in the result."
+      },
+      {
+        "index": 2,
+        "text": "The aliases cheap and pricey give each a distinct key."
+      },
+      {
+        "index": 3,
+        "text": "Each alias resolves product with its own id argument."
+      },
+      {
+        "index": 4,
+        "text": "The response is { data: { cheap: {...}, pricey: {...} } }."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Aliases let one query fetch the same field with different arguments, returning each result under its alias.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Response keys: data.cheap for product 101 and data.pricey for product 202.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "101",
+          "202"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what aliases change in the response."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 explains why aliases are needed here."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Aliases rename result keys so repeated fields with different arguments can coexist."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Predict the shape of the response."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Both products are returned under their aliases. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Aliases are GraphQL's way of batching similar lookups into one request. They also explain why the response shape follows the query, not the schema's field names.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

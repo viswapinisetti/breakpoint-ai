@@ -1,0 +1,198 @@
+[
+  {
+    "id": "apt-arrangements-puzzles-001",
+    "subject": "aptitude",
+    "topic": "Arrangements & Puzzles",
+    "subtopic": "Circular seating with a pair",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In how many distinct ways can 6 people sit around a round table if two particular friends must sit next to each other? (Arrangements that are rotations of each other count as the same.)",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "There are 240 ways.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Treat the two friends as a single block, so there are 5 units to arrange."
+      },
+      {
+        "index": 2,
+        "text": "5 units can be arranged in 5! = 120 ways."
+      },
+      {
+        "index": 3,
+        "text": "The two friends can swap places within their block, which doubles the count."
+      },
+      {
+        "index": 4,
+        "text": "Total = 120 x 2 = 240."
+      }
+    ],
+    "ai_final_answer": "240",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Using the straight-line count for a circular arrangement",
+      "explanation": "Around a round table, rotations are the same arrangement, so n units can be seated in (n - 1)! ways, not n!. The 5 units give 4! = 24 arrangements, and the friends can swap, so the total is 24 x 2 = 48.",
+      "why_convincing": "The block technique in step 1 is exactly right, and 5! is the reflex for arranging 5 things. The circular condition is stated in the question, but step 2 quietly switches to a line."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Treat the pair as one unit: 5 units around a circle give (5 - 1)! = 24 arrangements. The friends can sit in 2 orders within the block: 24 x 2 = 48.",
+    "canonical_answer": "48",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(5 - 1)! x 2 = 24 x 2 = 48.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "24",
+          "48"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "3 people around a table: there are 2 arrangements, not 3! = 6.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2",
+          "6"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Three people A, B, C around a round table have only 2 distinct arrangements (ABC and ACB), not 3! = 6."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that the counting formula matches the shape of the seating."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 counts arrangements of the 5 units. Ask whether rotations have been accounted for."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "n units around a circle, where rotations are identical, can be arranged in (n - 1)! ways."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recount the 5 units as a circular arrangement, then multiply by the pair's internal orders."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 uses 5! for a circle. Around a round table 5 units give 4! = 24 arrangements; with the pair swapping, the total is 48, not 240."
+      }
+    ],
+    "repair": "Replace step 2 with (5 - 1)! = 24 circular arrangements, giving 24 x 2 = 48.",
+    "debrief": "Counting problems fail most often on the model, not the arithmetic: a circle is not a line, because rotating everyone one seat produces the same seating. The block method was sound, and only the counting formula ignored the table's shape. A small case checked by hand - 3 people, 2 seatings - is the quickest way to confirm which formula applies.",
+    "transfer_check": {
+      "question": "In how many ways can 5 people sit around a round table if two particular people must sit together?",
+      "answer": "12",
+      "explanation": "4 units around a circle: 3! = 6, times 2 for the pair = 12."
+    },
+    "validation_payload": {
+      "solver": "from itertools import permutations\ncount = 0\nfor p in permutations(range(1, 6)):\n    seats = (0,) + p\n    i = seats.index(1)\n    if (i - 1) % 6 == seats.index(0) or (i + 1) % 6 == seats.index(0):\n        count += 1\nanswer = count",
+      "flawed_solver": "answer = math.factorial(5) * 2"
+    }
+  },
+  {
+    "id": "apt-arrangements-puzzles-002",
+    "subject": "aptitude",
+    "topic": "Arrangements & Puzzles",
+    "subtopic": "Queue order from clues",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Five friends A, B, C, D and E stand in a single queue (position 1 is the front). Clues: (1) B is somewhere ahead of D. (2) C stands immediately behind A. (3) E is at one end of the queue. (4) D is not last. (5) B is not first. (6) A is not first. Who is in the middle of the queue?",
+    "artifact_type": "logical_argument",
+    "artifact": {
+      "clues": [
+        "B is somewhere ahead of D.",
+        "C stands immediately behind A.",
+        "E is at one end of the queue.",
+        "D is not last.",
+        "B is not first.",
+        "A is not first."
+      ]
+    },
+    "ai_claim": "D is in the middle of the queue.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "First place: not A or B (clues 5 and 6), not C (C stands behind A), not D (B is ahead of D). So E is first."
+      },
+      {
+        "index": 2,
+        "text": "Last place: not D (clue 4), not B (D is behind B), not A (C is behind A). So C is last and A is fourth."
+      },
+      {
+        "index": 3,
+        "text": "B and D fill positions 2 and 3, and B is ahead of D, so B is second and D is third."
+      },
+      {
+        "index": 4,
+        "text": "The order is E, B, D, A, C, so D is in the middle."
+      }
+    ],
+    "ai_final_answer": "D",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Eliminating candidates for the front gives E first; eliminating candidates for the back gives C last, so A is fourth. B ahead of D fixes B second and D third. Order: E, B, D, A, C. The middle (position 3) is D. The arrangement is unique and satisfies all six clues.",
+    "canonical_answer": "D",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Each position is filled by elimination; the order E, B, D, A, C satisfies all six clues.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether each elimination in the steps is justified by a clue."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Clue 3 says E is at one end, but step 1 derives E's position without using it. Verify that step 1's reasoning holds."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In an ordering puzzle, a position can be fixed by ruling out every other candidate for it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Place the five friends in the order the solution gives and test all six clues one by one."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Every elimination follows from a clue, and E, B, D, A, C satisfies all six clues, so D is in the middle. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Solutions that reach a position by elimination rather than by a direct clue often look like guesswork. This one is rigorous: each candidate for the front and back is excluded by a stated clue, and the final order satisfies every condition. The fastest verification for any puzzle answer is to substitute it back into all the clues; if it passes and each step was forced, the answer stands.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "from itertools import permutations\nmiddles = set()\nfor p in permutations('ABCDE'):\n    pos = {c: i for i, c in enumerate(p)}\n    if pos['B'] < pos['D'] and pos['C'] == pos['A'] + 1 and pos['E'] in (0, 4) and pos['D'] != 4 and pos['B'] != 0 and pos['A'] != 0:\n        middles.add(p[2])\nanswer = middles.pop() if len(middles) == 1 else 'not unique'"
+    }
+  }
+]

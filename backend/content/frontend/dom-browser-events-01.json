@@ -1,0 +1,474 @@
+[
+  {
+    "id": "fe-dom-browser-events-001",
+    "subject": "frontend",
+    "topic": "DOM & Browser Events",
+    "subtopic": "querySelector returns one element",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this highlight all three .item elements?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// <li class=\"item\">A</li> <li class=\"item\">B</li> <li class=\"item\">C</li>\ndocument.querySelector(\".item\").classList.add(\"highlight\");"
+    },
+    "ai_claim": "Yes. querySelector('.item') selects the elements with class item, and classList.add applies the class to them.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The selector '.item' matches all three list items."
+      },
+      {
+        "index": 2,
+        "text": "querySelector returns the matching elements."
+      },
+      {
+        "index": 3,
+        "text": "classList.add('highlight') adds the class to each of them."
+      },
+      {
+        "index": 4,
+        "text": "So all three items are highlighted."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Confusing querySelector with querySelectorAll",
+      "explanation": "querySelector returns only the first matching element (or null). Only item A gets the class. querySelectorAll returns a NodeList of every match, which must be looped over: document.querySelectorAll('.item').forEach(el => el.classList.add('highlight')).",
+      "why_convincing": "The selector does match all three elements; the method just returns one of them."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Only the first item is highlighted. Use querySelectorAll and loop over the result.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "After running it, only item A has the highlight class.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "document.querySelectorAll('.item').forEach(el => el.classList.add('highlight'));",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Items B and C are unchanged."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what querySelector returns when several elements match."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says querySelector returns 'the matching elements'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "querySelector returns the first match; querySelectorAll returns all of them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Inspect items B and C after the code runs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: querySelector returns only the first match. Use querySelectorAll with forEach."
+      }
+    ],
+    "repair": "Use `document.querySelectorAll('.item').forEach(el => el.classList.add('highlight'))`.",
+    "debrief": "DOM APIs come in single and multiple forms (querySelector/querySelectorAll, getElementById/getElementsByClassName). Always check which one you have and test with more than one matching element.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-dom-browser-events-002",
+    "subject": "frontend",
+    "topic": "DOM & Browser Events",
+    "subtopic": "Listeners on elements added later",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the user mark every todo as done by clicking it, including todos added after the page loaded?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "document.querySelectorAll(\".todo\").forEach(el => {\n  el.addEventListener(\"click\", () => el.classList.toggle(\"done\"));\n});\n\n// later, when the user adds a task:\nfunction addTodo(text) {\n  const li = document.createElement(\"li\");\n  li.className = \"todo\";\n  li.textContent = text;\n  list.appendChild(li);\n}"
+    },
+    "ai_claim": "Yes. Every element with class todo has a click listener, and new todos get the todo class, so clicking any of them toggles it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The code adds a click listener to each .todo element."
+      },
+      {
+        "index": 2,
+        "text": "addTodo creates new items with the class todo."
+      },
+      {
+        "index": 3,
+        "text": "Elements with class todo respond to the click listener."
+      },
+      {
+        "index": 4,
+        "text": "So every todo, old or new, toggles when clicked."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming listeners attach to a selector rather than to elements",
+      "explanation": "addEventListener attaches to the specific elements that existed when the loop ran. A todo created later gets the class but no listener, so clicking it does nothing. Use event delegation: one listener on the list that checks e.target.closest('.todo').",
+      "why_convincing": "The initial todos work, and the new ones look identical."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Only todos present at load respond. Attach one listener to the list and use e.target.closest('.todo') to find the clicked item.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Add a todo with addTodo('Buy milk') and click it: nothing happens.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "list.addEventListener('click', e => e.target.closest('.todo')?.classList.toggle('done'));",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A newly added todo does not toggle."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test a todo created after the page loads."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a listener belongs to a class."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Listeners are attached to individual elements at the moment addEventListener runs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check whether the new <li> ever receives a listener."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: new elements get no listener. Use event delegation on the list."
+      }
+    ],
+    "repair": "Use one delegated listener on the list container.",
+    "debrief": "Listeners bind to elements, not selectors. Dynamic lists need event delegation, which also uses fewer listeners. Test interactions on content added at runtime, not only on the initial page.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-dom-browser-events-003",
+    "subject": "frontend",
+    "topic": "DOM & Browser Events",
+    "subtopic": "event.target in delegated handlers",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "When the user clicks the word 'Lamp', is removeItem called with '7'?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// <ul id=\"cart\">\n//   <li data-id=\"7\"><strong>Lamp</strong> <em>x1</em></li>\n// </ul>\ncart.addEventListener(\"click\", (e) => {\n  removeItem(e.target.dataset.id);\n});"
+    },
+    "ai_claim": "Yes. The click happens on the list item, whose data-id is 7, so e.target.dataset.id is '7'.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The listener is on the cart list and handles clicks on its items."
+      },
+      {
+        "index": 2,
+        "text": "Clicking 'Lamp' clicks the list item."
+      },
+      {
+        "index": 3,
+        "text": "e.target is the list item, whose data-id is 7."
+      },
+      {
+        "index": 4,
+        "text": "So removeItem('7') is called."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Assuming event.target is the element that has the data",
+      "explanation": "e.target is the innermost element clicked - here the <strong>, which has no data-id - so removeItem receives undefined. Use e.target.closest('li')?.dataset.id to walk up to the list item. (e.currentTarget would be the <ul>.)",
+      "why_convincing": "Clicking the gaps of the list item works, so the handler seems correct."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "e.target is the <strong>, so dataset.id is undefined. Use const li = e.target.closest('li[data-id]'); if (li) removeItem(li.dataset.id).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Clicking 'Lamp' logs e.target.tagName as STRONG and dataset.id as undefined.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "const li = e.target.closest('li[data-id]'); if (li) removeItem(li.dataset.id);",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Clicking the <strong> text calls removeItem(undefined)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the innermost element under the pointer."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes e.target is the list item."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "event.target is the deepest element clicked; closest() walks up to an ancestor."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Log e.target.tagName when clicking 'Lamp'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: e.target is the <strong>. Use e.target.closest('li')."
+      }
+    ],
+    "repair": "Use `e.target.closest('li[data-id]')` to find the item.",
+    "debrief": "In delegated handlers, event.target can be any descendant of the element you care about. closest() is the reliable way to reach it. Test clicks on nested text and icons, not just on padding.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-dom-browser-events-004",
+    "subject": "frontend",
+    "topic": "DOM & Browser Events",
+    "subtopic": "innerHTML and user input",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this display every comment exactly as the user typed it?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "function showComment(text) {\n  // text is whatever the user typed into the comment box\n  commentBox.innerHTML = text;\n}"
+    },
+    "ai_claim": "Yes. innerHTML sets the content of the element, so the comment text appears as typed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "text holds the user's comment."
+      },
+      {
+        "index": 2,
+        "text": "innerHTML replaces the element's content."
+      },
+      {
+        "index": 3,
+        "text": "The browser shows the text as it was typed."
+      },
+      {
+        "index": 4,
+        "text": "So every comment appears exactly as typed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating innerHTML as a text setter",
+      "explanation": "innerHTML parses its value as HTML. A comment like '<b>hi</b>' renders bold instead of showing the tags, and '<img src=x onerror=\"...\">' runs script - a cross-site scripting hole. textContent inserts plain text without parsing.",
+      "why_convincing": "Plain comments without angle brackets do display exactly as typed."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the text is parsed as HTML, so markup is rendered and scripts can run. Use commentBox.textContent = text.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "The comment '<b>hi</b>' is shown as bold 'hi', not as typed.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "commentBox.textContent = text;",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'<img src=x onerror=alert(1)>' executes script."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try a comment containing angle brackets."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the browser shows the value as text."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "innerHTML parses markup; textContent does not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Enter '<b>hi</b>' as a comment."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: innerHTML renders HTML, and can run script. Use textContent."
+      }
+    ],
+    "repair": "Use `textContent` for user-provided text.",
+    "debrief": "Choosing between innerHTML and textContent is choosing between code and data. User input is data, so it belongs in textContent (or a framework's escaped rendering).",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-dom-browser-events-005",
+    "subject": "frontend",
+    "topic": "DOM & Browser Events",
+    "subtopic": "Removing an event listener",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the removeEventListener call remove the scroll listener, even though it does not repeat { passive: true }?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "function onScroll() { updateHeader(); }\n\nwindow.addEventListener(\"scroll\", onScroll, { passive: true });\n\n// later\nwindow.removeEventListener(\"scroll\", onScroll);"
+    },
+    "ai_claim": "Yes. A listener is matched by event type, function reference and capture flag. onScroll is the same function and capture is false in both calls; passive is not part of the match.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "addEventListener registered onScroll for scroll, with capture false by default."
+      },
+      {
+        "index": 2,
+        "text": "removeEventListener passes the same type and the same function reference."
+      },
+      {
+        "index": 3,
+        "text": "The capture flag is false in both calls; passive does not affect matching."
+      },
+      {
+        "index": 4,
+        "text": "So the listener is removed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Listeners are identified by (type, callback, capture). Because onScroll is a named function, the same reference is passed both times, and passive is ignored for matching.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "DOM spec: removeEventListener matches on type, callback and capture; other options are ignored.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "An inline arrow function passed to both calls would not match, because each arrow is a new function.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which properties identify a registered listener."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says passive is not part of the match."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Listeners are matched by type, callback reference and capture."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the arguments of both calls."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The same function and capture flag are used, so the listener is removed. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "removeEventListener only works when you pass the same function reference, which is why inline arrow functions can never be removed. The claim identifies the matching rule precisely.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

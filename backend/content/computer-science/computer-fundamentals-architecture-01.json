@@ -1,0 +1,479 @@
+[
+  {
+    "id": "cs-computer-fundamentals-architecture-001",
+    "subject": "computer-science",
+    "topic": "Computer Fundamentals & Architecture",
+    "subtopic": "Two's complement range",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the range of values an 8-bit signed integer can hold in two's complement representation?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "An 8-bit signed integer holds values from -127 to 127.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "8 bits give 2^8 = 256 bit patterns."
+      },
+      {
+        "index": 2,
+        "text": "One bit is the sign, leaving 7 bits for the magnitude."
+      },
+      {
+        "index": 3,
+        "text": "7 magnitude bits reach at most 127, in either direction."
+      },
+      {
+        "index": 4,
+        "text": "So the range is -127 to 127."
+      }
+    ],
+    "ai_final_answer": "-127 to 127",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Applying sign-magnitude reasoning to two's complement",
+      "explanation": "In two's complement there is no separate magnitude and no negative zero. The 256 patterns cover -128 to 127: 10000000 is -128. Sign-magnitude wastes a pattern on -0, which is where -127 to 127 comes from.",
+      "why_convincing": "'One bit for the sign' is how signed numbers are first taught, and the answer is symmetric, which looks tidy."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Two's complement uses all 256 patterns for distinct values: -128 (10000000) to 127 (01111111). The range is asymmetric because zero takes one of the non-negative patterns.",
+    "canonical_answer": "-128 to 127",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "The pattern 10000000 represents -128 in two's complement.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "-128"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "256 patterns but -127..127 is only 255 values; one pattern would be unused.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "256",
+          "255"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "10000000 in 8-bit two's complement is -128."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count how many distinct values the claimed range contains."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 splits the byte into a sign and a magnitude. Is that how two's complement works?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Two's complement has a single zero and gives the extra pattern to the negative side."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out the value of 10000000 in two's complement."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 uses sign-magnitude logic. In two's complement 10000000 is -128, so the range is -128 to 127."
+      }
+    ],
+    "repair": "Replace steps 2-4: two's complement uses all 256 patterns, so the range is -128 to 127.",
+    "debrief": "The quickest check was counting: -127 to 127 is 255 values, but 8 bits give 256 patterns. Two's complement is designed so that there is one zero and the circuit for addition works for signed and unsigned numbers alike, which is why the range is lopsided. When a range 'looks' symmetric, count its members.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-computer-fundamentals-architecture-002",
+    "subject": "computer-science",
+    "topic": "Computer Fundamentals & Architecture",
+    "subtopic": "Unsigned overflow",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In an unsigned 8-bit register, what value results from adding 200 and 100?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "The register holds 300.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "200 in binary is 11001000 and 100 is 01100100."
+      },
+      {
+        "index": 2,
+        "text": "Adding them gives 300."
+      },
+      {
+        "index": 3,
+        "text": "The register stores the sum of its inputs."
+      },
+      {
+        "index": 4,
+        "text": "The result is 300."
+      }
+    ],
+    "ai_final_answer": "300",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming the register can hold any sum",
+      "explanation": "An unsigned 8-bit register holds only 0 to 255. 300 does not fit: the carry out of bit 7 is lost and the register keeps 300 - 256 = 44 (arithmetic modulo 256). The overflow is reported in the carry flag, not in the value.",
+      "why_convincing": "The arithmetic in step 2 is correct, so the answer feels verified; the register's width is a physical limit that the maths never mentions."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "8-bit unsigned arithmetic is modulo 256. 200 + 100 = 300, which wraps to 300 - 256 = 44 (binary 00101100), and the carry flag is set.",
+    "canonical_answer": "44",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "8-bit unsigned registers hold 0-255; results wrap modulo 256.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "256"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "11001000 + 01100100 = 1 00101100; the ninth bit is dropped, leaving 00101100 = 44",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "44"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "255 + 1 in an 8-bit register gives 0, not 256."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the largest value an 8-bit register can hold."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the register can hold the full sum."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Unsigned n-bit arithmetic wraps around modulo 2^n."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write the 9-bit binary sum and keep only the lowest 8 bits."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the register holds at most 255, so 300 wraps to 44 and the carry flag is set."
+      }
+    ],
+    "repair": "Replace step 3: an 8-bit register keeps the sum modulo 256, so the result is 44 with the carry flag set.",
+    "debrief": "Hardware arithmetic has a width, and mathematics does not. Overflow bugs appear wherever a value's real range exceeds its storage, from counters to timestamps. When reasoning about machine values, write the bit width down first and check that every result fits.",
+    "transfer_check": {
+      "question": "In an unsigned 8-bit register, what is 250 + 10?",
+      "answer": "4",
+      "explanation": "260 - 256 = 4."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-computer-fundamentals-architecture-003",
+    "subject": "computer-science",
+    "topic": "Computer Fundamentals & Architecture",
+    "subtopic": "Pipelining: latency versus throughput",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A processor moves from a non-pipelined design to a 5-stage pipeline with the same total work per instruction. Does each individual instruction now complete, from start to finish, about 5 times faster?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. With 5 stages working in parallel, each instruction finishes about 5 times faster.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The pipeline splits instruction execution into 5 stages."
+      },
+      {
+        "index": 2,
+        "text": "All 5 stages work at the same time on different instructions."
+      },
+      {
+        "index": 3,
+        "text": "So each instruction's own start-to-finish time is divided by 5."
+      },
+      {
+        "index": 4,
+        "text": "Each instruction completes about 5 times faster."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Confusing throughput with latency",
+      "explanation": "Pipelining overlaps different instructions; it does not shorten any single one. Each instruction still passes through all 5 stages, so its latency stays the same (or grows slightly because of pipeline registers). What improves - ideally about 5 times - is throughput: one instruction can finish every cycle.",
+      "why_convincing": "'5 stages in parallel' does make the processor about 5 times faster overall, so it is easy to attribute the speed-up to each instruction."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Latency per instruction is unchanged or slightly longer; throughput improves, ideally approaching one instruction completed per stage-time, about 5 times the non-pipelined rate.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Pipelining increases throughput, not the latency of an individual instruction.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "One instruction: IF -> ID -> EX -> MEM -> WB, still 5 stage-times from start to finish.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A single instruction run alone on the pipeline takes all 5 stages - no faster than before."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate 'how long one instruction takes' from 'how many instructions finish per second'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 moves from 'stages overlap' to 'each instruction is faster'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Throughput is completions per unit time; latency is the time for one item from start to finish."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace a single instruction through all 5 stages."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: each instruction still passes through all 5 stages, so its latency is not reduced. Pipelining raises throughput instead."
+      }
+    ],
+    "repair": "Replace steps 3-4: latency per instruction is unchanged (or slightly longer); throughput improves by up to about 5 times.",
+    "debrief": "Latency and throughput are different measures, and many performance claims quietly swap one for the other. An assembly line makes more cars per hour, not any single car faster. When you read 'N times faster', ask: faster at what - one task, or many tasks per second?",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-computer-fundamentals-architecture-004",
+    "subject": "computer-science",
+    "topic": "Computer Fundamentals & Architecture",
+    "subtopic": "Byte order in memory",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A little-endian machine stores the 32-bit value 0x12345678 at address 0x100. Which byte is stored at address 0x100?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "The byte at address 0x100 is 0x12.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "0x12345678 consists of the bytes 0x12, 0x34, 0x56 and 0x78."
+      },
+      {
+        "index": 2,
+        "text": "The value is written into four consecutive addresses, 0x100 to 0x103."
+      },
+      {
+        "index": 3,
+        "text": "Bytes are stored in the order they are written, so the first byte, 0x12, goes to the lowest address."
+      },
+      {
+        "index": 4,
+        "text": "Address 0x100 holds 0x12."
+      }
+    ],
+    "ai_final_answer": "0x12",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Describing big-endian storage for a little-endian machine",
+      "explanation": "Little-endian means the least significant byte is stored at the lowest address. 0x78 goes to 0x100, then 0x56, 0x34 and 0x12 at 0x103. Storing 0x12 first is big-endian.",
+      "why_convincing": "Reading the hexadecimal value left to right feels like the natural order, which is exactly the big-endian convention."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Little-endian stores the least significant byte first: 0x100 = 0x78, 0x101 = 0x56, 0x102 = 0x34, 0x103 = 0x12.",
+    "canonical_answer": "0x78",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Little-endian: least significant byte at the lowest address.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0x78"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "0x100: 78, 0x101: 56, 0x102: 34, 0x103: 12",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0x78"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "On an x86 machine, a memory dump of 0x12345678 reads 78 56 34 12."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall what 'little-endian' refers to."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 decides which byte goes first."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Little-endian stores the least significant byte at the lowest address."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Identify the least significant byte of 0x12345678."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 describes big-endian order. On a little-endian machine 0x100 holds the least significant byte, 0x78."
+      }
+    ],
+    "repair": "Replace step 3: little-endian puts the least significant byte, 0x78, at the lowest address.",
+    "debrief": "Endianness is a convention, and the 'natural' reading order matches only one of them. It matters whenever bytes cross a boundary: files, network packets, memory dumps. Name the convention explicitly and check which end is 'least significant' before reading bytes.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-computer-fundamentals-architecture-005",
+    "subject": "computer-science",
+    "topic": "Computer Fundamentals & Architecture",
+    "subtopic": "Amdahl's law",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "40% of a program's running time can be perfectly parallelised; the rest must run serially. What is the best overall speed-up on 4 cores?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "The best speed-up is about 1.43 times, not 4 times.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "By Amdahl's law, speed-up = 1 / (serial fraction + parallel fraction / cores)."
+      },
+      {
+        "index": 2,
+        "text": "The serial fraction is 0.6 and the parallel fraction 0.4."
+      },
+      {
+        "index": 3,
+        "text": "Speed-up = 1 / (0.6 + 0.4 / 4) = 1 / 0.7."
+      },
+      {
+        "index": 4,
+        "text": "That is about 1.43 times."
+      }
+    ],
+    "ai_final_answer": "1.43",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Amdahl's law: S = 1 / (0.6 + 0.4/4) = 1 / 0.7 = 1.43 (approximately). The serial 60% limits the speed-up however many cores are added; even infinite cores give only 1 / 0.6 = 1.67.",
+    "canonical_answer": "1.43",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "1 / (0.6 + 0.4 / 4) = 1 / 0.7 = 1.43",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.7",
+          "1.43"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "A result far below 4 on 4 cores deserves a check, not an automatic challenge."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 applies the formula. Recompute it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Amdahl's law: the serial fraction is not sped up at all."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate 1 / (0.6 + 0.1) yourself."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The serial 60% dominates, so 4 cores give only about 1.43 times. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Intuition says 4 cores should give about 4 times the speed, so a result of 1.43 looks like an error. Amdahl's law says otherwise: the part that cannot be parallelised dominates. Before optimising or buying hardware, measure the serial fraction - it sets the ceiling.",
+    "transfer_check": {
+      "question": "If 80% of a program parallelises perfectly, what is the best speed-up on 4 cores?",
+      "answer": "2.5",
+      "explanation": "1 / (0.2 + 0.8/4) = 1 / 0.4 = 2.5."
+    },
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,459 @@
+[
+  {
+    "id": "apt-wg-001",
+    "subject": "aptitude",
+    "topic": "Time, Speed & Distance",
+    "subtopic": "Time, speed and distance",
+    "difficulty": "3",
+    "challenge_mode": "which_ai_is_wrong",
+    "question": "A car covers the first 120 km of a journey at 40 km/h and the next 120 km at 60 km/h. Two AI assistants were asked for the average speed over the whole journey. They disagree. Which of them - if either - is right?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "given": [
+        "First leg: 120 km at 40 km/h",
+        "Second leg: 120 km at 60 km/h"
+      ]
+    },
+    "competing": [
+      {
+        "label": "A",
+        "persona": "AI Alpha",
+        "ai_claim": "The average speed is 50 km/h.",
+        "ai_final_answer": "50",
+        "simulated_confidence": 95,
+        "ai_solution": [
+          {
+            "index": 1,
+            "text": "The journey has two legs of equal length, 120 km each."
+          },
+          {
+            "index": 2,
+            "text": "The speeds on the two legs are 40 km/h and 60 km/h."
+          },
+          {
+            "index": 3,
+            "text": "Because the two distances are equal, the two legs contribute equally to the journey, so the average speed is the mean of the two speeds."
+          },
+          {
+            "index": 4,
+            "text": "(40 + 60) / 2 = 50, so the average speed is 50 km/h."
+          }
+        ]
+      },
+      {
+        "label": "B",
+        "persona": "AI Beta",
+        "ai_claim": "The average speed is 48 km/h.",
+        "ai_final_answer": "48",
+        "simulated_confidence": 71,
+        "ai_solution": [
+          {
+            "index": 1,
+            "text": "The journey has two legs of equal length, 120 km each, so the total distance is 240 km."
+          },
+          {
+            "index": 2,
+            "text": "The speeds on the two legs are 40 km/h and 60 km/h."
+          },
+          {
+            "index": 3,
+            "text": "Average speed is total distance over total time, so the times matter, not the speeds directly: the slower leg takes longer and so counts for more."
+          },
+          {
+            "index": 4,
+            "text": "First leg: 120/40 = 3 h. Second leg: 120/60 = 2 h. Total time 5 h."
+          },
+          {
+            "index": 5,
+            "text": "240 / 5 = 48, so the average speed is 48 km/h."
+          }
+        ]
+      }
+    ],
+    "comparison": {
+      "verdict": "b_correct",
+      "divergence_step": 3,
+      "explanation": "Both agree on the distances and the speeds. They part company at step 3, on what 'average' means. Equal distances do not mean equal weight: the 40 km/h leg takes 3 hours and the 60 km/h leg takes 2, so the slow leg occupies more of the journey and pulls the average below the midpoint. Average speed is always total distance over total time."
+    },
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Averaging rates directly instead of weighting them by the time each is sustained",
+      "explanation": "A's step 3 asserts that equal distances make the legs contribute equally. They contribute equally to the distance but not to the time, and average speed is a time-weighted quantity. The correct value is the harmonic mean of the two speeds, 2*40*60/(40+60) = 48, which is always below the arithmetic mean unless the speeds are equal.",
+      "why_convincing": "A's reasoning sounds like a symmetry argument, and symmetry arguments are usually sound. The equal 120 km legs make 'they count equally' feel like a statement about the problem rather than an assumption about the averaging. A is also the more confident of the two, and 50 is the rounder number."
+    },
+    "canonical_solution": "Total distance = 120 + 120 = 240 km. Time on the first leg = 120/40 = 3 h; on the second = 120/60 = 2 h; total 5 h. Average speed = 240/5 = 48 km/h. Equivalently, for equal distances the average speed is the harmonic mean 2(40)(60)/(40+60) = 48 km/h. The arithmetic mean 50 km/h would only be correct if equal *times* were spent at each speed, not equal distances.",
+    "canonical_answer": "48",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Total time is 5 h, so 240/5 = 48 km/h.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "48",
+          "5"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "At 50 km/h the 240 km journey would take 4.8 h, but the two legs take 3 + 2 = 5 h.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "4.8"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If A were right, 240 km at 50 km/h would take 4.8 h, but the legs demonstrably take 3 h and 2 h.",
+      "Push the speeds apart: 120 km at 1 km/h and 120 km at 100 km/h averages 1.98 km/h, nowhere near the mean of 50.5."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "The two solutions agree on every number until one specific claim. Find the step where they stop agreeing."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Work out how long each leg actually takes. Are the two legs equal in time?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Average speed is defined as total distance divided by total time. Check each solution against that definition rather than against your intuition."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test A's answer: if the average really were 50 km/h, how long would 240 km take? Compare with 3 + 2 hours."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "A's step 3 is the failure: equal distances weight the distance, not the time. The slow leg takes 3 h against 2 h, so the true average is 240/5 = 48 km/h. B is right."
+      }
+    ],
+    "repair": "Replace A's step 3 with a time computation: 120/40 = 3 h and 120/60 = 2 h, total 5 h, so the average speed is 240/5 = 48 km/h.",
+    "debrief": "Two assistants, two confident answers, and the more confident one is wrong. Notice what was *not* useful here: the confidence badge, the roundness of the answer, and the length of the explanation. What was useful was a definition - total distance over total time - applied to both solutions independently. When two sources disagree, do not compare them to each other. Compare each to the thing that decides.",
+    "transfer_check": {
+      "question": "A cyclist rides 60 km at 20 km/h and 60 km at 30 km/h. What is the average speed in km/h?",
+      "answer": "24",
+      "explanation": "Times are 3 h and 2 h, total 5 h for 120 km: 120/5 = 24 km/h, the harmonic mean of 20 and 30."
+    },
+    "validation_payload": {
+      "solver": "d = 120\nt = Fraction(d, 40) + Fraction(d, 60)\nanswer = Fraction(2 * d, 1) / t\n",
+      "solver_a": "answer = Fraction(40 + 60, 2)\n",
+      "solver_b": "d = 120\nt = Fraction(d, 40) + Fraction(d, 60)\nanswer = Fraction(2 * d, 1) / t\n"
+    }
+  },
+  {
+    "id": "apt-wg-002",
+    "subject": "aptitude",
+    "topic": "Averages, Ages & Partnerships",
+    "subtopic": "Averages",
+    "difficulty": "4",
+    "challenge_mode": "which_ai_is_wrong",
+    "question": "\"The average weight of a group increased by 2 kg when a person weighing 80 kg joined it. What was the average weight before?\" Two AI assistants answered. Which of them - if either - is right?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "given": [
+        "A group of unspecified size has some average weight",
+        "One person weighing 80 kg joins",
+        "The average rises by exactly 2 kg"
+      ]
+    },
+    "competing": [
+      {
+        "label": "A",
+        "persona": "AI Alpha",
+        "ai_claim": "The original average was 58 kg.",
+        "ai_final_answer": "58",
+        "simulated_confidence": 89,
+        "ai_solution": [
+          {
+            "index": 1,
+            "text": "Let the original group have n people with average a kg, so the total weight is n*a."
+          },
+          {
+            "index": 2,
+            "text": "After the new person joins: (n*a + 80) / (n + 1) = a + 2."
+          },
+          {
+            "index": 3,
+            "text": "Expanding: n*a + 80 = n*a + a + 2n + 2, so a = 78 - 2n."
+          },
+          {
+            "index": 4,
+            "text": "A group is conventionally taken as ten people when no size is stated, so n = 10."
+          },
+          {
+            "index": 5,
+            "text": "a = 78 - 20 = 58, so the original average was 58 kg."
+          }
+        ]
+      },
+      {
+        "label": "B",
+        "persona": "AI Beta",
+        "ai_claim": "The original average was 62 kg.",
+        "ai_final_answer": "62",
+        "simulated_confidence": 76,
+        "ai_solution": [
+          {
+            "index": 1,
+            "text": "Let the original group have n people with average a kg, so the total weight is n*a."
+          },
+          {
+            "index": 2,
+            "text": "After the new person joins: (n*a + 80) / (n + 1) = a + 2."
+          },
+          {
+            "index": 3,
+            "text": "Expanding: n*a + 80 = n*a + a + 2n + 2, so a = 78 - 2n."
+          },
+          {
+            "index": 4,
+            "text": "The new person is 80 kg and the average moved by 2 kg, so the group must be small; taking the group as eight people fits naturally."
+          },
+          {
+            "index": 5,
+            "text": "a = 78 - 16 = 62, so the original average was 62 kg."
+          }
+        ]
+      }
+    ],
+    "comparison": {
+      "verdict": "underdetermined",
+      "divergence_step": 4,
+      "explanation": "Both derive the same correct relation at step 3: a = 78 - 2n. They diverge at step 4, where each invents a group size - ten for A, eight for B - and neither invention comes from the question. Every n gives a different, equally consistent answer, so the original average cannot be determined from what was given."
+    },
+    "truth_state": "insufficient_information",
+    "missing_information": "The number of people in the original group. The relation a = 78 - 2n is correct and fully determined, but it has two unknowns and only one equation, so a single value for a exists only once n is stated.",
+    "resolving_scenarios": [
+      "If the group had 5 people, a = 78 - 10 = 68 kg, and the average rises from 68 to 70 when the 80 kg person joins.",
+      "If the group had 8 people, a = 78 - 16 = 62 kg, and the average rises from 62 to 64.",
+      "If the group had 10 people, a = 78 - 20 = 58 kg, and the average rises from 58 to 60."
+    ],
+    "canonical_solution": "Let the original group have n people averaging a kg. Then (na + 80)/(n + 1) = a + 2, which simplifies to a = 78 - 2n. That is one equation in two unknowns. n = 5 gives a = 68, n = 8 gives 62, n = 10 gives 58 - all consistent with everything stated. The question is missing the group size, so the original average cannot be determined.",
+    "canonical_answer": "cannot be determined",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "Two different group sizes both satisfy every stated condition and give different averages.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "68",
+          "58"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "a = 78 - 2n is one equation in two unknowns, so a is not determined.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "78"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "n = 5, a = 68: total 340, plus 80 is 420 over 6 people = 70, exactly 2 more than 68.",
+      "n = 10, a = 58: total 580, plus 80 is 660 over 11 people = 60, exactly 2 more than 58."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read steps 1 to 3 of both solutions. Are they actually different?"
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "The two solutions are identical until step 4. Ask where the number introduced in step 4 comes from."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Count your unknowns and your equations. a = 78 - 2n has two unknowns and one equation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try n = 5 and check it against every condition in the question. Then try n = 10. Do both work?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Neither is right. Step 4 in each is an invented assumption - ten people, eight people - that the question never supplies. Every n satisfies the conditions, so the answer cannot be determined."
+      }
+    ],
+    "repair": "Stop at a = 78 - 2n and state that the original average cannot be determined without the group size. If the intended answer is a single number, the question must supply n.",
+    "debrief": "The dangerous step here is not an arithmetic slip - the algebra in both solutions is flawless. It is step 4, where each assistant quietly converts a missing fact into an assumption and then never mentions it again. That is the most common way AI output misleads: not by miscalculating, but by filling a gap so smoothly that the gap disappears. When two solutions agree on all the mathematics and differ only in what they assumed, the honest answer is usually that the question does not have one.",
+    "transfer_check": {
+      "question": "Using a = 78 - 2n, what would the original average be if the group had 6 people?",
+      "answer": "66",
+      "explanation": "78 - 12 = 66. Total 396, plus 80 is 476 over 7 = 68, which is 2 more than 66."
+    },
+    "validation_payload": {
+      "solver": "def avg_before(n):\n    return Fraction(78 - 2 * n)\ndef consistent(n):\n    a = avg_before(n)\n    return Fraction(n * a + 80, n + 1) == a + 2\nsizes = [5, 8, 10]\nvalues = {avg_before(n) for n in sizes}\nanswer = (\n    'cannot be determined'\n    if all(consistent(n) for n in sizes) and len(values) > 1\n    else str(sorted(values)[0])\n)\n",
+      "solver_a": "n = 10\nanswer = 78 - 2 * n\n",
+      "solver_b": "n = 8\nanswer = 78 - 2 * n\n"
+    }
+  },
+  {
+    "id": "apt-wg-003",
+    "subject": "aptitude",
+    "topic": "Permutations, Combinations & Probability",
+    "subtopic": "Probability",
+    "difficulty": "4",
+    "challenge_mode": "which_ai_is_wrong",
+    "question": "Two fair six-sided dice are thrown. What is the probability that the sum is 8 or the product is 12? Two AI assistants disagree. Which of them - if either - is right?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "given": [
+        "Two fair six-sided dice, 36 equally likely ordered outcomes",
+        "Event S: the sum is 8",
+        "Event P: the product is 12"
+      ]
+    },
+    "competing": [
+      {
+        "label": "A",
+        "persona": "AI Alpha",
+        "ai_claim": "The probability is 1/4.",
+        "ai_final_answer": "0.25",
+        "simulated_confidence": 92,
+        "ai_solution": [
+          {
+            "index": 1,
+            "text": "There are 36 equally likely ordered outcomes."
+          },
+          {
+            "index": 2,
+            "text": "Sum 8 occurs for (2,6), (3,5), (4,4), (5,3), (6,2) - 5 outcomes."
+          },
+          {
+            "index": 3,
+            "text": "Product 12 occurs for (2,6), (6,2), (3,4), (4,3) - 4 outcomes."
+          },
+          {
+            "index": 4,
+            "text": "The two events describe different quantities - a sum and a product - so they cannot occur together; the counts simply add."
+          },
+          {
+            "index": 5,
+            "text": "(5 + 4)/36 = 9/36 = 1/4."
+          }
+        ]
+      },
+      {
+        "label": "B",
+        "persona": "AI Beta",
+        "ai_claim": "The probability is 2/9.",
+        "ai_final_answer": "0.2222",
+        "simulated_confidence": 68,
+        "ai_solution": [
+          {
+            "index": 1,
+            "text": "There are 36 equally likely ordered outcomes."
+          },
+          {
+            "index": 2,
+            "text": "Sum 8 occurs for (2,6), (3,5), (4,4), (5,3), (6,2) - 5 outcomes."
+          },
+          {
+            "index": 3,
+            "text": "Product 12 occurs for (2,6), (6,2), (3,4), (4,3) - 4 outcomes."
+          },
+          {
+            "index": 4,
+            "text": "These events can overlap, so I must subtract the intersection. The pair {2,6} appears in both lists, so the overlap is one outcome."
+          },
+          {
+            "index": 5,
+            "text": "(5 + 4 - 1)/36 = 8/36 = 2/9."
+          }
+        ]
+      }
+    ],
+    "comparison": {
+      "verdict": "neither_correct",
+      "divergence_step": 4,
+      "explanation": "Both enumerate the two events correctly at steps 2 and 3, then both mishandle the overlap at step 4. A denies any overlap; B allows one outcome of overlap by counting the unordered pair {2,6} once. In fact two *ordered* outcomes satisfy both events - (2,6) and (6,2) - so the union has 5 + 4 - 2 = 7 outcomes and the probability is 7/36. Neither 9/36 nor 8/36 is right."
+    },
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 4,
+      "misconception": "Mishandling the intersection in the addition rule - denying it outright, or counting ordered outcomes as unordered pairs",
+      "explanation": "P(S or P) = P(S) + P(P) - P(S and P). The intersection is the set of ordered outcomes with sum 8 and product 12: (2,6) and (6,2) both qualify, since 2+6=8 and 2*6=12. That is two outcomes, not zero and not one. The union therefore has 7 outcomes and the probability is 7/36.",
+      "why_convincing": "A's step 4 sounds like a principled argument about independence, and it is the kind of sentence that reads as rigour. B looks even safer, because it remembers the addition rule at all - and having remembered it, the slip from ordered outcomes to unordered pairs is invisible. A student checking whether the rule was applied will approve B."
+    },
+    "canonical_solution": "Sum 8: (2,6), (3,5), (4,4), (5,3), (6,2) - 5 ordered outcomes. Product 12: (2,6), (6,2), (3,4), (4,3) - 4 ordered outcomes. Both: (2,6) and (6,2), since 2+6=8 and 2*6=12 - 2 ordered outcomes. By the addition rule the union has 5 + 4 - 2 = 7 outcomes, so the probability is 7/36, about 0.1944.",
+    "canonical_answer": "7/36",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "(6,2) satisfies both events, so the overlap is at least two ordered outcomes.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "6",
+          "2"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "5 + 4 - 2 = 7 favourable outcomes out of 36.",
+        "must_reference_step": 5,
+        "must_contain_values": [
+          "7",
+          "36"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "(2,6): sum 8 and product 12 - so A's claim that the events cannot co-occur is false.",
+      "(6,2): sum 8 and product 12 as well - so B's overlap of one is also too small."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Both solutions list the same outcomes in steps 2 and 3. Read those two lists next to each other."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Is there any outcome that appears in both lists? Check each one."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The 36 outcomes are ordered pairs. (2,6) and (6,2) are two different outcomes, not one."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the outcomes satisfying both events exactly, then apply the addition rule with that number."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Two ordered outcomes are in both events: (2,6) and (6,2). So the union has 5 + 4 - 2 = 7 outcomes and the answer is 7/36. A says 9/36, B says 8/36 - both wrong."
+      }
+    ],
+    "repair": "Replace step 4 in both: list the outcomes satisfying both events explicitly - (2,6) and (6,2) - giving an intersection of 2, so (5 + 4 - 2)/36 = 7/36.",
+    "debrief": "It is tempting to treat 'two AIs disagree' as 'one of them is right', and the whole structure of the comparison pushes you that way. Here both are wrong, and the more sophisticated-looking answer is wrong in the more instructive manner: B remembers the addition rule and still miscounts, because it silently switched from ordered outcomes to unordered pairs mid-argument. Checking that the right rule was used is not the same as checking that it was used on the right objects.",
+    "transfer_check": {
+      "question": "Two fair dice are thrown. How many of the 36 ordered outcomes have sum 7 or product 12?",
+      "answer": "8",
+      "explanation": "Sum 7 gives 6 outcomes; product 12 gives 4; both give (3,4) and (4,3), so 6 + 4 - 2 = 8."
+    },
+    "validation_payload": {
+      "solver": "outcomes = [(i, j) for i in range(1, 7) for j in range(1, 7)]\nhits = [p for p in outcomes if p[0] + p[1] == 8 or p[0] * p[1] == 12]\nanswer = Fraction(len(hits), len(outcomes))\n",
+      "solver_a": "outcomes = [(i, j) for i in range(1, 7) for j in range(1, 7)]\ns = [p for p in outcomes if p[0] + p[1] == 8]\npr = [p for p in outcomes if p[0] * p[1] == 12]\nanswer = round(float(Fraction(len(s) + len(pr), 36)), 4)\n",
+      "solver_b": "outcomes = [(i, j) for i in range(1, 7) for j in range(1, 7)]\ns = [p for p in outcomes if p[0] + p[1] == 8]\npr = [p for p in outcomes if p[0] * p[1] == 12]\nunordered_overlap = {frozenset(p) for p in s} & {frozenset(p) for p in pr}\nanswer = round(float(Fraction(len(s) + len(pr) - len(unordered_overlap), 36)), 4)\n"
+    }
+  }
+]

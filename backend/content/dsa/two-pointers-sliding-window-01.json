@@ -1,0 +1,542 @@
+[
+  {
+    "id": "dsa-two-pointers-sliding-window-001",
+    "subject": "dsa",
+    "topic": "Two Pointers & Sliding Window",
+    "subtopic": "Two pointers on unsorted input",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does has_pair(nums, target) correctly report whether any two numbers in the list add up to target, for any list of integers?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def has_pair(nums, target):\n    i, j = 0, len(nums) - 1\n    while i < j:\n        s = nums[i] + nums[j]\n        if s == target:\n            return True\n        if s < target:\n            i += 1\n        else:\n            j -= 1\n    return False"
+    },
+    "ai_claim": "Yes. The two pointers move towards each other, adjusting the sum, so every candidate pair is considered.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "i starts at the left end and j at the right end."
+      },
+      {
+        "index": 2,
+        "text": "If the sum is too small, moving i right increases it; if too large, moving j left decreases it."
+      },
+      {
+        "index": 3,
+        "text": "This works for any list, so no valid pair is skipped."
+      },
+      {
+        "index": 4,
+        "text": "has_pair is correct for any list of integers."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Using the two-pointer technique without sorted input",
+      "explanation": "Moving i right increases the sum only if the list is sorted. For the unsorted [3, 8, 1, 5] with target 6 (1 + 5), the pointers skip the pair and the function returns False. Sort first (O(n log n)) or use a hash set of seen values (O(n)).",
+      "why_convincing": "Step 2 describes the technique correctly - for sorted arrays - and the precondition is easy to forget."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The pointer moves are justified only for sorted input. has_pair([3, 8, 1, 5], 6) returns False although 1 + 5 = 6. Sort the list first, or use a set of complements.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "has_pair([3, 8, 1, 5], 6) returns False; 1 + 5 = 6.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "3+5=8>6 -> j=2; 3+1=4<6 -> i=1; 8+1=9>6 -> j=1; stop -> False",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "8",
+          "9"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "has_pair([3, 8, 1, 5], 6) returns False."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what step 2 relies on about the order of the numbers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says the technique works on any list."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Moving the left pointer right increases the sum only if the list is sorted ascending."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace has_pair([3, 8, 1, 5], 6)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the technique needs sorted input. On [3, 8, 1, 5] it misses 1 + 5. Sort first or use a set."
+      }
+    ],
+    "repair": "Sort a copy of the list first, or check complements with a set.",
+    "debrief": "The two-pointer technique is a direct consequence of sorted order, and without it the pointer moves are guesses. Algorithms carry their preconditions with them. Before reusing a technique, restate why each step is safe and check that the reason still holds.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "has_pair",
+      "ai_code": "def has_pair(nums, target):\n    i, j = 0, len(nums) - 1\n    while i < j:\n        s = nums[i] + nums[j]\n        if s == target:\n            return True\n        if s < target:\n            i += 1\n        else:\n            j -= 1\n    return False",
+      "reference_code": "def has_pair(nums, target):\n    n = len(nums)\n    return any(nums[i] + nums[j] == target for i in range(n) for j in range(i + 1, n))",
+      "test_inputs": [
+        "([1, 3, 5, 8], 6)",
+        "([1, 2], 10)",
+        "([3, 8, 1, 5], 6)"
+      ],
+      "counterexample_input": "([3, 8, 1, 5], 6)"
+    }
+  },
+  {
+    "id": "dsa-two-pointers-sliding-window-002",
+    "subject": "dsa",
+    "topic": "Two Pointers & Sliding Window",
+    "subtopic": "Sliding the window by one",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does max_window(nums, k) return the largest sum of any k consecutive elements?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def max_window(nums, k):\n    window = sum(nums[:k])\n    best = window\n    for i in range(k, len(nums)):\n        window += nums[i] - nums[i - k + 1]\n        best = max(best, window)\n    return best"
+    },
+    "ai_claim": "Yes. It keeps a running window sum, adding the new element and removing the one that leaves.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The first window is the sum of the first k elements."
+      },
+      {
+        "index": 2,
+        "text": "For each new index i, nums[i] enters the window."
+      },
+      {
+        "index": 3,
+        "text": "nums[i - k + 1] is the element that leaves the window, so it is subtracted."
+      },
+      {
+        "index": 4,
+        "text": "best tracks the largest window sum."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Off-by-one in the element leaving the window",
+      "explanation": "When nums[i] enters, the window becomes nums[i - k + 1 .. i], so the element that leaves is nums[i - k], not nums[i - k + 1]. The code subtracts an element that is still inside the window. For [1, 2, 3, 4] with k = 2 it returns 5 instead of 7.",
+      "why_convincing": "i - k + 1 is the first index of the new window, which is easy to confuse with the index that just left."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Subtract nums[i - k], the element leaving the window. The current code returns 5 for max_window([1, 2, 3, 4], 2); the correct answer is 7.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "max_window([1, 2, 3, 4], 2) returns 5; the answer is 7.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5",
+          "7"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "window 3 -> +3-2 = 4 -> +4-3 = 5 (real windows: 3, 5, 7)",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "max_window([1, 2, 3, 4], 2) returns 5."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Write down which indices are in the window after each step."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 names the element that leaves the window."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "After adding nums[i], the window is nums[i - k + 1 .. i]; the leaving element is the one just before it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace max_window([1, 2, 3, 4], 2)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the leaving element is nums[i - k], not nums[i - k + 1]. The result for [1, 2, 3, 4], k = 2 is 5 instead of 7."
+      }
+    ],
+    "repair": "Change the update to `window += nums[i] - nums[i - k]`.",
+    "debrief": "Sliding windows are index bookkeeping, and the leaving index is where off-by-one errors live. Writing the window's exact range before and after each step makes the correct index obvious. Test with increasing values so every wrong subtraction shows.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "max_window",
+      "ai_code": "def max_window(nums, k):\n    window = sum(nums[:k])\n    best = window\n    for i in range(k, len(nums)):\n        window += nums[i] - nums[i - k + 1]\n        best = max(best, window)\n    return best",
+      "reference_code": "def max_window(nums, k):\n    return max(sum(nums[i:i + k]) for i in range(len(nums) - k + 1))",
+      "test_inputs": [
+        "([5, 5, 5], 2)",
+        "([1, 2, 3, 4], 2)"
+      ],
+      "counterexample_input": "([1, 2, 3, 4], 2)"
+    }
+  },
+  {
+    "id": "dsa-two-pointers-sliding-window-003",
+    "subject": "dsa",
+    "topic": "Two Pointers & Sliding Window",
+    "subtopic": "Resetting the window start",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does longest_unique(s) return the length of the longest substring of s with no repeated characters?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def longest_unique(s):\n    start = best = 0\n    last = {}\n    for i, c in enumerate(s):\n        if c in last and last[c] >= start:\n            start = i\n        last[c] = i\n        best = max(best, i - start + 1)\n    return best"
+    },
+    "ai_claim": "Yes. When a character repeats inside the window, the window restarts, so it always holds unique characters, and best records the longest.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "last records the most recent index of each character."
+      },
+      {
+        "index": 2,
+        "text": "If c was seen inside the current window, the window must change to exclude the earlier c."
+      },
+      {
+        "index": 3,
+        "text": "Setting start = i restarts the window at the repeated character, which removes the earlier copy."
+      },
+      {
+        "index": 4,
+        "text": "best therefore records the longest window of unique characters."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Moving the window start too far",
+      "explanation": "The window only needs to start just after the previous copy of c, at last[c] + 1. Jumping to i also discards the characters between the two copies, which were still unique. For 'dvdf' the answer is 3 ('vdf'), but the function returns 2.",
+      "why_convincing": "Restarting the window does remove the duplicate, so the window stays valid - it just is not the longest valid window."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Set start = last[c] + 1, not i. With start = i, longest_unique('dvdf') returns 2 instead of 3.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "longest_unique('dvdf') returns 2; the answer is 3 ('vdf').",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2",
+          "3"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "i=2 'd' repeats (last 0) -> start = 2 drops 'v'; best stays 2",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "longest_unique('dvdf') returns 2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test a string where the repeat is not adjacent to its earlier copy."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 chooses the new start of the window."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Only characters up to the earlier copy need to leave the window."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace longest_unique('dvdf')."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the start should move to last[c] + 1, not i. For 'dvdf' it returns 2 instead of 3."
+      }
+    ],
+    "repair": "Replace `start = i` with `start = last[c] + 1`.",
+    "debrief": "A sliding window should shrink only as much as needed to restore validity; shrinking more still gives a valid window but can lose the optimum. Tests like 'abcabcbb' happen to pass, which is why the classic example is 'dvdf'. Check both validity and optimality.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "longest_unique",
+      "ai_code": "def longest_unique(s):\n    start = best = 0\n    last = {}\n    for i, c in enumerate(s):\n        if c in last and last[c] >= start:\n            start = i\n        last[c] = i\n        best = max(best, i - start + 1)\n    return best",
+      "reference_code": "def longest_unique(s):\n    best = 0\n    for i in range(len(s)):\n        seen = set()\n        for c in s[i:]:\n            if c in seen:\n                break\n            seen.add(c)\n        best = max(best, len(seen))\n    return best",
+      "test_inputs": [
+        "('abcabcbb',)",
+        "('',)",
+        "('dvdf',)"
+      ],
+      "counterexample_input": "('dvdf',)"
+    }
+  },
+  {
+    "id": "dsa-two-pointers-sliding-window-004",
+    "subject": "dsa",
+    "topic": "Two Pointers & Sliding Window",
+    "subtopic": "Order when moving zeros",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does move_zeros(nums) move all zeros to the end while keeping the non-zero numbers in their original order?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def move_zeros(nums):\n    a = list(nums)\n    i, j = 0, len(a) - 1\n    while i < j:\n        if a[i] == 0:\n            a[i], a[j] = a[j], a[i]\n            j -= 1\n        else:\n            i += 1\n    return a"
+    },
+    "ai_claim": "Yes. Each zero is swapped to the end, and non-zero elements are left where they are.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "i scans from the left and j marks the last free position at the right."
+      },
+      {
+        "index": 2,
+        "text": "When a[i] is 0, it is swapped with a[j] and j moves left."
+      },
+      {
+        "index": 3,
+        "text": "Non-zero elements are skipped over, so they keep their order."
+      },
+      {
+        "index": 4,
+        "text": "All zeros end up at the end with the non-zeros in order."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Swapping from the far end disturbs order",
+      "explanation": "Swapping a zero with a[j] brings the element from the end into position i, jumping it ahead of elements between them. For [0, 1, 2], the 0 swaps with 2, giving [2, 1, 0]: 1 and 2 have been reordered. An order-preserving version copies non-zeros forward in order, then fills the rest with zeros.",
+      "why_convincing": "Steps 1 and 3 describe a plausible two-pointer pattern, and the zeros really do end up at the end."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The swap moves the last element forward past others, so move_zeros([0, 1, 2]) returns [2, 1, 0]. Use a write pointer that copies non-zeros forward in order.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "move_zeros([0, 1, 2]) returns [2, 1, 0].",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2",
+          "1",
+          "0"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "i=0 is 0 -> swap with a[2] -> [2, 1, 0]",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "move_zeros([0, 1, 2]) returns [2, 1, 0]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the order of the non-zero numbers after the swap."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 swaps with an element from the far end."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Swapping with the far end moves that element ahead of everything in between."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace move_zeros([0, 1, 2])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 breaks the order: swapping with a[j] moves 2 before 1. Copy non-zeros forward with a write pointer instead."
+      }
+    ],
+    "repair": "Use a write index: copy each non-zero forward in order, then fill the remaining positions with zeros.",
+    "debrief": "The requirement had two parts - zeros at the end, and order preserved - and the code satisfies only the first. Swaps over long distances are the usual culprit when order matters. Test the preservation requirement with distinct values you can see move.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "move_zeros",
+      "ai_code": "def move_zeros(nums):\n    a = list(nums)\n    i, j = 0, len(a) - 1\n    while i < j:\n        if a[i] == 0:\n            a[i], a[j] = a[j], a[i]\n            j -= 1\n        else:\n            i += 1\n    return a",
+      "reference_code": "def move_zeros(nums):\n    return [x for x in nums if x != 0] + [x for x in nums if x == 0]",
+      "test_inputs": [
+        "([1, 2, 0],)",
+        "([0, 1, 2],)",
+        "([],)"
+      ],
+      "counterexample_input": "([0, 1, 2],)"
+    }
+  },
+  {
+    "id": "dsa-two-pointers-sliding-window-005",
+    "subject": "dsa",
+    "topic": "Two Pointers & Sliding Window",
+    "subtopic": "Read and write pointers on sorted data",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For a list sorted in ascending order, does dedupe_sorted return the distinct values in ascending order, using O(1) extra space besides the copy?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def dedupe_sorted(nums):\n    a = list(nums)\n    if not a:\n        return []\n    w = 1\n    for r in range(1, len(a)):\n        if a[r] != a[w - 1]:\n            a[w] = a[r]\n            w += 1\n    return a[:w]"
+    },
+    "ai_claim": "Yes. The read pointer scans every element and the write pointer keeps one copy of each run of equal values.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "w is the length of the de-duplicated prefix; a[0] is always kept."
+      },
+      {
+        "index": 2,
+        "text": "r scans the rest of the list in order."
+      },
+      {
+        "index": 3,
+        "text": "Because the list is sorted, equal values are adjacent, so a[r] is new exactly when it differs from a[w - 1]."
+      },
+      {
+        "index": 4,
+        "text": "New values are written at a[w], so a[:w] holds each distinct value once, in ascending order."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct for sorted input: duplicates are adjacent, so comparing with the last kept value detects every new value. Uses O(1) extra space beyond the working copy.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "dedupe_sorted([1, 1, 2, 3, 3, 3]) returns [1, 2, 3].",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1",
+          "2",
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the claim's reliance on the list being sorted."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is where sortedness is used."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In a sorted list, equal values are adjacent."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace dedupe_sorted([1, 1, 2, 3, 3, 3])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Sorted input makes equal values adjacent, so comparing with the last kept value suffices. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "This is the same two-pointer idea as the flawed pair search, used where its precondition genuinely holds: the question states the list is sorted. Approving it means naming that precondition and checking it is given.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "dedupe_sorted",
+      "ai_code": "def dedupe_sorted(nums):\n    a = list(nums)\n    if not a:\n        return []\n    w = 1\n    for r in range(1, len(a)):\n        if a[r] != a[w - 1]:\n            a[w] = a[r]\n            w += 1\n    return a[:w]",
+      "reference_code": "def dedupe_sorted(nums):\n    return sorted(set(nums))",
+      "test_inputs": [
+        "([1, 1, 2, 3, 3, 3],)",
+        "([],)",
+        "([5],)",
+        "([2, 2, 2],)"
+      ]
+    }
+  }
+]

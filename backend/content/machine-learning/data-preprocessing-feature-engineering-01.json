@@ -1,0 +1,356 @@
+[
+  {
+    "id": "ml-data-preprocessing-feature-engineering-001",
+    "subject": "machine-learning",
+    "topic": "Data Preprocessing & Feature Engineering",
+    "subtopic": "Oversampling before splitting",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 0.96 a realistic estimate of the model's recall on real, new data?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "X_res, y_res = SMOTE().fit_resample(X, y)          # 2% positives -> 50%\nX_tr, X_te, y_tr, y_te = train_test_split(X_res, y_res, test_size=0.2)\nmodel.fit(X_tr, y_tr)\nprint(recall_score(y_te, model.predict(X_te)))   # 0.96"
+    },
+    "ai_claim": "Yes. The model was tested on a held-out 20%, so its recall of 0.96 reflects real-world performance.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "SMOTE balances the classes."
+      },
+      {
+        "index": 2,
+        "text": "The data are then split into train and test."
+      },
+      {
+        "index": 3,
+        "text": "The test set was not used for training."
+      },
+      {
+        "index": 4,
+        "text": "So 0.96 reflects real performance."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 2,
+      "misconception": "Resampling before the train/test split",
+      "explanation": "SMOTE creates synthetic positives by interpolating between real ones. Resampling first means test positives are often synthetic points generated from training positives - near-copies of what the model saw - and the test set is 50% positive instead of 2%. Both inflate the score. Split first, then resample only the training data (e.g. in an imblearn pipeline).",
+      "why_convincing": "The split does happen, and SMOTE is a standard tool."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: synthetic test points leak training information and the test class balance is artificial. Resample only the training fold.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The test set is 50% positive, while real data are 2% positive.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "50",
+          "2"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "Splitting first and applying SMOTE to training data only gives recall 0.71 on the untouched test set.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.71"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A synthetic test point lies between two training points."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which data SMOTE was applied to."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 splits after resampling."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Any data transformation that learns from data must be fitted on training data only."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the class balance of the test set."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: resampling before splitting leaks information. Split first."
+      }
+    ],
+    "repair": "Use `imblearn.pipeline.Pipeline([('smote', SMOTE()), ('model', model)])` inside cross-validation.",
+    "debrief": "The test set must look like future data: original distribution, no synthetic points. Resampling is part of training.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-data-preprocessing-feature-engineering-002",
+    "subject": "machine-learning",
+    "topic": "Data Preprocessing & Feature Engineering",
+    "subtopic": "Preprocessing inside cross-validation",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this gives leakage-free cross-validation scores?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "pre = ColumnTransformer([\n    (\"num\", Pipeline([(\"impute\", SimpleImputer(strategy=\"median\")), (\"scale\", StandardScaler())]), num_cols),\n    (\"cat\", OneHotEncoder(handle_unknown=\"ignore\"), cat_cols),\n])\npipe = Pipeline([(\"pre\", pre), (\"clf\", LogisticRegression(max_iter=1000))])\nscores = cross_val_score(pipe, X, y, cv=5, scoring=\"roc_auc\")"
+    },
+    "ai_claim": "Yes. cross_val_score refits the whole pipeline in each fold, so the imputer's medians, the scaler's statistics and the encoder's categories are learned from the training folds only.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The preprocessing is part of the pipeline."
+      },
+      {
+        "index": 2,
+        "text": "cross_val_score clones and fits the pipeline on each training split."
+      },
+      {
+        "index": 3,
+        "text": "Imputation medians, scaling statistics and categories come from that split only."
+      },
+      {
+        "index": 4,
+        "text": "So validation folds never influence preprocessing."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Putting preprocessing inside a Pipeline is the standard way to prevent preprocessing leakage during cross-validation.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The scaler inside each fitted fold has different mean_ values, computed from that fold's training data.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where each preprocessing statistic is learned."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 depends on the pipeline being refitted per fold."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Fitting preprocessing inside the pipeline keeps validation data out of it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Inspect the scaler in two different folds."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The pipeline is refitted per fold, so there is no leakage. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Pipelines make correct evaluation the default: anything learned from data is learned inside the fold.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-data-preprocessing-feature-engineering-003",
+    "subject": "machine-learning",
+    "topic": "Data Preprocessing & Feature Engineering",
+    "subtopic": "Log-transforming a skewed target",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's approach and note correct?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "model.fit(X_train, np.log1p(y_train))          # y = house price, right-skewed\npred = np.expm1(model.predict(X_test))\n# Note from the AI: predictions now estimate something closer to the median price for given features, not the mean."
+    },
+    "ai_claim": "Yes. Modelling log price handles the skew, and expm1 converts predictions back to rupees. Because the model minimises squared error on the log scale, back-transformed predictions estimate roughly the median, which is below the mean for skewed data.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Prices are right-skewed; logs make the distribution more symmetric."
+      },
+      {
+        "index": 2,
+        "text": "The model predicts log1p(price)."
+      },
+      {
+        "index": 3,
+        "text": "expm1 inverts log1p, giving predictions in rupees."
+      },
+      {
+        "index": 4,
+        "text": "exp(mean of log) is the geometric mean, roughly the median, so predictions tend to underestimate the mean."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Log targets often improve fit for skewed quantities; the back-transform yields median-like predictions, so a smearing correction is needed if unbiased means are required.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "For log-normal prices with sigma = 0.5, mean = median x exp(0.5^2 / 2) = median x 1.13.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "1.13"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that the back-transform inverts the forward one."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 notes a subtle bias."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The exponential of an average of logs is a geometric mean, not an arithmetic mean."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the mean and median of a log-normal distribution."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct, including the median caveat. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Transforming a target changes what 'best prediction' means. Knowing that the back-transform estimates a median avoids surprises in totals.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-data-preprocessing-feature-engineering-004",
+    "subject": "machine-learning",
+    "topic": "Data Preprocessing & Feature Engineering",
+    "subtopic": "Imputing missing income",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will median imputation leave the model's view of income unbiased?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# 18% of applicants left 'annual_income' blank.\ndf[\"annual_income\"] = df[\"annual_income\"].fillna(df[\"annual_income\"].median())\n# Why values are missing has not been investigated."
+    },
+    "ai_claim": "Yes. The median is robust to outliers, so filling blanks with it keeps the income distribution representative and unbiased.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "18% of incomes are missing."
+      },
+      {
+        "index": 2,
+        "text": "The median is robust to extreme values."
+      },
+      {
+        "index": 3,
+        "text": "Filling with the median keeps the distribution centred correctly."
+      },
+      {
+        "index": 4,
+        "text": "So the model's view of income is unbiased."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Why the values are missing. If income is missing at random, median imputation only reduces variance. If high earners (or very low earners) are the ones who leave it blank - missing not at random - imputing the median systematically misstates their income, and the missingness itself is informative.",
+    "resolving_scenarios": [
+      "Blanks are random (e.g. a form bug affecting all users equally): the median is a reasonable fill, with a modest loss of variance.",
+      "Self-employed applicants with irregular, often high incomes leave it blank: the median understates them, and a 'missing' indicator would carry real signal."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Whether median imputation biases the model depends on the missingness mechanism, which has not been investigated. Step 3 assumes it is random.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If blanks come mostly from high earners, imputing the overall median understates their income by a wide margin.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Missing-not-at-random data make median imputation biased."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who leaves the field blank."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the missing values resemble the observed ones."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Missingness can be random, dependent on other features, or dependent on the missing value itself."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare applicants with and without income on other features."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes random missingness. If random, the fill is fine; if not, it is biased. It cannot be decided."
+      }
+    ],
+    "repair": "Investigate missingness (compare groups), add a missing-indicator feature, and consider model-based imputation.",
+    "debrief": "Imputation is a modelling assumption about why data are missing. Check that assumption, and let the model see missingness through an indicator.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

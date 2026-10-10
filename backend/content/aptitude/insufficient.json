@@ -1,0 +1,453 @@
+[
+  {
+    "id": "apt-ins-012",
+    "subject": "aptitude",
+    "topic": "Ratio, Proportion & Mixtures",
+    "subtopic": "Ratios without a total",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In a class the ratio of boys to girls is 3:2. How many boys are in the class?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "There are 24 boys in the class.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The ratio 3:2 means the class divides into 3 parts boys and 2 parts girls, 5 parts in all."
+      },
+      {
+        "index": 2,
+        "text": "A class of this kind normally has about 40 students."
+      },
+      {
+        "index": 3,
+        "text": "Each part is therefore 40 / 5 = 8 students."
+      },
+      {
+        "index": 4,
+        "text": "Boys = 3 x 8 = 24."
+      }
+    ],
+    "ai_final_answer": "24",
+    "simulated_confidence": 92,
+    "truth_state": "insufficient_information",
+    "missing_information": "The size of the class, or the number of boys or girls. A ratio fixes the proportion between the two groups but says nothing about how large either is, so no count can be derived from it alone.",
+    "resolving_scenarios": [
+      "A class of 25: boys = 3/5 x 25 = 15, girls = 10. The ratio is 3:2, exactly as stated.",
+      "A class of 40: boys = 3/5 x 40 = 24, girls = 16. The ratio is also 3:2, and the answer is different."
+    ],
+    "canonical_solution": "The question cannot be answered as posed. A ratio of 3:2 constrains the proportion, not the size: any class whose total is a multiple of 5 satisfies it. A class of 25 gives 15 boys; a class of 40 gives 24 boys. Both are fully consistent with everything stated, so the number of boys is undetermined. Step 2 does not derive the class size from the problem — it invents it.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Two class sizes consistent with the ratio that give different counts.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "15"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A ratio fixes proportion, not magnitude.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A class of 25 satisfies the ratio 3:2 and has 15 boys, not 24."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that every number used in the solution came from the problem."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "One step introduces a figure the question never gives. Find it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A ratio constrains the proportion between quantities, not their size."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work the problem again assuming a class of 25, and compare."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 invents the class size. Any total that is a multiple of 5 fits the ratio: 25 gives 15 boys, 40 gives 24. The question is unanswerable as stated."
+      }
+    ],
+    "repair": "State that the question cannot be answered without the class size (or either group's count). If the class size is 40 then 24 is correct, but that figure has to be supplied, not assumed.",
+    "debrief": "A ratio is a statement about proportion, and no amount of arithmetic turns it into a count. The failure here is not a calculation error — steps 3 and 4 are flawless once step 2 is granted — but a fabricated input dressed as a reasonable default. When checking a solution, trace every number back to the problem statement; anything that cannot be traced is an assumption, and an assumption that changes the answer means the question was never answerable.",
+    "validation_payload": {
+      "solver": "small = 3 * (25 // 5)\nlarge = 3 * (40 // 5)\nanswer = 'insufficient information' if small != large else str(small)",
+      "insufficient_information": true
+    }
+  },
+  {
+    "id": "apt-ins-013",
+    "subject": "aptitude",
+    "topic": "Averages, Ages & Partnerships",
+    "subtopic": "Averages and the spread they permit",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The average of five positive integers is 20. What is the largest of them?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The largest of the five integers is 96.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "An average of 20 across five numbers means they sum to 5 x 20 = 100."
+      },
+      {
+        "index": 2,
+        "text": "To find the largest, make the other four as small as possible."
+      },
+      {
+        "index": 3,
+        "text": "The smallest positive integer is 1, so the other four sum to 4."
+      },
+      {
+        "index": 4,
+        "text": "The largest is therefore 100 - 4 = 96."
+      }
+    ],
+    "ai_final_answer": "96",
+    "simulated_confidence": 93,
+    "truth_state": "insufficient_information",
+    "missing_information": "How the total of 100 is distributed among the five integers. The average fixes the sum; it constrains no individual value beyond that, so the actual largest could be anything from 20 to 96.",
+    "resolving_scenarios": [
+      "All five equal: 20, 20, 20, 20, 20. The average is 20 and the largest is 20.",
+      "Maximally skewed: 1, 1, 1, 1, 96. The average is also 20 and the largest is 96."
+    ],
+    "canonical_solution": "The question cannot be answered. The average fixes only the sum, 100. The set (20, 20, 20, 20, 20) has average 20 and largest 20; the set (1, 1, 1, 1, 96) has average 20 and largest 96. Both satisfy every stated condition. The AI answers a different question — \"what is the largest the largest could be?\" — which is 96 and is determinate. What the largest *is* remains undetermined.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Two sets with average 20 and different largest values.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "20",
+          "96"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Step 2 optimises rather than determines.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "(20, 20, 20, 20, 20) averages 20 and its largest is 20, not 96."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the question asked with the question the solution answers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 chooses to minimise the other four. Ask what entitles it to choose anything."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An average constrains the sum. It places no bound on any individual value beyond that."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find a second set of five positive integers averaging 20, and compare its largest value."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 answers \"what is the maximum possible largest?\" rather than \"what is the largest?\". (20,20,20,20,20) also averages 20 with a largest of 20, so the value is undetermined."
+      }
+    ],
+    "repair": "State that the largest cannot be determined: the average fixes the sum at 100 but not the distribution. If the question had asked for the greatest possible value of the largest, 96 would be correct.",
+    "debrief": "Step 2 is where the question quietly changes. \"To find the largest, minimise the others\" is the correct technique for a maximisation problem and has no place in a determination problem — and the arithmetic that follows is impeccable, which is what makes it convincing. When a solution starts optimising, check that the question actually asked for an extreme value.",
+    "validation_payload": {
+      "solver": "equal = 20\nskewed = 100 - 4\nanswer = 'insufficient information' if equal != skewed else str(equal)",
+      "insufficient_information": true
+    }
+  },
+  {
+    "id": "apt-ins-014",
+    "subject": "aptitude",
+    "topic": "Time & Work",
+    "subtopic": "Unstated mode of collaboration",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A can complete a task in 12 days and B can complete it in 24 days. How many days does the task take?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The task takes 8 days.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A's rate is 1/12 of the task per day and B's is 1/24 per day."
+      },
+      {
+        "index": 2,
+        "text": "Working together, their combined rate is 1/12 + 1/24 = 3/24 = 1/8 per day."
+      },
+      {
+        "index": 3,
+        "text": "At 1/8 per day the task takes 8 days."
+      }
+    ],
+    "ai_final_answer": "8",
+    "simulated_confidence": 91,
+    "truth_state": "insufficient_information",
+    "missing_information": "How A and B work — simultaneously, on alternate days, or in some other arrangement. The question states each worker's individual rate but never says they work together.",
+    "resolving_scenarios": [
+      "Working simultaneously: combined rate 1/12 + 1/24 = 1/8 per day, so the task takes 8 days.",
+      "Working on alternate days starting with A: each two-day cycle completes 1/12 + 1/24 = 1/8, so eight cycles - 16 days - complete the task."
+    ],
+    "canonical_solution": "The question cannot be answered as posed. It gives two individual rates but never says how the work is shared. Simultaneously, the task takes 8 days. On alternate days starting with A, each two-day cycle completes 1/8 of the task, so it takes 16 days. Both readings use exactly the stated facts and reach different answers. Step 2 assumes simultaneous work without warrant.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Alternate-day working gives 16 days from the same rates.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "16"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "The problem never says they work together.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "On alternate days, two days complete 1/12 + 1/24 = 1/8, so the task finishes in 16 days, not 8."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Re-read the question and list exactly what it states about how the work happens."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes a particular working arrangement. Check the question for it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Individual rates determine a joint duration only once the mode of collaboration is fixed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out the duration if they alternate days rather than working together."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes simultaneous work, which the question never states. Alternating days gives 16 days from the same rates, so the answer is undetermined."
+      }
+    ],
+    "repair": "State that the answer depends on how A and B work. Simultaneously it is 8 days; alternating days starting with A it is 16. The question must specify the arrangement.",
+    "debrief": "\"A takes 12 days, B takes 24 days\" is such a familiar opening that the reader supplies \"working together\" without noticing. The assumption is imported from the genre of the question rather than from its text. Whenever a solution's first move is to combine rates, check that the problem said to combine them — familiarity is not a premise.",
+    "validation_payload": {
+      "solver": "together = 1 / (Fraction(1,12) + Fraction(1,24))\nalternating = 16\nanswer = 'insufficient information' if float(together) != alternating else str(alternating)",
+      "insufficient_information": true
+    }
+  },
+  {
+    "id": "apt-ins-015",
+    "subject": "aptitude",
+    "topic": "Data Interpretation",
+    "subtopic": "Share versus absolute quantity",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Using the table below, how many more units did Company A sell in 2025 than in 2024?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "caption": "Market share by company (percentage of total market units)",
+      "columns": "Company,2024,2025",
+      "rows": "A,30%,35%|B,45%,40%|C,25%,25%"
+    },
+    "ai_claim": "Company A sold 5% more units in 2025, which is 50 more units.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Company A's share rose from 30% to 35%, an increase of 5 percentage points."
+      },
+      {
+        "index": 2,
+        "text": "Taking the market as 1,000 units, 30% is 300 units and 35% is 350 units."
+      },
+      {
+        "index": 3,
+        "text": "The increase is therefore 350 - 300 = 50 units."
+      }
+    ],
+    "ai_final_answer": "50",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "missing_information": "The total market size in each year. The table reports shares only, and a share cannot be converted into a unit count without the base it is a share of - nor can two years be compared unless both bases are known.",
+    "resolving_scenarios": [
+      "The market is 1,000 units in both years: A sells 300 then 350, an increase of 50 units.",
+      "The market shrinks from 1,000 to 500 units: A sells 300 then 175, a decrease of 125 units - despite the rising share."
+    ],
+    "canonical_solution": "The question cannot be answered from this table. It reports shares, not units, and gives no market size for either year. If the market held at 1,000 units, A sold 50 more. If the market halved to 500, A sold 175 in 2025 against 300 in 2024 - a fall of 125 units, even though its share rose. Step 2 assumes a market size, and assumes it was the same in both years.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A shrinking market turns a rising share into falling units.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "175"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The table contains percentages only, with no totals.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If the market fell from 1,000 to 500 units, A went from 300 units to 175 - a loss of 125 - while its share rose from 30% to 35%."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the table's numbers actually measure."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 converts a percentage into units. Ask where the base came from."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A share is a proportion of a total. Without the total it cannot become a count."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute assuming the market halved between the two years."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 invents a market size and silently assumes it was unchanged. Percentages alone cannot yield unit counts: a shrinking market turns A's rising share into 125 fewer units."
+      }
+    ],
+    "repair": "State that the table gives shares only, so no unit figure can be derived. The answer requires the total market size for 2024 and 2025.",
+    "debrief": "A rising share and rising sales are different claims, and a table of percentages supports only the first. The trap is that the arithmetic in step 3 is correct and the framing sounds quantitative. Whenever a percentage becomes a count, find the base it was multiplied by — and check that the same base is legitimate for every year being compared.",
+    "validation_payload": {
+      "solver": "flat = 0.35 * 1000 - 0.30 * 1000\nshrinking = 0.35 * 500 - 0.30 * 1000\nanswer = 'insufficient information' if flat != shrinking else str(flat)",
+      "insufficient_information": true
+    }
+  },
+  {
+    "id": "apt-ins-016",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Affirming the consequent",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Read the statement, then answer the question below it.",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "Every employee who completed the safety course received a certificate.",
+      "question_asked": "Ravi has a certificate. Did Ravi complete the safety course?"
+    },
+    "ai_claim": "Yes — Ravi completed the safety course.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The statement links completing the course to receiving a certificate."
+      },
+      {
+        "index": 2,
+        "text": "Ravi has a certificate, so Ravi is in the group the statement describes."
+      },
+      {
+        "index": 3,
+        "text": "Therefore Ravi completed the safety course."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "insufficient_information",
+    "missing_information": "Whether the safety course is the only route to a certificate. The statement says completing the course is sufficient for a certificate; it does not say it is necessary, so a certificate held for another reason is not excluded.",
+    "resolving_scenarios": [
+      "The course is the only way to obtain a certificate: Ravi's certificate implies he completed it, and the answer is yes.",
+      "Certificates are also issued to employees transferring in from another site with equivalent training: Ravi could hold one without having completed this course, and the answer is no."
+    ],
+    "canonical_solution": "It cannot be determined. \"Every employee who completed the course received a certificate\" states that completing the course is sufficient for a certificate, not that it is necessary. The statement rules out someone completing the course and lacking a certificate; it says nothing about someone holding a certificate obtained another way. Both scenarios above are consistent with the statement, so Ravi's position is undetermined.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A certificate obtained by another route is consistent with the statement.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "\"If P then Q\" does not license inferring P from Q.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Suppose certificates are also issued for equivalent external training. Every course-completer still has one, so the statement holds, yet Ravi need not have completed it."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Write the statement as a conditional and note which direction it runs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 places Ravi inside a group. Check that the statement licenses that move."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "\"If P then Q\" permits inferring Q from P, and not-P from not-Q. It does not permit inferring P from Q."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Describe a workplace where the statement is true and Ravi has a certificate without having taken the course."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 reverses the conditional. The statement makes the course sufficient for a certificate, not necessary, so a certificate does not establish that Ravi took it. The answer cannot be determined."
+      }
+    ],
+    "repair": "The correct answer is that it cannot be determined. The statement makes course completion sufficient for a certificate but not necessary, so Ravi's certificate is consistent with either possibility.",
+    "debrief": "Affirming the consequent is the most common reasoning error in verbal sections, and it is invisible because the conclusion is usually plausible — Ravi probably did take the course. Plausibility is not entailment. The reliable move is to write the statement as \"if P then Q\", identify which of P and Q you have been given, and check the direction. Given Q, the honest answer is almost always that it cannot be determined.",
+    "validation_payload": {
+      "solver": "# Premise: every course completer holds a certificate,\n# i.e. completers is a subset of certificate holders.\n# Model 1 - the course is the only route to a certificate.\ncompleters_1 = {'ravi'}\ncertificates_1 = {'ravi'}\n# Model 2 - certificates are also issued for equivalent\n# external training, so Ravi holds one without the course.\ncompleters_2 = set()\ncertificates_2 = {'ravi'}\n\npremise_1 = completers_1 <= certificates_1\npremise_2 = completers_2 <= certificates_2\nravi_has_cert_1 = 'ravi' in certificates_1\nravi_has_cert_2 = 'ravi' in certificates_2\ntook_course_1 = 'ravi' in completers_1\ntook_course_2 = 'ravi' in completers_2\n\n# Both models satisfy the premise and the given fact, yet they\n# disagree about the question. That disagreement is the proof.\nboth_valid = (premise_1 and ravi_has_cert_1\n              and premise_2 and ravi_has_cert_2)\nanswer = ('insufficient information'\n          if both_valid and took_course_1 != took_course_2\n          else ('yes' if took_course_1 else 'no'))",
+      "insufficient_information": true
+    }
+  }
+]

@@ -1,0 +1,459 @@
+[
+  {
+    "id": "cs-internet-http-dns-001",
+    "subject": "computer-science",
+    "topic": "Internet, HTTP & DNS",
+    "subtopic": "HTTP is stateless",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does HTTP itself remember that a user logged in on an earlier request?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. HTTP keeps the connection's login state, so later requests are recognised automatically.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The user logs in with one HTTP request."
+      },
+      {
+        "index": 2,
+        "text": "HTTP remembers that the login succeeded."
+      },
+      {
+        "index": 3,
+        "text": "Later requests from the same browser are recognised as coming from the logged-in user."
+      },
+      {
+        "index": 4,
+        "text": "So HTTP itself keeps the user logged in."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Believing HTTP keeps state between requests",
+      "explanation": "HTTP is stateless: each request is independent. Logins persist only because the application sends state with every request, usually a session cookie or a token in a header, which the server checks each time.",
+      "why_convincing": "From the user's point of view, the site simply 'remembers' them, and the cookie mechanism is invisible."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. HTTP has no memory of earlier requests; applications build sessions on top of it with cookies or tokens sent on every request.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "HTTP is a stateless protocol; sessions are implemented with cookies or tokens.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Clear the site's cookies and the next request is no longer logged in.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Deleting the session cookie logs the user out, although nothing about HTTP changed."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what carries the login from one request to the next."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 attributes memory to the protocol."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "HTTP is stateless: the server treats each request on its own."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what happens if the browser stops sending cookies."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: HTTP is stateless. Logins persist because a cookie or token is sent with every request."
+      }
+    ],
+    "repair": "Replace step 2: the server issues a session cookie or token, which the browser sends with every later request.",
+    "debrief": "Statelessness is a deliberate design choice that makes HTTP servers easy to scale; state lives in cookies, tokens and databases instead. Knowing where state really lives explains logouts, session hijacking and why load-balanced servers need shared session storage.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-internet-http-dns-002",
+    "subject": "computer-science",
+    "topic": "Internet, HTTP & DNS",
+    "subtopic": "DNS caching and TTL",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Immediately after the change is saved at the DNS provider, will every user's browser connect to the new address?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "change": "A record for shop.example.in changed from 203.0.113.10 to 203.0.113.20",
+      "ttl": "3600 seconds"
+    },
+    "ai_claim": "Yes. DNS returns the updated record as soon as it is saved, so everyone gets the new address at once.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The A record is updated at the authoritative DNS provider."
+      },
+      {
+        "index": 2,
+        "text": "Browsers look up shop.example.in through DNS."
+      },
+      {
+        "index": 3,
+        "text": "DNS always returns the latest record from the authoritative server."
+      },
+      {
+        "index": 4,
+        "text": "So every user connects to the new address immediately."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Ignoring DNS caching",
+      "explanation": "Resolvers and operating systems cache answers for up to the record's TTL. With a TTL of 3600 seconds, users whose resolver cached the old record can keep reaching 203.0.113.10 for up to an hour. The usual practice is to lower the TTL well before a planned change.",
+      "why_convincing": "Saving the record at the provider feels like the change itself, and the provider's own lookup shows the new value instantly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Cached answers remain valid for up to the TTL (3600 s here), so some users see the old address for up to an hour. Lower the TTL in advance of changes.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "DNS answers are cached by resolvers for up to the record's TTL.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3600"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "A resolver that cached the record a minute before the change keeps returning 203.0.113.10 for almost an hour.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3600"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Querying a public resolver right after the change can still return the old address."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider who else stores DNS answers besides the authoritative server."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every lookup reaches the authoritative server."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Resolvers cache records for up to their TTL."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out how long an old answer can survive with TTL 3600."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: cached answers survive for up to the TTL, so some users reach the old address for up to an hour."
+      }
+    ],
+    "repair": "Replace step 3: resolvers may serve the cached old record for up to 3600 seconds.",
+    "debrief": "Caching trades freshness for speed everywhere, and DNS is the classic example. Any change to cached data has a propagation delay set by its TTL. When planning a change to cached data, ask how long old copies can live, and shorten that window beforehand.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-internet-http-dns-003",
+    "subject": "computer-science",
+    "topic": "Internet, HTTP & DNS",
+    "subtopic": "401 versus 403",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A logged-in student requests the admin dashboard, which students are not permitted to see. Should the server respond with 401 Unauthorized?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. The student is not authorised for this page, and 401 means Unauthorized.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The student's identity is known, because they are logged in."
+      },
+      {
+        "index": 2,
+        "text": "Students do not have permission to view the admin dashboard."
+      },
+      {
+        "index": 3,
+        "text": "401 is named 'Unauthorized', which describes lacking permission."
+      },
+      {
+        "index": 4,
+        "text": "So the correct response is 401."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Choosing a status code by its name rather than its definition",
+      "explanation": "Despite its name, 401 means the request lacks valid authentication credentials; it asks the client to authenticate. A known user without permission should get 403 Forbidden. Returning 401 would prompt the client to log in again, which cannot help.",
+      "why_convincing": "The status text 'Unauthorized' seems to describe the situation exactly; HTTP's naming is a historical accident."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. 403 Forbidden is correct: the user is authenticated but not permitted. 401 is for missing or invalid credentials.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "401: credentials missing or invalid. 403: authenticated but not allowed.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "401",
+          "403"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If the student logs in again, they still cannot see the dashboard, so 'please authenticate' (401) is the wrong instruction."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the definition of 401, not only its name."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 chooses the code from its reason phrase."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "401 asks the client to authenticate; 403 refuses an authenticated client."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask whether logging in again would change the outcome."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 401 means missing or invalid authentication. An authenticated user without permission gets 403 Forbidden."
+      }
+    ],
+    "repair": "Replace step 3: return 403 Forbidden, since the user is authenticated but not permitted.",
+    "debrief": "Status codes are part of an API's contract, and clients act on them: a 401 typically triggers a login flow. HTTP's 'Unauthorized' really means 'unauthenticated', one of the best-known naming accidents in web standards. Choose codes by their specification, and ask what the client will do when it receives one.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-internet-http-dns-004",
+    "subject": "computer-science",
+    "topic": "Internet, HTTP & DNS",
+    "subtopic": "Retrying non-idempotent requests",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A mobile app automatically retries GET requests that time out. Is it equally safe to automatically retry a timed-out POST /payments request in the same way?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. A retry just repeats the request, so it is as safe for POST as for GET.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A timeout means the client did not receive a response."
+      },
+      {
+        "index": 2,
+        "text": "Retrying sends the same request again."
+      },
+      {
+        "index": 3,
+        "text": "HTTP requests are safe to repeat whatever their method."
+      },
+      {
+        "index": 4,
+        "text": "So retrying POST /payments is as safe as retrying GET."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating every HTTP method as idempotent",
+      "explanation": "GET is safe and idempotent; POST is neither. A timeout does not mean the server did nothing: the payment may have been processed and only the response lost. Retrying can charge twice. Safe retries of POST need an idempotency key that lets the server recognise duplicates.",
+      "why_convincing": "Retries work so smoothly for page loads that they feel like a general network technique, independent of what the request does."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. POST is not idempotent, and a timeout may hide a successful payment, so a blind retry risks a double charge. Use an idempotency key (or check the payment's status) before retrying.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "GET, PUT and DELETE are idempotent by definition; POST is not.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Server charges the card, the response is lost, the client retries: the card is charged twice.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The first POST succeeds but its response times out; the retry creates a second payment."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what a timeout tells you about the server's side."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 makes a claim about all HTTP methods."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Idempotent requests have the same effect whether sent once or many times; POST is not idempotent."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine the first POST succeeded and only its response was lost."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: POST is not idempotent, so a retry can repeat the payment. Use an idempotency key."
+      }
+    ],
+    "repair": "Replace step 3: only idempotent requests are safe to retry blindly; add an idempotency key to POST /payments.",
+    "debrief": "A timeout is ambiguous: the request may have failed, or only its response. Retrying is safe only when repeating the operation cannot change the result. Payment systems solve this with idempotency keys, and the review question for any retry policy is: what happens if the first attempt actually succeeded?",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-internet-http-dns-005",
+    "subject": "computer-science",
+    "topic": "Internet, HTTP & DNS",
+    "subtopic": "no-cache versus no-store",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it true that `Cache-Control: no-cache` still allows a browser to store a response but requires revalidation with the server before each use, while `no-store` forbids storing it at all?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. no-cache means 'store, but check with the server before reusing'; no-store means 'do not store'.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "With no-cache, a cache may keep the response."
+      },
+      {
+        "index": 2,
+        "text": "Before reusing it, the cache must revalidate with the origin server, for example with If-None-Match."
+      },
+      {
+        "index": 3,
+        "text": "With no-store, the response must not be stored in any cache."
+      },
+      {
+        "index": 4,
+        "text": "So no-cache and no-store differ, and the claim is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. no-cache permits storage but requires validation before each reuse (often a cheap 304 Not Modified); no-store forbids storage entirely, which is what sensitive responses need.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "no-cache: must revalidate before reuse. no-store: must not be stored.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "304"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "The directive names are misleading, so check the definitions."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 says no-cache still allows storing. Verify it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "no-cache controls reuse without validation; no-store controls storage."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask which directive a banking page with personal data should use."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. no-cache allows storage with mandatory revalidation; no-store forbids storage. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "'no-cache' does not mean 'do not cache', which is why this correct explanation looks wrong. Using no-cache for sensitive data is a real security mistake: the data is still written to disk. When a keyword's name and definition seem to disagree, trust the definition.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

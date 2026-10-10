@@ -1,0 +1,485 @@
+[
+  {
+    "id": "api-requests-responses-json-001",
+    "subject": "api-integration",
+    "topic": "Requests, Responses & JSON",
+    "subtopic": "JSON requires double quotes",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this request body valid JSON?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "request": "POST /customers\nContent-Type: application/json\n\n{'name': 'Asha', 'city': 'Pune'}"
+    },
+    "ai_claim": "Yes. It is an object with two string fields, name and city, which is valid JSON.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The body is enclosed in braces, so it is an object."
+      },
+      {
+        "index": 2,
+        "text": "It has two key-value pairs."
+      },
+      {
+        "index": 3,
+        "text": "Both keys and values are strings."
+      },
+      {
+        "index": 4,
+        "text": "So it is valid JSON."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating single-quoted strings as JSON strings",
+      "explanation": "JSON strings must use double quotes. Single quotes are valid in Python and JavaScript object literals, but not in JSON, so a JSON parser rejects this body (the API will respond 400 or 422). Usually this comes from sending str(dict) instead of json.dumps(dict).",
+      "why_convincing": "It looks exactly like a Python dict or a JavaScript object, both of which accept it."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not valid: JSON requires double quotes. Send {\"name\": \"Asha\", \"city\": \"Pune\"} (use json.dumps, not str).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "json.loads(\"{'name': 'Asha'}\") raises JSONDecodeError: Expecting property name enclosed in double quotes.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "RFC 8259: a string begins and ends with quotation marks (U+0022).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The API rejects the body as malformed JSON."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the quote characters."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 counts single-quoted text as JSON strings."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "JSON only allows double-quoted strings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Parse the body with json.loads."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: JSON strings need double quotes. Serialise with json.dumps."
+      }
+    ],
+    "repair": "Serialise with `json.dumps(body)` (or the client's json= option).",
+    "debrief": "JSON is a strict subset of JavaScript syntax. The usual source of single quotes is str(dict) in Python; always serialise with a JSON library.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-requests-responses-json-002",
+    "subject": "api-integration",
+    "topic": "Requests, Responses & JSON",
+    "subtopic": "Optional fields",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this code compute the total, 1,350, for this response?",
+    "artifact_type": "api_response",
+    "artifact": {
+      "response": "{\n  \"items\": [\n    {\"sku\": \"LAMP-1\", \"price\": 1200, \"discount\": 200},\n    {\"sku\": \"MUG-3\",  \"price\": 350}\n  ]\n}",
+      "code": "total = sum(i[\"price\"] - i[\"discount\"] for i in resp.json()[\"items\"])"
+    },
+    "ai_claim": "Yes. It subtracts each item's discount from its price and adds them up: 1,200 - 200 + 350 = 1,350.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "LAMP-1 contributes 1,200 - 200 = 1,000."
+      },
+      {
+        "index": 2,
+        "text": "MUG-3 contributes its price minus its discount."
+      },
+      {
+        "index": 3,
+        "text": "Every item has a price and a discount."
+      },
+      {
+        "index": 4,
+        "text": "The total is 1,350."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming every object has every field",
+      "explanation": "MUG-3 has no discount field. i[\"discount\"] raises KeyError, so the code crashes instead of totalling. Optional fields must be read with a default: i.get(\"discount\", 0). The arithmetic 1,350 is right; the code never reaches it.",
+      "why_convincing": "The first item has a discount, and it is easy to assume the rest look the same."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: MUG-3 lacks discount, so the code raises KeyError. Use i.get('discount', 0); the total is then 1,350.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The MUG-3 object has only sku and price.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Running the code on this response raises KeyError: 'discount'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The second item raises KeyError."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the fields of the two items."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every item has a discount."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "API objects often omit optional fields rather than sending null."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the expression on MUG-3 alone."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: MUG-3 has no discount, so the code raises KeyError. Use i.get('discount', 0)."
+      }
+    ],
+    "repair": "Use `i.get(\"discount\", 0)`.",
+    "debrief": "Treat every field that is not documented as required as optional. Real responses vary across records, and the first item is a poor sample of the schema.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-requests-responses-json-003",
+    "subject": "api-integration",
+    "topic": "Requests, Responses & JSON",
+    "subtopic": "Large integer IDs in JavaScript",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this code like the tweet with id 9007199254740993?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "javascript",
+      "code": "const resp = await fetch(\"/api/tweets/latest\");\nconst data = await resp.json();   // body: {\"id\": 9007199254740993, \"text\": \"...\"}\nawait fetch(`/api/tweets/${data.id}/like`, { method: \"POST\" });"
+    },
+    "ai_claim": "Yes. resp.json() parses the id, and the code uses it to build the like URL for tweet 9007199254740993.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The response contains the id 9007199254740993."
+      },
+      {
+        "index": 2,
+        "text": "resp.json() parses it as a number."
+      },
+      {
+        "index": 3,
+        "text": "The number is inserted into the URL."
+      },
+      {
+        "index": 4,
+        "text": "So the request likes tweet 9007199254740993."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Assuming JSON numbers survive JavaScript parsing exactly",
+      "explanation": "JavaScript numbers are 64-bit floats and represent integers exactly only up to 2^53 - 1 (9007199254740991). 9007199254740993 is rounded to 9007199254740992 when parsed, so the like goes to a different tweet (or fails). APIs with large ids should send them as strings (e.g. id_str), and clients should use them.",
+      "why_convincing": "The id looks like an ordinary integer, and smaller ids parse exactly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the id is parsed as 9007199254740992, so the wrong tweet is liked. Use a string id field.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "JSON.parse('{\"id\": 9007199254740993}').id evaluates to 9007199254740992.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "9007199254740992"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Number.MAX_SAFE_INTEGER is 9007199254740991.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "9007199254740991"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The like request goes to /api/tweets/9007199254740992/like."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the largest integer a JavaScript number stores exactly."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes parsing preserves the value."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Integers above 2^53 - 1 lose precision in JavaScript numbers."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Parse the body in the browser console."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the id rounds to 9007199254740992. Use string ids."
+      }
+    ],
+    "repair": "Request or use a string form of the id (id_str) and keep it as a string.",
+    "debrief": "JSON has no size limit on numbers, but its consumers do. 64-bit ids, money in minor units and timestamps in nanoseconds are safest sent as strings.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-requests-responses-json-004",
+    "subject": "api-integration",
+    "topic": "Requests, Responses & JSON",
+    "subtopic": "Timestamps and local dates",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the label say the order was placed on the 10th?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// order.created_at from the API: \"2026-03-10T23:30:00Z\"\nconst day = new Date(order.created_at).getDate();\nlabel.textContent = `Ordered on the ${day}th`;\n// The user's browser is set to India Standard Time (UTC+5:30)."
+    },
+    "ai_claim": "Yes. The timestamp's date is 2026-03-10, so getDate() returns 10.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The timestamp is 2026-03-10T23:30:00Z."
+      },
+      {
+        "index": 2,
+        "text": "Its date part is the 10th."
+      },
+      {
+        "index": 3,
+        "text": "getDate() returns the day of the month of that timestamp."
+      },
+      {
+        "index": 4,
+        "text": "So the label says the 10th."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Ignoring the time zone conversion",
+      "explanation": "The Z means UTC. getDate() returns the day in the browser's local time zone, and 23:30 UTC is 05:00 on 11 March in India. The label says the 11th. Decide which time zone the business means (often the store's), and format explicitly, e.g. with Intl.DateTimeFormat and a timeZone option.",
+      "why_convincing": "For daytime timestamps, or users near UTC, the dates match."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: in UTC+5:30, 23:30 UTC on the 10th is 05:00 on the 11th, so the label says 11th. Format with an explicit time zone.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "With TZ=Asia/Kolkata, new Date('2026-03-10T23:30:00Z').getDate() returns 11.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "11"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "23:30 UTC + 5:30 = 05:00 the next day.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "05:00"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An order placed late in the UTC evening shows the next day's date in India."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which time zone getDate uses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes getDate returns the UTC date."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Date's getters use the local time zone; getUTCDate uses UTC."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Convert 23:30 UTC to India Standard Time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: getDate is local, so the day is the 11th. Format with an explicit time zone."
+      }
+    ],
+    "repair": "Use `Intl.DateTimeFormat('en-IN', { timeZone: 'Asia/Kolkata', day: 'numeric' })` (or whichever zone the business uses).",
+    "debrief": "A timestamp is an instant; a date is that instant seen from a time zone. Every conversion from one to the other needs a zone, chosen deliberately.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-requests-responses-json-005",
+    "subject": "api-integration",
+    "topic": "Requests, Responses & JSON",
+    "subtopic": "Parsing prices as decimals",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this assertion passes, while it would fail with json.loads' default float parsing?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "from decimal import Decimal\n\nprices = json.loads(resp.text, parse_float=Decimal)   # {\"a\": 0.1, \"b\": 0.2}\ntotal = prices[\"a\"] + prices[\"b\"]\nassert total == Decimal(\"0.3\")"
+    },
+    "ai_claim": "Yes. parse_float=Decimal builds each number from its exact text, so 0.1 + 0.2 is exactly Decimal('0.3'). With floats, 0.1 + 0.2 is 0.30000000000000004.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "parse_float is called with the text of each JSON number containing a decimal point."
+      },
+      {
+        "index": 2,
+        "text": "Decimal('0.1') and Decimal('0.2') are exact decimal values."
+      },
+      {
+        "index": 3,
+        "text": "Their sum is exactly Decimal('0.3'), so the assertion passes."
+      },
+      {
+        "index": 4,
+        "text": "With the default, 0.1 and 0.2 become binary floats, and their sum is 0.30000000000000004."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Decimal parsing preserves the decimal text exactly, which is what money requires; binary floats cannot represent 0.1 exactly.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "json.loads('{\"a\": 0.1, \"b\": 0.2}', parse_float=Decimal) gives a sum equal to Decimal('0.3').",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.3"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "In Python, 0.1 + 0.2 == 0.30000000000000004.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0.30000000000000004"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what parse_float receives."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 depends on Decimal being built from the original text."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Decimal constructed from a string is exact; floats are binary approximations."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run both versions in a Python shell."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Decimal parsing is exact, so the assertion passes, unlike floats. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Money should never pass through binary floats. Parsing JSON numbers straight into Decimal keeps amounts exact from the wire onward.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

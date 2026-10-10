@@ -1,0 +1,464 @@
+[
+  {
+    "id": "ds-python-for-data-science-001",
+    "subject": "data-science",
+    "topic": "Python for Data Science",
+    "subtopic": "Assignment does not copy a list",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the original list raw left unchanged, so the notebook still has both the raw and the cleaned data?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "raw = [12, 15, 14, 900, 13]      # response times in ms; 900 is a logging glitch\nclean = raw\nclean.remove(900)\n\nprint(len(raw), len(clean))"
+    },
+    "ai_claim": "Yes. clean is a separate list created from raw, so removing 900 from clean leaves raw with all five values. It prints 5 4.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "raw holds five response times."
+      },
+      {
+        "index": 2,
+        "text": "clean = raw creates the cleaned copy."
+      },
+      {
+        "index": 3,
+        "text": "Removing 900 from clean does not affect raw."
+      },
+      {
+        "index": 4,
+        "text": "It prints 5 4."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming assignment copies a list",
+      "explanation": "clean = raw binds a second name to the same list object; no copy is made. remove(900) mutates that one list, so raw loses the value too, and the notebook prints 4 4. Use clean = raw.copy() (or list(raw)), or build a new list: clean = [x for x in raw if x != 900].",
+      "why_convincing": "In spreadsheets and in some languages, assigning a value does make a copy."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: both names refer to the same list, so raw is modified too; it prints 4 4. Use raw.copy().",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Running the cell prints 4 4, and raw no longer contains 900.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "raw is clean evaluates to True.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The raw data loses the glitch value, so the cleaning step cannot be audited."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether a new list is created."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes assignment copies."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In Python, assignment binds names to objects; it never copies them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print raw is clean."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: both names point to one list, so raw is changed too. Use raw.copy()."
+      }
+    ],
+    "repair": "Use `clean = [x for x in raw if x != 900]` (or `raw.copy()` before removing).",
+    "debrief": "Python variables are names for objects. Mutating through one name changes what every other name sees - the same reason pandas and NumPy distinguish views from copies.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-python-for-data-science-002",
+    "subject": "data-science",
+    "topic": "Python for Data Science",
+    "subtopic": "round() and halves",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this print [3, 4, 5], rounding each half up?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "scores = [2.5, 3.5, 4.5]\nprint([round(s) for s in scores])   # report whole-number grades"
+    },
+    "ai_claim": "Yes. round() rounds .5 up to the next whole number, so 2.5, 3.5 and 4.5 become 3, 4 and 5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "round() rounds to the nearest integer."
+      },
+      {
+        "index": 2,
+        "text": "Values exactly halfway are rounded up."
+      },
+      {
+        "index": 3,
+        "text": "2.5 -> 3, 3.5 -> 4, 4.5 -> 5."
+      },
+      {
+        "index": 4,
+        "text": "It prints [3, 4, 5]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming round-half-up",
+      "explanation": "Python's round() uses round-half-to-even (banker's rounding): halfway values go to the nearest even integer. 2.5 -> 2, 3.5 -> 4, 4.5 -> 4, so it prints [2, 4, 4]. Rounding also meets binary floating-point effects, e.g. round(0.125, 2) is 0.12. For grading rules, use decimal.Decimal with ROUND_HALF_UP.",
+      "why_convincing": "School arithmetic rounds halves up, and most values are not exactly halfway."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It prints [2, 4, 4]: halves round to even. Use Decimal.quantize with ROUND_HALF_UP if the policy requires it.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "round(2.5) returns 2 and round(4.5) returns 4.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2",
+          "4"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "round(0.125, 2) returns 0.12.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.12"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A student with 4.5 is reported as 4."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try round(2.5) in Python."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states the rounding rule for halves."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Python rounds halfway values to the nearest even number."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate each value in the list."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: round() rounds halves to even, giving [2, 4, 4]."
+      }
+    ],
+    "repair": "Use `Decimal(str(s)).quantize(Decimal('1'), rounding=ROUND_HALF_UP)`.",
+    "debrief": "Rounding rules are policy decisions. Languages differ (Python, NumPy and Excel do not all agree), so implement the rule your report requires explicitly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-python-for-data-science-003",
+    "subject": "data-science",
+    "topic": "Python for Data Science",
+    "subtopic": "Counting with Counter",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this prints [('data', 3), ('science', 2)]?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "from collections import Counter\n\nwords = \"data science needs data and more data and science\".split()\nprint(Counter(words).most_common(2))"
+    },
+    "ai_claim": "Yes. Counter counts each word: data 3, science 2, and 2, and the rest 1. most_common(2) returns the two highest counts; ties are ordered by first appearance, and science appears before and.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "split() gives nine words."
+      },
+      {
+        "index": 2,
+        "text": "Counts: data 3, science 2, and 2, needs 1, more 1."
+      },
+      {
+        "index": 3,
+        "text": "most_common sorts by count, keeping first-seen order for ties."
+      },
+      {
+        "index": 4,
+        "text": "science is seen before and, so the result is [('data', 3), ('science', 2)]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Counter.most_common orders by count, and equal counts keep insertion order, so science (first seen at position 2) precedes and (position 5).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Running the cell prints [('data', 3), ('science', 2)].",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "3",
+          "2"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "'science' first appears at index 1; 'and' at index 4.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count each word."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains how ties are broken."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Counter preserves insertion order among equal counts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find where 'science' and 'and' first appear."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. data has 3, and science wins the tie with and. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Tie-breaking rules decide outputs more often than expected. The claim identifies Counter's documented tie behaviour, which makes the result deterministic.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-python-for-data-science-004",
+    "subject": "data-science",
+    "topic": "Python for Data Science",
+    "subtopic": "Sorting by several keys",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this prints ['Chen', 'Asha', 'Ben'] - highest score first, ties in alphabetical order?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "records = [{\"name\": \"Ben\", \"score\": 90}, {\"name\": \"Asha\", \"score\": 90}, {\"name\": \"Chen\", \"score\": 95}]\nranked = sorted(records, key=lambda r: (-r[\"score\"], r[\"name\"]))\nprint([r[\"name\"] for r in ranked])"
+    },
+    "ai_claim": "Yes. The key sorts by negative score (so higher scores come first), then by name. Chen (95) is first; Asha and Ben tie on 90 and are ordered alphabetically.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The key is the tuple (-score, name)."
+      },
+      {
+        "index": 2,
+        "text": "Tuples compare element by element."
+      },
+      {
+        "index": 3,
+        "text": "-95 is smallest, so Chen comes first."
+      },
+      {
+        "index": 4,
+        "text": "Asha and Ben both have -90, so name decides: Asha, then Ben."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Negating the numeric key reverses its order while the name stays ascending. Output: ['Chen', 'Asha', 'Ben'].",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Running the cell prints ['Chen', 'Asha', 'Ben'].",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "95",
+          "90"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Evaluate the key for each record."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 relies on tuple comparison."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tuples compare the first elements, then the second on a tie."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write out the keys: (-90, 'Ben'), (-90, 'Asha'), (-95, 'Chen')."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Scores descend and ties are alphabetical. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Tuple keys give multi-level sorts in one pass. Negation works for numbers; for strings in descending order, sort twice (stable sort) or use reverse on a separate key.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-python-for-data-science-005",
+    "subject": "data-science",
+    "topic": "Python for Data Science",
+    "subtopic": "Reading a CSV without an encoding",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this print '7,São Paulo,Brazil' correctly?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "with open(\"survey_cities.csv\") as f:      # no encoding argument\n    rows = f.read().splitlines()\nprint(rows[1])   # the file's second line is: 7,São Paulo,Brazil"
+    },
+    "ai_claim": "Yes. Python reads text files as UTF-8, so 'São Paulo' is read and printed correctly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "open() opens the file in text mode."
+      },
+      {
+        "index": 2,
+        "text": "Python decodes text files as UTF-8."
+      },
+      {
+        "index": 3,
+        "text": "The ã character is decoded correctly."
+      },
+      {
+        "index": 4,
+        "text": "So it prints 7,São Paulo,Brazil."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The file's encoding and the platform's default encoding. Without an encoding argument, open() uses the locale's preferred encoding: UTF-8 on Linux and macOS (and with Python's UTF-8 mode), but often cp1252 on Windows. Which platform runs the notebook, and how the file was saved, are not stated.",
+    "resolving_scenarios": [
+      "UTF-8 file, read on Linux or macOS (default UTF-8): prints 7,São Paulo,Brazil.",
+      "UTF-8 file, read on Windows with a cp1252 default: prints 7,SÃ£o Paulo,Brazil (mojibake)."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the platform default and the file's encoding, neither of which is given. Step 2 assumes UTF-8. Passing encoding='utf-8' removes the dependence.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "On Windows with cp1252 as the default, the UTF-8 bytes for ã decode as 'Ã£'.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The same notebook prints mojibake on a Windows laptop."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what encoding open() uses when none is given."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states a default that depends on the platform."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Without encoding=, Python uses the locale's preferred encoding."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider running the cell on Windows and on Linux."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes UTF-8. On Linux it prints correctly; on a cp1252 Windows default it does not. It cannot be decided."
+      }
+    ],
+    "repair": "Always pass `encoding=\"utf-8\"` (pandas: read_csv(..., encoding=\"utf-8\")).",
+    "debrief": "Implicit encodings make code behave differently on different machines. Name the encoding explicitly whenever you read or write text.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,94 @@
+[
+  {
+    "id": "dev-k8s-001",
+    "subject": "devops",
+    "topic": "Kubernetes Fundamentals",
+    "subtopic": "Pod security context",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this Deployment manifest, prepared for a production rollout. Does it follow container security best practice?",
+    "artifact_type": "k8s_manifest",
+    "artifact": {
+      "file": "deployment.yaml",
+      "manifest": "apiVersion: apps/v1\nkind: Deployment\nmetadata:\n  name: payments-api\nspec:\n  replicas: 3\n  template:\n    spec:\n      containers:\n      - name: api\n        image: registry.internal/payments-api:latest\n        securityContext:\n          privileged: true\n          runAsUser: 0\n        resources:\n          requests:\n            cpu: 100m\n            memory: 128Mi\n        ports:\n        - containerPort: 8080"
+    },
+    "ai_claim": "This manifest is production ready and follows container security best practice.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Three replicas provide redundancy, so a single node failure does not take the service down."
+      },
+      {
+        "index": 2,
+        "text": "Resource requests are declared, so the scheduler can place the pods sensibly."
+      },
+      {
+        "index": 3,
+        "text": "A securityContext block is present, which shows security has been configured explicitly rather than left to defaults."
+      },
+      {
+        "index": 4,
+        "text": "The image comes from the internal registry rather than a public one. The manifest is production ready."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Treating the presence of a securityContext as evidence that it is secure",
+      "explanation": "The securityContext is present but its values are the most dangerous possible: `privileged: true` grants the container effectively unrestricted access to the host kernel and devices, and `runAsUser: 0` runs it as root. A container escape from this pod compromises the node. It should be `privileged: false`, `runAsNonRoot: true`, a non-zero `runAsUser`, and `allowPrivilegeEscalation: false`.",
+      "why_convincing": "Steps 1, 2 and 4 are all genuinely good practice, which builds confidence going into Step 3. Reviewers often check that a securityContext *exists* as a box-ticking exercise without reading its values - and the block itself looks like diligence."
+    },
+    "canonical_solution": "Not production ready. `privileged: true` with `runAsUser: 0` is the least secure configuration available - it grants host-level kernel access as root. Replace with:\n\nsecurityContext:\n  privileged: false\n  runAsNonRoot: true\n  runAsUser: 1000\n  allowPrivilegeEscalation: false\n  readOnlyRootFilesystem: true\n  capabilities:\n    drop: [\"ALL\"]\n\nSeparately, `image: ...:latest` is not reproducible and there are no memory/CPU limits or probes - but the privileged root container is the blocking issue.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "privileged: true grants host kernel access; runAsUser: 0 is root.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "A hardened securityContext.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A privileged container can mount the host filesystem and access /dev directly, so any remote code execution in this API becomes full node compromise."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the values inside each block, not just which blocks are present."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 makes a claim about the securityContext. Check what it actually configures."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A securityContext can harden a container or remove every restriction from it. Its presence tells you nothing on its own."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look up what `privileged: true` grants, and which user id 0 is."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 mistakes presence for correctness. `privileged: true` grants host kernel access and `runAsUser: 0` runs as root - the least secure combination possible. Set privileged: false, runAsNonRoot: true and drop all capabilities."
+      }
+    ],
+    "repair": "Replace the securityContext with `privileged: false`, `runAsNonRoot: true`, `runAsUser: 1000`, `allowPrivilegeEscalation: false`, and `capabilities: drop: [\"ALL\"]`. Also pin the image to a digest or version tag rather than `latest`, and add memory limits plus readiness and liveness probes.",
+    "debrief": "Configuration review fails most often on the difference between a setting being *present* and being *correct*. A securityContext block reads as evidence of care, which is exactly why an insecure one survives review. The habit worth building: for every security-relevant key, read the value and ask what it permits, not merely whether someone thought about it. Here the block that looked like diligence was the vulnerability.",
+    "validation_payload": {},
+    "truth_state": "flawed"
+  }
+]

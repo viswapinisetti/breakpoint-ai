@@ -1,0 +1,460 @@
+[
+  {
+    "id": "mat-combinatorics-001",
+    "subject": "mathematics",
+    "topic": "Combinatorics",
+    "subtopic": "Order does not matter in a committee",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many different 3-person committees can be chosen from 10 people?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Choose a 3-person committee from 10 people.\nAI working: 10 x 9 x 8 = 720 ways."
+    },
+    "ai_claim": "720. There are 10 choices for the first member, 9 for the second and 8 for the third: 10 x 9 x 8 = 720.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "There are 10 choices for the first member."
+      },
+      {
+        "index": 2,
+        "text": "9 for the second and 8 for the third."
+      },
+      {
+        "index": 3,
+        "text": "Each ordered choice gives a different committee."
+      },
+      {
+        "index": 4,
+        "text": "So there are 720 committees."
+      }
+    ],
+    "ai_final_answer": "720",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Counting ordered selections as different committees",
+      "explanation": "10 x 9 x 8 counts ordered selections: choosing Asha, then Ben, then Chen is counted separately from Ben, Chen, Asha, but they form the same committee. Each committee is counted 3! = 6 times, so there are 720 / 6 = 120 committees, which is C(10, 3).",
+      "why_convincing": "The counting of choices in steps 1-2 is correct for ordered selections."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "C(10, 3) = 720 / 3! = 120.",
+    "canonical_answer": "120",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "720 / 6 = 120",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "120"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "(Asha, Ben, Chen) and (Chen, Ben, Asha) are counted twice but are one committee.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Every committee is counted 6 times in 720."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the order of selection matters for a committee."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats different orders as different committees."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Combinations divide permutations by the number of orderings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide by 3!."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: each committee is counted 6 times. There are 120."
+      }
+    ],
+    "repair": "",
+    "debrief": "The key question in counting is whether order matters. Permutations count arrangements; combinations count selections.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = math.comb(10, 3)",
+      "flawed_solver": "answer = math.perm(10, 3)"
+    }
+  },
+  {
+    "id": "mat-combinatorics-002",
+    "subject": "mathematics",
+    "topic": "Combinatorics",
+    "subtopic": "Arrangements with repeated letters",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many distinct arrangements of LEVEL are there?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "How many distinct arrangements are there of the letters in LEVEL?\nAI working: 5 letters, so 5! = 120."
+    },
+    "ai_claim": "120. LEVEL has 5 letters, and 5 letters can be arranged in 5! = 120 ways.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "LEVEL has 5 letters."
+      },
+      {
+        "index": 2,
+        "text": "The letters can be arranged in 5! ways."
+      },
+      {
+        "index": 3,
+        "text": "Each arrangement is distinct."
+      },
+      {
+        "index": 4,
+        "text": "So there are 120."
+      }
+    ],
+    "ai_final_answer": "120",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Ignoring repeated letters",
+      "explanation": "LEVEL has two L's and two E's. Swapping the two L's (or the two E's) produces the same word, so 5! counts each distinct arrangement 2! x 2! = 4 times. Distinct arrangements: 5! / (2! x 2!) = 30.",
+      "why_convincing": "The 5! formula is correct for five different letters."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "5! / (2! x 2!) = 120 / 4 = 30.",
+    "canonical_answer": "30",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "120 / (2 x 2) = 30",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "30"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Swapping the two L's in LEVEL gives LEVEL again, but 5! counts it as new.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The two L's are indistinguishable."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check for repeated letters."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every arrangement is different."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Divide by the factorial of each letter's repetition count."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the L's and the E's."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: repeated letters make arrangements identical. There are 30."
+      }
+    ],
+    "repair": "",
+    "debrief": "Multinomial counting divides n! by the orderings of identical items. Always check for repeats before using n!.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = math.factorial(5) // (math.factorial(2) * math.factorial(2))",
+      "flawed_solver": "answer = math.factorial(5)"
+    }
+  },
+  {
+    "id": "mat-combinatorics-003",
+    "subject": "mathematics",
+    "topic": "Combinatorics",
+    "subtopic": "Stars and bars",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In how many ways can the sweets be shared?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "10 identical sweets are shared among 3 children; a child may get none.\nAI working: place 2 dividers among 10 sweets: C(10 + 2, 2) = C(12, 2) = 66."
+    },
+    "ai_claim": "66. Each distribution corresponds to arranging 10 sweets and 2 dividers in a row, and choosing the divider positions gives C(12, 2) = 66.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Represent a distribution as a row of 10 sweets and 2 dividers."
+      },
+      {
+        "index": 2,
+        "text": "The dividers split the row into 3 groups, one per child (possibly empty)."
+      },
+      {
+        "index": 3,
+        "text": "Each arrangement of 12 symbols gives exactly one distribution."
+      },
+      {
+        "index": 4,
+        "text": "Choose 2 of the 12 positions for dividers: C(12, 2) = 66."
+      }
+    ],
+    "ai_final_answer": "66",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 66. Stars and bars counts non-negative integer solutions of a + b + c = 10 as C(10 + 3 - 1, 3 - 1).",
+    "canonical_answer": "66",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "C(12, 2) = 12 x 11 / 2 = 66",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "66"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Represent a distribution as a sequence of symbols."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is the one-to-one correspondence."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Non-negative solutions of x1 + ... + xk = n number C(n + k - 1, k - 1)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute C(12, 2)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. There are 66 distributions. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Stars and bars turns a distribution problem into choosing positions. The 'may get none' condition is what allows empty groups.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = math.comb(12, 2)"
+    }
+  },
+  {
+    "id": "mat-combinatorics-004",
+    "subject": "mathematics",
+    "topic": "Combinatorics",
+    "subtopic": "Counting by the complement",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many 4-digit PINs have at least one repeated digit?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "How many 4-digit PINs (0000-9999) have at least one repeated digit?\nAI working: total 10^4 = 10,000; PINs with all digits different: 10 x 9 x 8 x 7 = 5,040; answer = 10,000 - 5,040 = 4,960."
+    },
+    "ai_claim": "4,960. Counting the complement is easiest: of 10,000 PINs, 5,040 have all digits different, so 4,960 have a repeat.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "There are 10^4 = 10,000 PINs."
+      },
+      {
+        "index": 2,
+        "text": "PINs with four different digits: 10 x 9 x 8 x 7 = 5,040."
+      },
+      {
+        "index": 3,
+        "text": "'At least one repeat' is the complement of 'all different'."
+      },
+      {
+        "index": 4,
+        "text": "10,000 - 5,040 = 4,960."
+      }
+    ],
+    "ai_final_answer": "4960",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 4,960. Leading zeros are allowed, so all 10,000 strings count.",
+    "canonical_answer": "4960",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "10,000 - 5,040 = 4,960",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "4960"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider counting the opposite case."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 identifies the complement."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "'At least one' is often easiest as total minus 'none'."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count PINs with all digits different."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. 10,000 - 5,040 = 4,960. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Direct counting of 'at least one repeat' would need many cases; the complement needs one product.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 10 ** 4 - 10 * 9 * 8 * 7"
+    }
+  },
+  {
+    "id": "mat-combinatorics-005",
+    "subject": "mathematics",
+    "topic": "Combinatorics",
+    "subtopic": "Seating around a table",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In how many ways can the guests be seated?",
+    "artifact_type": "derivation",
+    "artifact": {
+      "working": "6 guests are seated at a round table with 6 chairs.\nAI working: circular arrangements of 6 people: (6 - 1)! = 120."
+    },
+    "ai_claim": "120. For circular arrangements, fix one person and arrange the rest: (6 - 1)! = 120.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Rotations of a circular seating are the same arrangement."
+      },
+      {
+        "index": 2,
+        "text": "Fix one guest's position to remove rotations."
+      },
+      {
+        "index": 3,
+        "text": "Arrange the other 5: 5! = 120."
+      },
+      {
+        "index": 4,
+        "text": "So there are 120 seatings."
+      }
+    ],
+    "ai_final_answer": "120",
+    "simulated_confidence": 95,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "What counts as a different seating. If the chairs are distinguishable (numbered places, or a head of the table), rotations are different seatings: 6! = 720. If only who sits next to whom matters, rotations are the same: 120 (and 60 if mirror images also count as the same). The question does not say.",
+    "resolving_scenarios": [
+      "Chairs are numbered (place cards): every assignment of guests to chairs is different: 6! = 720.",
+      "Only the circular order matters, rotations identical: (6 - 1)! = 120."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The count depends on whether rotations (and reflections) are considered the same, which the question does not specify. Step 1 assumes rotations are identical.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "With numbered chairs, rotating everyone one seat gives a different seating, so the count is 6! = 720.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "720"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With place cards, there are 720 seatings."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the chairs themselves are distinguishable."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 assumes rotations are the same seating."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Circular counting depends on which symmetries are treated as equivalent."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count with numbered chairs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 assumes an equivalence the question does not state: 720 with numbered chairs, 120 without. It cannot be decided."
+      }
+    ],
+    "repair": "State whether chairs are numbered and whether reflections count as the same.",
+    "debrief": "Counting problems hinge on what 'different' means. When the equivalence is not specified, the honest answer names the possible interpretations.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

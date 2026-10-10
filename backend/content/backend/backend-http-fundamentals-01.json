@@ -1,0 +1,487 @@
+[
+  {
+    "id": "be-backend-http-fundamentals-001",
+    "subject": "backend",
+    "topic": "Backend & HTTP Fundamentals",
+    "subtopic": "GET requests must be safe",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it true that orders are cancelled only when a user deliberately clicks the Cancel link?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.get(\"/orders/{order_id}/cancel\")\ndef cancel_order(order_id: int, user=Depends(current_user)):\n    orders.cancel(order_id, by=user)\n    return {\"status\": \"cancelled\"}\n\n# The order page links to it: <a href=\"/orders/42/cancel\">Cancel order</a>"
+    },
+    "ai_claim": "Yes. The endpoint runs only when its URL is requested, and the only way to request it is to click the link.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "cancel_order runs when /orders/{id}/cancel is requested."
+      },
+      {
+        "index": 2,
+        "text": "The link is shown on the order page."
+      },
+      {
+        "index": 3,
+        "text": "Only a user clicking the link sends that request."
+      },
+      {
+        "index": 4,
+        "text": "So orders are cancelled only on purpose."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming only people follow GET links",
+      "explanation": "GET is defined as a safe method, and software relies on that: browsers prefetch and prerender links, link-preview bots and security scanners in email and chat fetch URLs, and extensions crawl pages. Any of them can request /orders/42/cancel with the user's cookies and cancel the order. State changes belong behind POST (or DELETE) with a form or fetch call.",
+      "why_convincing": "In manual testing, nothing ever requests the URL except the tester's click."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: prefetchers, previewers and crawlers issue GET requests freely because GET is supposed to be safe. Make cancellation a POST.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "RFC 9110: GET is a safe method; clients may issue it without the user intending any state change.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "A chat app's link preview fetches /orders/42/cancel with the user's session and cancels the order.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "42"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A browser prefetch of the link cancels the order."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List everything that can make a GET request to a URL."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes only a human click requests the URL."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "HTTP defines GET as safe, so browsers and bots request GET URLs without asking."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider link previews and browser prefetching."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: automated clients follow GET links freely. Use POST for state changes."
+      }
+    ],
+    "repair": "Change the route to `@app.post(\"/orders/{order_id}/cancel\")` and trigger it from a form or fetch.",
+    "debrief": "HTTP method semantics are a contract that the whole web depends on. Browsers, caches and crawlers treat GET as harmless; an endpoint that breaks the contract will eventually be triggered by something that trusted it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-backend-http-fundamentals-002",
+    "subject": "backend",
+    "topic": "Backend & HTTP Fundamentals",
+    "subtopic": "Errors disguised as 200 OK",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can a client detect a missing user by checking response.ok, as most HTTP clients do?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.get(\"/users/{uid}\")\ndef get_user(uid: int):\n    user = users.find(uid)\n    if user is None:\n        return {\"error\": \"user not found\"}      # status 200\n    return user"
+    },
+    "ai_claim": "Yes. The endpoint reports the error, so the client sees it as a failed request when it checks response.ok.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "When the user does not exist, the endpoint returns an error message."
+      },
+      {
+        "index": 2,
+        "text": "The response describes the failure."
+      },
+      {
+        "index": 3,
+        "text": "Clients check response.ok to detect failures."
+      },
+      {
+        "index": 4,
+        "text": "So a missing user shows up as a failed request."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Reporting failure in the body but success in the status",
+      "explanation": "The endpoint returns status 200, so response.ok is true and generic tooling - HTTP clients, retries, monitoring, caches - treats it as success. Only code that parses the body and looks for an error field notices. Return 404 with the error body.",
+      "why_convincing": "The body clearly says 'error', so it seems the failure has been reported."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the status is 200, so response.ok is true. Raise HTTPException(status_code=404, detail='user not found').",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "GET /users/999 returns status 200 with body {\"error\": \"user not found\"}; response.ok is true.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "200"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "HTTP status codes signal the outcome; 404 Not Found indicates a missing resource.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "404"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Monitoring counts every missing-user request as a success."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the status code of the error response."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says the response 'describes the failure'. Where?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Clients and infrastructure read the status code, not the body, to decide success."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Request a user that does not exist and inspect response.ok."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the failure is only in the body; the status is 200. Return 404."
+      }
+    ],
+    "repair": "Raise `HTTPException(status_code=404, detail=\"user not found\")`.",
+    "debrief": "The status code is the machine-readable outcome of an HTTP request. Errors inside 200 responses defeat every generic tool that understands HTTP, from fetch to load balancers.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-backend-http-fundamentals-003",
+    "subject": "backend",
+    "topic": "Backend & HTTP Fundamentals",
+    "subtopic": "Redirects and request methods",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will old clients' POST requests, with their JSON body, be re-sent to /api/v2/orders as POSTs?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "# v1 is retired; old clients still POST to it\n@app.post(\"/api/v1/orders\")\ndef old_create_order():\n    return RedirectResponse(\"/api/v2/orders\", status_code=301)"
+    },
+    "ai_claim": "Yes. A redirect tells the client to repeat the request at the new URL, so the POST and its body go to /api/v2/orders.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The client POSTs an order to /api/v1/orders."
+      },
+      {
+        "index": 2,
+        "text": "The server responds 301 with Location: /api/v2/orders."
+      },
+      {
+        "index": 3,
+        "text": "The client repeats the same request at the new location."
+      },
+      {
+        "index": 4,
+        "text": "So the order is created by v2."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Forgetting that 301 and 302 allow a method change",
+      "explanation": "For historical reasons, clients may - and browsers and many libraries do - change POST to GET when following 301 or 302, dropping the body. The order becomes a GET /api/v2/orders, which lists orders or fails. 307 and 308 require the method and body to be preserved; use 308 for a permanent move.",
+      "why_convincing": "Redirects 'send you to the new URL', and for GET requests that is exactly what happens."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: on 301 many clients switch to GET without the body. Use 308 Permanent Redirect (or 307) to preserve the method.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "RFC 9110: for 301 and 302, a user agent may change POST to GET; 307 and 308 forbid changing the method.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "307",
+          "308"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "fetch('/api/v1/orders', { method: 'POST', body }) follows the 301 with GET /api/v2/orders.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "301"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Browsers convert the redirected POST into a GET with no body."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which redirect codes preserve the method."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the client repeats the request unchanged."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "301 and 302 permit changing POST to GET; 307 and 308 do not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Follow the redirect with fetch and watch the method."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: after 301, POST typically becomes GET. Use 308."
+      }
+    ],
+    "repair": "Return status_code=308 (or 307).",
+    "debrief": "Redirect codes differ in two ways: permanent versus temporary, and whether the method may change. For APIs that receive POST, PUT or DELETE, only 307 and 308 are safe.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-backend-http-fundamentals-004",
+    "subject": "backend",
+    "topic": "Backend & HTTP Fundamentals",
+    "subtopic": "CORS is not access control",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this CORS configuration prevent anyone except the shop's own frontend from calling /admin/refund?",
+    "artifact_type": "middleware_chain",
+    "artifact": {
+      "language": "python",
+      "code": "app.add_middleware(\n    CORSMiddleware,\n    allow_origins=[\"https://shop.example\"],\n    allow_methods=[\"*\"],\n)\n\n@app.post(\"/admin/refund\")\ndef refund(order_id: int):\n    ...   # no authentication check"
+    },
+    "ai_claim": "Yes. CORS allows only https://shop.example, so requests from any other origin or client are rejected.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "CORS lists the origins allowed to call the API."
+      },
+      {
+        "index": 2,
+        "text": "Only https://shop.example is allowed."
+      },
+      {
+        "index": 3,
+        "text": "Requests from other origins or tools are rejected by the server."
+      },
+      {
+        "index": 4,
+        "text": "So only the shop frontend can issue refunds."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Using CORS as an authorisation mechanism",
+      "explanation": "CORS is enforced by browsers, and it only controls whether a page on another origin may read the response. The server still receives and executes every request. curl, scripts, mobile apps and backend services ignore CORS entirely, so anyone can POST /admin/refund. The endpoint needs authentication and an authorisation check.",
+      "why_convincing": "In the browser, a page on another site does see a CORS error, which looks like a rejection."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: CORS does not stop non-browser clients, and even cross-site browser requests may reach the server. Add authentication and an admin check.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "curl -X POST https://api.shop.example/admin/refund?order_id=7 succeeds; curl ignores CORS.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "CORS is a browser mechanism for relaxing the same-origin policy; it is not server-side access control.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A curl request issues a refund."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who enforces CORS."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says the server rejects requests from other clients."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Browsers enforce CORS by withholding responses; servers still process requests."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call the endpoint with curl."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: CORS is enforced by browsers only. Add authentication and authorisation."
+      }
+    ],
+    "repair": "Require an authenticated admin user on the endpoint; treat CORS only as a browser read policy.",
+    "debrief": "CORS protects users' browsers from other sites reading your API's responses with their credentials. It does nothing to protect the API from anyone who is not using a browser. Authorisation belongs in the endpoint.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-backend-http-fundamentals-005",
+    "subject": "backend",
+    "topic": "Backend & HTTP Fundamentals",
+    "subtopic": "Conditional requests with ETags",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that a client re-requesting an unchanged catalog, with the ETag it received earlier, gets a 304 with no body and reuses its cached copy?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.get(\"/catalog\")\ndef catalog(request: Request):\n    body, etag = load_catalog()             # etag = hash of the catalog JSON\n    if request.headers.get(\"if-none-match\") == etag:\n        return Response(status_code=304, headers={\"ETag\": etag})\n    return JSONResponse(body, headers={\"ETag\": etag})"
+    },
+    "ai_claim": "Yes. The client sends If-None-Match with its ETag; if the catalog is unchanged the hashes match, so the server returns 304 Not Modified without a body and the client uses its cached copy.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The first response includes an ETag, the hash of the catalog."
+      },
+      {
+        "index": 2,
+        "text": "On the next request the client sends If-None-Match with that value."
+      },
+      {
+        "index": 3,
+        "text": "If the catalog has not changed, the hashes are equal and the server returns 304 with no body."
+      },
+      {
+        "index": 4,
+        "text": "The client reuses its cached response; a changed catalog produces a new ETag and a full 200."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. This is HTTP revalidation: the ETag identifies the representation, and 304 tells the client its copy is current, saving the transfer. (A full implementation would also handle weak ETags and lists of ETags.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Second request with If-None-Match equal to the ETag returns 304 and an empty body.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "304"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "RFC 9110: 304 Not Modified has no content; the client uses its stored response.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow the ETag through both requests."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on the ETag changing only when the catalog changes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A content hash as ETag plus If-None-Match lets the server confirm the client's copy is current."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Make two requests and compare statuses."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Matching ETags produce a 304 with no body, and the client reuses its copy. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Conditional requests make caching correct: the client may keep a copy, but checks it cheaply. Content-hash ETags change exactly when the representation changes, which is what makes this implementation sound.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

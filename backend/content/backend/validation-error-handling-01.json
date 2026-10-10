@@ -1,0 +1,468 @@
+[
+  {
+    "id": "be-validation-error-handling-001",
+    "subject": "backend",
+    "topic": "Validation & Error Handling",
+    "subtopic": "Returning exception text to clients",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is returning str(e) to the client a harmless way to make errors easier to debug?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/orders\")\ndef create_order(data: OrderIn):\n    try:\n        return orders.create(data)\n    except Exception as e:\n        return JSONResponse({\"error\": str(e)}, status_code=500)"
+    },
+    "ai_claim": "Yes. The message only describes what went wrong, which helps developers and users understand the failure.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Unexpected exceptions are caught."
+      },
+      {
+        "index": 2,
+        "text": "str(e) gives a description of the problem."
+      },
+      {
+        "index": 3,
+        "text": "The description contains only the error, nothing sensitive."
+      },
+      {
+        "index": 4,
+        "text": "So returning it is harmless and helpful."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Assuming exception messages contain nothing sensitive",
+      "explanation": "Exception text often includes internals: SQL statements and constraint names from database errors, file paths, hostnames, connection strings, or fragments of other users' data. Returned to any client, it helps attackers map the system (and can leak data). Log the details server-side with a request id, and return a generic message with that id.",
+      "why_convincing": "In development, detailed messages are genuinely useful, and the ones seen in testing look innocent."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not harmless: messages can expose SQL, paths and data. Log the exception and return a generic error with a correlation id.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A database error returns 'duplicate key value violates unique constraint \"users_email_key\" DETAIL: Key (email)=(asha@example.com)'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "OWASP: error responses must not reveal implementation details; log them server-side.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A driver error exposes the internal database hostname."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about what different exceptions' messages contain."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes error messages contain nothing sensitive."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Library exceptions often include queries, values, paths and hosts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trigger a database constraint violation and read the message."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: exception text can leak internals and data. Log it and return a generic message."
+      }
+    ],
+    "repair": "Log the exception with a request id; return {\"error\": \"internal error\", \"request_id\": ...}.",
+    "debrief": "Error handling has two audiences: developers need detail, clients need safety. Keep the detail in logs, correlated by an id that the client can report.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-validation-error-handling-002",
+    "subject": "backend",
+    "topic": "Validation & Error Handling",
+    "subtopic": "Type validation is not business validation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the Pydantic model guarantee that quantity is a valid order quantity (at least 1)?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "class OrderIn(BaseModel):\n    product_id: int\n    quantity: int\n\n@app.post(\"/orders\")\ndef create_order(data: OrderIn):\n    charge(data.product_id, data.quantity)"
+    },
+    "ai_claim": "Yes. Pydantic validates the request, rejecting anything that is not a proper quantity.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "FastAPI validates the body against OrderIn."
+      },
+      {
+        "index": 2,
+        "text": "quantity must be an int."
+      },
+      {
+        "index": 3,
+        "text": "Invalid quantities fail validation with a 422."
+      },
+      {
+        "index": 4,
+        "text": "So charge always receives a valid quantity."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Treating a type check as a range check",
+      "explanation": "quantity: int checks only that the value is an integer. -5 and 0 are integers, so they pass, and charge receives a negative quantity - possibly issuing a refund. Constraints must be declared: quantity: int = Field(gt=0, le=100).",
+      "why_convincing": "Validation does happen, and non-numbers are rejected, so it looks complete."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: -5 and 0 pass the int check. Declare quantity: int = Field(ge=1).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "POST /orders with {\"product_id\": 1, \"quantity\": -5} passes validation.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-5"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A type annotation only constrains the type; ranges need Field(gt=..., le=...) or validators.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A negative quantity reaches charge()."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try boundary and negative values."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes 'valid quantity' is checked."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Types say what kind of value; constraints say which values are allowed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send quantity -5."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: -5 is an int and passes. Add Field(ge=1)."
+      }
+    ],
+    "repair": "Use `quantity: int = Field(ge=1, le=100)`.",
+    "debrief": "Schema validation is only as strong as the rules written into it. Every numeric field needs an explicit range, and tests should include zero, negatives and very large values.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-validation-error-handling-003",
+    "subject": "backend",
+    "topic": "Validation & Error Handling",
+    "subtopic": "Field constraints reject boundary values",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right about which scores are accepted?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "class Rating(BaseModel):\n    score: int = Field(gt=0, le=100)\n\n@app.post(\"/ratings\")\ndef rate(r: Rating): ..."
+    },
+    "ai_claim": "Yes: 1 to 100 are accepted, and 0 and 101 are rejected with a 422 response before the endpoint runs.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "gt=0 means strictly greater than 0, so 0 is rejected and 1 is accepted."
+      },
+      {
+        "index": 2,
+        "text": "le=100 means less than or equal to 100, so 100 is accepted and 101 is rejected."
+      },
+      {
+        "index": 3,
+        "text": "FastAPI validates the body before calling rate."
+      },
+      {
+        "index": 4,
+        "text": "Invalid scores receive a 422 with details of the failing field."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. gt is exclusive and le is inclusive, so the valid range is 1-100. FastAPI returns 422 for validation failures without calling the endpoint.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "score 0 -> 422, score 1 -> accepted, score 100 -> accepted, score 101 -> 422.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0",
+          "101"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "gt/lt are exclusive bounds; ge/le are inclusive.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which bounds are inclusive."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 interpret gt and le."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "gt means strictly greater; le means less than or equal."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test 0, 1, 100 and 101."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The valid range is 1 to 100, and failures get a 422. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Off-by-one errors in validation live at the boundaries, so exclusive and inclusive bounds matter. Testing exactly the boundary values - here 0, 1, 100 and 101 - confirms the rule.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-validation-error-handling-004",
+    "subject": "backend",
+    "topic": "Validation & Error Handling",
+    "subtopic": "HTTPException raised in a helper",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "When a user requests an invoice they do not own, does the client receive 404?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "def get_owned_invoice(db, invoice_id, user):\n    inv = db.get(Invoice, invoice_id)\n    if inv is None or inv.owner_id != user.id:\n        raise HTTPException(status_code=404)\n    return inv\n\n@app.get(\"/invoices/{invoice_id}\")\ndef read_invoice(invoice_id: int, user=Depends(current_user), db=Depends(get_db)):\n    return get_owned_invoice(db, invoice_id, user)"
+    },
+    "ai_claim": "Yes. The helper raises HTTPException(404); the exception propagates out of the endpoint, and FastAPI converts it into a 404 response.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "read_invoice calls the helper."
+      },
+      {
+        "index": 2,
+        "text": "The helper finds the invoice belongs to someone else and raises HTTPException(404)."
+      },
+      {
+        "index": 3,
+        "text": "Nothing catches it, so it propagates out of read_invoice."
+      },
+      {
+        "index": 4,
+        "text": "FastAPI's exception handler turns it into a 404 response."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. HTTPException can be raised at any depth; FastAPI handles it when it leaves the endpoint. Returning 404 (rather than 403) also avoids revealing that the invoice exists.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "GET /invoices/{another user's id} returns 404.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "404"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "helper raises -> read_invoice does not catch -> FastAPI handler -> 404",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "404"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow the exception from the helper."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on nothing catching the exception."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Exceptions propagate up the call stack until a handler catches them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Request someone else's invoice."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The HTTPException propagates and FastAPI returns 404. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Raising HTTP errors from helpers keeps endpoints short and checks reusable. The claim traces the propagation correctly, and the ownership check is part of the same lookup.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-validation-error-handling-005",
+    "subject": "backend",
+    "topic": "Validation & Error Handling",
+    "subtopic": "Rounding money on storage",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the stored amount exactly 10.56?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "class PaymentIn(BaseModel):\n    amount: Decimal\n\n@app.post(\"/payments\")\ndef pay(p: PaymentIn, db=Depends(get_db)):\n    db.add(Payment(amount=p.amount))   # column type defined in migrations (not shown)\n    db.commit()\n\n# Client sends {\"amount\": \"10.555\"}"
+    },
+    "ai_claim": "Yes. Money is stored with two decimal places, so 10.555 is rounded to 10.56 when saved.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The amount arrives as Decimal('10.555')."
+      },
+      {
+        "index": 2,
+        "text": "The payments.amount column stores two decimal places."
+      },
+      {
+        "index": 3,
+        "text": "10.555 rounded to two places is 10.56."
+      },
+      {
+        "index": 4,
+        "text": "So 10.56 is stored."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The amount column's type, which is defined in migrations that are not shown. NUMERIC(10, 2) in PostgreSQL rounds to 10.56; NUMERIC(10, 3) keeps 10.555; a FLOAT column stores an approximation; some databases or modes truncate or reject extra digits.",
+    "resolving_scenarios": [
+      "amount NUMERIC(10, 2) in PostgreSQL: the value is rounded and 10.56 is stored.",
+      "amount NUMERIC(12, 4) or FLOAT: 10.555 (or a float approximation of it) is stored."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the column type, which is not given. Step 2 assumes two decimal places. Validating decimal places in the schema (e.g. Field(decimal_places=2)) would remove the ambiguity.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "With amount NUMERIC(12, 4), the stored value is 10.5550.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "10.555"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A FLOAT column stores 10.555 approximately, not 10.56."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find where the number of decimal places is decided."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states the column's precision."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Rounding on storage depends on the column type and database."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider NUMERIC(10, 2) and NUMERIC(12, 4)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes the column type. With NUMERIC(10, 2) it is 10.56; with more places it stays 10.555. It cannot be decided."
+      }
+    ],
+    "repair": "Validate precision in the API (Field(decimal_places=2)) and show the column definition.",
+    "debrief": "Where rounding happens matters for money: silently in the database, explicitly in code, or by rejecting the input. Without the column type, the result is not determined - and relying on implicit rounding is itself a design smell.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

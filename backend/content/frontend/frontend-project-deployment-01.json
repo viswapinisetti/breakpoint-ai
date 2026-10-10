@@ -1,0 +1,480 @@
+[
+  {
+    "id": "fe-frontend-project-deployment-001",
+    "subject": "frontend",
+    "topic": "Frontend Project & Deployment",
+    "subtopic": "Environment variables in the bundle",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Since the .env file is not committed, is the secret key kept away from the public?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "# .env (not committed to git)\nVITE_PAYMENT_SECRET_KEY=sk_live_51H...\n\n// src/pay.js\nconst key = import.meta.env.VITE_PAYMENT_SECRET_KEY;\nawait fetch(\"https://api.payments.example/charge\", {\n  headers: { Authorization: `Bearer ${key}` },\n});"
+    },
+    "ai_claim": "Yes. The key lives in .env, which is not in the repository, so it stays secret on the build machine.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": ".env is excluded from git."
+      },
+      {
+        "index": 2,
+        "text": "The key is read from the environment at build time."
+      },
+      {
+        "index": 3,
+        "text": "Environment variables stay on the machine that runs the build."
+      },
+      {
+        "index": 4,
+        "text": "So users never see the key."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating build-time variables as server-side secrets",
+      "explanation": "Vite replaces import.meta.env.VITE_* with the literal values when it builds the bundle. The key is written into the JavaScript files that every visitor downloads, so anyone can read it in DevTools. Secret keys must stay on a server; the frontend should call your backend, which calls the payment API.",
+      "why_convincing": "Keeping .env out of git is a real security practice, which makes the setup feel safe."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: VITE_ variables are embedded in the public bundle. Move the secret to a backend endpoint and never expose it to the browser.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Search the built dist/assets/*.js for 'sk_live_': the key is there in plain text.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Vite statically replaces import.meta.env.VITE_* in client code; only non-secret values may use the VITE_ prefix.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The key is visible in the browser's Sources panel."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what happens to import.meta.env during the build."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the value stays on the build machine."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Client-side env variables are inlined into the bundle that users download."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Search the built JavaScript for the key."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: Vite inlines the key into public JavaScript. Keep secrets on a server."
+      }
+    ],
+    "repair": "Remove the key from frontend code; call your own backend, which holds the secret.",
+    "debrief": "Anything the browser needs, the browser can read. Frontend environment variables configure the bundle; they are never secrets. Rotate any key that has shipped in a bundle.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-frontend-project-deployment-002",
+    "subject": "frontend",
+    "topic": "Frontend Project & Deployment",
+    "subtopic": "Caching index.html",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After a new release (with app.7b2e4d.js), do returning users get the new version on their next visit?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "# Build output\nindex.html                      -> <script src=\"/assets/app.3f9a1c.js\">\nassets/app.3f9a1c.js\n\n# Server headers for every file\nCache-Control: public, max-age=31536000"
+    },
+    "ai_claim": "Yes. The bundle filename contains a content hash, so a new release has a new filename and browsers download it immediately.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Vite puts a content hash in each asset's filename."
+      },
+      {
+        "index": 2,
+        "text": "The new release's bundle is app.7b2e4d.js."
+      },
+      {
+        "index": 3,
+        "text": "Browsers have never cached that file, so they download it."
+      },
+      {
+        "index": 4,
+        "text": "So users get the new version on their next visit."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Forgetting that index.html is what references the hashed file",
+      "explanation": "Browsers learn the new filename only from index.html, which has no hash and is cached for a year. Returning users load their cached index.html, which still points to app.3f9a1c.js, so they keep running the old version. Serve index.html with Cache-Control: no-cache and keep the long cache for hashed assets only.",
+      "why_convincing": "Hashed filenames are the right technique, and they work for every file except the one that lists them."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the cached index.html keeps pointing to the old bundle for up to a year. Give index.html no-cache and hashed assets a long, immutable cache.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "In DevTools, index.html is served '(from disk cache)' and requests app.3f9a1c.js.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "index.html: Cache-Control: no-cache; /assets/*: Cache-Control: public, max-age=31536000, immutable",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A returning user still loads app.3f9a1c.js after the release."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find out how the browser learns the new bundle's name."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the browser knows about app.7b2e4d.js."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Only index.html references the hashed files, and it is itself cached."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the cache headers for index.html."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the cached index.html still references the old bundle. Serve index.html with no-cache."
+      }
+    ],
+    "repair": "Serve index.html with `no-cache`; keep year-long caching for hashed assets.",
+    "debrief": "Cache busting has two halves: hashed assets can be cached forever, and the entry point that names them must be revalidated. Deploy bugs where 'some users still see the old site' usually come from the entry point.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-frontend-project-deployment-003",
+    "subject": "frontend",
+    "topic": "Frontend Project & Deployment",
+    "subtopic": "Deploying under a sub-path",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the deployed site at https://asha.github.io/shop/ load its JavaScript and CSS?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// vite.config.js\nexport default defineConfig({\n  plugins: [react()],\n  // no base option\n});\n\n// Deployed to GitHub Pages at https://asha.github.io/shop/"
+    },
+    "ai_claim": "Yes. The build output is self-contained, so the files load from wherever the folder is deployed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "npm run build produces index.html and an assets folder."
+      },
+      {
+        "index": 2,
+        "text": "index.html references the assets it needs."
+      },
+      {
+        "index": 3,
+        "text": "The whole folder is deployed to /shop/."
+      },
+      {
+        "index": 4,
+        "text": "So the assets load correctly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Assuming asset URLs are relative to the deployment folder",
+      "explanation": "Vite's default base is '/', so index.html references absolute paths like /assets/index-3f9a.js. On asha.github.io/shop/ the browser requests https://asha.github.io/assets/..., which does not exist: 404s and a blank page. Set base: '/shop/' in the Vite config (and the router's basename).",
+      "why_convincing": "Locally the app is served from the domain root, where absolute paths work."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: assets are requested from /assets/ at the domain root and fail with 404. Set base: '/shop/'.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The network panel shows GET https://asha.github.io/assets/index-3f9a.js returning 404.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "404"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "export default defineConfig({ base: '/shop/', plugins: [react()] });",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The deployed page is blank with 404 errors for every asset."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the asset URLs inside the built index.html."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the references are relative."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Vite's default base is '/', producing root-absolute asset URLs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Resolve /assets/app.js against https://asha.github.io/shop/."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the paths are root-absolute, so they miss /shop/. Set base: '/shop/'."
+      }
+    ],
+    "repair": "Set `base: '/shop/'` in vite.config.js and `basename=\"/shop\"` on the router.",
+    "debrief": "Build tools bake the deployment path into the output. Deploying anywhere other than the domain root needs configuration, and the symptom - a blank page - rarely points to the cause directly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-frontend-project-deployment-004",
+    "subject": "frontend",
+    "topic": "Frontend Project & Deployment",
+    "subtopic": "The dev proxy does not ship",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In production, does fetch('/api/products') reach the API?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// vite.config.js\nexport default defineConfig({\n  server: {\n    proxy: { \"/api\": \"http://localhost:8000\" },\n  },\n});\n\n// app code\nfetch(\"/api/products\");\n\n// Production: the built files are uploaded to a static host; the API runs at https://api.shop.example"
+    },
+    "ai_claim": "Yes. The proxy in vite.config.js forwards /api requests to the backend, so the same code works in production.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The config proxies /api to the backend."
+      },
+      {
+        "index": 2,
+        "text": "The app requests /api/products."
+      },
+      {
+        "index": 3,
+        "text": "The proxy forwards the request to the API."
+      },
+      {
+        "index": 4,
+        "text": "So the request reaches the API in production too."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Assuming dev-server configuration is part of the build",
+      "explanation": "server.proxy configures only the Vite development server. A production build is static files; there is no Vite server, so /api/products goes to the static host, which returns 404 (or index.html). Production needs its own routing - a reverse proxy or host rewrite for /api - or an absolute API URL with CORS.",
+      "why_convincing": "Everything works during development, where the proxy is running."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the proxy exists only in development. Configure the production host to proxy /api, or call https://api.shop.example with CORS enabled.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "On the deployed site, GET /api/products returns the static host's 404 page.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "404"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Vite's server.* options apply to `vite dev` only, not to the production build.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The static host answers /api/products itself."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which program performs the proxying."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the proxy runs in production."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "server.proxy belongs to the dev server; the build output is just files."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check what serves the site in production."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: there is no dev server in production, so /api is not forwarded. Configure a production proxy or use the API's full URL."
+      }
+    ],
+    "repair": "Add a reverse proxy rule for /api on the production host, or use an environment-specific API base URL.",
+    "debrief": "Development tooling hides production concerns - proxies, HTTPS, CORS. Anything configured under 'server' in a build tool needs an explicit production equivalent.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-frontend-project-deployment-005",
+    "subject": "frontend",
+    "topic": "Frontend Project & Deployment",
+    "subtopic": "A sound caching strategy",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this setup gives users each new release on their next page load while reusing unchanged assets from cache?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "# Server headers\n/index.html   Cache-Control: no-cache\n/assets/*     Cache-Control: public, max-age=31536000, immutable\n\n# Assets have content-hashed names, e.g. /assets/app.7b2e4d.js"
+    },
+    "ai_claim": "Yes. index.html is revalidated on every load, so users always get the current asset names; hashed assets never change content, so they can be cached forever and reused when unchanged.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "no-cache makes the browser revalidate index.html before using it."
+      },
+      {
+        "index": 2,
+        "text": "After a release, revalidation returns the new index.html with the new hashed filenames."
+      },
+      {
+        "index": 3,
+        "text": "Files whose content did not change keep their hash, so they are served from cache."
+      },
+      {
+        "index": 4,
+        "text": "Changed files have new names, so they are downloaded fresh."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. This is the standard split: revalidate the entry point, cache content-addressed assets immutably. Releases are picked up on the next navigation, and unchanged chunks cost nothing.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "After a release, index.html returns 200 with new script names; unchanged chunks load '(from disk cache)'.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "200"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "no-cache permits storing but requires revalidation before each use.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what no-cache means for index.html."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 relies on no-cache requiring revalidation, not forbidding caching."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "no-cache revalidates every time; immutable tells the browser a file never changes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace a returning user's load after a release."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The entry point is revalidated and hashed assets are cached forever. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "This is the fix for the earlier stale-index.html bug. Knowing that no-cache means 'revalidate', not 'never store', is what makes the design both correct and fast.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

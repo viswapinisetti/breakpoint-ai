@@ -1,0 +1,532 @@
+[
+  {
+    "id": "dsa-trees-bst-001",
+    "subject": "dsa",
+    "topic": "Trees & BST",
+    "subtopic": "Checking only the children",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does is_bst(tree) return True exactly when the tree is a valid binary search tree? Consider tree = [10, [5, None, [15, None, None]], [20, None, None]].",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "# A tree node is [value, left, right]; an empty subtree is None.\n\ndef is_bst(node):\n    if node is None:\n        return True\n    val, left, right = node\n    if left is not None and left[0] >= val:\n        return False\n    if right is not None and right[0] <= val:\n        return False\n    return is_bst(left) and is_bst(right)"
+    },
+    "ai_claim": "Yes. Every node is checked against its children, so the whole tree is verified; this tree is a valid BST.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A BST requires smaller values on the left and larger values on the right."
+      },
+      {
+        "index": 2,
+        "text": "For each node, is_bst checks that its left child is smaller and its right child is larger."
+      },
+      {
+        "index": 3,
+        "text": "It recurses into both subtrees, so every node is checked the same way."
+      },
+      {
+        "index": 4,
+        "text": "Checking every node against its children verifies the whole tree, so this tree is a BST."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 4,
+      "misconception": "Checking only parent-child pairs",
+      "explanation": "The BST property constrains whole subtrees: every value in the left subtree of 10 must be less than 10. Here 15 sits in 10's left subtree (as 5's right child). Each parent-child pair looks fine (15 > 5), so is_bst returns True, but a search for 15 from the root would go right and never find it. Pass down lower and upper bounds.",
+      "why_convincing": "Every local comparison really does pass, and checking locally at every node sounds exhaustive."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The property is global. In [10, [5, None, [15, None, None]], [20, None, None]], 15 is in the left subtree of 10, so the tree is not a BST, yet is_bst returns True. Carry (lo, hi) bounds through the recursion.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "is_bst returns True for the given tree, but 15 lies in the left subtree of 10.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "15",
+          "10"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Searching this tree for 15 goes right from 10 and fails.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "15"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A standard BST search for 15 in this tree goes right at 10 and returns 'not found'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the rule for the whole left subtree, not just the left child."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 claims local checks at every node verify the whole tree."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Every value in a node's left subtree must be smaller than the node."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find where 15 is, relative to the root 10."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: 15 is in 10's left subtree, which breaks the BST property although each parent-child pair passes. Pass bounds down the recursion."
+      }
+    ],
+    "repair": "Recurse with bounds: `is_bst(left, lo, val) and is_bst(right, val, hi)`, checking lo < val < hi.",
+    "debrief": "Local checks cannot verify a global property. The BST invariant relates each node to all of its ancestors, which is why the correct check carries bounds downward. Build test trees where every parent-child pair is fine but a grandchild breaks the rule.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "is_bst",
+      "ai_code": "def is_bst(node):\n    if node is None:\n        return True\n    val, left, right = node\n    if left is not None and left[0] >= val:\n        return False\n    if right is not None and right[0] <= val:\n        return False\n    return is_bst(left) and is_bst(right)",
+      "reference_code": "def is_bst(node, lo=None, hi=None):\n    if node is None:\n        return True\n    val, left, right = node\n    if (lo is not None and val <= lo) or (hi is not None and val >= hi):\n        return False\n    return is_bst(left, lo, val) and is_bst(right, val, hi)",
+      "test_inputs": [
+        "([8, [3, [1, None, None], [6, None, None]], [10, None, [14, None, None]]],)",
+        "(None,)",
+        "([10, [5, None, [15, None, None]], [20, None, None]],)"
+      ],
+      "counterexample_input": "([10, [5, None, [15, None, None]], [20, None, None]],)"
+    }
+  },
+  {
+    "id": "dsa-trees-bst-002",
+    "subject": "dsa",
+    "topic": "Trees & BST",
+    "subtopic": "In-order traversal outside a BST",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does sorted_values(tree) return the tree's values in ascending order for any binary tree?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "# A tree node is [value, left, right]; an empty subtree is None.\n\ndef sorted_values(node):\n    if node is None:\n        return []\n    val, left, right = node\n    return sorted_values(left) + [val] + sorted_values(right)"
+    },
+    "ai_claim": "Yes. An in-order traversal visits left, root, right, which produces the values in ascending order.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "sorted_values visits the left subtree, then the node, then the right subtree."
+      },
+      {
+        "index": 2,
+        "text": "That is an in-order traversal."
+      },
+      {
+        "index": 3,
+        "text": "In-order traversal visits values in ascending order."
+      },
+      {
+        "index": 4,
+        "text": "So sorted_values returns the values sorted for any binary tree."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming every binary tree is a search tree",
+      "explanation": "In-order traversal yields ascending order only for a binary search tree, where the ordering is built into the structure. For an arbitrary binary tree such as [1, [3, None, None], [2, None, None]], in-order gives [3, 1, 2]. Sorting needs an actual sort.",
+      "why_convincing": "The in-order-equals-sorted fact is so strongly associated with trees that its BST condition drops out."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The result is sorted only for BSTs. For [1, [3, None, None], [2, None, None]] it returns [3, 1, 2]. Collect the values and sort them.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "sorted_values([1, [3, None, None], [2, None, None]]) returns [3, 1, 2].",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3",
+          "1",
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "For [1, [3, None, None], [2, None, None]], the result is [3, 1, 2]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the condition under which in-order traversal is sorted."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a fact about in-order traversal. Does it need a condition?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In-order traversal is sorted only when the tree satisfies the BST property."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run sorted_values on a small tree that is not a BST."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong for arbitrary binary trees: in-order is sorted only for BSTs. [1, [3], [2]] gives [3, 1, 2]."
+      }
+    ],
+    "repair": "Collect all values (any traversal) and return sorted(values).",
+    "debrief": "Facts about data structures usually hold because of an invariant, and the in-order property is the BST invariant in disguise. When a claim says 'any', check which invariant the underlying fact depends on.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "sorted_values",
+      "ai_code": "def sorted_values(node):\n    if node is None:\n        return []\n    val, left, right = node\n    return sorted_values(left) + [val] + sorted_values(right)",
+      "reference_code": "def sorted_values(node):\n    if node is None:\n        return []\n    out = [node[0]] + sorted_values(node[1]) + sorted_values(node[2])\n    return sorted(out)",
+      "test_inputs": [
+        "([8, [3, [1, None, None], [6, None, None]], [10, None, [14, None, None]]],)",
+        "(None,)",
+        "([1, [3, None, None], [2, None, None]],)"
+      ],
+      "counterexample_input": "([1, [3, None, None], [2, None, None]],)"
+    }
+  },
+  {
+    "id": "dsa-trees-bst-003",
+    "subject": "dsa",
+    "topic": "Trees & BST",
+    "subtopic": "Lowest common ancestor with a missing value",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The docstring promises None when either value is missing from the tree. For the BST [10, [5, None, None], [20, None, None]], does lca(tree, 5, 7) return None?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "# A tree node is [value, left, right]; an empty subtree is None.\n\ndef lca(node, a, b):\n    \"\"\"Lowest common ancestor of values a and b in a BST, or None if either is missing.\"\"\"\n    while node is not None:\n        v = node[0]\n        if a < v and b < v:\n            node = node[1]\n        elif a > v and b > v:\n            node = node[2]\n        else:\n            return v\n    return None"
+    },
+    "ai_claim": "Yes. 7 is not in the tree, so the search finds no common ancestor and returns None.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The search starts at the root and moves left when both values are smaller and right when both are larger."
+      },
+      {
+        "index": 2,
+        "text": "At the node where the values split, that node is their lowest common ancestor."
+      },
+      {
+        "index": 3,
+        "text": "If one of the values is not in the tree, the search runs off the bottom of the tree."
+      },
+      {
+        "index": 4,
+        "text": "So lca(tree, 5, 7) returns None."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming the split point proves both values exist",
+      "explanation": "The loop never checks that a or b is present. For (5, 7): both are below 10, so it goes left to 5; at 5, a == 5 is not less than 5, so it returns 5 immediately, although 7 is not in the tree. To honour the docstring, check that both values exist first.",
+      "why_convincing": "When both values are present the algorithm is exactly right, and missing values are rarely tested."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "lca(tree, 5, 7) returns 5: the split logic returns a node without verifying membership. Check contains(a) and contains(b) before searching.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "lca([10, [5, None, None], [20, None, None]], 5, 7) returns 5.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5",
+          "7"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "at 10: 5 < 10 and 7 < 10 -> left; at 5: 5 is not < 5 -> return 5",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "lca(tree, 5, 7) returns 5 even though 7 is absent."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the function with one value that is not in the tree."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a missing value makes the search fall off the tree."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The loop returns as soon as the values split, without checking that they exist."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace lca with a = 5 and b = 7."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the search returns 5 at the split point without checking that 7 exists. Verify membership first."
+      }
+    ],
+    "repair": "Return None unless both contains(node, a) and contains(node, b) are true, then run the search.",
+    "debrief": "An algorithm that is correct under a precondition (both values present) must check that precondition if its contract promises a result without it. The docstring made a promise the code never enforced. Test every documented case, especially the failure cases.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "lca",
+      "ai_code": "def lca(node, a, b):\n    \"\"\"Lowest common ancestor of values a and b in a BST, or None if either is missing.\"\"\"\n    while node is not None:\n        v = node[0]\n        if a < v and b < v:\n            node = node[1]\n        elif a > v and b > v:\n            node = node[2]\n        else:\n            return v\n    return None",
+      "reference_code": "def contains(node, x):\n    while node is not None:\n        if x == node[0]:\n            return True\n        node = node[1] if x < node[0] else node[2]\n    return False\n\ndef lca(node, a, b):\n    if not (contains(node, a) and contains(node, b)):\n        return None\n    while node is not None:\n        v = node[0]\n        if a < v and b < v:\n            node = node[1]\n        elif a > v and b > v:\n            node = node[2]\n        else:\n            return v\n    return None",
+      "test_inputs": [
+        "([10, [5, None, None], [20, None, None]], 5, 20)",
+        "([10, [5, None, None], [20, None, None]], 5, 7)"
+      ],
+      "counterexample_input": "([10, [5, None, None], [20, None, None]], 5, 7)"
+    }
+  },
+  {
+    "id": "dsa-trees-bst-004",
+    "subject": "dsa",
+    "topic": "Trees & BST",
+    "subtopic": "Counting leaves",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does count_leaves(tree) return the number of leaf nodes (nodes with no children)? For [1, [2, None, None], [3, None, None]] the answer should be 2.",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "# A tree node is [value, left, right]; an empty subtree is None.\n\ndef count_leaves(node):\n    if node is None:\n        return 1\n    return count_leaves(node[1]) + count_leaves(node[2])"
+    },
+    "ai_claim": "Yes. The recursion reaches every leaf and counts 1 for each, giving 2 for this tree.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The function recurses into the left and right subtrees of each node."
+      },
+      {
+        "index": 2,
+        "text": "When it reaches the bottom of the tree, it returns 1."
+      },
+      {
+        "index": 3,
+        "text": "Each leaf therefore contributes 1 to the total."
+      },
+      {
+        "index": 4,
+        "text": "For [1, [2], [3]] it returns 2."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Counting empty subtrees instead of leaves",
+      "explanation": "The base case counts None, the empty subtree below a node, not the leaf itself. Every leaf has two None children, so each leaf contributes 2, and a binary tree with n nodes has n + 1 empty subtrees. For [1, [2], [3]] it returns 4, and for an empty tree it returns 1 instead of 0.",
+      "why_convincing": "'Reaching the bottom' blurs the difference between a leaf node and the empty positions beneath it."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "count_leaves counts None positions: 4 for [1, [2], [3]]. Return 0 for None, 1 for a node with no children, and otherwise the sum of the two subtrees.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "count_leaves([1, [2, None, None], [3, None, None]]) returns 4.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "node 2 -> count(None) + count(None) = 2; node 3 -> 2; total 4",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2",
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "count_leaves(None) returns 1 for an empty tree."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the base case actually counts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes what happens at 'the bottom of the tree'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A leaf is a node whose two children are None; the None values themselves are not nodes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace count_leaves on a single leaf node."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the base case counts empty subtrees, so each leaf counts 2 and the result is 4. Test for a node with no children instead."
+      }
+    ],
+    "repair": "Return 0 for None, 1 when both children are None, and the sum of the subtrees otherwise.",
+    "debrief": "Recursive tree functions hinge on precise base cases, and 'the empty tree' is not 'a leaf'. A one-node tree and the empty tree are the two tests that expose the difference immediately.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "count_leaves",
+      "ai_code": "def count_leaves(node):\n    if node is None:\n        return 1\n    return count_leaves(node[1]) + count_leaves(node[2])",
+      "reference_code": "def count_leaves(node):\n    if node is None:\n        return 0\n    if node[1] is None and node[2] is None:\n        return 1\n    return count_leaves(node[1]) + count_leaves(node[2])",
+      "test_inputs": [
+        "([1, None, None],)",
+        "([1, [2, None, None], [3, None, None]],)",
+        "(None,)"
+      ],
+      "counterexample_input": "([1, [2, None, None], [3, None, None]],)"
+    }
+  },
+  {
+    "id": "dsa-trees-bst-005",
+    "subject": "dsa",
+    "topic": "Trees & BST",
+    "subtopic": "Searching a BST",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For a valid binary search tree such as [8, [3, [1, None, None], [6, None, None]], [10, None, [14, None, None]]], does contains(tree, x) return True exactly when x is in the tree, visiting at most one node per level?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "# A tree node is [value, left, right]; an empty subtree is None.\n\ndef contains(node, x):\n    while node is not None:\n        if x == node[0]:\n            return True\n        node = node[1] if x < node[0] else node[2]\n    return False"
+    },
+    "ai_claim": "Yes. At each node it moves to the only subtree that could contain x, so it follows one root-to-leaf path in O(h).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "If x equals the node's value, it is found."
+      },
+      {
+        "index": 2,
+        "text": "In a BST all smaller values are in the left subtree and all larger values in the right, so only one subtree can contain x."
+      },
+      {
+        "index": 3,
+        "text": "Moving into that subtree discards the other safely, visiting one node per level."
+      },
+      {
+        "index": 4,
+        "text": "If the path reaches None, x is not in the tree."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct for valid BSTs: the BST property guarantees x can only be in the chosen subtree, so the search is exact and costs O(h), where h is the height.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "contains(tree, 6): 8 -> left to 3 -> right to 6 -> found",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that the discarded subtree can never contain x."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 relies on the BST property. The question guarantees a valid BST."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In a BST, the ordering property fully determines which subtree could hold x."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace contains(tree, 6) and contains(tree, 7)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. For a valid BST, only one subtree can contain x, so the search is exact in O(h). The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "This search is correct precisely because the tree is a valid BST - the property the flawed is_bst failed to verify. Approving it means confirming the precondition is guaranteed by the question, which it is here.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "contains",
+      "ai_code": "def contains(node, x):\n    while node is not None:\n        if x == node[0]:\n            return True\n        node = node[1] if x < node[0] else node[2]\n    return False",
+      "reference_code": "def contains(node, x):\n    if node is None:\n        return False\n    return node[0] == x or contains(node[1], x) or contains(node[2], x)",
+      "test_inputs": [
+        "([8, [3, [1, None, None], [6, None, None]], [10, None, [14, None, None]]], 6)",
+        "([8, [3, [1, None, None], [6, None, None]], [10, None, [14, None, None]]], 7)",
+        "(None, 1)",
+        "([8, [3, [1, None, None], [6, None, None]], [10, None, [14, None, None]]], 14)"
+      ]
+    }
+  }
+]

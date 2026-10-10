@@ -1,0 +1,390 @@
+[
+  {
+    "id": "dsa-searching-sorting-001",
+    "subject": "dsa",
+    "topic": "Searching & Sorting",
+    "subtopic": "Stability of selection sort",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Students are stored as [name, marks] and sorted by marks with selection_sort(items, 1). Is the sort stable - do students with equal marks keep their original relative order?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def selection_sort(items, key):\n    a = list(items)\n    for i in range(len(a)):\n        m = i\n        for j in range(i + 1, len(a)):\n            if a[j][key] < a[m][key]:\n                m = j\n        a[i], a[m] = a[m], a[i]\n    return a"
+    },
+    "ai_claim": "Yes. Equal marks are never swapped past each other, because the comparison uses a strict less-than.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each pass finds the minimum of the unsorted part."
+      },
+      {
+        "index": 2,
+        "text": "The comparison a[j][key] < a[m][key] is strict, so a later equal element never replaces the current minimum."
+      },
+      {
+        "index": 3,
+        "text": "So elements with equal keys are never reordered relative to each other."
+      },
+      {
+        "index": 4,
+        "text": "selection_sort is stable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming a strict comparison is enough for stability",
+      "explanation": "The strict comparison controls which minimum is chosen, but the swap in each pass moves a[i] to wherever the minimum was, jumping it over equal elements. For [['A', 2], ['B', 2], ['C', 1]], the first pass swaps A with C, giving C, B, A: B now precedes A although A came first. Selection sort with swaps is not stable.",
+      "why_convincing": "The strict < looks like the classic stability safeguard from insertion and merge sort, and simple tests with distinct keys cannot show instability."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The long-distance swap breaks stability: [['A', 2], ['B', 2], ['C', 1]] sorts to C, B, A. Use a stable algorithm (Python's sorted is stable).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "selection_sort([['A', 2], ['B', 2], ['C', 1]], 1) gives C, B, A.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2",
+          "1"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "pass 1: minimum C at index 2; swap A and C -> [C, B, A]",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A and B both have 2 marks; A comes first in the input but last in the output."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the sort with equal keys that start in a known order."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 considers the comparison but not the swap."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Swapping an element over a long distance can jump it past equal elements."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace the first pass on [['A', 2], ['B', 2], ['C', 1]]."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the swap moves A past B, so the equal-mark students end up as B, A. Selection sort is not stable."
+      }
+    ],
+    "repair": "Use a stable sort such as `sorted(items, key=lambda r: r[1])`.",
+    "debrief": "Stability matters whenever records are sorted by one field after being ordered by another. It is a property of the whole algorithm, including its data movement, not just of the comparison. Test stability with equal keys whose original order you can see.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "selection_sort",
+      "ai_code": "def selection_sort(items, key):\n    a = list(items)\n    for i in range(len(a)):\n        m = i\n        for j in range(i + 1, len(a)):\n            if a[j][key] < a[m][key]:\n                m = j\n        a[i], a[m] = a[m], a[i]\n    return a",
+      "reference_code": "def selection_sort(items, key):\n    return sorted(items, key=lambda r: r[key])",
+      "test_inputs": [
+        "([['X', 3], ['Y', 1]], 1)",
+        "([['A', 2], ['B', 2], ['C', 1]], 1)"
+      ],
+      "counterexample_input": "([['A', 2], ['B', 2], ['C', 1]], 1)"
+    }
+  },
+  {
+    "id": "dsa-searching-sorting-002",
+    "subject": "dsa",
+    "topic": "Searching & Sorting",
+    "subtopic": "Inserting into a sorted list",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this claim correct: insert_sorted keeps the list sorted, finds the insertion point in O(log n), but still costs O(n) per insertion overall?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "import bisect\n\ndef insert_sorted(sorted_list, x):\n    a = list(sorted_list)\n    bisect.insort(a, x)\n    return a"
+    },
+    "ai_claim": "Yes. bisect finds the position by binary search in O(log n), but inserting into a list shifts the later elements, which is O(n).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "bisect.insort uses binary search to find where x belongs, in O(log n)."
+      },
+      {
+        "index": 2,
+        "text": "It then inserts x at that position, so the list stays sorted."
+      },
+      {
+        "index": 3,
+        "text": "Inserting into the middle of a Python list shifts every later element one place, which is O(n)."
+      },
+      {
+        "index": 4,
+        "text": "So each insertion is O(n) overall, even though the search is O(log n)."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The search is logarithmic, but list insertion is linear, so the total per insertion is O(n). For many insertions, a balanced tree or heap may suit better.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "insert_sorted([1, 3, 5], 4) returns [1, 3, 4, 5].",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate the cost of finding the position from the cost of inserting."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is the claim about insertion cost."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Inserting into an array requires shifting later elements."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the element moves for inserting at the front of an n-element list."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The search is O(log n) and the insertion O(n), so the total is O(n). The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "An O(log n) search inside an O(n) operation does not make the operation O(log n). The claim separates the two costs correctly, which is the precise kind of reasoning complexity analysis needs. Always identify the dominant step.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "insert_sorted",
+      "ai_code": "import bisect\n\ndef insert_sorted(sorted_list, x):\n    a = list(sorted_list)\n    bisect.insort(a, x)\n    return a",
+      "reference_code": "def insert_sorted(sorted_list, x):\n    return sorted(list(sorted_list) + [x])",
+      "test_inputs": [
+        "([1, 3, 5], 4)",
+        "([], 1)",
+        "([2, 2], 2)",
+        "([1, 2], 0)"
+      ]
+    }
+  },
+  {
+    "id": "dsa-searching-sorting-003",
+    "subject": "dsa",
+    "topic": "Searching & Sorting",
+    "subtopic": "Counting sort for bounded integers",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For marks that are integers from 0 to 100, does sort_marks return them in ascending order in O(n + 101) time?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def sort_marks(marks):\n    \"\"\"marks are integers from 0 to 100.\"\"\"\n    counts = [0] * 101\n    for m in marks:\n        counts[m] += 1\n    out = []\n    for value, c in enumerate(counts):\n        out.extend([value] * c)\n    return out"
+    },
+    "ai_claim": "Yes. It counts how often each mark occurs and writes them out in order, which takes O(n + k) with k = 101.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "counts has one slot for each possible mark, 0 to 100."
+      },
+      {
+        "index": 2,
+        "text": "One pass over the n marks increments the right slots, which is O(n)."
+      },
+      {
+        "index": 3,
+        "text": "Walking the 101 slots in order and repeating each value by its count outputs the marks in ascending order."
+      },
+      {
+        "index": 4,
+        "text": "The total work is O(n + 101), which is linear in n."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Counting sort is linear when the key range is small and known. It would fail (IndexError) for marks outside 0-100, which the stated input excludes.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "sort_marks([90, 35, 90, 0, 100]) returns [0, 35, 90, 90, 100].",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0",
+          "100"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the claim against the stated input range."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 produces the output. Check its order and duplicates."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Counting sort runs in O(n + k) for integer keys in a range of size k."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace sort_marks([90, 35, 90, 0, 100])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. For marks 0-100 it sorts in O(n + 101). The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Counting sort beats the O(n log n) comparison-sort bound because it does not compare elements; it exploits the known, small range of keys. The claim correctly states that condition. When approving a linear-time sort, check that its assumptions about the keys hold.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "sort_marks",
+      "ai_code": "def sort_marks(marks):\n    \"\"\"marks are integers from 0 to 100.\"\"\"\n    counts = [0] * 101\n    for m in marks:\n        counts[m] += 1\n    out = []\n    for value, c in enumerate(counts):\n        out.extend([value] * c)\n    return out",
+      "reference_code": "def sort_marks(marks):\n    return sorted(marks)",
+      "test_inputs": [
+        "([90, 35, 90, 0, 100],)",
+        "([],)",
+        "([50],)"
+      ]
+    }
+  },
+  {
+    "id": "dsa-searching-sorting-004",
+    "subject": "dsa",
+    "topic": "Searching & Sorting",
+    "subtopic": "Binary search and duplicates",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The lookup table is sorted in ascending order. Will find(table, x) return the index of the first occurrence of x?",
+    "artifact_type": "algorithm",
+    "artifact": {
+      "language": "python",
+      "code": "def find(table, x):\n    lo, hi = 0, len(table) - 1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if table[mid] == x:\n            return mid\n        if table[mid] < x:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1"
+    },
+    "ai_claim": "Yes. Binary search locates x, and because each value appears once in the table, that index is its first occurrence.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The table is sorted, so binary search applies."
+      },
+      {
+        "index": 2,
+        "text": "find returns the index mid as soon as table[mid] == x."
+      },
+      {
+        "index": 3,
+        "text": "Each value appears only once in the lookup table."
+      },
+      {
+        "index": 4,
+        "text": "So the index returned is the first occurrence of x."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether the table can contain duplicate values. The code returns whichever matching index it reaches first, which is the first occurrence only if x appears once; the question says the table is sorted but not that its values are unique.",
+    "resolving_scenarios": [
+      "Values are unique, e.g. [1, 3, 5, 7] with x = 5: the only occurrence is index 2, and find returns 2.",
+      "Duplicates are allowed, e.g. [2, 2, 2, 2, 2] with x = 2: find returns index 2 (the middle), not the first occurrence at index 0."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on whether duplicates occur, which is not stated. With unique values the answer is yes; with duplicates, find may return any matching index. To guarantee the first occurrence, keep searching left after a match (bisect_left).",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "find([2, 2, 2, 2, 2], 2) returns 2, not 0.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2",
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "find([2, 2, 2, 2, 2], 2) returns 2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where step 3's fact about the table comes from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states that each value appears once. Is that given?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A plain binary search returns some matching index, not necessarily the first."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run find on [2, 2, 2, 2, 2] with x = 2."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 invents uniqueness. With duplicates, find can return a middle index. It cannot be decided from what is given."
+      }
+    ],
+    "repair": "Either confirm the table's values are unique, or use bisect.bisect_left to find the first occurrence.",
+    "debrief": "'Sorted' and 'unique' are different guarantees, and binary search variants differ exactly on duplicates. Step 3 supplied the convenient one. When an algorithm's correctness depends on a property of the data, find where that property is stated - or ask.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

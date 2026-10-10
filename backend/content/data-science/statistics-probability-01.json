@@ -1,0 +1,403 @@
+[
+  {
+    "id": "ds-statistics-probability-001",
+    "subject": "data-science",
+    "topic": "Statistics & Probability",
+    "subtopic": "What a p-value is",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does p = 0.03 mean there is a 3% chance that the new checkout has no effect?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "result": "A/B test of a new checkout: two-sided test, p = 0.03"
+    },
+    "ai_claim": "Yes. The p-value is the probability that the null hypothesis is true, so there is a 3% chance of no effect and a 97% chance the effect is real.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The null hypothesis is that the checkout has no effect."
+      },
+      {
+        "index": 2,
+        "text": "The p-value is 0.03."
+      },
+      {
+        "index": 3,
+        "text": "The p-value is the probability that the null hypothesis is true."
+      },
+      {
+        "index": 4,
+        "text": "So there is a 97% chance the effect is real."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Reading a p-value as the probability of the hypothesis",
+      "explanation": "A p-value is the probability of seeing data at least this extreme if the null hypothesis were true: P(data | H0), not P(H0 | data). It says nothing directly about the chance the effect is real, which also depends on prior plausibility and power. p = 0.03 means results like these would be fairly unusual under no effect.",
+      "why_convincing": "The misreading sounds like what a p-value ought to mean, and it is extremely common."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: p = 0.03 is the probability of data this extreme assuming no effect, not the probability that there is no effect.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The p-value is P(result at least this extreme | H0) = 0.03.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.03"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "With a very implausible hypothesis and a low-powered test, many results with p = 0.03 are false positives.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "P(data | H0) and P(H0 | data) can differ greatly, just as P(wet | rain) differs from P(rain | wet)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall the conditional probability a p-value represents."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states what the p-value is."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A p-value conditions on the null hypothesis being true."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare P(data | H0) with P(H0 | data)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: p is P(data this extreme | H0), not P(H0 | data)."
+      }
+    ],
+    "repair": "Report: 'If there were no effect, a difference this large would occur about 3% of the time.'",
+    "debrief": "The p-value is one of the most misread numbers in science. Say what it conditions on, and add effect sizes and intervals rather than turning p into a probability of truth.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-statistics-probability-002",
+    "subject": "data-science",
+    "topic": "Statistics & Probability",
+    "subtopic": "Testing many metrics",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the conclusion justified?",
+    "artifact_type": "experiment_design",
+    "artifact": {
+      "analysis": "After a UI change, the team tested 20 metrics, each at a 0.05 significance level.\nOne metric (time on settings page) was significant: p = 0.04. The other 19 were not.",
+      "conclusion": "\"The UI change significantly increased time on the settings page.\""
+    },
+    "ai_claim": "Yes. The settings-page metric was significant at p = 0.04, below the 0.05 threshold, so the effect is real.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "20 metrics were tested."
+      },
+      {
+        "index": 2,
+        "text": "One had p = 0.04."
+      },
+      {
+        "index": 3,
+        "text": "0.04 is below 0.05, so it is significant."
+      },
+      {
+        "index": 4,
+        "text": "So the UI change increased time on the settings page."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Ignoring multiple comparisons",
+      "explanation": "With 20 independent tests at 0.05, about one false positive is expected even with no real effects (1 - 0.95^20 = 64% chance of at least one). One significant result out of 20 is exactly what chance produces. Correct for multiplicity (e.g. Bonferroni: 0.05 / 20 = 0.0025, which 0.04 does not meet) or pre-register a primary metric.",
+      "why_convincing": "Each test on its own is computed correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: one 'hit' in 20 tests is expected by chance. After a Bonferroni correction the threshold is 0.0025, and p = 0.04 is not significant.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "P(at least one false positive) = 1 - 0.95^20 = 0.64",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.64"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "Bonferroni threshold: 0.05 / 20 = 0.0025, and p = 0.04 is above it.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.0025"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Running 20 tests on two identical versions typically yields one 'significant' metric."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how many tests were run."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 applies the single-test threshold."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The chance of a false positive grows with the number of tests."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 1 - 0.95^20."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: with 20 tests, one p < 0.05 is expected by chance. Correct for multiple comparisons."
+      }
+    ],
+    "repair": "Pre-register a primary metric, and correct for multiple comparisons (Bonferroni or FDR).",
+    "debrief": "The more you test, the more 'significant' results you find by luck. Count the tests before trusting any single one.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-statistics-probability-003",
+    "subject": "data-science",
+    "topic": "Statistics & Probability",
+    "subtopic": "Base rates",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If a transaction is flagged, what is the probability, in percent, that it is actually fraudulent?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "test": "Fraud screen: flags 99% of fraudulent transactions (sensitivity), and wrongly flags 5% of legitimate ones (false positive rate).",
+      "population": "1% of transactions are fraudulent."
+    },
+    "ai_claim": "99. The screen catches 99% of fraud, so a flagged transaction is 99% likely to be fraud.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The screen detects 99% of fraud."
+      },
+      {
+        "index": 2,
+        "text": "A flag therefore indicates fraud 99% of the time."
+      },
+      {
+        "index": 3,
+        "text": "The false positive rate is small, only 5%."
+      },
+      {
+        "index": 4,
+        "text": "So a flagged transaction is 99% likely to be fraud."
+      }
+    ],
+    "ai_final_answer": "99",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Confusing P(flag | fraud) with P(fraud | flag)",
+      "explanation": "Out of 10,000 transactions, 100 are fraud and 99 of them are flagged. Of the 9,900 legitimate ones, 5% - 495 - are also flagged. So 99 of 594 flags are fraud: about 16.7%. Because fraud is rare, false positives outnumber true positives. This is the base rate fallacy.",
+      "why_convincing": "99% is the most prominent number, and 5% sounds small."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "P(fraud | flag) = 0.99 x 0.01 / (0.99 x 0.01 + 0.05 x 0.99) = 16.7%.",
+    "canonical_answer": "16.7",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "99 true flags / (99 + 495) flags = 16.7%",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "16.7"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Only 1% of transactions are fraud, so legitimate transactions dominate the flags.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Most flagged transactions, about 83%, are legitimate."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Work with 10,000 transactions."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 reverses the conditional probability."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Bayes' theorem: P(fraud | flag) depends on the base rate."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count true flags and false flags."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: only about 16.7% of flags are fraud, because fraud is rare."
+      }
+    ],
+    "repair": "",
+    "debrief": "With rare events, even accurate tests produce mostly false alarms. Always combine sensitivity and false positive rate with the base rate before interpreting a positive.",
+    "transfer_check": {
+      "question": "With the same screen, if 10% of transactions were fraudulent, what percent of flags would be fraud?",
+      "answer": "68.75",
+      "explanation": "0.99 x 0.1 / (0.99 x 0.1 + 0.05 x 0.9) = 0.099 / 0.144 = 68.75%."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-statistics-probability-004",
+    "subject": "data-science",
+    "topic": "Statistics & Probability",
+    "subtopic": "What a confidence interval covers",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the report's interpretation of the interval correct?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "result": "Mean delivery time from a sample of 400 deliveries: 30 minutes, 95% CI [28, 32]",
+      "report": "\"95% of deliveries take between 28 and 32 minutes.\""
+    },
+    "ai_claim": "Yes. The 95% confidence interval is 28 to 32 minutes, so 95% of deliveries take between 28 and 32 minutes.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The sample mean is 30 minutes."
+      },
+      {
+        "index": 2,
+        "text": "The 95% CI is 28 to 32 minutes."
+      },
+      {
+        "index": 3,
+        "text": "A 95% interval contains 95% of the values."
+      },
+      {
+        "index": 4,
+        "text": "So 95% of deliveries take 28-32 minutes."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Treating a confidence interval for the mean as a range for individual values",
+      "explanation": "The interval describes uncertainty about the average delivery time, not the spread of individual deliveries. With n = 400, the standard error is SD / 20, so a CI of +-2 minutes implies an SD of about 10 minutes: individual deliveries range far wider, roughly 10 to 50 minutes. A prediction interval or percentiles describe individual deliveries.",
+      "why_convincing": "Both are '95% intervals' around 30 minutes."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the CI covers the mean, not individual deliveries. With SD about 10 minutes, individual times vary far more widely.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Half-width 2 = 1.96 x SD / sqrt(400) gives SD = 2 x 20 / 1.96 = about 10.2 minutes.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10.2"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Many single deliveries take 45 minutes, far outside [28, 32].",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "45"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An individual delivery of 45 minutes is normal given an SD of about 10."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what quantity the interval is about."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 applies the interval to individual deliveries."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A CI for the mean shrinks with sample size; the spread of individual values does not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Back out the standard deviation from the interval's width."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the CI is for the mean. Individual deliveries vary far more."
+      }
+    ],
+    "repair": "Report the mean with its CI, and describe individual deliveries with percentiles (e.g. 90% take under 45 minutes).",
+    "debrief": "Confidence intervals for a mean narrow as samples grow; the variability of individuals does not. Say which one you are reporting.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

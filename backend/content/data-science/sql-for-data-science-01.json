@@ -1,0 +1,562 @@
+[
+  {
+    "id": "ds-sql-for-data-science-001",
+    "subject": "data-science",
+    "topic": "SQL for Data Science",
+    "subtopic": "LIMIT is not a random sample",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the sample's mean a fair estimate of the average transaction amount?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "sample = pd.read_sql(\"SELECT * FROM transactions LIMIT 10000\", conn)\n# transactions: 40 million rows, loaded in date order since 2019\nprint(sample[\"amount\"].mean())   # used as the average transaction amount"
+    },
+    "ai_claim": "Yes. 10,000 rows is a large sample, so its mean is a good estimate of the average across all transactions.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The query returns 10,000 rows."
+      },
+      {
+        "index": 2,
+        "text": "10,000 is a large sample."
+      },
+      {
+        "index": 3,
+        "text": "Large samples estimate population averages well."
+      },
+      {
+        "index": 4,
+        "text": "So the sample mean is a fair estimate."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Treating the first rows as a random sample",
+      "explanation": "LIMIT without ORDER BY returns whatever rows the database reads first - in practice usually the oldest, loaded in date order. The sample covers early 2019 only, missing price changes, new products and growth since. A large biased sample is still biased. Sample randomly: TABLESAMPLE, ORDER BY RANDOM() (on a smaller table), or a hash of the id.",
+      "why_convincing": "10,000 rows sounds like plenty, and the query is quick."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the rows are effectively the oldest transactions, not a random sample. Use random sampling (TABLESAMPLE or hash-based).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "sample['created_at'].max() is in January 2019.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2019"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "If average amounts grew 40% since 2019, the sample mean understates the overall mean.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "40"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The sample contains no transaction after early 2019."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which rows LIMIT returns."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the sample is random."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Estimates need random samples; size does not fix selection bias."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the date range of the sample."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: LIMIT returns the first rows read, not random ones. Sample randomly."
+      }
+    ],
+    "repair": "Use `TABLESAMPLE SYSTEM (0.025)` or `WHERE hashtext(id::text) % 4000 = 0`.",
+    "debrief": "The quickest sample is rarely a random one. Check the sample's distribution on key fields (dates, regions) against the population before trusting estimates.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-sql-for-data-science-002",
+    "subject": "data-science",
+    "topic": "SQL for Data Science",
+    "subtopic": "AVG after a LEFT JOIN",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this query give the average spend per customer, including customers who spent nothing?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "customers": {
+        "title": "customers",
+        "columns": [
+          "id"
+        ],
+        "rows": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ]
+        ]
+      },
+      "orders": {
+        "title": "orders",
+        "columns": [
+          "customer_id",
+          "amount"
+        ],
+        "rows": [
+          [
+            1,
+            100
+          ],
+          [
+            3,
+            300
+          ]
+        ]
+      },
+      "query": "SELECT AVG(o.amount) AS avg_spend_per_customer\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id;"
+    },
+    "ai_claim": "Yes. The LEFT JOIN keeps all four customers, so AVG(o.amount) averages over every customer: 200.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The LEFT JOIN keeps all 4 customers."
+      },
+      {
+        "index": 2,
+        "text": "Customers 2 and 4 have no orders, so their amount is NULL."
+      },
+      {
+        "index": 3,
+        "text": "AVG averages over all four customers."
+      },
+      {
+        "index": 4,
+        "text": "The result, 200, is the average spend per customer."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming AVG counts NULL rows",
+      "explanation": "AVG ignores NULLs, so it averages only customers 1 and 3: (100 + 300) / 2 = 200. Spend per customer, counting non-buyers as 0, is 400 / 4 = 100. Use AVG(COALESCE(o.amount, 0)), or divide the total by the number of customers.",
+      "why_convincing": "The LEFT JOIN really does keep every customer, which makes it look like the average covers them."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "AVG skips NULLs, giving 200 (buyers only). Per customer it is 100: AVG(COALESCE(o.amount, 0)).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(100 + 300) / 2 = 200 versus (100 + 0 + 300 + 0) / 4 = 100",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "200",
+          "100"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "SELECT AVG(COALESCE(o.amount, 0)) returns 100.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "100"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Adding 100 more non-buyers would leave the query's answer unchanged."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how AVG treats NULL."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes AVG includes the NULL rows."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Aggregate functions ignore NULLs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Replace NULL with 0 and recompute."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: AVG skips NULLs, so 200 is the average per buyer. Per customer it is 100."
+      }
+    ],
+    "repair": "Use `AVG(COALESCE(o.amount, 0))` (with one row per customer).",
+    "debrief": "Whether zeros or NULLs are in your data changes every average. Decide which population the metric describes, then make the SQL match.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-sql-for-data-science-003",
+    "subject": "data-science",
+    "topic": "SQL for Data Science",
+    "subtopic": "Features computed from the future",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is total_orders a legitimate feature for this prediction?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "features = pd.read_sql(\"\"\"\n  SELECT c.id, COUNT(o.id) AS total_orders, c.churned_by_2026_06\n  FROM customers c LEFT JOIN orders o ON o.customer_id = c.id\n  GROUP BY c.id, c.churned_by_2026_06\n\"\"\", conn)\n# Goal: on 1 Jan 2026, predict who will churn by June 2026."
+    },
+    "ai_claim": "Yes. Order history is a strong, standard churn feature, and it comes straight from the orders table.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Customers who order more are less likely to churn."
+      },
+      {
+        "index": 2,
+        "text": "total_orders counts each customer's orders."
+      },
+      {
+        "index": 3,
+        "text": "It is computed from the orders table."
+      },
+      {
+        "index": 4,
+        "text": "So it is a legitimate feature."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 2,
+      "misconception": "Using data from after the prediction date",
+      "explanation": "The query counts all orders, including those placed between January and June 2026. Customers who kept ordering in that window did not churn, so the feature partly encodes the label. Validation scores look excellent, and the model fails in production, where future orders are unknown. Filter to orders before the prediction date: WHERE o.created_at < '2026-01-01'.",
+      "why_convincing": "Order counts are a textbook churn feature."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without a date cutoff, total_orders includes orders after 1 January 2026 - target leakage. Count only orders placed before the prediction date.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The query has no filter on o.created_at.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "A customer who placed 5 orders in March 2026 gets a high count exactly because they did not churn.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The model scores unrealistically well in validation."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the time window of the orders counted."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 counts all orders."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Features must use only information available at the prediction time."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what the count includes for a customer active in March 2026."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the count includes orders after the prediction date. Add a date cutoff."
+      }
+    ],
+    "repair": "Add `AND o.created_at < '2026-01-01'` to the join condition.",
+    "debrief": "Every feature needs an 'as of' date. Build training rows as snapshots at the prediction time, and leakage has nowhere to hide.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-sql-for-data-science-004",
+    "subject": "data-science",
+    "topic": "SQL for Data Science",
+    "subtopic": "COUNT(*) after a LEFT JOIN",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is Ben's n_orders 0, the correct feature value for a customer with no orders?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "customers": {
+        "title": "customers",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "rows": [
+          [
+            1,
+            "Asha"
+          ],
+          [
+            2,
+            "Ben"
+          ]
+        ]
+      },
+      "orders": {
+        "title": "orders",
+        "columns": [
+          "id",
+          "customer_id"
+        ],
+        "rows": [
+          [
+            10,
+            1
+          ],
+          [
+            11,
+            1
+          ]
+        ]
+      },
+      "query": "SELECT c.name, COUNT(*) AS n_orders\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nGROUP BY c.name;"
+    },
+    "ai_claim": "Yes. Ben has no orders, the LEFT JOIN gives him NULL order columns, and COUNT(*) counts his orders as 0.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The LEFT JOIN keeps Ben with NULL order columns."
+      },
+      {
+        "index": 2,
+        "text": "COUNT(*) counts Ben's orders."
+      },
+      {
+        "index": 3,
+        "text": "Ben has no orders."
+      },
+      {
+        "index": 4,
+        "text": "So n_orders is 0."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 2,
+      "misconception": "Counting rows instead of matches",
+      "explanation": "COUNT(*) counts rows, and the LEFT JOIN produces one row for Ben (with NULLs), so n_orders is 1. The feature then says Ben ordered once. Count a column from the right table: COUNT(o.id) ignores NULLs and gives 0.",
+      "why_convincing": "The LEFT JOIN is the right choice for keeping Ben; the count is what goes wrong."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "COUNT(*) gives Ben 1. Use COUNT(o.id) to get 0.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The query returns ('Ben', 1).",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "With COUNT(o.id), Ben's count is 0.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Every customer with no orders gets n_orders = 1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the rows produced for Ben."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes COUNT(*) counts orders."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "COUNT(*) counts rows; COUNT(column) counts non-NULL values."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the query and look at Ben's row."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: COUNT(*) counts Ben's NULL row as 1. Use COUNT(o.id)."
+      }
+    ],
+    "repair": "Use `COUNT(o.id)`.",
+    "debrief": "After a LEFT JOIN, counts must target the joined table's key, or every unmatched row counts as one. This quietly corrupts 'number of X' features.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-sql-for-data-science-005",
+    "subject": "data-science",
+    "topic": "SQL for Data Science",
+    "subtopic": "Rolling features that exclude today",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that avg_prev_7_days uses only the previous 7 days, so it can predict each day's activity without leaking that day's value?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "SELECT user_id, day, active_minutes,\n       AVG(active_minutes) OVER (\n         PARTITION BY user_id ORDER BY day\n         ROWS BETWEEN 7 PRECEDING AND 1 PRECEDING\n       ) AS avg_prev_7_days\nFROM daily_activity;   -- exactly one row per user per day, no gaps"
+    },
+    "ai_claim": "Yes. The frame ends at 1 PRECEDING, so the current row is excluded, and with one row per user per day, 7 PRECEDING to 1 PRECEDING is exactly the previous 7 days.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "PARTITION BY user_id keeps each user's rows separate."
+      },
+      {
+        "index": 2,
+        "text": "ORDER BY day orders them in time."
+      },
+      {
+        "index": 3,
+        "text": "The frame ends at 1 PRECEDING, so the current day is not included."
+      },
+      {
+        "index": 4,
+        "text": "With exactly one row per day, the frame covers the 7 previous days."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct, given the stated one-row-per-day guarantee. (With gaps, a ROWS frame would reach further back than 7 days; a RANGE frame on dates would then be needed.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "For a user's 8th day, the feature equals the mean of days 1-7.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "7"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The frame's upper bound is 1 PRECEDING, excluding the current row.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the current row is in the frame."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 relies on the table having no gaps."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A frame ending at 1 PRECEDING excludes the current row."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the feature for a user's 8th day."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The frame excludes today and covers 7 prior days. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Window frames are a clean way to build leakage-free time features. The claim states the data assumption (no gaps) that makes ROWS equivalent to days.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

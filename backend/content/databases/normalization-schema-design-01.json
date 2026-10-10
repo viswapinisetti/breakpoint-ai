@@ -1,0 +1,555 @@
+[
+  {
+    "id": "db-normalization-schema-design-001",
+    "subject": "databases",
+    "topic": "Normalization & Schema Design",
+    "subtopic": "First normal form and packed values",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this table in first normal form (1NF)?",
+    "artifact_type": "schema",
+    "artifact": {
+      "customers": {
+        "title": "customers",
+        "columns": [
+          "id",
+          "name",
+          "phones"
+        ],
+        "rows": [
+          [
+            1,
+            "Asha",
+            "98450 11111, 99000 22222"
+          ],
+          [
+            2,
+            "Ben",
+            "98450 33333"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. Every cell holds a single value - phones is one string per row - so the table is in 1NF.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "1NF requires each cell to hold a single value."
+      },
+      {
+        "index": 2,
+        "text": "The phones column is a text column."
+      },
+      {
+        "index": 3,
+        "text": "Each row stores exactly one string in phones."
+      },
+      {
+        "index": 4,
+        "text": "So every cell is single-valued and the table is in 1NF."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating a packed list as one value",
+      "explanation": "1NF requires atomic values: one fact per cell. Asha's phones cell holds two phone numbers packed into a string. The database cannot constrain, index or join individual numbers, and finding a customer by one number needs fragile string matching. Move phones to customer_phones(customer_id, phone).",
+      "why_convincing": "Technically each cell is one string, so the type system does not complain."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not in 1NF: phones stores a repeating group as a comma-separated list. Create customer_phones(customer_id, phone) with one row per number.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Asha's phones cell contains two numbers: 98450 11111 and 99000 22222.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "CREATE TABLE customer_phones (customer_id INT REFERENCES customers(id), phone VARCHAR(20), PRIMARY KEY (customer_id, phone));",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Looking up the customer who owns 99000 22222 requires LIKE '%99000 22222%'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how many facts the phones cell holds for Asha."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 counts strings rather than facts."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Atomicity is about meaning: one value per cell, not one string per cell."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try to find the customer who owns 99000 22222 with an equality test."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: a comma-separated list is several values. Move phones into their own table."
+      }
+    ],
+    "repair": "Create customer_phones(customer_id, phone) and drop the packed column.",
+    "debrief": "Packing lists into strings hides a repeating group from the database, so it cannot enforce uniqueness, index members, or join on them. The test for 1NF is whether you would ever need to split a cell to answer a question.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-normalization-schema-design-002",
+    "subject": "databases",
+    "topic": "Normalization & Schema Design",
+    "subtopic": "Partial dependencies and 2NF",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is order_items in second normal form (2NF)?",
+    "artifact_type": "schema",
+    "artifact": {
+      "schema": "CREATE TABLE order_items (\n  order_id     INT,\n  product_id   INT,\n  quantity     INT,\n  product_name VARCHAR(100),\n  PRIMARY KEY (order_id, product_id)\n);"
+    },
+    "ai_claim": "Yes. It is in 1NF, and every non-key column - quantity and product_name - depends on the primary key.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "All values are atomic, so the table is in 1NF."
+      },
+      {
+        "index": 2,
+        "text": "The primary key is (order_id, product_id)."
+      },
+      {
+        "index": 3,
+        "text": "quantity and product_name are both determined once the key is known."
+      },
+      {
+        "index": 4,
+        "text": "So every non-key column depends on the key, and the table is in 2NF."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Ignoring dependence on part of a composite key",
+      "explanation": "2NF requires every non-key column to depend on the whole key. quantity does, but product_name depends only on product_id - part of the key. It repeats on every order line for that product, and renaming a product means updating many rows. Move product_name to products(product_id, name).",
+      "why_convincing": "Knowing the full key does determine product_name, so step 3 is true - it just misses that half the key is enough."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not in 2NF: product_name is determined by product_id alone, a partial dependency. Store it in a products table.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Product 7 on orders 100 and 101 stores its name twice; renaming it requires updating both rows.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "7"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "products(product_id PRIMARY KEY, product_name); order_items(order_id, product_id, quantity)",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A product ordered 1,000 times has its name stored 1,000 times."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether each non-key column needs the whole key or only part of it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 checks dependence on the full key only."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "2NF forbids non-key columns that depend on part of a composite key."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what you need to know to determine product_name."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: product_name depends on product_id alone. Move it to a products table."
+      }
+    ],
+    "repair": "Move product_name to products(product_id, product_name).",
+    "debrief": "Partial dependencies only arise with composite keys, and the tell is a column describing just one of the key's parts. Such columns repeat and drift out of sync. Ask of each column: which part of the key actually determines it?",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-normalization-schema-design-003",
+    "subject": "databases",
+    "topic": "Normalization & Schema Design",
+    "subtopic": "Transitive dependencies and update anomalies",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After this update, does the database consistently record department 3's new name?",
+    "artifact_type": "schema",
+    "artifact": {
+      "employees": {
+        "title": "employees",
+        "columns": [
+          "id",
+          "name",
+          "dept_id",
+          "dept_name"
+        ],
+        "rows": [
+          [
+            101,
+            "Asha",
+            3,
+            "Sales"
+          ],
+          [
+            102,
+            "Ben",
+            3,
+            "Sales"
+          ],
+          [
+            103,
+            "Chen",
+            3,
+            "Sales"
+          ],
+          [
+            104,
+            "Dev",
+            5,
+            "Ops"
+          ]
+        ]
+      },
+      "query": "-- Department 3 is renamed to 'Revenue':\nUPDATE employees SET dept_name = 'Revenue' WHERE id = 101;"
+    },
+    "ai_claim": "Yes. The department's name is stored with its employees, and the update changes it to Revenue.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "dept_name records the name of each employee's department."
+      },
+      {
+        "index": 2,
+        "text": "Department 3 is renamed to Revenue."
+      },
+      {
+        "index": 3,
+        "text": "Updating the department's row sets the new name."
+      },
+      {
+        "index": 4,
+        "text": "So department 3 is now recorded as Revenue."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Updating one copy of a repeated fact",
+      "explanation": "dept_name depends on dept_id, not on the employee: a transitive dependency (id -> dept_id -> dept_name). The name is therefore stored once per employee, and there is no single department row. The update changes only Asha's copy, leaving Ben and Chen in 'Sales': department 3 now has two names. Move dept_name into departments(dept_id, name).",
+      "why_convincing": "It feels like there is 'a department row', but the table only holds employee rows."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Only row 101 changes, so department 3 is recorded as both Revenue and Sales. The transitive dependency violates 3NF; store department names in a departments table.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "After the update, department 3 appears as Revenue for 101 and as Sales for 102 and 103.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "101",
+          "102",
+          "103"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "departments(dept_id PRIMARY KEY, name); employees(id, name, dept_id REFERENCES departments)",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "SELECT DISTINCT dept_name FROM employees WHERE dept_id = 3 returns two names."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count how many rows store department 3's name."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes there is one department row to update."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "When a column depends on another non-key column, its value repeats across rows."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List department 3's names after the update."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: only one of three copies changes, leaving department 3 with two names. Move department names into their own table."
+      }
+    ],
+    "repair": "Create departments(dept_id, name) and remove dept_name from employees.",
+    "debrief": "The update anomaly is why 3NF exists: a fact stored in many rows must be updated in all of them, and partial updates leave contradictions. Store each fact once, in the table whose key determines it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-normalization-schema-design-004",
+    "subject": "databases",
+    "topic": "Normalization & Schema Design",
+    "subtopic": "Lossless decomposition",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does joining A and B on name reconstruct exactly the original three employee rows?",
+    "artifact_type": "schema",
+    "artifact": {
+      "employees": {
+        "title": "employees",
+        "columns": [
+          "emp_id",
+          "name",
+          "dept"
+        ],
+        "rows": [
+          [
+            1,
+            "Asha",
+            "Sales"
+          ],
+          [
+            2,
+            "Ravi",
+            "Support"
+          ],
+          [
+            3,
+            "Ravi",
+            "Finance"
+          ]
+        ]
+      },
+      "query": "-- Proposed split:\n-- A(emp_id, name)\n-- B(name, dept)\n-- Reconstruct with: SELECT * FROM A JOIN B USING (name);"
+    },
+    "ai_claim": "Yes. Every column is kept in one of the tables, and name links them, so the join recovers the original table.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A keeps each employee's id and name."
+      },
+      {
+        "index": 2,
+        "text": "B keeps each name with its department."
+      },
+      {
+        "index": 3,
+        "text": "Joining on name reattaches each employee's department."
+      },
+      {
+        "index": 4,
+        "text": "No information is lost, so the original table is reconstructed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Joining on a column that does not determine the rest",
+      "explanation": "A decomposition is lossless only if the shared column is a key of one side. name is not unique: two employees are called Ravi, in different departments. The join pairs each Ravi with both departments and returns 5 rows, including the false rows (2, Ravi, Finance) and (3, Ravi, Support). Split on emp_id instead.",
+      "why_convincing": "No column is dropped, so it seems no information can be lost - but spurious rows are also a loss of information."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The join returns 5 rows, two of them spurious. The shared column must be a key of one of the parts, for example A(emp_id, name) and B(emp_id, dept).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "A JOIN B returns 5 rows; (2, Ravi, Finance) and (3, Ravi, Support) are spurious.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "A row (2, Ravi) matches B rows (Ravi, Support) and (Ravi, Finance)",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Employee 2 appears in both Support and Finance after the join."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look for a name shared by two employees."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes each name belongs to one department."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A decomposition is lossless when the common attributes form a key of at least one part."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Join the tables by hand for the two Ravis."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: name is not unique, so the join creates spurious rows (5 instead of 3). Share emp_id instead."
+      }
+    ],
+    "repair": "Decompose on the key: A(emp_id, name), B(emp_id, dept).",
+    "debrief": "Decomposition can lose information by adding rows as well as by dropping columns. The rule: the attributes the parts share must functionally determine one of the parts. Test by joining the parts on data with duplicate values in the shared column.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-normalization-schema-design-005",
+    "subject": "databases",
+    "topic": "Normalization & Schema Design",
+    "subtopic": "Snapshot values are not redundancy",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A reviewer says order_items.unit_price duplicates products.price and should be removed to normalise the schema. Is the AI right that it should stay?",
+    "artifact_type": "schema",
+    "artifact": {
+      "schema": "CREATE TABLE products (\n  id INT PRIMARY KEY,\n  name VARCHAR(100),\n  price NUMERIC(10, 2)       -- current list price\n);\nCREATE TABLE order_items (\n  order_id   INT,\n  product_id INT REFERENCES products(id),\n  quantity   INT,\n  unit_price NUMERIC(10, 2), -- price charged at the time of the order\n  PRIMARY KEY (order_id, product_id)\n);"
+    },
+    "ai_claim": "Yes, it should stay. unit_price records what the customer was charged when they ordered, which is a different fact from today's list price.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "products.price is the current price and changes over time."
+      },
+      {
+        "index": 2,
+        "text": "unit_price is the price at the moment of the order, fixed forever for that order."
+      },
+      {
+        "index": 3,
+        "text": "The two columns hold different facts, even when their values happen to be equal."
+      },
+      {
+        "index": 4,
+        "text": "Removing unit_price would make old invoices change whenever the list price changes."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Normalisation removes repeated copies of the same fact. unit_price is a separate fact - a historical snapshot - determined by the order line, not by the product. Deriving it from the current price would rewrite history.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If a product's price rises from 100 to 120, an old order line should still show 100.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "100",
+          "120"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the two columns record the same fact."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 separates value equality from fact equality."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Functional dependencies are about what determines a value: product_id determines the current price, but the order line determines the price charged."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what happens to an old invoice after a price change."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. unit_price is a historical fact, not a copy of the list price. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Normalisation targets redundancy - the same fact stored twice. A price at the time of sale, an address at the time of shipping, a rate at the time of booking are different facts from their current values. Recognising a snapshot keeps you from 'normalising' away history.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

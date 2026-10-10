@@ -1,0 +1,483 @@
+[
+  {
+    "id": "da-dashboard-design-001",
+    "subject": "data-analytics",
+    "topic": "Dashboard Design",
+    "subtopic": "A number without context",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this card tell the sales head whether the month is going well?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "kpi_card": "Revenue (this month): Rs 42 lakh",
+      "other_elements": "No target, no previous period, no trend."
+    },
+    "ai_claim": "Yes. Rs 42 lakh is a strong revenue figure, so the card shows the month is going well.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The card shows this month's revenue."
+      },
+      {
+        "index": 2,
+        "text": "Rs 42 lakh is a large amount."
+      },
+      {
+        "index": 3,
+        "text": "A large revenue figure means good performance."
+      },
+      {
+        "index": 4,
+        "text": "So the month is going well."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Judging performance without a comparison",
+      "explanation": "A number is only good or bad relative to something: a target, last month, the same month last year, or where the month should be by today. Rs 42 lakh could be 140% of target or 60% of it. The card needs a comparison (target, prior period, trend) for anyone to judge performance.",
+      "why_convincing": "Big round numbers feel impressive on their own."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without a target or comparison period, the card cannot show whether 42 lakh is good. Add target, variance and trend.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If the monthly target is Rs 70 lakh, 42 lakh is 60% of target.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "70",
+          "60"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "KPI displays need a reference: target, prior period or benchmark.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Last month's revenue could have been Rs 60 lakh."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 42 lakh should be compared with."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 judges the number in isolation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Performance is always relative to a target or a previous value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a target of 70 lakh."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without a comparison, the card cannot show performance. Add a target and trend."
+      }
+    ],
+    "repair": "Show the target, the variance to target and last period, and a small trend line.",
+    "debrief": "Every KPI on a dashboard should answer 'compared to what?'. Context turns a number into information.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-dashboard-design-002",
+    "subject": "data-analytics",
+    "topic": "Dashboard Design",
+    "subtopic": "Colour meaning on cost metrics",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "All tiles are green. Is everything improving?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "tiles": {
+        "title": "Operations dashboard tiles",
+        "columns": [
+          "Metric",
+          "Change vs last month",
+          "Tile colour"
+        ],
+        "rows": [
+          [
+            "Orders",
+            "+8%",
+            "green"
+          ],
+          [
+            "Delivery cost per order",
+            "+12%",
+            "green"
+          ],
+          [
+            "Return rate",
+            "+3 pts",
+            "green"
+          ]
+        ]
+      },
+      "rule": "Colour rule: green if the value went up, red if it went down."
+    },
+    "ai_claim": "Yes. Every tile is green, which means every metric improved this month.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "All three tiles are green."
+      },
+      {
+        "index": 2,
+        "text": "Green indicates improvement."
+      },
+      {
+        "index": 3,
+        "text": "So orders, delivery cost and returns all improved."
+      },
+      {
+        "index": 4,
+        "text": "Everything is improving."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Reading 'up' as 'good' for every metric",
+      "explanation": "The colour rule encodes direction, not desirability. For delivery cost and return rate, going up is bad: costs rose 12% and returns rose 3 points. Only orders improved. Colour should reflect whether a change is good for each metric (with 'higher is better' defined per KPI).",
+      "why_convincing": "Green universally signals 'good', and the tiles look healthy."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: two of the three metrics got worse. Colour by desirability, not by direction.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Delivery cost per order rose 12% and the return rate rose 3 points.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "12",
+          "3"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Status colours must be defined per metric's desired direction.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Rising costs are shown in the same green as rising orders."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the colour rule actually encodes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 interprets green as improvement."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "For costs and return rates, increases are bad."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply 'good or bad' to each metric's change."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: green means 'went up', and two metrics going up is bad news."
+      }
+    ],
+    "repair": "Define a desired direction per KPI and colour by whether the change is favourable.",
+    "debrief": "Colour is a claim about meaning. A dashboard that paints costs rising in green trains people to miss problems.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-dashboard-design-003",
+    "subject": "data-analytics",
+    "topic": "Dashboard Design",
+    "subtopic": "Shared filters keep tiles consistent",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that these three tiles are consistent with each other?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "layout": "One global date filter (set to 'August 2026') applies to every tile.\nTiles: Orders (12,400), Revenue (Rs 62L), Average order value (Rs 500).\nAll tiles read from the same orders table."
+    },
+    "ai_claim": "Yes. All tiles use the same table and the same global date filter, so they describe the same set of orders, and revenue divided by orders equals the average order value: 62,00,000 / 12,400 = 500.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A single date filter applies to all tiles."
+      },
+      {
+        "index": 2,
+        "text": "All tiles query the same orders table."
+      },
+      {
+        "index": 3,
+        "text": "So they describe the same orders."
+      },
+      {
+        "index": 4,
+        "text": "Rs 62,00,000 / 12,400 orders = Rs 500, matching the AOV tile."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Shared filters and a single source make the tiles reconcile, and the arithmetic check confirms it.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "6,200,000 / 12,400 = 500",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "500"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the tiles could be looking at different data."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 checks the tiles against each other."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tiles reconcile when they share a source and filters."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide revenue by orders."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The tiles share a source and filter, and 62L / 12,400 = 500. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "A quick reconciliation - do related tiles agree arithmetically? - is one of the best dashboard tests. Here it confirms the shared-filter design.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-dashboard-design-004",
+    "subject": "data-analytics",
+    "topic": "Dashboard Design",
+    "subtopic": "Leading with the key question",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this layout suits executives who look at it for a minute each morning?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "design": "Executive dashboard layout:\nTop row: 4 KPI cards (revenue, orders, margin, NPS) each with target and change vs last month.\nMiddle: 13-month trend lines for the same 4 KPIs.\nBottom: a table for drill-down by region, with details available on click."
+    },
+    "ai_claim": "Yes. The most important numbers and their status come first, trends explain direction, and detail is available on demand without cluttering the first view.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Executives need status first: the top row gives each KPI with its target and change."
+      },
+      {
+        "index": 2,
+        "text": "Trends in the middle show whether changes are one-offs or patterns."
+      },
+      {
+        "index": 3,
+        "text": "Detail sits at the bottom and behind clicks."
+      },
+      {
+        "index": 4,
+        "text": "So a one-minute scan answers 'how are we doing?' and 'is anything changing?'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The layout follows the overview-first, details-on-demand principle, and each KPI carries the context needed to judge it.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Overview first, zoom and filter, then details on demand (Shneiderman).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "Each KPI card shows a target and the change vs last month.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about what the audience needs in their first few seconds."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 depends on the cards including context."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Good dashboards put status first and details on demand."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare this with a dashboard that opens on a detailed table."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The layout matches a one-minute executive scan. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Design a dashboard around its audience's questions and time. The claim ties each layer of the layout to a question executives actually ask.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-dashboard-design-005",
+    "subject": "data-analytics",
+    "topic": "Dashboard Design",
+    "subtopic": "A sudden drop this week",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Did revenue actually fall 35% this week?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "tile": "Weekly revenue (week to date): Rs 18L, down 35% vs last week",
+      "context": "Today is Thursday. The data pipeline's last successful load time is not shown on the dashboard."
+    },
+    "ai_claim": "Yes. The dashboard shows revenue down 35% compared with last week, so this week's sales have dropped sharply.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The tile compares this week with last week."
+      },
+      {
+        "index": 2,
+        "text": "It shows a 35% decrease."
+      },
+      {
+        "index": 3,
+        "text": "The dashboard reflects this week's actual sales."
+      },
+      {
+        "index": 4,
+        "text": "So revenue fell 35%."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Two things: whether 'last week' means the full week or the same days (Monday to Thursday), and how current the data is. If the comparison is week-to-date against a full week, or the pipeline has not loaded recent days, the drop can be an artefact.",
+    "resolving_scenarios": [
+      "Same-days comparison and data loaded through this morning: revenue really is 35% below the same point last week.",
+      "Comparison against last week's full 7 days, or a stalled pipeline missing Wednesday: the 35% gap reflects missing days, not lower sales."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the comparison basis and data freshness, neither of which is shown. Step 3 assumes complete, comparable data.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Monday-Thursday is 4 of 7 days; against a full week, an unchanged daily rate already shows about -43%.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "43"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An incomplete-period comparison alone produces a large apparent drop."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 'last week' is being compared with."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the data is complete and comparable."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Partial periods and stale pipelines create fake drops."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare four days of sales with seven days."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes comparable, fresh data. Like-for-like and current, the drop is real; otherwise it is an artefact. It cannot be decided."
+      }
+    ],
+    "repair": "Compare like-for-like periods and show the data's last-updated time on the dashboard.",
+    "debrief": "Before reacting to a dashboard alarm, check the comparison basis and data freshness. Many 'drops' are partial periods or late data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

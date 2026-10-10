@@ -1,0 +1,368 @@
+[
+  {
+    "id": "api-api-security-rate-limits-error-handling-001",
+    "subject": "api-integration",
+    "topic": "API Security, Rate Limits & Error Handling",
+    "subtopic": "Backoff without jitter",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this backoff spread the 1,000 instances' retries out so the API is not hit all at once when it recovers?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "def call_with_retry(fn):\n    for attempt in range(5):\n        try:\n            return fn()\n        except ServiceUnavailable:\n            time.sleep(2 ** attempt)        # 1, 2, 4, 8, 16 s\n    raise\n\n# 1,000 app instances call the same API; it has a 10-second outage."
+    },
+    "ai_claim": "Yes. Exponential backoff increases the wait each time, so retries become spread out and the recovering API is not overwhelmed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each failure doubles the wait: 1, 2, 4, 8, 16 seconds."
+      },
+      {
+        "index": 2,
+        "text": "Longer waits mean fewer retries per second."
+      },
+      {
+        "index": 3,
+        "text": "The retries are therefore spread over time."
+      },
+      {
+        "index": 4,
+        "text": "So the API is not hit all at once."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Forgetting that identical backoff keeps clients in lockstep",
+      "explanation": "Every instance failed at about the same moment and follows the same deterministic schedule, so all 1,000 retry together at 1 s, 3 s, 7 s, 15 s... Each retry is a synchronised burst - a thundering herd - that can knock the API over again just as it recovers. Add random jitter (e.g. sleep(random.uniform(0, 2 ** attempt))) to spread the retries.",
+      "why_convincing": "Exponential backoff does reduce the rate for one client, which is where the reasoning stops."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without jitter, all instances retry at the same instants. Add random jitter to the delays.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "all 1,000 fail at t = 0 -> all retry at t = 1 -> all fail -> all retry at t = 3 -> ...",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1,000"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Identical schedules produce bursts of 1,000 requests at the same instant.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1,000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "At t = 15 s, 1,000 requests arrive in the same second as the API recovers."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the schedules of two different instances."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the retries are spread across clients."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Deterministic backoff synchronises clients that failed together; jitter desynchronises them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List the retry times of all 1,000 instances."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: every instance retries at the same moments. Add random jitter."
+      }
+    ],
+    "repair": "Use full jitter: `time.sleep(random.uniform(0, 2 ** attempt))`.",
+    "debrief": "Backoff reduces each client's rate; jitter spreads clients apart. Both are needed for retries at scale.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-api-security-rate-limits-error-handling-002",
+    "subject": "api-integration",
+    "topic": "API Security, Rate Limits & Error Handling",
+    "subtopic": "Circuit breakers",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's description of how this protects the page accurate?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "breaker = CircuitBreaker(failure_threshold=5, recovery_timeout=30)\n\n@breaker\ndef get_recommendations(user_id):\n    return httpx.get(f\"{RECS_API}/users/{user_id}\", timeout=2).json()\n\n# On CircuitOpenError, the page shows popular items instead."
+    },
+    "ai_claim": "Yes. After 5 consecutive failures the circuit opens: calls fail immediately for 30 seconds, so pages show popular items instead of waiting for timeouts. Then one trial call is allowed; if it succeeds the circuit closes, otherwise it opens again.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Failures are counted; 5 in a row trip the breaker."
+      },
+      {
+        "index": 2,
+        "text": "While open, calls raise CircuitOpenError at once, without contacting the API."
+      },
+      {
+        "index": 3,
+        "text": "The page falls back to popular items instead of waiting 2 s for each timeout."
+      },
+      {
+        "index": 4,
+        "text": "After 30 s the breaker half-opens and lets a trial call decide whether to close."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A circuit breaker stops sending traffic to a failing dependency, gives it time to recover, and keeps the caller fast by failing immediately into a fallback.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "5 failures -> open (fail fast) -> 30 s -> half-open -> trial success -> closed",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "5",
+          "30"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow the breaker through its states."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 explains the benefit while open."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Circuit breakers move between closed, open and half-open states."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Simulate the recommendations API failing for a minute."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The breaker fails fast while open and probes before closing. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Timeouts limit how long one call can hurt; circuit breakers limit how many calls keep hurting. Together with a fallback, they let a page degrade gracefully when a dependency fails.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-api-security-rate-limits-error-handling-003",
+    "subject": "api-integration",
+    "topic": "API Security, Rate Limits & Error Handling",
+    "subtopic": "Honouring Retry-After",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this client waits 30 seconds before retrying, as the server asked?",
+    "artifact_type": "api_response",
+    "artifact": {
+      "response": "HTTP/1.1 429 Too Many Requests\nRetry-After: 30\n\n{\"error\": \"rate_limited\"}",
+      "client": "if resp.status_code == 429:\n    time.sleep(int(resp.headers.get(\"Retry-After\", \"1\")))\n    resp = send_again()"
+    },
+    "ai_claim": "Yes. On a 429, the client reads Retry-After, which is 30 here, sleeps for 30 seconds, then sends the request again.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The server responds 429 Too Many Requests."
+      },
+      {
+        "index": 2,
+        "text": "It includes Retry-After: 30 (seconds)."
+      },
+      {
+        "index": 3,
+        "text": "The client parses 30 and sleeps for 30 seconds."
+      },
+      {
+        "index": 4,
+        "text": "Then it retries."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct for this response. (Retry-After can also be an HTTP date, which int() would reject; a robust client handles both forms.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The response carries Retry-After: 30.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "30"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "429 -> read Retry-After = 30 -> sleep 30 s -> retry",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "30"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the response headers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 parses the header value."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Retry-After tells the client how long to wait before retrying."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate int('30')."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The client waits the 30 seconds the server asked for. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Rate-limited APIs tell clients how long to wait. Honouring Retry-After is both polite and the fastest way to get served again.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-api-security-rate-limits-error-handling-004",
+    "subject": "api-integration",
+    "topic": "API Security, Rate Limits & Error Handling",
+    "subtopic": "Reading rate-limit headers",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will all 1,000 requests stay within the rate limit?",
+    "artifact_type": "api_response",
+    "artifact": {
+      "response_headers": "X-RateLimit-Limit: 1000\nX-RateLimit-Remaining: 1000",
+      "plan": "A nightly job will make 1,000 requests to this API within one minute."
+    },
+    "ai_claim": "Yes. The limit is 1,000 and all 1,000 are remaining, so 1,000 requests in a minute fit exactly within the limit.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "X-RateLimit-Limit is 1,000."
+      },
+      {
+        "index": 2,
+        "text": "X-RateLimit-Remaining is 1,000."
+      },
+      {
+        "index": 3,
+        "text": "The limit applies per minute."
+      },
+      {
+        "index": 4,
+        "text": "So 1,000 requests in a minute are allowed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The rate-limit window and scope. The headers give a count but not its window (per second, minute, hour or day), nor whether the quota is shared with other clients using the same key or account. No reset header or documentation is shown.",
+    "resolving_scenarios": [
+      "The limit is 1,000 per minute for this key alone: all 1,000 requests fit.",
+      "The limit is 1,000 per hour, or 100 per 6 seconds in a sliding window: sending 1,000 within one minute triggers 429s."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the window and scope of the limit, which the headers do not state. Step 3 assumes a per-minute window.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If the window is 1,000 per hour with a burst limit of 100 per 6 seconds, the job receives 429s within seconds.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "100"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With a sliding 6-second burst limit, most of the job's requests are rejected."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the headers say about time."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a window that no header gives."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A limit is a count per window; without the window, the rate is unknown."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a per-hour window and a burst limit."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes a per-minute window. Per minute, it fits; per hour or with a burst limit, it does not. It cannot be decided."
+      }
+    ],
+    "repair": "Read the provider's rate-limit documentation (window, burst limits, scope), and pace the job by X-RateLimit-Reset.",
+    "debrief": "Rate-limit headers are incomplete without the window and scope. Pace batch jobs from documented limits and the reset header, not from a single snapshot of 'remaining'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

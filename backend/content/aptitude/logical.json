@@ -1,0 +1,1056 @@
+[
+  {
+    "id": "apt-log-017",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Syllogism with a negative premise",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Premises: (1) All cats are mammals. (2) No dogs are cats. Does the conclusion 'No dogs are mammals' follow?",
+    "artifact_type": "logical_argument",
+    "ai_claim": "Yes, the conclusion follows from the two premises.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Premise 1 places the whole set of cats inside the set of mammals."
+      },
+      {
+        "index": 2,
+        "text": "Premise 2 says the sets of dogs and cats are entirely separate."
+      },
+      {
+        "index": 3,
+        "text": "Since dogs are excluded from cats, and cats are what lies inside mammals, dogs are excluded from mammals too."
+      },
+      {
+        "index": 4,
+        "text": "Therefore no dogs are mammals."
+      }
+    ],
+    "ai_final_answer": "follows",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Treating a subset as if it exhausted the set that contains it",
+      "explanation": "Premise 1 puts cats inside mammals but does not say cats are the only mammals. Being outside cats therefore says nothing about being outside mammals. Dogs can sit inside mammals and outside cats at once, which is in fact how the world is.",
+      "why_convincing": "The chain reads like valid transitivity, and the exclusion in premise 2 is genuine. The unstated leap is that leaving the smaller set means leaving the larger one — which would only hold if the two sets coincided."
+    },
+    "canonical_solution": "It does not follow. Build a model: cats = {c}, dogs = {d}, mammals = {c, d}. Premise 1 holds because every cat is a mammal. Premise 2 holds because no dog is a cat. Yet d is a mammal, so 'no dogs are mammals' is false. A model satisfying the premises while falsifying the conclusion settles it.",
+    "canonical_answer": "does not follow",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A model where both premises hold and the conclusion fails.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Exclusion from a subset does not imply exclusion from the superset.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "cats = {c}, dogs = {d}, mammals = {c, d}. Both premises hold; d is a dog and a mammal."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether premise 1 says cats are the only mammals."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 moves from 'outside cats' to 'outside mammals'. Check that move."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A subset does not exhaust its superset, so leaving the subset says nothing about the superset."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try to build a set of animals where both premises hold and some dog is a mammal."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes cats fill the mammal set. Take cats={c}, dogs={d}, mammals={c,d}: both premises hold and d is a mammal, so the conclusion fails."
+      }
+    ],
+    "repair": "Step 3 should note that cats are only part of the mammal set, so excluding dogs from cats leaves their relationship to mammals open. The correct conclusion is that it does not follow.",
+    "debrief": "Negative premises invite over-strong conclusions, because exclusion feels like it should propagate. It does not: leaving a subset tells you nothing about the superset. The reliable method is the same one that settles every syllogism — construct one concrete model where the premises hold and the conclusion fails. If you can, the argument is invalid regardless of how natural the chain sounded.",
+    "validation_payload": {
+      "solver": "cats = {'c'}\ndogs = {'d'}\nmammals = {'c', 'd'}\npremise_1 = cats <= mammals\npremise_2 = len(dogs & cats) == 0\nconclusion = len(dogs & mammals) == 0\nanswer = 'does not follow' if (premise_1 and premise_2 and not conclusion) else 'follows'",
+      "flawed_solver": "cats = {'c'}\ndogs = {'d'}\nmammals = {'c', 'd'}\npremise_1 = cats <= mammals\npremise_2 = len(dogs & cats) == 0\n# Flawed rule: treat exclusion from cats as exclusion from mammals.\nanswer = 'follows' if (premise_1 and premise_2) else 'does not follow'"
+    }
+  },
+  {
+    "id": "apt-log-018",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Direction sense",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Ravi walks 3 km north from his house, turns right and walks 4 km. How far is he from his house in a straight line?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "Ravi is 7 km from his house.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "He walks 3 km north, then turns right, which faces him east."
+      },
+      {
+        "index": 2,
+        "text": "He then walks 4 km east."
+      },
+      {
+        "index": 3,
+        "text": "The total distance covered is 3 + 4 = 7 km."
+      },
+      {
+        "index": 4,
+        "text": "So he is 7 km from his house."
+      }
+    ],
+    "ai_final_answer": "7",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 4,
+      "misconception": "Reporting distance travelled instead of straight-line displacement",
+      "explanation": "The two legs are perpendicular, so the straight-line distance is the hypotenuse: sqrt(3² + 4²) = 5 km. The 7 km in step 3 is the path length, which is a different quantity from the distance between two points.",
+      "why_convincing": "Steps 1 to 3 are all correct — the direction reasoning is right and 3 + 4 really is 7. Only the last step substitutes one quantity for another, and 'how far is he' reads naturally as 'how far did he go'."
+    },
+    "canonical_solution": "The legs are perpendicular, so displacement is the hypotenuse of a 3-4 right triangle: sqrt(9 + 16) = sqrt(25) = 5 km. The 7 km figure is the distance walked, not the distance from the house.",
+    "canonical_answer": "5",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Apply Pythagoras to the two perpendicular legs.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Straight-line distance is displacement, not path length.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If he had walked 3 km north then 3 km south, the path length would be 6 km and the distance from the house 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Identify precisely which quantity the question asks for."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 to 3 are correct. Check what step 4 does with the number from step 3."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Distance travelled and straight-line distance are different quantities."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Sketch the path and identify the shape formed by the two legs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 reports the path length. The legs are perpendicular, so the straight-line distance is sqrt(3²+4²) = 5 km."
+      }
+    ],
+    "repair": "Step 4 should apply Pythagoras: the straight-line distance is sqrt(3² + 4²) = 5 km. The 7 km is the distance walked.",
+    "debrief": "Direction-sense questions are geometry in disguise, and the commonest error is answering with the total walked. Sketching the path makes the distinction visible immediately — the two legs form a right triangle and the question asks for the hypotenuse. Whenever a question says 'how far from', check whether the solution computed a displacement or a total.",
+    "validation_payload": {
+      "solver": "answer = math.sqrt(3 ** 2 + 4 ** 2)",
+      "flawed_solver": "answer = 3 + 4"
+    }
+  },
+  {
+    "id": "apt-log-019",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Coding-decoding",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In a certain code, CAT is written as DBU. How is DOG written in the same code?",
+    "artifact_type": "series",
+    "ai_claim": "DOG is written as CNF.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Compare CAT with DBU letter by letter: C to D, A to B, T to U."
+      },
+      {
+        "index": 2,
+        "text": "Each letter moves one place in the alphabet."
+      },
+      {
+        "index": 3,
+        "text": "Applying the same shift to DOG: D goes to C, O goes to N, G goes to F."
+      },
+      {
+        "index": 4,
+        "text": "So DOG is written as CNF."
+      }
+    ],
+    "ai_final_answer": "CNF",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 3,
+      "misconception": "Applying the shift in the wrong direction",
+      "explanation": "Step 2 correctly identifies a forward shift of one — C to D, A to B, T to U all move up the alphabet. Step 3 then shifts backwards, giving CNF instead of EPH. The rule was read correctly and applied in reverse.",
+      "why_convincing": "Steps 1 and 2 are exactly right, so the hard part of the puzzle is already solved. The error is mechanical and the output still looks like a plausible code word, so nothing signals that the direction flipped."
+    },
+    "canonical_solution": "The shift is +1, as step 2 correctly states. Applying it forward to DOG gives D→E, O→P, G→H, so DOG is written as EPH. Step 3 applied −1 instead.",
+    "canonical_answer": "EPH",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Apply the +1 shift forward to each letter of DOG.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "contradiction",
+        "summary": "Step 3 shifts down while step 2 established a shift up.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Apply step 3's backward shift to CAT and you get BZS, not DBU — so it is not the rule the example demonstrates."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that the rule is applied in the same direction it was derived."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states the rule correctly. Compare it with what step 3 does."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A code derived as a forward shift must be applied forward."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test step 3's rule on the original example, CAT, and see what it produces."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 correctly identifies +1, but step 3 shifts backwards. Forward gives D→E, O→P, G→H, so the answer is EPH."
+      }
+    ],
+    "repair": "Step 3 should shift each letter forward by one: D→E, O→P, G→H, giving EPH.",
+    "debrief": "The most reliable check on a coding question costs one line: apply your rule back to the worked example. If step 3's rule is run on CAT it produces BZS, not DBU, which exposes the reversal instantly. Deriving a rule correctly and applying it wrongly is a distinct failure from misreading the rule, and only the round-trip test catches it.",
+    "validation_payload": {
+      "solver": "word = 'DOG'\nshift = 1\nout = ''\nfor ch in word:\n    out += chr((ord(ch) - 65 + shift) % 26 + 65)\nanswer = out",
+      "flawed_solver": "word = 'DOG'\nshift = -1\nout = ''\nfor ch in word:\n    out += chr((ord(ch) - 65 + shift) % 26 + 65)\nanswer = out"
+    }
+  },
+  {
+    "id": "apt-log-020",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Number series with insufficient constraints",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What number continues the series: 1, 2, 4, ?",
+    "artifact_type": "series",
+    "ai_claim": "The next number is 8.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each term is twice the one before it: 1 x 2 = 2, and 2 x 2 = 4."
+      },
+      {
+        "index": 2,
+        "text": "The rule is therefore multiplication by 2."
+      },
+      {
+        "index": 3,
+        "text": "Applying it to 4 gives 4 x 2 = 8."
+      }
+    ],
+    "ai_final_answer": "8",
+    "simulated_confidence": 88,
+    "truth_state": "insufficient_information",
+    "missing_information": "Enough terms to distinguish between the rules that fit. Three terms are consistent with more than one simple rule, and they disagree from the fourth term onward.",
+    "resolving_scenarios": [
+      "Doubling: each term is twice the previous. 1, 2, 4, 8, 16, … The next term is 8.",
+      "Increasing differences: the gaps are 1, 2, 3, … so the series is 1, 2, 4, 7, 11, … The next term is 7."
+    ],
+    "canonical_solution": "The series is underdetermined. Doubling fits: 1, 2, 4, 8. So does a rule of increasing differences (+1, +2, +3): 1, 2, 4, 7. Both reproduce every given term and disagree at the fourth. Nothing in the question selects between them, so no single continuation is entailed. Doubling is the more common convention, but a convention is not a constraint.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "The +1, +2, +3 rule fits the same three terms and gives 7.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "7"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A rule is determined only when the given terms exclude the alternatives.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Differences of 1, 2, 3 give 1, 2, 4, 7 — which matches all three given terms exactly."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the given terms rule out every rule but one."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 declares a rule. Try to find a second rule fitting the same three terms."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Three terms rarely determine a series; several simple rules usually fit."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the differences between consecutive terms and look for a pattern in those."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 asserts a unique rule. Differences of +1, +2, +3 also fit and give 7, so the continuation is not determined by the three terms given."
+      }
+    ],
+    "repair": "State that the series is underdetermined: doubling gives 8, increasing differences give 7, and both match the terms supplied. A fourth term, or a stated rule, is needed.",
+    "debrief": "Pattern questions carry a hidden premise — that exactly one rule fits — and with only three terms that premise usually fails. This is worth internalising as a general habit: before extending a pattern, try to find a second rule that fits the data you were given. In a real dataset, the equivalent question is whether your model is the only one consistent with the observations, and it usually is not.",
+    "validation_payload": {
+      "solver": "doubling = 4 * 2\ndifferences = 4 + 3\nanswer = 'insufficient information' if doubling != differences else str(doubling)",
+      "insufficient_information": true
+    }
+  },
+  {
+    "id": "apt-log-021",
+    "subject": "aptitude",
+    "topic": "Arrangements & Puzzles",
+    "subtopic": "Ordering from partial constraints",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Five friends sit in a row. Asha is to the left of Bina. Bina is to the left of Chetan. Deepa is to the right of Chetan. Is Asha necessarily sitting at the far left?",
+    "artifact_type": "logical_argument",
+    "ai_claim": "Yes — the constraints place Asha before everyone else mentioned, so she is at the far left.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Asha is left of Bina, and Bina is left of Chetan, so the order so far is Asha, Bina, Chetan."
+      },
+      {
+        "index": 2,
+        "text": "Deepa is right of Chetan, extending the chain to Asha, Bina, Chetan, Deepa."
+      },
+      {
+        "index": 3,
+        "text": "Asha comes before every other person in this chain."
+      },
+      {
+        "index": 4,
+        "text": "So Asha is sitting at the far left."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 87,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 4,
+      "misconception": "Forgetting the person no constraint mentions",
+      "explanation": "There are five friends but only four appear in the constraints. The fifth is unconstrained and may sit anywhere, including to Asha's left. The chain establishes Asha's position relative to Bina, Chetan and Deepa, not relative to everyone in the row.",
+      "why_convincing": "Steps 1 to 3 are all correct and the chain is built properly. The fifth person is absent from every constraint, so they are absent from the reasoning too — the omission is in the problem's arithmetic of people, not in any stated relation."
+    },
+    "canonical_solution": "No. Five friends are seated but only four are constrained. The unnamed fifth friend is subject to no condition and can sit at the far left, giving the order (fifth, Asha, Bina, Chetan, Deepa) — which satisfies every constraint while placing Asha second. Asha is necessarily left of Bina, Chetan and Deepa, but not necessarily leftmost.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An arrangement satisfying every constraint with Asha second.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "contradiction",
+        "summary": "Five friends are seated but only four are constrained.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Order: Esha, Asha, Bina, Chetan, Deepa. Every stated constraint holds and Asha is not at the far left."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the people in the problem and the people in the constraints."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 to 3 build the chain correctly. Ask whether the chain covers everyone."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An ordering constraint fixes a position only relative to the people it mentions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try to seat the unmentioned fifth friend to Asha's left without breaking any constraint."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 forgets the fifth friend, who appears in no constraint. Seating them leftmost satisfies everything and puts Asha second, so she is not necessarily at the far left."
+      }
+    ],
+    "repair": "Step 4 should conclude that Asha is left of Bina, Chetan and Deepa, but that the unconstrained fifth friend may sit further left. So no, Asha is not necessarily at the far left.",
+    "debrief": "Arrangement puzzles are as much about what the constraints omit as what they state. Counting the entities against the entities mentioned takes seconds and catches this whole class of error. Note the shape of the failure: every step is individually valid, and the conclusion overreaches only because the chain was mistaken for the whole row.",
+    "validation_payload": {
+      "solver": "row = ['Esha', 'Asha', 'Bina', 'Chetan', 'Deepa']\ni = {name: pos for pos, name in enumerate(row)}\nconstraints = (i['Asha'] < i['Bina'] and i['Bina'] < i['Chetan'] and i['Chetan'] < i['Deepa'])\nasha_leftmost = i['Asha'] == 0\nanswer = 'no' if (constraints and not asha_leftmost) else 'yes'",
+      "flawed_solver": "chain = ['Asha', 'Bina', 'Chetan', 'Deepa']\n# Flawed rule: treat the constraint chain as the whole row.\nanswer = 'yes' if chain[0] == 'Asha' else 'no'"
+    }
+  },
+  {
+    "id": "apt-log-022",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Valid contrapositive",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Statement: 'If a student passes the viva, they are awarded the diploma.' Priya was not awarded the diploma. Does it follow that Priya did not pass the viva?",
+    "artifact_type": "logical_argument",
+    "ai_claim": "Yes — this follows by contraposition.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The statement has the form: if P (passes the viva) then Q (awarded the diploma)."
+      },
+      {
+        "index": 2,
+        "text": "We are told not-Q: Priya was not awarded the diploma."
+      },
+      {
+        "index": 3,
+        "text": "The contrapositive of 'if P then Q' is 'if not-Q then not-P', and it is logically equivalent to the original."
+      },
+      {
+        "index": 4,
+        "text": "Applying it: Priya did not pass the viva. The conclusion follows."
+      }
+    ],
+    "ai_final_answer": "follows",
+    "simulated_confidence": 86,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. Contraposition is a valid inference: 'if P then Q' is logically equivalent to 'if not-Q then not-P'. Given the conditional and not-Q, not-P follows. This is the mirror image of affirming the consequent — reasoning from not-Q is valid, while reasoning from Q is not — and the solution applies the valid direction.",
+    "canonical_answer": "follows",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Write the statement as a conditional and identify which part you were given."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 names an inference rule. Check whether that rule is valid."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "'If P then Q' licenses inferring not-P from not-Q. It does not license inferring P from Q."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try to construct a case where the statement holds, Priya has no diploma, and she passed the viva."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This reasoning is correct. Contraposition is valid, and it is applied in the valid direction — from not-Q to not-P. Approving it was the right call."
+      }
+    ],
+    "repair": "",
+    "debrief": "Conditional reasoning has two valid moves and two invalid ones, and they look alike on the page. From P you may infer Q; from not-Q you may infer not-P. From Q you may infer nothing, and from not-P you may infer nothing. A reviewer primed by the frequency of affirming-the-consequent errors will reject this valid argument on reflex — the discipline is to write down which of the four patterns you are actually looking at.",
+    "validation_payload": {
+      "solver": "# Exhaustive check over both truth assignments consistent with the premises.\ncases = [(p, q) for p in (True, False) for q in (True, False)]\nconsistent = [(p, q) for p, q in cases if (not p or q) and not q]\nanswer = 'follows' if all(not p for p, q in consistent) else 'does not follow'"
+    }
+  },
+  {
+    "id": "apt-lr-046",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Syllogisms",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Premises: All managers are graduates. Some graduates are engineers. Conclusion: Some managers are engineers. Does the conclusion follow?",
+    "artifact_type": "logical_argument",
+    "artifact": {
+      "premises": [
+        "All managers are graduates.",
+        "Some graduates are engineers."
+      ],
+      "conclusion": "Some managers are engineers."
+    },
+    "ai_claim": "The conclusion follows from the premises.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The first premise places all managers inside the set of graduates."
+      },
+      {
+        "index": 2,
+        "text": "The second premise says the sets of graduates and engineers overlap."
+      },
+      {
+        "index": 3,
+        "text": "Managers are graduates, and graduates overlap with engineers, so managers overlap with engineers too."
+      },
+      {
+        "index": 4,
+        "text": "Therefore some managers are engineers, and the conclusion follows."
+      }
+    ],
+    "ai_final_answer": "follows",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Chaining a universal with a particular, as though overlap were transitive through a subset",
+      "explanation": "'Some graduates are engineers' says nothing about which graduates. The engineer-graduates may all be non-managers. Take graduates = {1, 2}, managers = {1}, engineers = {2}: both premises hold and no manager is an engineer. Overlap is not transitive, so step 3's inference is invalid.",
+      "why_convincing": "Step 3 reads like the transitivity of subset relations, which is genuinely valid: if all managers are graduates and all graduates are engineers, the conclusion would follow. Swapping 'all' for 'some' in the second premise breaks it, and that swap is a single word."
+    },
+    "canonical_solution": "The conclusion does not follow. A counterexample: graduates = {Alice, Bob}, managers = {Alice}, engineers = {Bob}. Every manager is a graduate, some graduates (Bob) are engineers, and no manager is an engineer. Exhausting all assignments over a small universe confirms there is no valid inference here: 'some' in the second premise leaves the overlap free to sit entirely outside the managers.",
+    "canonical_answer": "does not follow",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "graduates {A,B}, managers {A}, engineers {B} satisfies both premises with no manager an engineer.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "A universal and a particular premise sharing one term do not yield a particular conclusion about the other two.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Graduates = {Alice, Bob}, Managers = {Alice}, Engineers = {Bob}: both premises true, conclusion false."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try to build a small world where both premises are true and the conclusion is false."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Focus on step 3. Which graduates does the second premise talk about?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Overlap is not transitive: A inside B and B overlapping C does not put A and C together."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Put exactly two graduates in your world, make one a manager and the other an engineer."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is the failure. graduates={A,B}, managers={A}, engineers={B} satisfies both premises with no manager an engineer, so the conclusion does not follow."
+      }
+    ],
+    "repair": "Step 3 should conclude only that the engineer-graduates may or may not be managers, so no conclusion about managers and engineers follows.",
+    "debrief": "Syllogism questions are decided by counterexample, not by whether the chain sounds right. The habit worth building: before agreeing with any 'therefore', spend ten seconds trying to build a world where the premises hold and the conclusion fails. If you can build it, you are done and you have your evidence. Two or three elements is almost always enough.",
+    "transfer_check": {
+      "question": "All poets are dreamers. Some dreamers are engineers. A group has 10 dreamers, of whom 4 are poets and 3 are engineers. What is the smallest possible number of people who are both poets and engineers?",
+      "answer": "0",
+      "explanation": "4 + 3 = 7, which fits inside 10 dreamers with no overlap, so the poets and the engineers can be entirely different people. A minimum of 0 is exactly why 'some poets are engineers' does not follow."
+    },
+    "validation_payload": {
+      "solver": "from itertools import product\n\nUNIVERSE = range(4)\n\ndef subsets():\n    for mask in product([False, True], repeat=len(UNIVERSE)):\n        yield frozenset(i for i in UNIVERSE if mask[i])\n\ndef valid(premises, conclusion):\n    \"\"\"True when no model satisfies the premises and falsifies the conclusion.\"\"\"\n    for managers in subsets():\n        for graduates in subsets():\n            for engineers in subsets():\n                if premises(managers, graduates, engineers):\n                    if not conclusion(managers, graduates, engineers):\n                        return False\n    return True\n\npremises = lambda m, g, e: m <= g and len(g & e) > 0 and len(m) > 0 and len(e) > 0\nconclusion = lambda m, g, e: len(m & e) > 0\nanswer = 'follows' if valid(premises, conclusion) else 'does not follow'\n",
+      "flawed_solver": "# Flawed rule: treat overlap as transitive through a subset relation.\nall_managers_are_graduates = True\nsome_graduates_are_engineers = True\nanswer = (\n    'follows'\n    if all_managers_are_graduates and some_graduates_are_engineers\n    else 'does not follow'\n)\n"
+    }
+  },
+  {
+    "id": "apt-lr-047",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Blood relations",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A is B's father. B is C's sister. C is D's mother. How is A related to D?",
+    "artifact_type": "logical_argument",
+    "artifact": {
+      "statements": [
+        "A is B's father.",
+        "B is C's sister.",
+        "C is D's mother."
+      ]
+    },
+    "ai_claim": "A is D's great-grandfather.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A is B's father, so A is one generation above B."
+      },
+      {
+        "index": 2,
+        "text": "B is C's sister, so C is one generation below B."
+      },
+      {
+        "index": 3,
+        "text": "C is D's mother, so D is one generation below C."
+      },
+      {
+        "index": 4,
+        "text": "Counting down from A: B, then C, then D - three generations, so A is D's great-grandfather."
+      }
+    ],
+    "ai_final_answer": "3",
+    "simulated_confidence": 85,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Treating a sibling relation as a change of generation",
+      "explanation": "Siblings are in the same generation. 'B is C's sister' puts C level with B, not below it, so A is the father of both B and C. D is C's child, which makes D A's grandchild: A is D's grandfather, two generations up, not three.",
+      "why_convincing": "The solution counts named people rather than generations, and three names appear between A and D. Step 2's phrasing - 'one generation below' - is stated so flatly that it reads as a restatement of the premise rather than an inference from it."
+    },
+    "canonical_solution": "Assign generations: A at 0, B at 1 (A's child). B is C's sister, so C is also at generation 1 and A is C's father too. D is C's child, so D is at generation 2. A is two generations above D: A is D's grandfather.",
+    "canonical_answer": "2",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "A sibling relation preserves generation, so B and C are both A's children.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "calculation",
+        "summary": "Generations: A=0, B=1, C=1, D=2, so the gap is 2.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If a sibling relation dropped a generation, two sisters would each be the other's daughter."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Write each person's generation as a number and see which step changes it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Three of the four steps assign a generation. Check each assignment against the relation named."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Parent and child differ by one generation. Siblings do not differ at all."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Put A at 0 and work forwards: what generation is C in?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is the failure: B and C are siblings, so both are at generation 1. D is at 2, so A is D's grandfather - a gap of 2, not 3."
+      }
+    ],
+    "repair": "Step 2 should place C in the same generation as B, making A the father of both. D is then A's grandchild, a gap of two generations.",
+    "debrief": "Kinship chains are easy to get right and easy to get wrong for the same reason: they are solved by counting. The trick is to count the right thing. Counting the names between A and D gives three; counting generations gives two, because one of the links is sideways. Turn each relation into a number before chaining anything, and sibling links become visibly harmless.",
+    "transfer_check": {
+      "question": "P is Q's mother. Q is R's brother. R is S's father. How many generations separate P and S? Give a number.",
+      "answer": "2",
+      "explanation": "Q and R are siblings at generation 1, S is at 2, so the gap from P is 2."
+    },
+    "validation_payload": {
+      "solver": "gen = {'A': 0}\ngen['B'] = gen['A'] + 1   # A is B's father\ngen['C'] = gen['B']       # B is C's sister: same generation\ngen['D'] = gen['C'] + 1   # C is D's mother\nanswer = gen['D'] - gen['A']\n",
+      "flawed_solver": "gen = {'A': 0}\ngen['B'] = gen['A'] + 1\ngen['C'] = gen['B'] + 1   # Flawed: sibling treated as a generation down\ngen['D'] = gen['C'] + 1\nanswer = gen['D'] - gen['A']\n"
+    }
+  },
+  {
+    "id": "apt-lr-048",
+    "subject": "aptitude",
+    "topic": "Arrangements & Puzzles",
+    "subtopic": "Seating arrangement",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Five friends P, Q, R, S and T sit in a row of five chairs numbered 1 to 5 from the left, all facing north. P is not at either end. Q sits immediately to the right of P. S sits at one of the ends. R sits somewhere to the left of P. How many seating arrangements are possible?",
+    "artifact_type": "logical_argument",
+    "artifact": {
+      "constraints": [
+        "Five seats in a row, numbered 1 to 5 from left to right.",
+        "P is not in seat 1 or seat 5.",
+        "Q sits immediately to the right of P.",
+        "S sits at one of the ends.",
+        "R sits somewhere to the left of P."
+      ]
+    },
+    "ai_claim": "There are 3 possible arrangements.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "P is not at an end, so P is in seat 2, 3 or 4."
+      },
+      {
+        "index": 2,
+        "text": "Q sits immediately to the right of P, so P and Q occupy seats 2-3, 3-4 or 4-5."
+      },
+      {
+        "index": 3,
+        "text": "S sits at an end, so S takes seat 1."
+      },
+      {
+        "index": 4,
+        "text": "P in seat 2: R must be to the left of P, so R needs seat 1 - but S is there. No arrangement."
+      },
+      {
+        "index": 5,
+        "text": "P in seat 3: Q takes 4, S takes 1, R must be left of 3 so R takes 2, and T takes 5. That is 1 arrangement (S R P Q T)."
+      },
+      {
+        "index": 6,
+        "text": "P in seat 4: Q takes 5, S takes 1, and R must be left of 4, so R takes 2 or 3 with T in the other. That is 2 arrangements (S R T P Q and S T R P Q)."
+      },
+      {
+        "index": 7,
+        "text": "Total: 0 + 1 + 2 = 3 arrangements."
+      }
+    ],
+    "ai_final_answer": "3",
+    "simulated_confidence": 84,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Collapsing a disjunctive constraint to one of its options, so a whole family of arrangements is never generated",
+      "explanation": "'S sits at one of the ends' permits seat 1 or seat 5. Step 3 silently fixes S at seat 1, and every later case inherits that. The three arrangements found are all genuine, but the branch with S at seat 5 is never explored: R P Q T S, R T P Q S and T R P Q S also satisfy every constraint. There are 6 arrangements, not 3.",
+      "why_convincing": "The case analysis that follows is meticulous and correct, including the elimination of P in seat 2 - which looks like exactly the kind of care that catches missed cases. Step 3 also reads as a deduction rather than a choice, because it restates the constraint before narrowing it, and the arrangements it does list are all valid, so spot-checking any one of them confirms the working."
+    },
+    "canonical_solution": "Enumerating all 120 permutations against the four constraints gives 6 valid arrangements: with S at seat 1 there are S R P Q T, S R T P Q and S T R P Q; with S at seat 5 there are R P Q T S, R T P Q S and T R P Q S. The answer is 6. The S-at-seat-5 family exists because R only needs to be somewhere left of P, not adjacent to seat 1.",
+    "canonical_answer": "6",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "R P Q T S satisfies every constraint and has S at seat 5, so the enumeration is incomplete.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "calculation",
+        "summary": "Three arrangements with S at seat 1 and three with S at seat 5 gives 6.",
+        "must_reference_step": 7,
+        "must_contain_values": [
+          "6"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "R P Q T S: P at 2 (not an end), Q at 3 (immediately right of P), S at 5 (an end), R at 1 (left of P). Valid, and never listed.",
+      "T R P Q S: P at 3, Q at 4, S at 5, R at 2. Valid, and never listed."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read each of the four constraints and ask whether the solution used all of what it allows."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 4 to 6 are correct given step 3. Examine step 3 by itself."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A constraint of the form 'either A or B' opens two branches. Fixing one of them without justification loses the other."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Redo the case analysis with S at seat 5 and see whether anything survives."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is the failure. S may sit at seat 5 too, which gives R P Q T S, R T P Q S and T R P Q S. The total is 6, not 3."
+      }
+    ],
+    "repair": "Split step 3 into two branches, S at seat 1 and S at seat 5, and run the case analysis in both. Each branch yields 3 arrangements, for a total of 6.",
+    "debrief": "The most dangerous step in a constraint problem is rarely the arithmetic - it is the moment a disjunction becomes a decision. Here everything after step 3 is correct, and all three listed arrangements are genuine, so any spot check passes. What no spot check finds is a missing branch. When a solution to a counting problem narrows an 'either/or', check that it comes back for the other half.",
+    "transfer_check": {
+      "question": "Same five friends and the same rules, except R now sits somewhere to the right of P instead of the left. How many arrangements are possible?",
+      "answer": "4",
+      "explanation": "S P Q R T, S P Q T R, S T P Q R and T P Q R S - four arrangements."
+    },
+    "validation_payload": {
+      "solver": "from itertools import permutations\n\nPEOPLE = ('P', 'Q', 'R', 'S', 'T')\n\ndef arrangements(s_positions):\n    total = 0\n    for seats in permutations(PEOPLE):\n        pos = {name: i + 1 for i, name in enumerate(seats)}\n        if (\n            pos['P'] not in (1, 5)\n            and pos['Q'] == pos['P'] + 1\n            and pos['S'] in s_positions\n            and pos['R'] < pos['P']\n        ):\n            total += 1\n    return total\n\nanswer = arrangements((1, 5))\n",
+      "flawed_solver": "from itertools import permutations\n\nPEOPLE = ('P', 'Q', 'R', 'S', 'T')\n\ndef arrangements(s_positions):\n    total = 0\n    for seats in permutations(PEOPLE):\n        pos = {name: i + 1 for i, name in enumerate(seats)}\n        if (\n            pos['P'] not in (1, 5)\n            and pos['Q'] == pos['P'] + 1\n            and pos['S'] in s_positions\n            and pos['R'] < pos['P']\n        ):\n            total += 1\n    return total\n\n# Flawed reading: \"one of the ends\" taken as the left end only.\nanswer = arrangements((1,))\n"
+    }
+  },
+  {
+    "id": "apt-lr-049",
+    "subject": "aptitude",
+    "topic": "Logical Reasoning",
+    "subtopic": "Coding and decoding",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In a certain code, MANGO is written as NBOHP. How is APPLE written in the same code?",
+    "artifact_type": "logical_argument",
+    "artifact": {
+      "given": [
+        "MANGO -> NBOHP",
+        "Encode: APPLE"
+      ]
+    },
+    "ai_claim": "APPLE is written as BQQMF.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Compare the two words letter by letter: M->N, A->B, N->O, G->H, O->P."
+      },
+      {
+        "index": 2,
+        "text": "Every letter advances by exactly one position in the alphabet, and the rule is consistent across all five letters."
+      },
+      {
+        "index": 3,
+        "text": "Apply the same rule to APPLE: A->B, P->Q, P->Q, L->M, E->F."
+      },
+      {
+        "index": 4,
+        "text": "So APPLE is written as BQQMF."
+      }
+    ],
+    "ai_final_answer": "BQQMF",
+    "simulated_confidence": 72,
+    "truth_state": "valid",
+    "canonical_solution": "Each of the five letter pairs in MANGO -> NBOHP differs by +1: M->N, A->B, N->O, G->H, O->P. The rule is a single shift forward by one, confirmed on all five positions rather than inferred from one. Applying it to APPLE gives B, Q, Q, M, F - BQQMF. The solution is correct throughout.",
+    "canonical_answer": "BQQMF",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "All five letter pairs differ by +1, so the shift is established, not guessed.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "calculation",
+        "summary": "A->B, P->Q, P->Q, L->M, E->F gives BQQMF.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "BQQMF"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the rule on every letter of the given pair, not just the first."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Verify each of the five mappings in step 1 independently."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A coding rule is only established when it holds for every position given."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply the shift to APPLE yourself and compare letter by letter."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Every step holds: the +1 shift is confirmed on all five letters and applied correctly. BQQMF is right, so the correct verdict is to approve."
+      }
+    ],
+    "repair": "",
+    "debrief": "Coding questions are where a valid artifact is easiest to mistake for a trap, because the format is associated with tricks. The thing that makes this one approvable is step 2: the rule is checked against all five given letters, so there is no room for a different rule that also fits. Had only one or two pairs been checked, the same answer would have been a guess - and a guess that happens to be right is still not evidence.",
+    "transfer_check": {
+      "question": "In the same code, a word is written as HPME. What is the alphabet position (A = 1) of the first letter of the original word?",
+      "answer": "7",
+      "explanation": "Decoding shifts each letter back by one: HPME becomes GOLD, and G is the 7th letter."
+    },
+    "validation_payload": {
+      "solver": "given = list(zip('MANGO', 'NBOHP'))\nshifts = {(ord(b) - ord(a)) % 26 for a, b in given}\nshift = shifts.pop() if len(shifts) == 1 else None\nanswer = (\n    ''.join(chr((ord(c) - 65 + shift) % 26 + 65) for c in 'APPLE')\n    if shift is not None\n    else 'rule not determined'\n)\n"
+    }
+  },
+  {
+    "id": "apt-lr-050",
+    "subject": "aptitude",
+    "topic": "Arrangements & Puzzles",
+    "subtopic": "Ranking and order",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In a row of 40 students, A is 12th from the left end and B is 18th from the right end. How many students sit between A and B?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "given": [
+        "Row of 40 students",
+        "A is 12th from the left",
+        "B is 18th from the right"
+      ]
+    },
+    "ai_claim": "There are 11 students between A and B.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A is 12th from the left, so A is in position 12."
+      },
+      {
+        "index": 2,
+        "text": "B is 18th from the right, so B is in position 40 - 18 + 1 = 23."
+      },
+      {
+        "index": 3,
+        "text": "The students between them occupy the positions from 12 to 23."
+      },
+      {
+        "index": 4,
+        "text": "That is 23 - 12 = 11 students between A and B."
+      }
+    ],
+    "ai_final_answer": "11",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 4,
+      "misconception": "Subtracting positions to count what lies strictly between them, which includes one endpoint",
+      "explanation": "23 - 12 = 11 counts positions 13 through 23, which includes B. The students strictly between A and B occupy positions 13 to 22, and that is 22 - 13 + 1 = 10 students. The correct expression is 23 - 12 - 1 = 10.",
+      "why_convincing": "Steps 1 and 2 handle the genuinely error-prone part - the 40 - 18 + 1 conversion - perfectly, including the +1 that most people drop. Having got that right, the same off-by-one in step 4 reads as consistent care rather than a slip, and 11 is close enough that no sanity check flags it."
+    },
+    "canonical_solution": "A is at position 12. B is 18th from the right, so B is at position 40 - 18 + 1 = 23. The students strictly between them are at positions 13 to 22 inclusive, which is 22 - 13 + 1 = 10 students. Equivalently, 23 - 12 - 1 = 10: subtracting the positions counts one of the endpoints, so one more must be removed.",
+    "canonical_answer": "10",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Positions 13 to 22 inclusive is 10 students.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "10",
+          "13",
+          "22"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "For adjacent students at positions 5 and 6, the same formula gives 1 rather than 0.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If A were at 5 and B at 6, step 4's rule gives 6 - 5 = 1 student between two adjacent students, which is impossible."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Steps 1 and 2 are right. The question is what step 4 is actually counting."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "List the positions that lie strictly between 12 and 23."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The count of integers strictly between a and b is b - a - 1, not b - a."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test the rule on two adjacent positions, where the answer must be 0."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is the failure: 23 - 12 = 11 includes B. Positions 13 to 22 is 10 students, so the answer is 23 - 12 - 1 = 10."
+      }
+    ],
+    "repair": "Use 23 - 12 - 1 = 10, or count positions 13 to 22 inclusive.",
+    "debrief": "Off-by-one is the most common error in ranking questions and the least likely to be caught by eye, because every answer near the right one looks equally plausible. The defence is a degenerate test: apply the rule to two adjacent people, where you know the answer is zero. Any counting rule that fails that case is wrong everywhere, and it takes five seconds to check.",
+    "transfer_check": {
+      "question": "In a row of 30 students, X is 8th from the left and Y is 14th from the right. How many students are between them?",
+      "answer": "8",
+      "explanation": "Y is at 30 - 14 + 1 = 17; between 8 and 17 lie positions 9 to 16, which is 8 students."
+    },
+    "validation_payload": {
+      "solver": "a = 12\nb = 40 - 18 + 1\nanswer = b - a - 1\n",
+      "flawed_solver": "a = 12\nb = 40 - 18 + 1\nanswer = b - a\n"
+    }
+  }
+]

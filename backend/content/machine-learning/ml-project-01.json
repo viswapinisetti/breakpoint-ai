@@ -1,0 +1,476 @@
+[
+  {
+    "id": "ml-ml-project-001",
+    "subject": "machine-learning",
+    "topic": "ML Project",
+    "subtopic": "Unseeded runs",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will rerunning this notebook reproduce the reported AUC of 0.874?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2)\nmodel = RandomForestClassifier(n_estimators=300).fit(X_tr, y_tr)\nprint(roc_auc_score(y_te, model.predict_proba(X_te)[:, 1]))   # reported: 0.874\n# No random_state is set anywhere."
+    },
+    "ai_claim": "Yes. The same code and data produce the same model and the same AUC every time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The code is unchanged."
+      },
+      {
+        "index": 2,
+        "text": "The data are unchanged."
+      },
+      {
+        "index": 3,
+        "text": "The same inputs produce the same outputs."
+      },
+      {
+        "index": 4,
+        "text": "So the AUC is 0.874 again."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming randomised steps are deterministic",
+      "explanation": "train_test_split shuffles randomly and the random forest bootstraps and samples features randomly. Without random_state, each run uses a different split and different trees, so the AUC changes (e.g. 0.861-0.883). Set random_state (and record library versions) for reproducibility, and report variation across seeds.",
+      "why_convincing": "Code feels deterministic."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the split and the forest are random without seeds. Set random_state and report results across several seeds.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Five reruns give AUC 0.861, 0.883, 0.874, 0.869 and 0.878.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.861"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "No random_state is set.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A colleague rerunning the notebook gets a different number."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the random steps in the code."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the same inputs give the same outputs."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Randomised algorithms need fixed seeds to be reproducible."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the cell twice."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: random steps are unseeded. Set random_state."
+      }
+    ],
+    "repair": "Set random_state in the split and the model; record package versions.",
+    "debrief": "Reproducibility is a prerequisite for trusting and comparing results. Seeds, versions and data snapshots all need recording.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-ml-project-002",
+    "subject": "machine-learning",
+    "topic": "ML Project",
+    "subtopic": "Training-serving skew",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the deployed model perform like its offline AUC of 0.88?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# Training (batch SQL): avg_order_value_30d = AVG(order_value) over the last 30 days, excluding cancelled orders.\n# Serving (API code): avg_order_value_30d = mean of the last 30 orders, including cancelled ones.\n# Offline validation AUC: 0.88"
+    },
+    "ai_claim": "Yes. The feature has the same name and meaning in training and serving, so the model receives the same inputs and performs as validated.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Both pipelines compute avg_order_value_30d."
+      },
+      {
+        "index": 2,
+        "text": "The feature has the same name in both."
+      },
+      {
+        "index": 3,
+        "text": "So the model receives the same feature in production."
+      },
+      {
+        "index": 4,
+        "text": "Production AUC will be about 0.88."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Computing a feature differently in training and serving",
+      "explanation": "The two implementations differ: 30 days versus 30 orders, and cancelled orders excluded versus included. The model learned relationships for one definition and receives values from another - training-serving skew - so production performance can fall well below 0.88. Compute features with one shared implementation (a feature store or shared library), and log served features to compare with training.",
+      "why_convincing": "Same name, same intent, so it seems the same feature."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the serving feature differs in window and filtering, so the model sees different inputs. Share one feature implementation.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Training uses 30 days excluding cancellations; serving uses 30 orders including them.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "30"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "For a sample of customers, served values differ from training values by more than 20% in 35% of cases.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "35"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A customer with many cancelled orders gets a different feature value online."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the two definitions line by line."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the same name means the same computation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Training-serving skew arises when features are computed differently."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare served and training values for the same customer."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the definitions differ. Use one implementation."
+      }
+    ],
+    "repair": "Use a shared feature pipeline (feature store) and monitor served-versus-training feature distributions.",
+    "debrief": "A model is only as good as the consistency of its inputs. Two implementations of one feature will drift apart.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-ml-project-003",
+    "subject": "machine-learning",
+    "topic": "ML Project",
+    "subtopic": "A final test set used once",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that 0.846 is an unbiased estimate of the final model's performance on similar new data?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "process": "1. Split off a 15% test set and do not touch it.\n2. Do all feature work, model selection and tuning with cross-validation on the remaining 85%.\n3. Fit the chosen pipeline on the 85% and score it once on the test set: AUC 0.846."
+    },
+    "ai_claim": "Yes. No decision was made using the test set, so the single final score is an unbiased estimate for new data drawn from the same distribution.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The test set was held out before any work began."
+      },
+      {
+        "index": 2,
+        "text": "All selection and tuning used cross-validation on the other 85%."
+      },
+      {
+        "index": 3,
+        "text": "The final pipeline was scored on the test set exactly once."
+      },
+      {
+        "index": 4,
+        "text": "No choice depended on the test set, so its score is unbiased."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A test set untouched by any decision gives an unbiased (if noisy) estimate. It is unbiased for data like the test set; distribution shift in production is a separate question.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The test set was scored once, after all choices were fixed.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.846"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether any decision used the test set."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 depends on the test set being used only once."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An untouched test set gives an unbiased estimate."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace every decision to the data it used."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The test set was used once at the end. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The discipline is simple and often broken: decide everything first, then look at the test set once.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-ml-project-004",
+    "subject": "machine-learning",
+    "topic": "ML Project",
+    "subtopic": "Beating the existing rule",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that the model outperforms the current rule in a way the business can use?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "results": {
+        "title": "Same held-out month of transactions",
+        "columns": [
+          "method",
+          "precision",
+          "recall",
+          "fraud caught (Rs)"
+        ],
+        "rows": [
+          [
+            "current rule: amount > Rs 50,000 from a new device",
+            "0.21",
+            "0.38",
+            "Rs 42L"
+          ],
+          [
+            "new model at matched review volume",
+            "0.34",
+            "0.61",
+            "Rs 71L"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. Evaluated on the same held-out month at the same review volume, the model catches more fraud (Rs 71L vs Rs 42L) with higher precision, so reviewers spend their time better.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Both methods were evaluated on the same held-out month."
+      },
+      {
+        "index": 2,
+        "text": "The model's threshold was set so the review volume matches the rule's."
+      },
+      {
+        "index": 3,
+        "text": "At that volume, precision rises from 0.21 to 0.34 and recall from 0.38 to 0.61."
+      },
+      {
+        "index": 4,
+        "text": "Fraud caught rises from Rs 42L to Rs 71L with the same reviewer workload."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Comparing against the incumbent rule on the same data at the same operating point is the right way to show business value.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Fraud caught: Rs 71L vs Rs 42L at matched review volume.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "71",
+          "42"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that the comparison is like-for-like."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 matches the review volume."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Compare with the existing baseline at the same operating point."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare fraud caught per reviewer."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The model beats the rule at the same workload. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The baseline that matters is what the business does today. Matching the operating point (review capacity) makes the comparison fair.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-ml-project-005",
+    "subject": "machine-learning",
+    "topic": "ML Project",
+    "subtopic": "Will monthly retraining be enough",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will monthly retraining keep the model's accuracy close to its launch level?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "plan": "Retrain the demand-forecasting model on the first of every month using the latest 24 months of data.",
+      "unknown": "How quickly the relationship between features and demand changes has not been measured."
+    },
+    "ai_claim": "Yes. Retraining every month keeps the model up to date, so its accuracy stays close to the launch level.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model is retrained every month."
+      },
+      {
+        "index": 2,
+        "text": "Each retraining uses the latest data."
+      },
+      {
+        "index": 3,
+        "text": "So the model is always up to date."
+      },
+      {
+        "index": 4,
+        "text": "Accuracy stays near the launch level."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "How fast the data drift. If patterns change slowly, monthly retraining is plenty; if they shift within weeks (flash sales, a new competitor, a sudden event), accuracy can fall between retrainings - and 24 months of mostly old data may dilute recent changes. Drift has not been measured.",
+    "resolving_scenarios": [
+      "Demand patterns change gradually over quarters: monthly retraining keeps accuracy near launch level.",
+      "A competitor launch changes buying patterns within two weeks: accuracy drops sharply mid-month, and the 24-month window adapts slowly."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the rate and nature of drift, which is unknown. Step 3 assumes monthly updates are frequent enough.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "After a sudden market change, error could double within two weeks, before the next scheduled retrain.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Fast drift can outpace a monthly schedule."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how quickly the data change."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes monthly is often enough."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Retraining frequency should follow measured drift and performance decay."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a sudden change mid-month."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes slow drift. With slow drift it works; with fast drift it does not. It cannot be decided."
+      }
+    ],
+    "repair": "Measure performance decay over time (backtests), monitor drift, and trigger retraining on alerts as well as on schedule.",
+    "debrief": "Retraining schedules are hypotheses about drift. Backtesting accuracy over time tells you how often a model actually needs refreshing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

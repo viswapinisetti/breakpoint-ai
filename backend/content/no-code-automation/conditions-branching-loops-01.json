@@ -1,0 +1,469 @@
+[
+  {
+    "id": "nc-conditions-branching-loops-001",
+    "subject": "no-code-automation",
+    "topic": "Conditions, Branching & Loops",
+    "subtopic": "Numbers stored as text",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will an order of '1,500' pass the filter?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Filter: continue only if {{amount}} is greater than 1000\nThe form sends amount as text with a comma, e.g. '1,500'.\nAI: \"Orders over 1,000 pass the filter and get manager approval.\""
+    },
+    "ai_claim": "Yes. 1,500 is greater than 1,000, so the order passes the filter.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The amount is 1,500."
+      },
+      {
+        "index": 2,
+        "text": "1,500 > 1,000."
+      },
+      {
+        "index": 3,
+        "text": "The filter checks greater than 1000."
+      },
+      {
+        "index": 4,
+        "text": "So the order passes."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 1,
+      "misconception": "Comparing a formatted text value as a number",
+      "explanation": "The value is the text '1,500'. A numeric comparison cannot parse the comma (it fails or treats the value as invalid), and a text comparison compares characters, not magnitudes ('9' > '1,500' as text). Large orders can skip approval. Remove separators and convert to a number (a formatter step) before comparing.",
+      "why_convincing": "To a person, '1,500' is obviously a number."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: '1,500' is text with a comma, so the numeric comparison fails. Strip the comma and convert to a number first.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The run log shows the filter 'did not pass' for amount '1,500'.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "1,500"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Convert values to the right type before numeric comparisons.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A 25,000 order skips manager approval."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the type of the amount value."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 treats the text as a number."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Formatted numbers must be converted before comparing."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the filter with '1,500'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: the value is text with a comma. Convert it."
+      }
+    ],
+    "repair": "Add a formatter step that removes commas and converts to a number.",
+    "debrief": "Type mismatches are silent in no-code tools. Check what type each field really is.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-conditions-branching-loops-002",
+    "subject": "no-code-automation",
+    "topic": "Conditions, Branching & Loops",
+    "subtopic": "Overlapping branch conditions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do orders over 5,000 go only to the finance director?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Router / Paths after 'New order':\n  Route A: amount > 1000  -> notify sales manager\n  Route B: amount > 5000  -> notify finance director\nAI: \"Orders over 5,000 go only to the finance director.\""
+    },
+    "ai_claim": "Yes. Orders over 5,000 match route B, so they are sent to the finance director.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "An order of 8,000 matches route B."
+      },
+      {
+        "index": 2,
+        "text": "Route B notifies the finance director."
+      },
+      {
+        "index": 3,
+        "text": "Each order follows one route."
+      },
+      {
+        "index": 4,
+        "text": "So large orders go only to the finance director."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming only one branch runs",
+      "explanation": "In routers and paths, every route whose condition is true runs. An 8,000 order also satisfies amount > 1000, so both the sales manager and the finance director are notified. Make conditions mutually exclusive (Route A: 1000 < amount <= 5000) if only one should run.",
+      "why_convincing": "Branching is often imagined as if/else, where the first match wins."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: an 8,000 order matches both routes, so both run. Make the conditions mutually exclusive.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "An 8,000 order produces two notifications: sales manager and finance director.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "8,000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Routers run all routes whose filters pass, not only the first.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The sales manager is notified about every large order too."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether a large order matches Route A."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes one route per order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "All matching routes run."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test with an 8,000 order."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: both routes match. Make conditions exclusive."
+      }
+    ],
+    "repair": "Use ranges: Route A 1000 < amount <= 5000; Route B amount > 5000.",
+    "debrief": "Branch conditions should be designed as a set: exclusive and exhaustive, with a fallback.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-conditions-branching-loops-003",
+    "subject": "no-code-automation",
+    "topic": "Conditions, Branching & Loops",
+    "subtopic": "Actions inside a loop",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the customer get one confirmation email?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Trigger: New order (with a line_items array)\nIterator: split line_items into individual items\nAction: Send email to customer 'Your order is confirmed'\nAn order with 20 items arrives.\nAI: \"The customer gets one confirmation email for the order.\""
+    },
+    "ai_claim": "Yes. One order triggers one run, and the run sends the confirmation, so the customer gets one email.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "One order triggers one run."
+      },
+      {
+        "index": 2,
+        "text": "The iterator processes the line items."
+      },
+      {
+        "index": 3,
+        "text": "The email step sends the confirmation."
+      },
+      {
+        "index": 4,
+        "text": "So one email is sent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Placing a once-per-order action after an iterator",
+      "explanation": "After an iterator, every following module runs once per item. With 20 line items, the email step runs 20 times and the customer receives 20 identical confirmations (and 20 operations are used). Put the email before the iterator, or aggregate the items back into one bundle before emailing.",
+      "why_convincing": "It is still one trigger event, which feels like one run of each step."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the email runs once per item - 20 emails. Send it before the iterator or after an aggregator.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "order (20 items) -> iterator emits 20 bundles -> email step runs 20 times",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "20"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Modules after an iterator execute for each bundle it produces.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The customer receives 20 identical emails."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the bundles after the iterator."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the email runs once."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Everything after an iterator runs per item."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace an order with 3 items."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the email runs per item. Move it or aggregate first."
+      }
+    ],
+    "repair": "Send the confirmation before iterating, or use an aggregator to rebuild one bundle.",
+    "debrief": "Know the multiplicity of each step: per trigger event or per item.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-conditions-branching-loops-004",
+    "subject": "no-code-automation",
+    "topic": "Conditions, Branching & Loops",
+    "subtopic": "Case-sensitive text conditions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will all approved requests continue?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Filter: continue only if {{status}} (Text) exactly matches 'Approved'\nApprovers type the status by hand in a sheet: 'Approved', 'approved', 'APPROVED ', 'Approved.'\nAI: \"All approved requests continue to the payment step.\""
+    },
+    "ai_claim": "Yes. Every approved request has the status 'Approved', so all of them pass the filter.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Approvers mark requests as approved."
+      },
+      {
+        "index": 2,
+        "text": "The status says 'Approved'."
+      },
+      {
+        "index": 3,
+        "text": "The filter matches 'Approved'."
+      },
+      {
+        "index": 4,
+        "text": "So all approved requests continue."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Exact text matching on free-typed values",
+      "explanation": "'Exactly matches' is case- and character-sensitive: 'approved', 'APPROVED ' (trailing space) and 'Approved.' all fail, so those payments silently stop. Use a dropdown (data validation) for status, or normalise (trim, lowercase, remove punctuation) and compare case-insensitively.",
+      "why_convincing": "People read all the variants as the same word."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: case, spaces and punctuation variants fail an exact match. Use a dropdown or normalise before comparing.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Rows with 'approved' and 'APPROVED ' do not pass the filter.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Exact text comparisons match character for character, including case and whitespace.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Payments approved as 'approved' never happen."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the variants approvers type."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes one spelling."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Exact matches fail on case and whitespace differences."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test the filter with 'APPROVED '."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: variants fail. Use a dropdown or normalise."
+      }
+    ],
+    "repair": "Restrict the input with a dropdown, or trim and lowercase before an equality check.",
+    "debrief": "Free text entering a condition needs normalising - or better, a controlled vocabulary.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-conditions-branching-loops-005",
+    "subject": "no-code-automation",
+    "topic": "Conditions, Branching & Loops",
+    "subtopic": "A fallback route",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this design ensures no ticket silently disappears?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Router after 'Classify ticket category':\n  Route 1: category = billing  -> billing queue\n  Route 2: category = technical -> tech queue\n  Route 3: category = account  -> account queue\n  Fallback route (runs when no other route matches) -> 'needs triage' queue + Slack alert"
+    },
+    "ai_claim": "Yes. Known categories go to their queues, and anything unexpected - a new category, a typo, an empty value - takes the fallback route to triage with an alert, so every ticket ends up somewhere visible.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each known category has a route."
+      },
+      {
+        "index": 2,
+        "text": "Unexpected values match no normal route."
+      },
+      {
+        "index": 3,
+        "text": "The fallback route catches them."
+      },
+      {
+        "index": 4,
+        "text": "Triage plus an alert makes them visible."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A fallback (else) route makes branching exhaustive, so unmatched items are handled instead of dropped.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "A ticket classified as 'refund' goes to 'needs triage' and posts a Slack alert.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider a category nobody planned for."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is the key."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Exhaustive branching needs a default path."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send a ticket with category 'refund'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The fallback prevents silent drops. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Every router should have an answer for 'none of the above'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

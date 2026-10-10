@@ -1,0 +1,482 @@
+[
+  {
+    "id": "be-testing-backend-security-001",
+    "subject": "backend",
+    "topic": "Testing & Backend Security",
+    "subtopic": "Tests that only test the mock",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this passing test show that the payment integration works?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "def test_payment_succeeds(mocker):\n    mocker.patch(\"app.payments.gateway.charge\", return_value={\"status\": \"ok\"})\n    result = payments.gateway.charge(amount=500, card=\"tok_visa\")\n    assert result[\"status\"] == \"ok\""
+    },
+    "ai_claim": "Yes. The test charges 500 and checks that the status is ok, so the payment flow is verified.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The test calls charge with an amount and a card."
+      },
+      {
+        "index": 2,
+        "text": "It asserts the status is ok."
+      },
+      {
+        "index": 3,
+        "text": "The test passes."
+      },
+      {
+        "index": 4,
+        "text": "So payments work."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Testing the mock instead of the code",
+      "explanation": "The test replaces charge with a mock that returns ok, and then calls the mock directly. No application code runs - not the request building, the gateway call, nor the handling of the response. It would pass even if payments.py were empty apart from the gateway attribute. Mock the external boundary (the HTTP call), then exercise your own code that uses it, and assert on what that code does.",
+      "why_convincing": "It has a call, an assertion and a green result, which looks like a test."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the test calls the mock it configured, so it verifies nothing about the application. Mock the HTTP layer and test the code that calls it (e.g. checkout()).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Replace the real charge() body with 'raise Exception': the test still passes.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "test -> mocked charge -> returns {'status': 'ok'} -> assert; no application code executed",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The test passes even when the payment code is broken."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the application code this test actually runs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats passing as evidence."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A test is only evidence about code it executes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Break the real charge() and rerun the test."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the test only calls its own mock. Mock the external call and test your code."
+      }
+    ],
+    "repair": "Mock the HTTP client (or use the gateway's sandbox) and call the application function, asserting its behaviour.",
+    "debrief": "A useful test fails when the code is wrong. Mutation - deliberately breaking the code - is the quickest way to find tests that cannot fail.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-testing-backend-security-002",
+    "subject": "backend",
+    "topic": "Testing & Backend Security",
+    "subtopic": "Cookie authentication and CSRF",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can only the bank's own pages trigger a transfer, because the endpoint requires a valid session?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/transfer\")\ndef transfer(to: str = Form(), amount: int = Form(), user=Depends(session_user)):\n    accounts.transfer(user, to, amount)\n\n# session_user reads a cookie set as: Set-Cookie: session=...; HttpOnly; Secure\n# (no SameSite attribute, no CSRF token)"
+    },
+    "ai_claim": "Yes. Only a logged-in user's session can call /transfer, and other sites cannot read the HttpOnly cookie, so they cannot make transfers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The endpoint requires a valid session cookie."
+      },
+      {
+        "index": 2,
+        "text": "The cookie is HttpOnly, so other sites cannot read it."
+      },
+      {
+        "index": 3,
+        "text": "Without the cookie, a request is rejected."
+      },
+      {
+        "index": 4,
+        "text": "So only the bank's pages can trigger transfers."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Assuming an unreadable cookie is not sent",
+      "explanation": "An attacker does not need to read the cookie. A page on evil.example can auto-submit a form that POSTs to /transfer, and the browser attaches the user's cookie. With SameSite=None semantics, or older browsers and some cross-site navigations, the request carries the session and the transfer happens - cross-site request forgery. Use SameSite=Lax or Strict and a CSRF token.",
+      "why_convincing": "Steps 1 and 2 are both true; the gap is between reading a cookie and sending it."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a cross-site form POST can carry the user's cookie, so another site can trigger a transfer. Add a CSRF token and SameSite=Lax (or Strict).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "evil.example hosts <form action=\"https://bank.example/transfer\" method=\"post\"> with hidden fields and submits it with JavaScript.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Browsers attach cookies to requests to the cookie's site even when another site initiates them, unless SameSite restricts it.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A hidden auto-submitting form on another site performs the transfer."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate reading a cookie from the browser sending it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes other sites' requests arrive without the cookie."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Browsers send cookies automatically with requests to that site, including forged ones."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Build a form on another site that posts to /transfer."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: cross-site requests can carry the cookie. Add CSRF tokens and SameSite."
+      }
+    ],
+    "repair": "Set SameSite=Lax (or Strict) on the session cookie and require a CSRF token on state-changing requests.",
+    "debrief": "Cookie authentication authenticates the browser, not the page that made the request. CSRF defences are what tie a request to your own pages.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-testing-backend-security-003",
+    "subject": "backend",
+    "topic": "Testing & Backend Security",
+    "subtopic": "Tests that depend on each other",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The suite passes when run in file order. Is it reliable - would each test pass on its own or in any order?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "# All tests share one database, created once per session.\n\ndef test_create_user(client):\n    assert client.post(\"/users\", json={\"email\": \"a@x.com\"}).status_code == 201\n\ndef test_duplicate_email_rejected(client):\n    r = client.post(\"/users\", json={\"email\": \"a@x.com\"})\n    assert r.status_code == 409"
+    },
+    "ai_claim": "Yes. Both tests pass, and each checks one behaviour of the endpoint, so the suite is reliable in any order.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "test_create_user checks that a new user is created."
+      },
+      {
+        "index": 2,
+        "text": "test_duplicate_email_rejected checks the conflict response."
+      },
+      {
+        "index": 3,
+        "text": "Both pass when the suite runs."
+      },
+      {
+        "index": 4,
+        "text": "So each test is correct on its own."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 4,
+      "misconception": "Relying on state left by another test",
+      "explanation": "test_duplicate_email_rejected only gets a 409 because test_create_user already inserted a@x.com into the shared database. Run it alone, first, or in parallel, and the email is new, so it gets 201 and fails. Each test must create its own preconditions and use an isolated or reset database (e.g. a transaction rolled back per test).",
+      "why_convincing": "Tests usually run in file order, so the hidden dependency never shows."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the second test depends on data created by the first. Make it insert its own user first, and isolate each test's database state.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "pytest -k test_duplicate_email_rejected fails: status 201 instead of 409.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "201",
+          "409"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "run alone: no existing a@x.com -> POST creates it -> 201",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "201"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Running the duplicate test on its own fails."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Run the second test by itself."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 concludes independence from a single run order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tests that share state can pass only in one order."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask where the existing a@x.com comes from in the second test."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the second test relies on the first. Give it its own setup and isolate the database."
+      }
+    ],
+    "repair": "Create the first user inside the duplicate test, and roll back or recreate the database per test.",
+    "debrief": "Order-dependent tests fail when someone runs one test, shuffles the order, or parallelises the suite. Each test should arrange its own world; tools like pytest-randomly expose hidden dependencies.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-testing-backend-security-004",
+    "subject": "backend",
+    "topic": "Testing & Backend Security",
+    "subtopic": "Logging request headers",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is logging every request's full headers a harmless debugging aid?",
+    "artifact_type": "middleware_chain",
+    "artifact": {
+      "language": "python",
+      "code": "@app.middleware(\"http\")\nasync def log_requests(request, call_next):\n    logger.info(\"request %s %s headers=%s\", request.method, request.url, dict(request.headers))\n    return await call_next(request)\n\n# Logs are shipped to a third-party log service that the whole engineering team can search."
+    },
+    "ai_claim": "Yes. Headers only describe the request - content type, user agent and so on - so logging them helps debugging without risk.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The middleware logs the method, URL and headers."
+      },
+      {
+        "index": 2,
+        "text": "Headers contain request metadata such as content type and user agent."
+      },
+      {
+        "index": 3,
+        "text": "Metadata is not sensitive."
+      },
+      {
+        "index": 4,
+        "text": "So logging headers is harmless."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Treating all headers as harmless metadata",
+      "explanation": "Headers include Authorization (bearer tokens, API keys) and Cookie (session ids). Logging them copies live credentials into a third-party system that many people can search, where they can be used to impersonate users. Redact sensitive headers - Authorization, Cookie, Set-Cookie, X-API-Key - before logging.",
+      "why_convincing": "Most headers really are harmless, and logs feel internal."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: Authorization and Cookie headers contain credentials. Redact them before logging.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A log line contains 'authorization': 'Bearer eyJhbGciOi...', usable by anyone with log access.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "OWASP Logging Cheat Sheet: never log session ids, access tokens or passwords.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A searchable log service holds valid session cookies."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List the headers a typical authenticated request carries."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes headers contain nothing sensitive."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Authorization and Cookie headers carry credentials."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Search the logs for 'authorization'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: headers include credentials, which end up in the logs. Redact sensitive headers."
+      }
+    ],
+    "repair": "Redact Authorization, Cookie, Set-Cookie and API-key headers (and sensitive query parameters) before logging.",
+    "debrief": "Logs are a copy of your data that is usually less protected than the database. Decide what must never be logged, and enforce it in one place, such as logging middleware.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-testing-backend-security-005",
+    "subject": "backend",
+    "topic": "Testing & Backend Security",
+    "subtopic": "Constant-time key comparison",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right about why secrets.compare_digest is used here instead of ==?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "import secrets\n\ndef require_api_key(key: str = Header(alias=\"X-API-Key\")):\n    if not secrets.compare_digest(key.encode(), settings.API_KEY.encode()):\n        raise HTTPException(status_code=401)"
+    },
+    "ai_claim": "Yes. == can stop at the first differing byte, so response time can leak how many leading bytes of a guess are correct. compare_digest takes time independent of where the inputs differ, removing that timing side channel.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A normal comparison may return as soon as it finds a mismatch."
+      },
+      {
+        "index": 2,
+        "text": "Guesses with a longer correct prefix could take slightly longer to reject."
+      },
+      {
+        "index": 3,
+        "text": "Measured over many requests, that difference can reveal the key byte by byte."
+      },
+      {
+        "index": 4,
+        "text": "compare_digest's running time does not depend on the position of the first difference."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. compare_digest is designed for comparing secrets in constant time with respect to their contents, which prevents timing attacks on API keys, tokens and HMACs.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Python docs: secrets.compare_digest uses an approach designed to prevent timing analysis.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "== on 'sk_live_a...' vs 'sk_live_b...' compares 8 bytes before failing; vs 'x...' fails at byte 1",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "8",
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about what an attacker can measure."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 describes how timing could leak the key."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Early-exit comparisons leak the length of the matching prefix through timing."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare how long == takes for guesses with different correct prefixes."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. compare_digest removes the timing side channel of early-exit comparison. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Security-sensitive comparisons must not leak information through timing. For secrets - API keys, tokens, signatures - use a constant-time comparison function.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

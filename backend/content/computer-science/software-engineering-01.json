@@ -1,0 +1,467 @@
+[
+  {
+    "id": "cs-software-engineering-001",
+    "subject": "computer-science",
+    "topic": "Software Engineering",
+    "subtopic": "What Agile does and does not mean",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does following Agile mean the team should skip planning and documentation?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. Agile values working software over documentation and responding to change over following a plan, so planning and documentation are dropped.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The Agile Manifesto values working software over comprehensive documentation."
+      },
+      {
+        "index": 2,
+        "text": "It values responding to change over following a plan."
+      },
+      {
+        "index": 3,
+        "text": "'Over' means the second item is replaced by the first."
+      },
+      {
+        "index": 4,
+        "text": "So Agile teams skip planning and documentation."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Reading 'X over Y' as 'X instead of Y'",
+      "explanation": "The Manifesto says explicitly that while there is value in the items on the right, the items on the left are valued more. Agile teams plan continuously (sprint planning, backlogs) and keep the documentation that is useful; they avoid heavy up-front plans that cannot adapt.",
+      "why_convincing": "The manifesto lines are short and memorable, and the clarifying sentence after them is rarely quoted."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Agile de-emphasises heavy up-front plans and exhaustive documents, not planning or documentation themselves. Planning happens every iteration, and useful documentation is kept.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "The Manifesto states that the items on the right still have value; the left is valued more.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Scrum includes sprint planning and a maintained product backlog.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Scrum, the most widely used Agile framework, schedules a planning meeting at the start of every sprint."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read how the Manifesto itself explains the word 'over'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 interprets 'over'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The Manifesto adds that the items on the right still have value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Name a planning activity that Agile frameworks require."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 'over' means 'valued more than', not 'instead of'. Agile teams plan every iteration and keep useful documentation."
+      }
+    ],
+    "repair": "Replace step 3: 'over' means prioritised above, not replaced; Agile still plans and documents, just adaptively.",
+    "debrief": "Slogans compress ideas and invite misreading. The Agile Manifesto's own text rules out 'no planning, no documentation', yet the misreading is common enough to have its own name - 'cowboy Agile'. When a principle is quoted as a slogan, read the full source before applying it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-software-engineering-002",
+    "subject": "computer-science",
+    "topic": "Software Engineering",
+    "subtopic": "Code coverage and correctness",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does 100% line coverage with all tests passing mean the code has no bugs?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "report": "Unit tests: 214 passed. Line coverage: 100%."
+    },
+    "ai_claim": "Yes. Every line was executed by a passing test, so every line is verified.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Coverage measures which lines the tests executed."
+      },
+      {
+        "index": 2,
+        "text": "At 100%, every line ran during the test suite."
+      },
+      {
+        "index": 3,
+        "text": "Every test passed, so every line behaved correctly."
+      },
+      {
+        "index": 4,
+        "text": "Therefore the code has no bugs."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Treating execution as verification",
+      "explanation": "Coverage shows that a line ran, not that its result was checked against the right answer, nor that every input was tried. A line can run with an input that happens to work, or run inside a test with a weak assertion. Missing requirements are not lines at all, so coverage cannot see them.",
+      "why_convincing": "100% is a striking number, and 'every line tested' sounds like 'everything verified'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Coverage measures execution, not correctness. Bugs survive through untested input values, weak assertions and missing behaviour that has no code to cover.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "def avg(xs): return sum(xs) / len(xs) has 100% coverage from avg([2, 4]) yet crashes on [].",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Coverage is a measure of execution, not of correctness.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A function that divides by len(xs) is fully covered by one test with a non-empty list, yet fails on an empty one."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate 'this line ran' from 'this line was proven correct'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 moves from 'tests passed' to 'every line behaved correctly'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Coverage says nothing about which inputs were used or what the assertions checked."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write a fully covered function that still has a bug."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: coverage shows lines ran, not that they are correct for all inputs. Fully covered code can still fail."
+      }
+    ],
+    "repair": "Replace steps 3-4: passing tests with full coverage show that every line ran without a failed assertion; they do not prove the absence of bugs.",
+    "debrief": "Coverage is best used to find what is not tested, not to certify what is. A single test can execute every line and check almost nothing. Judge a test suite by its inputs and assertions - edge cases, boundaries, failure paths - not by a percentage.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-software-engineering-003",
+    "subject": "computer-science",
+    "topic": "Software Engineering",
+    "subtopic": "Adding people to a late project",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will doubling the team roughly halve the remaining time?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "situation": "A project estimated at 6 months with 4 developers is 2 months behind. The manager adds 4 new developers in month 5."
+    },
+    "ai_claim": "Yes. Twice the developers do twice the work per month, so the remaining time roughly halves.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The remaining work is fixed."
+      },
+      {
+        "index": 2,
+        "text": "Doubling the team doubles the work completed per month."
+      },
+      {
+        "index": 3,
+        "text": "New developers contribute at the same rate as the existing team."
+      },
+      {
+        "index": 4,
+        "text": "So the remaining time roughly halves."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming new team members are immediately as productive",
+      "explanation": "New developers need onboarding, and the existing team loses time training them; communication paths grow quadratically (4 people: 6 pairs; 8 people: 28). This is Brooks's law: adding people to a late software project tends to make it later, at least in the short term.",
+      "why_convincing": "In manual work, more workers often do mean faster completion, so the arithmetic in steps 1-2 feels like common sense."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Onboarding and coordination costs mean the new developers slow the team at first, and communication overhead rises from 6 to 28 pairs. The remaining time will not halve and may grow (Brooks's law).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Brooks's law: adding manpower to a late software project makes it later.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "Communication pairs n(n-1)/2: 4 people = 6, 8 people = 28",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6",
+          "28"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "New developers need weeks to learn the codebase, and the experienced ones spend that time teaching them."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the existing team must do when four new people join."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the newcomers are productive at once."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Onboarding and communication overhead grow with team size."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the communication pairs for 4 and for 8 people."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: newcomers need onboarding and add coordination overhead, so the time does not halve (Brooks's law)."
+      }
+    ],
+    "repair": "Replace step 3: new developers need onboarding and increase coordination costs, so the remaining time will not halve.",
+    "debrief": "Software work is not divisible like digging a trench: it depends on shared understanding, and understanding takes time to transfer. Brooks's observation from 1975 still holds because the cost is human, not technical. When a plan assumes linear scaling of people, look for the coordination cost it ignores.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-software-engineering-004",
+    "subject": "computer-science",
+    "topic": "Software Engineering",
+    "subtopic": "Unit tests versus integration tests",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Since every unit test passes, can the team skip integration testing?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "situation": "Every module's unit tests pass. The payment module and the order module each mock the other."
+    },
+    "ai_claim": "Yes. If every unit works on its own, the system built from those units works too.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each module has thorough unit tests, and all of them pass."
+      },
+      {
+        "index": 2,
+        "text": "Each unit test replaces the module's collaborators with mocks."
+      },
+      {
+        "index": 3,
+        "text": "Since every unit works correctly, the combined system works correctly."
+      },
+      {
+        "index": 4,
+        "text": "Integration testing is therefore unnecessary."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Assuming correct parts guarantee a correct whole",
+      "explanation": "Unit tests with mocks check each module against the author's assumptions about the other module. If those assumptions disagree - different field names, units, error formats, ordering - both sides pass their unit tests and the system still fails. Integration tests exercise the real interaction.",
+      "why_convincing": "Step 2 describes good unit testing practice, which makes the conclusion feel earned."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Mocks encode assumptions about collaborators; integration tests check that those assumptions match reality. Correct units can still be wired together incorrectly.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Orders sends amount in rupees; payments expects paise. Both pass unit tests with mocks; together they charge 1/100th of the price.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "100"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Mocks test a unit against assumed behaviour, not the collaborator's real behaviour.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The order module sends amount in rupees while the payment module's mock-based tests assume paise."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the mocks in step 2 represent."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 moves from 'each part works' to 'the whole works'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A mock encodes an assumption about how the real collaborator behaves."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Invent a mismatch between two modules that both sets of unit tests would miss."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: unit tests with mocks cannot detect mismatched assumptions between modules. Integration tests are still needed."
+      }
+    ],
+    "repair": "Replace steps 3-4: unit tests verify parts in isolation; integration tests are still needed to verify how they work together.",
+    "debrief": "Many real outages happen at boundaries: two components that are each correct but disagree about a format, a unit or an order of events. Mocks hide exactly those disagreements. A healthy test suite has many unit tests and some integration tests that exercise the real connections.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-software-engineering-005",
+    "subject": "computer-science",
+    "topic": "Software Engineering",
+    "subtopic": "Cohesion and coupling",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this refactoring increase OrderService's cohesion and keep coupling low?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "before": "OrderService: validates orders, saves them, and builds the HTML for confirmation emails.",
+      "after": "OrderService validates and saves orders and calls EmailFormatter.confirmation(order) to build the email."
+    },
+    "ai_claim": "Yes. OrderService now has one focused responsibility, and it depends on EmailFormatter through a single narrow method.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Cohesion measures how closely a module's responsibilities belong together."
+      },
+      {
+        "index": 2,
+        "text": "Before, OrderService mixed order handling with HTML formatting, two unrelated concerns."
+      },
+      {
+        "index": 3,
+        "text": "After, OrderService handles orders only and delegates formatting to EmailFormatter, so its cohesion increases."
+      },
+      {
+        "index": 4,
+        "text": "The dependency is one narrow call, confirmation(order), so coupling stays low; email layout can change without touching OrderService."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Separating email formatting gives each class one reason to change (higher cohesion), and the single method call keeps the dependency narrow (low coupling).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "High cohesion: each module has one reason to change. Low coupling: modules depend on narrow interfaces.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Evaluate cohesion and coupling separately."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 is the coupling claim; check how wide the new dependency is."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A change that separates unrelated concerns raises cohesion; a narrow interface keeps coupling low."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine changing the email's layout: which classes must change?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. OrderService is more focused, and it depends on EmailFormatter through one narrow method. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cohesion and coupling are judged by asking what must change when requirements change. Here a new email design touches only EmailFormatter, which is the practical test of good separation. Approving a design means checking both properties, not just noticing that a class got smaller.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,389 @@
+[
+  {
+    "id": "prg-debugging-testing-001",
+    "subject": "programming",
+    "topic": "Debugging & Testing",
+    "subtopic": "Assertions that always pass",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does check_total(total) raise AssertionError whenever total is not 100?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def check_total(total):\n    assert (total == 100, \"total must be 100\")\n    return \"passed\""
+    },
+    "ai_claim": "Yes. The assert checks total == 100 and fails with the message whenever it is false.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "assert raises AssertionError when its condition is false."
+      },
+      {
+        "index": 2,
+        "text": "The condition here is total == 100, and the message is 'total must be 100'."
+      },
+      {
+        "index": 3,
+        "text": "Wrapping them in parentheses just groups the condition with its message."
+      },
+      {
+        "index": 4,
+        "text": "check_total(90) raises AssertionError."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Parenthesising an assert's condition and message together",
+      "explanation": "(total == 100, 'total must be 100') is a two-element tuple, and a non-empty tuple is always truthy. The assert therefore never fails: check_total(90) returns 'passed'. Write `assert total == 100, 'total must be 100'` without parentheses.",
+      "why_convincing": "Parentheses usually only group, and the line looks like a function call with two arguments. Tests that expect a pass still pass, so the broken assert is silent."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The parentheses make a tuple, which is always true, so the assertion can never fail (Python even emits a SyntaxWarning). check_total(90) returns 'passed'. Remove the parentheses.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "check_total(90) returns 'passed' instead of raising AssertionError.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "90"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "assert total == 100, \"total must be 100\"",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "check_total(90) returns 'passed'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test that the assertion actually fails when it should."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says the parentheses only group."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "assert is a statement, not a function: `assert (a, b)` asserts a tuple."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call check_total(90)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the parentheses build a non-empty tuple, which is always true, so the assert never fires. Remove the parentheses."
+      }
+    ],
+    "repair": "Write `assert total == 100, \"total must be 100\"`.",
+    "debrief": "A check that can never fail is worse than no check, because it creates confidence. Test your tests: make sure each assertion fails when the condition is broken. Python's own SyntaxWarning for this pattern exists because the bug is so easy to write.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "check_total",
+      "ai_code": "def check_total(total):\n    assert (total == 100, \"total must be 100\")\n    return \"passed\"",
+      "reference_code": "def check_total(total):\n    assert total == 100, \"total must be 100\"\n    return \"passed\"",
+      "test_inputs": [
+        "(100,)",
+        "(90,)"
+      ],
+      "counterexample_input": "(90,)"
+    }
+  },
+  {
+    "id": "prg-debugging-testing-002",
+    "subject": "programming",
+    "topic": "Debugging & Testing",
+    "subtopic": "Locating a crash",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's diagnosis of the crash correct?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def average(values):\n    total = 0\n    for v in values:\n        total += v\n    return total / len(values)",
+      "bug_report": "average([]) crashes with ZeroDivisionError."
+    },
+    "ai_claim": "Yes: the crash comes from the division on the last line when the list is empty, because len(values) is 0. The loop is not the cause.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "For an empty list, the loop body never runs, so total stays 0."
+      },
+      {
+        "index": 2,
+        "text": "The last line then evaluates 0 / len([]), which is 0 / 0."
+      },
+      {
+        "index": 3,
+        "text": "Dividing by zero raises ZeroDivisionError, which is the crash in the report."
+      },
+      {
+        "index": 4,
+        "text": "The loop is not the cause; the fix is to handle the empty list before dividing (return 0, or raise a clear ValueError)."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. With [], the loop does nothing and the return statement divides by len([]) = 0, raising ZeroDivisionError. Guard the empty case: `if not values: raise ValueError('average of empty list')` (or return 0 if that is the agreed behaviour).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "values = [] -> loop skipped -> total = 0 -> 0 / 0 -> ZeroDivisionError",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Trace the function with the exact input from the bug report."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 identifies the failing operation. Check it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An empty iterable makes a for loop run zero times; len([]) is 0."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate each line of average([]) in order."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The loop is skipped and the division by len([]) = 0 raises ZeroDivisionError. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Good debugging names the exact operation that fails and explains why, rather than rewriting code that merely looks suspicious. This diagnosis traces the failing input line by line and separates the cause (division by zero length) from the innocent loop. Reproducing a bug report's exact input is the first step of every sound diagnosis.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "average",
+      "ai_code": "def average(values):\n    total = 0\n    for v in values:\n        total += v\n    return total / len(values)",
+      "reference_code": "def average(values):\n    total = 0\n    for v in values:\n        total += v\n    return total / len(values)",
+      "test_inputs": [
+        "([],)",
+        "([2, 4],)",
+        "([5],)"
+      ]
+    }
+  },
+  {
+    "id": "prg-debugging-testing-003",
+    "subject": "programming",
+    "topic": "Debugging & Testing",
+    "subtopic": "Verifying an off-by-one fix",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the AI's fixed version count every vowel, upper or lower case, in any string?",
+    "artifact_type": "code",
+    "artifact": {
+      "original": "def count_vowels(s):\n    count = 0\n    for i in range(len(s) - 1):\n        if s[i].lower() in \"aeiou\":\n            count += 1\n    return count",
+      "fixed": "def count_vowels(s):\n    count = 0\n    for i in range(len(s)):\n        if s[i].lower() in \"aeiou\":\n            count += 1\n    return count",
+      "note": "The original version missed a vowel at the end of a string."
+    },
+    "ai_claim": "Yes. range(len(s)) now visits every index, and .lower() handles capital vowels.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The original range(len(s) - 1) stopped one index early, so the last character was never checked."
+      },
+      {
+        "index": 2,
+        "text": "range(len(s)) visits indexes 0 to len(s) - 1, which is every character."
+      },
+      {
+        "index": 3,
+        "text": "s[i].lower() in 'aeiou' counts both 'A' and 'a'."
+      },
+      {
+        "index": 4,
+        "text": "The fixed version counts every vowel in any string, including the empty string, which gives 0."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. range(len(s)) covers every index, and lowering each character handles capitals. count_vowels('apple') = 2, count_vowels('AEIOU') = 5, count_vowels('') = 0.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "count_vowels('idea') = 3 now, where the original returned 2.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3",
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the fix against the exact input that broke the original."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states which indexes the new range visits."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "range(n) yields 0 to n - 1: exactly the valid indexes of a length-n string."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare original and fixed on 'idea', 'AEIOU' and ''."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The new range covers every character, and case is handled. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "A fix is verified by re-running the input that exposed the bug, plus the edges around it - here, a string ending in a vowel, an all-capital string and the empty string. The explanation connects the fix to the original fault precisely. Approving it is justified by those tests, not by the change merely looking plausible.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "count_vowels",
+      "ai_code": "def count_vowels(s):\n    count = 0\n    for i in range(len(s)):\n        if s[i].lower() in \"aeiou\":\n            count += 1\n    return count",
+      "reference_code": "def count_vowels(s):\n    return sum(c in 'aeiou' for c in s.lower())",
+      "test_inputs": [
+        "('idea',)",
+        "('AEIOU',)",
+        "('',)",
+        "('sky',)",
+        "('apple',)"
+      ]
+    }
+  },
+  {
+    "id": "prg-debugging-testing-004",
+    "subject": "programming",
+    "topic": "Debugging & Testing",
+    "subtopic": "Tests without a stated requirement",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is is_adult(age) correct for the college signup form?",
+    "artifact_type": "function",
+    "artifact": {
+      "language": "python",
+      "code": "def is_adult(age):\n    return age > 18"
+    },
+    "ai_claim": "Yes. The form treats users as adults only once they are older than 18, which is exactly what age > 18 checks.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "is_adult returns True when age is greater than 18."
+      },
+      {
+        "index": 2,
+        "text": "The signup form counts a user as an adult only once they are older than 18."
+      },
+      {
+        "index": 3,
+        "text": "is_adult(17) is False and is_adult(25) is True, as expected."
+      },
+      {
+        "index": 4,
+        "text": "The function is correct for the signup form."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The form's actual age rule. Whether an 18-year-old counts as an adult (age >= 18) or only someone over 18 (age > 18) is never stated, and the two rules disagree exactly at 18.",
+    "resolving_scenarios": [
+      "The rule is 'adults are 18 or older': is_adult(18) must be True, but it returns False, so the function is wrong.",
+      "The rule is 'adults are older than 18': is_adult(18) should be False, which it is, so the function is correct."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The code is correct or wrong depending on a requirement that is not given: the treatment of age 18. With '18 or older' it fails at 18; with 'older than 18' it is right. The claim cannot be settled without the form's rule, and the boundary case 18 is exactly where it must be tested.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "is_adult(18) returns False; whether that is right depends on the unstated rule.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "18"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If the rule is '18 or older', is_adult(18) should be True but returns False."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where each fact in the reasoning comes from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states the form's rule. Look for it in the question."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Correctness is always relative to a requirement; boundary values reveal which requirement code implements."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Decide what is_adult(18) should return under each plausible rule."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 invents the requirement. With '18 or older' the function is wrong at 18; with 'older than 18' it is right. It cannot be decided from what is given."
+      }
+    ],
+    "repair": "Get the requirement stated (18 or older, versus over 18) and add a test for age 18; with the usual '18 or older' rule the code should be `age >= 18`.",
+    "debrief": "Tests can only confirm code against a requirement, and here the requirement was assumed rather than given. The examples in step 3 avoid the only value that matters - 18 - which is why they prove nothing. When a boundary decides correctness, find the written rule for that boundary before calling the code right or wrong.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

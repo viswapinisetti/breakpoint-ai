@@ -1,0 +1,232 @@
+@import "tailwindcss";
+
+/* NxtWave Breakpoint design system (PRD v0.2 section 7.1).
+ *
+ * Blue and white foundation. Colour values were observed in NxtWave's public
+ * stylesheet on 5 September 2026; the *roles* below are proposed application
+ * tokens, not an official brand hierarchy, and internal brand assets can
+ * replace them without touching layout or logic.
+ *
+ * Two rules that shape the whole palette:
+ *   - No purple-led theme, no neon, no terminal aesthetic.
+ *   - Green/amber/red are small semantic accents used only AFTER adjudication,
+ *     always with a text label. Pre-verdict surfaces stay neutral blue, because
+ *     colour must never reveal the answer.
+ */
+@theme {
+  /* Brand */
+  --color-brand: #2563eb;
+  --color-brand-hover: #1d4ed8;
+  --color-brand-alt: #1565d8;
+  --color-brand-soft: #dbeafe;
+
+  /* Surfaces and text */
+  --color-page: #f8fafc;
+  --color-surface: #ffffff;
+  --color-ink: #0f172a;
+  --color-ink-muted: #475569;
+  --color-border-subtle: #e2e8f0;
+  --color-border-control: #64748b;
+
+  /* Semantic - post-adjudication only */
+  --color-verified: #166534;
+  --color-needs-evidence: #92400e;
+  --color-failure: #b91c1c;
+
+  /* The NxtWave LMS typeface. Two weights only, as on the platform: 700 for
+     bold labels (font-bold) and 400 for everything else (font-normal).
+     index.html loads exactly those two. */
+  --font-sans: "Roboto", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo,
+    monospace;
+
+  --radius-card: 12px;
+  --radius-control: 8px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    background: var(--color-page);
+    color: var(--color-ink);
+    font-family: 'Roboto', sans-serif;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Visible focus on every background (PRD v0.2 section 7.3). */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: var(--color-brand-soft);
+  }
+
+  /* Tabular numerals for calculations and tables (PRD v0.2 section 7.2). */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .bp-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-card);
+    box-shadow: 0 1px 2px rgb(15 23 42 / 0.04);
+  }
+
+  /* Minimum 44x44 product target (PRD v0.2 section 7.2). */
+  .bp-btn {
+    border-radius: var(--radius-control);
+    font-weight: 700;
+    font-size: 14px;
+    min-height: 44px;
+    padding: 0.625rem 1.125rem;
+    transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+    cursor: pointer;
+  }
+
+  .bp-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .bp-btn-primary {
+    background: var(--color-brand);
+    color: #fff;
+    border: 1px solid var(--color-brand);
+  }
+
+  .bp-btn-primary:hover:not(:disabled) {
+    background: var(--color-brand-hover);
+    border-color: var(--color-brand-hover);
+  }
+
+  .bp-btn-ghost {
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border: 1px solid var(--color-border-control);
+  }
+
+  .bp-btn-ghost:hover:not(:disabled) {
+    border-color: var(--color-brand);
+    color: var(--color-brand-hover);
+  }
+
+  /* Blue-only banner. Deliberately not a gradient into purple: the product
+     foundation is blue and white (PRD v0.2 section 7.1). */
+  .bp-banner {
+    background: linear-gradient(
+      135deg,
+      var(--color-brand) 0%,
+      var(--color-brand-alt) 100%
+    );
+  }
+
+  .bp-step {
+    border-left: 3px solid transparent;
+    transition: background-color 0.12s, border-color 0.12s;
+  }
+
+  .bp-step-selectable:hover {
+    background: var(--color-page);
+    border-left-color: var(--color-brand);
+  }
+
+  .bp-step-selected {
+    background: var(--color-brand-soft);
+    border-left-color: var(--color-brand);
+  }
+
+  .bp-scrollx {
+    overflow-x: auto;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * NxtWave LMS shell tokens.
+ *
+ * These reproduce the chrome of the NIAT / NxtWave learning platform so
+ * Breakpoint sits inside it as one more course rather than as a separate
+ * product. Values were matched by eye from platform screenshots supplied on
+ * 8 September 2026; they are application tokens, not an official brand
+ * hierarchy, and the real brand assets can replace them without touching any
+ * layout or logic.
+ *
+ * Kept separate from the --color-brand set above: that palette governs the
+ * investigation surfaces, where colour must never reveal an answer. The tokens
+ * below govern navigation chrome only.
+ * ------------------------------------------------------------------------- */
+@theme {
+  /* Course-catalog rail (deepest navy, indigo active state) */
+  --color-lms-rail: #0f1a38;
+  --color-lms-rail-hover: #1a2750;
+  --color-lms-rail-active: #4c35c4;
+  --color-lms-rail-text: #c3cbdd;
+
+  /* In-course contents rail */
+  --color-lms-contents: #1b2b4e;
+  --color-lms-contents-hover: #243a63;
+  --color-lms-contents-open: #2166d1;
+  --color-lms-contents-text: #b7c2d6;
+  --color-lms-contents-line: #33456d;
+
+  /* Chrome and page */
+  --color-lms-header: #ffffff;
+  --color-lms-hairline: #e6e9ef;
+  --color-lms-canvas: #f4f6fa;
+  --color-lms-link: #2d6be4;
+  --color-lms-done: #22a06b;
+  --color-lms-ink: #12203c;
+}
+
+@layer components {
+  /* Thin scrollbar inside the contents rail, so a 19-section list does not
+     get a chunky OS scrollbar sitting on the navy. */
+  .lms-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-lms-contents-line) transparent;
+  }
+  .lms-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .lms-scroll::-webkit-scrollbar-thumb {
+    background: var(--color-lms-contents-line);
+    border-radius: 3px;
+  }
+  .lms-scroll::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  /* The pinned question column on an investigation. */
+  .bp-pane-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+  .bp-pane-scroll::-webkit-scrollbar {
+    width: 6px;
+  }
+  .bp-pane-scroll::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 3px;
+  }
+}

@@ -1,0 +1,475 @@
+[
+  {
+    "id": "eng-resume-linkedin-professional-writing-001",
+    "subject": "english",
+    "topic": "Résumé, LinkedIn & Professional Writing",
+    "subtopic": "Duties instead of achievements",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this a strong résumé bullet?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "passage": "Résumé bullet: \"Responsible for handling customer queries.\"\nAI: \"This is a strong bullet: it clearly states the candidate's responsibility.\""
+    },
+    "ai_claim": "Yes. It clearly states what the candidate was responsible for, which is what recruiters need to know.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The bullet names the responsibility."
+      },
+      {
+        "index": 2,
+        "text": "Recruiters want to know responsibilities."
+      },
+      {
+        "index": 3,
+        "text": "So the bullet gives them that."
+      },
+      {
+        "index": 4,
+        "text": "It is a strong bullet."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 2,
+      "misconception": "Describing duties instead of results",
+      "explanation": "'Responsible for' describes the job, not how well it was done; every applicant for the role could write it. Strong bullets start with an action verb and show scope and results: 'Resolved 40+ customer queries a day with a 4.7/5 satisfaction score; cut average response time from 6 to 2 hours.'",
+      "why_convincing": "Job descriptions are written as responsibilities, so résumés copy the style."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: it lists a duty, not an achievement. Use an action verb with measurable results.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "Resolved 40+ customer queries daily (4.7/5 satisfaction) and cut average response time from 6 to 2 hours.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "40",
+          "4.7"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Effective résumé bullets show action, scope and measurable impact.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Every other applicant's résumé says the same thing."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what makes this candidate different."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes responsibilities are what recruiters need."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Recruiters look for evidence of impact."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add a number and a result."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: duties do not show performance. Show results."
+      }
+    ],
+    "repair": "Start with an action verb and quantify the result.",
+    "debrief": "A résumé is evidence of impact. Every bullet should answer 'so what?'",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-resume-linkedin-professional-writing-002",
+    "subject": "english",
+    "topic": "Résumé, LinkedIn & Professional Writing",
+    "subtopic": "A generic objective statement",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this objective statement compelling?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "passage": "Top of a fresher's résumé: \"Objective: To obtain a challenging position in a reputed organisation where I can utilise my skills for the growth of the organisation.\"\nAI: \"This objective is professional and compelling.\""
+    },
+    "ai_claim": "Yes. It is professional and shows the candidate wants to contribute to the organisation's growth.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The objective is formally worded."
+      },
+      {
+        "index": 2,
+        "text": "It mentions contributing to growth."
+      },
+      {
+        "index": 3,
+        "text": "Employers want contributors."
+      },
+      {
+        "index": 4,
+        "text": "So it is compelling."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Assuming formal wording makes a statement compelling",
+      "explanation": "The statement is generic - it could appear on any résumé for any role - and says nothing about the candidate's skills, target role or value. It uses prime space for filler. Replace it with a 2-line summary tailored to the role: 'Computer science graduate with internship experience building REST APIs in Python; seeking a backend developer role.'",
+      "why_convincing": "It sounds professional, and many résumés use it."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: it is generic filler. Use a short, specific summary tied to the target role.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "CS graduate (2026) with a 6-month internship building REST APIs in Python and PostgreSQL; seeking a backend developer role.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Summary statements should be specific to the candidate and target role.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The same sentence appears on thousands of résumés."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the statement could describe anyone."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 equates formality with impact."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Specificity makes a summary compelling."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Replace it with skills and a target role."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the statement is generic."
+      }
+    ],
+    "repair": "Write a two-line summary with skills, experience and target role.",
+    "debrief": "Space at the top of a résumé is the most-read part. Use it for specifics.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-resume-linkedin-professional-writing-003",
+    "subject": "english",
+    "topic": "Résumé, LinkedIn & Professional Writing",
+    "subtopic": "A four-page fresher résumé",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is including everything the best approach for a fresher's résumé?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "A fresher's résumé is four pages: school marks from Class 10, every certificate since school, a list of 30 hobbies, a declaration and personal details (father's name, religion).\nAI: \"More information is better: recruiters can pick what they need.\""
+    },
+    "ai_claim": "Yes. More detail gives recruiters a fuller picture, and they can choose what is relevant.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "More detail gives a fuller picture."
+      },
+      {
+        "index": 2,
+        "text": "Recruiters can skim for what they need."
+      },
+      {
+        "index": 3,
+        "text": "Nothing relevant is left out."
+      },
+      {
+        "index": 4,
+        "text": "So including everything is best."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Ignoring résumé length and relevance conventions",
+      "explanation": "Recruiters spend seconds on an initial scan; relevant strengths get buried under old marks, irrelevant certificates and hobbies. For freshers, the convention is one page focused on the target role. Personal details such as religion and father's name are unnecessary (and can invite bias). Keep what supports the application.",
+      "why_convincing": "Completeness seems safe, and older formats included such details."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: key strengths are buried. Keep one focused page and remove irrelevant personal details.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Fresher résumés are typically one page, prioritising relevant skills, projects and internships.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "one"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "One page: summary, skills, 2-3 projects with results, internship, education (degree marks), key certifications.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2-3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The recruiter never reaches the internship listed on page 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how long a recruiter spends on a first scan."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes recruiters will dig through four pages."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Relevance and brevity make strengths visible."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find the most important item's position."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: detail buries what matters."
+      }
+    ],
+    "repair": "Cut to one page of relevant content; drop personal details and old marks.",
+    "debrief": "A résumé is a filter, not an archive: every line should help the reader decide yes.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-resume-linkedin-professional-writing-004",
+    "subject": "english",
+    "topic": "Résumé, LinkedIn & Professional Writing",
+    "subtopic": "Typos in 'attention to detail'",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do these typos not matter because recruiters focus on skills?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "passage": "Skills section: \"Strong atention to detial; excellent comunication skills.\"\nAI: \"Recruiters focus on skills, not spelling, so these small typos don't matter.\""
+    },
+    "ai_claim": "Yes. The skills listed are what recruiters look for, and small spelling mistakes are minor.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Recruiters scan for skills."
+      },
+      {
+        "index": 2,
+        "text": "The skills are listed."
+      },
+      {
+        "index": 3,
+        "text": "Spelling is secondary."
+      },
+      {
+        "index": 4,
+        "text": "So the typos do not matter."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Underestimating what typos communicate",
+      "explanation": "The typos contradict the very skills claimed - 'attention to detail' and 'communication' - which many recruiters treat as an immediate red flag. Automated screening may also miss misspelled keywords. Proofread (and have someone else check) every document.",
+      "why_convincing": "Each typo is small in isolation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the typos undermine the claimed skills and can fail keyword screening. Proofread.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "A misspelled 'attention to detial' contradicts the claim of attention to detail.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Strong attention to detail; excellent communication skills.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An applicant-tracking system does not match 'detial' to 'detail'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the misspelled words against what they claim."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats spelling as irrelevant."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Written errors are evidence about the writer."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the claimed skills."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the typos contradict the claims."
+      }
+    ],
+    "repair": "Proofread carefully and use a spell-checker; ask someone to review.",
+    "debrief": "In professional writing, the document is itself evidence of the skills it lists.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-resume-linkedin-professional-writing-005",
+    "subject": "english",
+    "topic": "Résumé, LinkedIn & Professional Writing",
+    "subtopic": "A STAR-style bullet",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this is a strong résumé bullet?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "passage": "Résumé bullet: \"Automated weekly sales reporting with Python and Google Sheets API, cutting preparation time from 6 hours to 20 minutes and eliminating manual copy errors for a 12-person sales team.\""
+    },
+    "ai_claim": "Yes. It starts with an action verb, names the tools, quantifies the result (6 hours to 20 minutes) and states the scope (12-person team), so it shows skill and impact.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "It opens with an action verb: 'Automated'."
+      },
+      {
+        "index": 2,
+        "text": "It names specific tools."
+      },
+      {
+        "index": 3,
+        "text": "It quantifies the result."
+      },
+      {
+        "index": 4,
+        "text": "It shows who benefited and at what scale."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Action, method, measurable result and scope make a strong, credible bullet.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Strong bullets combine action, tools/method, quantified result and scope.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6",
+          "20"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check for action, method, result and scope."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 quantifies the impact."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Measurable outcomes make achievements credible."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare with 'Responsible for reports'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It is a strong bullet. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Compare with 'Responsible for handling customer queries': specifics turn a duty into evidence.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

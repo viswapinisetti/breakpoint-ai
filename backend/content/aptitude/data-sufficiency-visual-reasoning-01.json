@@ -1,0 +1,537 @@
+[
+  {
+    "id": "apt-data-sufficiency-visual-reasoning-001",
+    "subject": "aptitude",
+    "topic": "Data Sufficiency & Visual Reasoning",
+    "subtopic": "Sign from a square and a cube",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "x is a real number. Is x > 0? Statement I: x^2 = 16. Statement II: x^3 = -64. Which option (A-E) is correct?",
+    "artifact_type": "logical_argument",
+    "artifact": {
+      "statements": [
+        "I: x^2 = 16",
+        "II: x^3 = -64"
+      ],
+      "options": [
+        "A: Statement I alone is sufficient; statement II alone is not.",
+        "B: Statement II alone is sufficient; statement I alone is not.",
+        "C: Both statements together are sufficient; neither alone is.",
+        "D: Each statement alone is sufficient.",
+        "E: The statements together are not sufficient."
+      ]
+    },
+    "ai_claim": "Each statement alone is sufficient, so the answer is D.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Statement I: x^2 = 16, so x = 4, which is positive. Statement I alone is sufficient."
+      },
+      {
+        "index": 2,
+        "text": "Statement II: x^3 = -64, so x = -4, which is not positive. Statement II alone is sufficient."
+      },
+      {
+        "index": 3,
+        "text": "Each statement alone answers the question."
+      },
+      {
+        "index": 4,
+        "text": "The answer is D."
+      }
+    ],
+    "ai_final_answer": "D",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 1,
+      "misconception": "Taking only the positive square root",
+      "explanation": "x^2 = 16 has two solutions, x = 4 and x = -4, so statement I cannot decide whether x is positive. Statement II has the single real solution x = -4, so it alone answers 'no'. Only II is sufficient: the answer is B.",
+      "why_convincing": "Reading the square root as the positive number is a lifelong reflex. The contradiction it creates - statement I says 'positive' while statement II says 'negative' about the same x - goes unnoticed because each statement is judged separately."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Statement I gives x = 4 or x = -4, so it cannot answer the question. Statement II gives x = -4 (a cube has one real root), which answers 'no'. II alone is sufficient and I alone is not: B.",
+    "canonical_answer": "B",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "x = -4 satisfies x^2 = 16 but is not positive.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "-4",
+          "16"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Step 1 concludes x is positive and step 2 that it is negative, yet both statements describe the same x.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "4",
+          "-4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "x = -4 satisfies x^2 = 16 and is negative, so statement I does not force x > 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether each equation has exactly one solution."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 turns an equation into a single value. Look at that step closely."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An equation x^2 = k with k > 0 has two real solutions; x^3 = k has exactly one."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List every value of x allowed by statement I and ask whether they all give the same answer to 'Is x > 0?'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 drops x = -4. Statement I allows both 4 and -4, so it is not sufficient, while statement II fixes x = -4. The answer is B, not D."
+      }
+    ],
+    "repair": "Replace step 1: x^2 = 16 gives x = 4 or x = -4, so statement I is not sufficient. With step 2, the answer is B.",
+    "debrief": "Data sufficiency questions test whether a statement pins down a single answer, and equations with several solutions are the classic trap. The warning sign was on the page: the two statements, which describe the same x, led to opposite conclusions, which cannot happen if both were read correctly. When separate lines of reasoning about the same object disagree, one of them contains an error.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "cands = [Fraction(n, 2) for n in range(-40, 41)]\n\ndef letter(a, b, both):\n    return 'D' if a and b else 'A' if a else 'B' if b else 'C' if both else 'E'\ndef det(conds):\n    return len({x > 0 for x in cands if all(c(x) for c in conds)}) == 1\nI = lambda x: x * x == 16\nII = lambda x: x ** 3 == -64\nanswer = letter(det([I]), det([II]), det([I, II]))",
+      "flawed_solver": "cands = [Fraction(n, 2) for n in range(-40, 41)]\n\ndef letter(a, b, both):\n    return 'D' if a and b else 'A' if a else 'B' if b else 'C' if both else 'E'\ndef det(conds):\n    return len({x > 0 for x in cands if all(c(x) for c in conds)}) == 1\nI = lambda x: x == 4   # the flawed reading: only the positive root\nII = lambda x: x ** 3 == -64\nanswer = letter(det([I]), det([II]), det([I, II]))"
+    }
+  },
+  {
+    "id": "apt-data-sufficiency-visual-reasoning-002",
+    "subject": "aptitude",
+    "topic": "Data Sufficiency & Visual Reasoning",
+    "subtopic": "Two-digit number from digit clues",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the two-digit number N? Statement I: The sum of its digits is 9. Statement II: Its tens digit exceeds its units digit by 3. Which option (A-E) is correct?",
+    "artifact_type": "logical_argument",
+    "artifact": {
+      "statements": [
+        "I: The sum of the digits of N is 9.",
+        "II: The tens digit of N exceeds its units digit by 3."
+      ],
+      "options": [
+        "A: Statement I alone is sufficient; statement II alone is not.",
+        "B: Statement II alone is sufficient; statement I alone is not.",
+        "C: Both statements together are sufficient; neither alone is.",
+        "D: Each statement alone is sufficient.",
+        "E: The statements together are not sufficient."
+      ]
+    },
+    "ai_claim": "Both statements together are needed, so the answer is C.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Statement I alone allows 18, 27, 36, 45, 54, 63, 72, 81 and 90, so it is not sufficient."
+      },
+      {
+        "index": 2,
+        "text": "Statement II alone allows 30, 41, 52, 63, 74, 85 and 96, so it is not sufficient."
+      },
+      {
+        "index": 3,
+        "text": "Together: tens + units = 9 and tens - units = 3, which give tens = 6 and units = 3."
+      },
+      {
+        "index": 4,
+        "text": "N = 63 is the only number satisfying both, so the statements are sufficient together but not alone: C."
+      }
+    ],
+    "ai_final_answer": "C",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "I alone and II alone each allow several numbers. Together, t + u = 9 and t - u = 3 give t = 6, u = 3, so N = 63 uniquely. The answer is C.",
+    "canonical_answer": "C",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "t + u = 9 and t - u = 3 give t = 6, u = 3, so N = 63.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "63"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each statement's list of candidates for completeness."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 list candidate numbers. Verify that nothing is missing and nothing is extra."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A statement is sufficient only if it leaves exactly one possible value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Solve the two conditions together and check the result is unique."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Each statement alone leaves several numbers, and together they force 63. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The solution does what a sufficiency argument needs: it shows each statement alone leaves more than one answer, then shows the combination leaves exactly one. Listing the candidates explicitly is what makes the argument checkable. When reviewing a 'not sufficient' claim, look for two concrete candidates - if they are there, the claim is proven.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "cands = range(10, 100)\n\ndef letter(a, b, both):\n    return 'D' if a and b else 'A' if a else 'B' if b else 'C' if both else 'E'\ndef det(conds):\n    return len({n for n in cands if all(c(n) for c in conds)}) == 1\nI = lambda n: n // 10 + n % 10 == 9\nII = lambda n: n // 10 - n % 10 == 3\nanswer = letter(det([I]), det([II]), det([I, II]))"
+    }
+  },
+  {
+    "id": "apt-data-sufficiency-visual-reasoning-003",
+    "subject": "aptitude",
+    "topic": "Data Sufficiency & Visual Reasoning",
+    "subtopic": "Average from partial information",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the average of five numbers? Statement I: The sum of the five numbers is 60. Statement II: The largest of the numbers is 20 and the smallest is 8. Which option (A-E) is correct?",
+    "artifact_type": "logical_argument",
+    "artifact": {
+      "statements": [
+        "I: The sum of the five numbers is 60.",
+        "II: The largest number is 20 and the smallest is 8."
+      ],
+      "options": [
+        "A: Statement I alone is sufficient; statement II alone is not.",
+        "B: Statement II alone is sufficient; statement I alone is not.",
+        "C: Both statements together are sufficient; neither alone is.",
+        "D: Each statement alone is sufficient.",
+        "E: The statements together are not sufficient."
+      ]
+    },
+    "ai_claim": "Each statement alone gives the average, so the answer is D.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Statement I: average = sum / count = 60 / 5 = 12. Sufficient."
+      },
+      {
+        "index": 2,
+        "text": "Statement II: the average lies midway between the smallest and largest values, so it is (8 + 20) / 2 = 14. Sufficient."
+      },
+      {
+        "index": 3,
+        "text": "Each statement alone determines the average."
+      },
+      {
+        "index": 4,
+        "text": "The answer is D."
+      }
+    ],
+    "ai_final_answer": "D",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming the mean equals the midpoint of the extremes",
+      "explanation": "The midpoint of the smallest and largest values (the midrange) equals the mean only for evenly spread data. Five numbers between 8 and 20 can have many averages: 8, 8, 8, 8, 20 averages 10.4, while 8, 20, 20, 20, 20 averages 17.6. Statement II alone is not sufficient; statement I alone is. The answer is A.",
+      "why_convincing": "For two numbers, or for evenly spaced numbers, the midpoint really is the average, so the shortcut feels like a rule. The solution also reaches a confident number for each statement, and nobody notices that 12 and 14 cannot both be the average of the same five numbers."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Statement I fixes the average at 60/5 = 12. Statement II allows many averages (8, 8, 8, 8, 20 gives 10.4; 8, 20, 20, 20, 20 gives 17.6), so it is not sufficient. I alone is sufficient: A.",
+    "canonical_answer": "A",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "8, 8, 8, 8, 20 and 8, 20, 20, 20, 20 both satisfy II but average 10.4 and 17.6.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "10.4",
+          "17.6"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Step 1 gives an average of 12 and step 2 an average of 14 for the same five numbers.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "12",
+          "14"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "8, 8, 8, 8, 20 satisfies statement II and averages 10.4, not 14."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that each statement's conclusion is forced, not assumed."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 computes an average from only two of the five numbers."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The mean depends on every value; the midpoint of the extremes equals the mean only when the data are evenly spread."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Build two different sets of five numbers that both satisfy statement II, and compare their averages."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes the mean is the midpoint of the extremes. 8, 8, 8, 8, 20 and 8, 20, 20, 20, 20 both satisfy II with different averages, so II is not sufficient. The answer is A."
+      }
+    ],
+    "repair": "Replace step 2: statement II allows different averages (10.4 or 17.6, for example), so it is not sufficient. The answer is A.",
+    "debrief": "Summaries such as 'smallest' and 'largest' describe the edges of a data set, not its centre, and the average depends on every value. The reasoning also produced two different averages (12 and 14) for one set of numbers, which is impossible and should stop any reviewer. A sufficiency claim is disproved by two examples that satisfy the statement but give different answers, so look for them first.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "from itertools import combinations_with_replacement as cwr\ncands = list(cwr(range(0, 25), 5))\n\ndef letter(a, b, both):\n    return 'D' if a and b else 'A' if a else 'B' if b else 'C' if both else 'E'\ndef det(conds):\n    return len({Fraction(sum(s), 5) for s in cands if all(c(s) for c in conds)}) == 1\nI = lambda s: sum(s) == 60\nII = lambda s: min(s) == 8 and max(s) == 20\nanswer = letter(det([I]), det([II]), det([I, II]))",
+      "flawed_solver": "\ndef letter(a, b, both):\n    return 'D' if a and b else 'A' if a else 'B' if b else 'C' if both else 'E'\na = len({Fraction(60, 5)}) == 1\nb = len({Fraction(8 + 20, 2)}) == 1   # the flawed belief: mean = midpoint of extremes\nanswer = letter(a, b, True)"
+    }
+  },
+  {
+    "id": "apt-data-sufficiency-visual-reasoning-004",
+    "subject": "aptitude",
+    "topic": "Data Sufficiency & Visual Reasoning",
+    "subtopic": "Painted cube faces",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A 4 x 4 x 4 cube is painted on all six faces and then cut into 64 unit cubes. How many unit cubes have exactly two painted faces?",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "48 unit cubes have exactly two painted faces.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Unit cubes with exactly two painted faces lie along the edges of the large cube."
+      },
+      {
+        "index": 2,
+        "text": "A cube has 12 edges."
+      },
+      {
+        "index": 3,
+        "text": "Each edge of the 4 x 4 x 4 cube has 4 unit cubes, so there are 12 x 4 = 48 such cubes."
+      },
+      {
+        "index": 4,
+        "text": "48 unit cubes have exactly two painted faces."
+      }
+    ],
+    "ai_final_answer": "48",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 3,
+      "misconception": "Counting corner cubes as edge cubes",
+      "explanation": "The two end cubes of every edge are corners, and corners have three painted faces. Each edge therefore contributes only 4 - 2 = 2 cubes with exactly two painted faces, so the count is 12 x 2 = 24.",
+      "why_convincing": "Step 1's observation is correct, so step 3 feels like simple multiplication. Corners belong to three edges at once, which is easy to forget when you think of edges one at a time."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Cubes with exactly two painted faces are on the edges but not at the corners. Each edge has 4 - 2 = 2 such cubes, and there are 12 edges: 12 x 2 = 24. (Corners: 8 cubes with three faces.)",
+    "canonical_answer": "24",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Each edge has 4 - 2 = 2 non-corner cubes: 12 x 2 = 24.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "24"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "The 8 corner cubes have three painted faces, yet step 3 counts them among the two-face cubes.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "8"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A corner cube touches three faces, so it has three painted faces, not two - yet step 3 counts all 8 corners (twice each, in fact)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether every cube counted in step 3 really has exactly two painted faces."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Look at the ends of each edge in step 3."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Corner cubes have three painted faces, and each corner is shared by three edges."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recount the cubes on one edge that are not corners, then multiply by 12."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 counts the corner cubes, which have three painted faces. Each edge has 4 - 2 = 2 two-face cubes, so the answer is 24, not 48."
+      }
+    ],
+    "repair": "Replace step 3: each edge has 4 - 2 = 2 cubes that are not corners, so there are 12 x 2 = 24 such cubes.",
+    "debrief": "Counting errors often come from boundaries: the ends of an edge are also corners, where three faces meet. A reliable check is to account for every unit cube: 8 corners (3 faces), 24 edge cubes (2 faces), 24 face-centre cubes (1 face) and 8 inner cubes (0 faces) add up to 64. When a total must match, adding up all the categories exposes any double counting.",
+    "transfer_check": {
+      "question": "A 5 x 5 x 5 painted cube is cut into 125 unit cubes. How many have exactly two painted faces?",
+      "answer": "36",
+      "explanation": "Each edge has 5 - 2 = 3 non-corner cubes: 12 x 3 = 36."
+    },
+    "validation_payload": {
+      "solver": "n = 4\ncount = 0\nfor x in range(n):\n    for y in range(n):\n        for z in range(n):\n            faces = sum(c in (0, n - 1) for c in (x, y, z))\n            count += faces == 2\nanswer = count",
+      "flawed_solver": "edges = 12\ncubes_per_edge = 4\nanswer = edges * cubes_per_edge"
+    }
+  },
+  {
+    "id": "apt-data-sufficiency-visual-reasoning-005",
+    "subject": "aptitude",
+    "topic": "Data Sufficiency & Visual Reasoning",
+    "subtopic": "Divisibility from two conditions",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "n is an integer. Is n divisible by 6? Statement I: n is divisible by 3. Statement II: n^2 is divisible by 4. Which option (A-E) is correct?",
+    "artifact_type": "logical_argument",
+    "artifact": {
+      "statements": [
+        "I: n is divisible by 3.",
+        "II: n^2 is divisible by 4."
+      ],
+      "options": [
+        "A: Statement I alone is sufficient; statement II alone is not.",
+        "B: Statement II alone is sufficient; statement I alone is not.",
+        "C: Both statements together are sufficient; neither alone is.",
+        "D: Each statement alone is sufficient.",
+        "E: The statements together are not sufficient."
+      ]
+    },
+    "ai_claim": "The statements together are not sufficient, so the answer is E.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Statement I: n is a multiple of 3, but it may be odd (for example 9), so statement I alone is not sufficient."
+      },
+      {
+        "index": 2,
+        "text": "Statement II: n^2 is divisible by 4. That makes n^2 even, but it does not tell us whether n itself is even."
+      },
+      {
+        "index": 3,
+        "text": "Together, n is a multiple of 3 that might still be odd, so divisibility by 6 is not guaranteed."
+      },
+      {
+        "index": 4,
+        "text": "The statements together are not sufficient: E."
+      }
+    ],
+    "ai_final_answer": "E",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Believing an integer can be odd while its square is even",
+      "explanation": "For an integer n, if n is odd then n^2 is odd. So n^2 divisible by 4 (hence even) forces n to be even. Statement II alone therefore gives 'n is even' (not sufficient on its own: 2 is even but not divisible by 6), and combined with statement I, n is divisible by both 2 and 3, hence by 6. The answer is C.",
+      "why_convincing": "Step 2 sounds cautious - it refuses to assume more than is stated - and caution feels like rigour. The fact it overlooks (odd squared is odd) is basic, but it is hidden behind the more complicated condition 'divisible by 4'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "If n were odd, n^2 would be odd, so statement II forces n to be even. Alone, II is not sufficient (n = 2 gives 'no', n = 6 gives 'yes'), and neither is I (n = 9 gives 'no', n = 6 gives 'yes'). Together n is a multiple of 2 and of 3, so it is divisible by 6: C.",
+    "canonical_answer": "C",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "An odd integer has an odd square, so n^2 divisible by 4 forces n to be even.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "No odd n has n^2 divisible by 4: 1, 9, 25, 49 and 81 are all odd.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Try odd values: 3^2 = 9, 5^2 = 25, 9^2 = 81 - none is even, let alone divisible by 4."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what each statement actually implies about n, not only about n^2."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 claims a fact about the parity of n. Test it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "For integers, n and n^2 always have the same parity."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try to find an odd integer whose square is divisible by 4."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: an odd integer always has an odd square, so statement II forces n to be even. With statement I, n is divisible by 2 and 3, so the answer is C, not E."
+      }
+    ],
+    "repair": "Replace step 2: n^2 divisible by 4 forces n to be even, because odd numbers have odd squares. Together with statement I, n is divisible by 6: C.",
+    "debrief": "Refusing to assume is only rigorous when the fact is genuinely unknown. Here step 2 declined to use a certain implication - an even square means an even integer - and so under-reported what the statement proves. Test a 'this tells us nothing' claim the same way as any other: look for a case that satisfies the statement but breaks the conclusion. If none exists, the statement says more than claimed.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "cands = range(-60, 61)\n\ndef letter(a, b, both):\n    return 'D' if a and b else 'A' if a else 'B' if b else 'C' if both else 'E'\ndef det(conds):\n    return len({n % 6 == 0 for n in cands if all(c(n) for c in conds)}) == 1\nI = lambda n: n % 3 == 0\nII = lambda n: (n * n) % 4 == 0\nanswer = letter(det([I]), det([II]), det([I, II]))",
+      "flawed_solver": "cands = range(-60, 61)\n\ndef letter(a, b, both):\n    return 'D' if a and b else 'A' if a else 'B' if b else 'C' if both else 'E'\ndef det(conds):\n    return len({n % 6 == 0 for n in cands if all(c(n) for c in conds)}) == 1\nI = lambda n: n % 3 == 0\nII = lambda n: True   # the flawed reading: II says nothing about n\nanswer = letter(det([I]), det([II]), det([I, II]))"
+    }
+  }
+]

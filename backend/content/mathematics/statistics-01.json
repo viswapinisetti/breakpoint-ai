@@ -1,0 +1,497 @@
+[
+  {
+    "id": "mat-statistics-001",
+    "subject": "mathematics",
+    "topic": "Statistics",
+    "subtopic": "Deviations cancel out",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the population variance of the data?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Data: 2, 4, 4, 4, 5, 5, 7, 9   (mean = 5)\nAI working: variance = average deviation from the mean\n= ((2-5) + (4-5) + (4-5) + (4-5) + (5-5) + (5-5) + (7-5) + (9-5)) / 8 = 0 / 8 = 0"
+    },
+    "ai_claim": "0. The average deviation from the mean is 0, so the variance is 0.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The mean is 5."
+      },
+      {
+        "index": 2,
+        "text": "Variance is the average deviation from the mean."
+      },
+      {
+        "index": 3,
+        "text": "The deviations sum to 0."
+      },
+      {
+        "index": 4,
+        "text": "So the variance is 0."
+      }
+    ],
+    "ai_final_answer": "0",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Averaging deviations without squaring them",
+      "explanation": "Deviations from the mean always sum to zero, so their average says nothing about spread. Variance averages the squared deviations: (9 + 1 + 1 + 1 + 0 + 0 + 4 + 16) / 8 = 32 / 8 = 4.",
+      "why_convincing": "Averaging deviations sounds like a natural measure of spread."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Population variance = (9 + 1 + 1 + 1 + 0 + 0 + 4 + 16) / 8 = 4 (standard deviation 2).",
+    "canonical_answer": "4",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Squared deviations sum to 32; 32 / 8 = 4.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "The data are not all equal, so the variance cannot be 0.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Any data set would get a 'variance' of 0 by this method."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether deviations from the mean can ever average to anything other than 0."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 defines variance incorrectly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Variance is the mean of the squared deviations."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Square each deviation before averaging."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: variance averages squared deviations. The variance is 4."
+      }
+    ],
+    "repair": "",
+    "debrief": "A result of zero spread for data that visibly vary is a contradiction. Squaring (or absolute values) is what stops deviations cancelling.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "d = [2, 4, 4, 4, 5, 5, 7, 9]; m = sum(d) / len(d); answer = sum((x - m) ** 2 for x in d) / len(d)",
+      "flawed_solver": "d = [2, 4, 4, 4, 5, 5, 7, 9]; m = sum(d) / len(d); answer = sum(x - m for x in d) / len(d)"
+    }
+  },
+  {
+    "id": "mat-statistics-002",
+    "subject": "mathematics",
+    "topic": "Statistics",
+    "subtopic": "Sample variance divides by n - 1",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the unbiased sample variance?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "A sample of 3 bolts has lengths 2, 4 and 6 mm.\nFind the unbiased sample variance.\nAI working: mean = 4; squared deviations 4, 0, 4; variance = 8 / 3"
+    },
+    "ai_claim": "2.666667. The squared deviations sum to 8, and dividing by the 3 values gives 8/3.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The mean is 4."
+      },
+      {
+        "index": 2,
+        "text": "The squared deviations are 4, 0 and 4, summing to 8."
+      },
+      {
+        "index": 3,
+        "text": "Divide by the number of values, 3."
+      },
+      {
+        "index": 4,
+        "text": "The variance is 8/3 = 2.666667."
+      }
+    ],
+    "ai_final_answer": "2.666667",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Using the population formula for a sample",
+      "explanation": "The unbiased sample variance divides by n - 1 (Bessel's correction), because deviations are measured from the sample mean, which is closer to the data than the true mean. 8 / (3 - 1) = 4.",
+      "why_convincing": "Dividing by n is the natural 'average', and it is correct for a whole population."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "s^2 = 8 / (3 - 1) = 4.",
+    "canonical_answer": "4",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "8 / 2 = 4",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Unbiased sample variance: sum of squared deviations / (n - 1).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "With n = 1, dividing by n would claim zero uncertainty from a single measurement."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which divisor the unbiased estimator uses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 divides by n."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Bessel's correction: divide by n - 1 for a sample."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide 8 by 2."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the unbiased sample variance divides by n - 1. The answer is 4."
+      }
+    ],
+    "repair": "",
+    "debrief": "Know which variance a tool computes: Python's statistics.pvariance and NumPy's default divide by n; statistics.variance and pandas' default divide by n - 1.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "d = [2, 4, 6]; m = sum(d) / 3; answer = sum((x - m) ** 2 for x in d) / (3 - 1)",
+      "flawed_solver": "d = [2, 4, 6]; m = sum(d) / 3; answer = sum((x - m) ** 2 for x in d) / 3"
+    }
+  },
+  {
+    "id": "mat-statistics-003",
+    "subject": "mathematics",
+    "topic": "Statistics",
+    "subtopic": "The median of combined groups",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the median of all eight values combined?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Group A: 1, 2, 3   (median 2)\nGroup B: 10, 11, 12, 13, 14   (median 12)\nAI working: combined median = average of the medians = (2 + 12) / 2 = 7"
+    },
+    "ai_claim": "7. The combined median is the average of the two group medians: (2 + 12) / 2 = 7.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Group A's median is 2."
+      },
+      {
+        "index": 2,
+        "text": "Group B's median is 12."
+      },
+      {
+        "index": 3,
+        "text": "The combined median is the average of the group medians."
+      },
+      {
+        "index": 4,
+        "text": "(2 + 12) / 2 = 7."
+      }
+    ],
+    "ai_final_answer": "7",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming medians combine like averages",
+      "explanation": "Medians do not combine: the combined median depends on all the values and on the group sizes. Sorted, the eight values are 1, 2, 3, 10, 11, 12, 13, 14; the median is the average of the 4th and 5th: (10 + 11) / 2 = 10.5.",
+      "why_convincing": "Averaging summary statistics is a familiar shortcut."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Sort all eight values; the median is (10 + 11) / 2 = 10.5.",
+    "canonical_answer": "10.5",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Sorted: 1, 2, 3, 10, 11, 12, 13, 14; median = (10 + 11) / 2 = 10.5",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10.5"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "7 is not even one of the values near the middle; no value lies between 3 and 10.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "7"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "No data value is anywhere near 7."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Combine the raw values instead of the medians."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 averages medians."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The median of combined data must be computed from all values."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Sort the eight values."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: medians do not average. The combined median is 10.5."
+      }
+    ],
+    "repair": "",
+    "debrief": "Only some statistics combine from group summaries (counts, sums, and means with group sizes). Medians and percentiles need the underlying data.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "v = sorted([1, 2, 3, 10, 11, 12, 13, 14]); answer = (v[3] + v[4]) / 2",
+      "flawed_solver": "answer = (2 + 12) / 2"
+    }
+  },
+  {
+    "id": "mat-statistics-004",
+    "subject": "mathematics",
+    "topic": "Statistics",
+    "subtopic": "z-scores use the standard deviation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the z-score of a score of 85?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Exam scores: mean 70, variance 25.\nAI working: z for a score of 85 = (85 - 70) / 25 = 0.6"
+    },
+    "ai_claim": "0.6. The z-score is the distance from the mean divided by the spread: (85 - 70) / 25 = 0.6.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The distance from the mean is 85 - 70 = 15."
+      },
+      {
+        "index": 2,
+        "text": "The spread is 25."
+      },
+      {
+        "index": 3,
+        "text": "z = 15 / 25."
+      },
+      {
+        "index": 4,
+        "text": "= 0.6."
+      }
+    ],
+    "ai_final_answer": "0.6",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Dividing by the variance instead of the standard deviation",
+      "explanation": "25 is the variance. The z-score divides by the standard deviation, sqrt(25) = 5, so z = 15 / 5 = 3. A score of 85 is three standard deviations above the mean, which is exceptional, not ordinary.",
+      "why_convincing": "The variance is the number given, and 'spread' is ambiguous."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "SD = sqrt(25) = 5, so z = (85 - 70) / 5 = 3.",
+    "canonical_answer": "3",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "sqrt(25) = 5; 15 / 5 = 3",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "z = (x - mean) / standard deviation.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Dividing by the variance changes the result when the units are rescaled; z-scores must not."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what quantity was given: variance or standard deviation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 uses the variance as the spread."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "z-scores divide by the standard deviation, the square root of the variance."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Take the square root of 25."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the SD is 5, so z = 3."
+      }
+    ],
+    "repair": "",
+    "debrief": "Variance and standard deviation differ by a square root and by units (variance is in squared units). Formulas specify which one they need.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (85 - 70) / math.sqrt(25)",
+      "flawed_solver": "answer = (85 - 70) / 25"
+    }
+  },
+  {
+    "id": "mat-statistics-005",
+    "subject": "mathematics",
+    "topic": "Statistics",
+    "subtopic": "Converting units of a spread",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the standard deviation in degrees Fahrenheit?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Daily temperatures: mean 20 C, standard deviation 5 C.\nConvert to Fahrenheit: F = 9/5 x C + 32.\nAI working: mean = 9/5 x 20 + 32 = 68 F; SD = 9/5 x 5 = 9 F (the + 32 shifts every value equally, so it does not change the spread)."
+    },
+    "ai_claim": "9. Multiplying by 9/5 scales the spread by 9/5, while adding 32 shifts all values equally and leaves the spread unchanged: 9/5 x 5 = 9.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "F = 9/5 x C + 32 is a linear transformation."
+      },
+      {
+        "index": 2,
+        "text": "Multiplying every value by 9/5 multiplies the SD by 9/5."
+      },
+      {
+        "index": 3,
+        "text": "Adding 32 to every value does not change the SD."
+      },
+      {
+        "index": 4,
+        "text": "SD = 9/5 x 5 = 9 F."
+      }
+    ],
+    "ai_final_answer": "9",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 9 F. For Y = aX + b, SD(Y) = |a| x SD(X), and the mean becomes a x mean + b = 68 F.",
+    "canonical_answer": "9",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "9/5 x 5 = 9",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "9"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "SD(aX + b) = |a| SD(X).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate the scaling from the shift."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains why + 32 does not matter."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Shifts move the centre; only scaling changes the spread."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply the SD by 9/5."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The SD is 9 F. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Linear transformations affect location and spread differently. The same rule explains why standardising (subtracting the mean, dividing by the SD) gives z-scores with SD 1.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = Fraction(9, 5) * 5"
+    }
+  }
+]

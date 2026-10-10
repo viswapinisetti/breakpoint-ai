@@ -1,0 +1,481 @@
+[
+  {
+    "id": "fe-routing-state-management-001",
+    "subject": "frontend",
+    "topic": "Routing & State Management",
+    "subtopic": "Deep links on a static host",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If a user opens https://shop.example.com/orders/42 directly (or refreshes on that page), do they see the order page?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "jsx",
+      "code": "// main.jsx\n<BrowserRouter>\n  <Routes>\n    <Route path=\"/\" element={<Home />} />\n    <Route path=\"/orders/:id\" element={<Order />} />\n  </Routes>\n</BrowserRouter>\n\n// Deployed: the build folder (index.html + assets/) uploaded to a plain static file server,\n// with no rewrite rules."
+    },
+    "ai_claim": "Yes. The router has a route for /orders/:id, so it renders the Order component for /orders/42.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The router defines /orders/:id."
+      },
+      {
+        "index": 2,
+        "text": "The user requests /orders/42."
+      },
+      {
+        "index": 3,
+        "text": "The router matches the URL and renders <Order />."
+      },
+      {
+        "index": 4,
+        "text": "So the order page appears."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Forgetting the server handles the first request",
+      "explanation": "On a direct visit or refresh, the browser asks the server for /orders/42. The router runs only after index.html and the JavaScript have loaded, but a plain static server has no file at /orders/42 and returns 404. Navigating inside the app works because the router intercepts those links. Configure the host to serve index.html for unknown paths (an SPA fallback or rewrite).",
+      "why_convincing": "Clicking through the app from the home page works perfectly, which is how most manual testing is done."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The static server returns 404 before the router ever runs. Add an SPA fallback so every unknown path serves index.html.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Open /orders/42 in a new tab: the server responds 404 Not Found.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "404"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Configure the host: rewrite /* to /index.html (e.g. Netlify _redirects: '/*  /index.html  200').",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Refreshing any page other than / shows the server's 404 page."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who handles the very first request for /orders/42."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the router is already running."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Client-side routing starts only after the server has returned index.html."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Refresh the browser while on /orders/42."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the server looks for a file at /orders/42 and returns 404. Add an SPA fallback to index.html."
+      }
+    ],
+    "repair": "Add a rewrite from all unknown paths to /index.html on the host.",
+    "debrief": "Client-side routes are invisible to the server. Every SPA deployment needs a fallback rule, and the only reliable test is loading a deep URL directly, not clicking to it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-routing-state-management-002",
+    "subject": "frontend",
+    "topic": "Routing & State Management",
+    "subtopic": "Plain links reload the app",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After adding three items and clicking the Cart link, does the cart page still show three items?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "jsx",
+      "code": "// The cart lives in React context (in memory).\nfunction Header() {\n  const { items } = useCart();\n  return (\n    <nav>\n      <a href=\"/cart\">Cart ({items.length})</a>\n    </nav>\n  );\n}"
+    },
+    "ai_claim": "Yes. The app is a single-page app, so moving to /cart keeps all in-memory state, including the cart.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The cart is stored in React context."
+      },
+      {
+        "index": 2,
+        "text": "The app is a single-page application."
+      },
+      {
+        "index": 3,
+        "text": "Following a link in an SPA does not reload the page."
+      },
+      {
+        "index": 4,
+        "text": "So the cart still has three items."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming every link in an SPA is a client-side navigation",
+      "explanation": "A plain <a href> makes the browser perform a full page load. The whole app restarts, React context is recreated empty, and the cart shows zero items. Client-side navigation needs the router's <Link to=\"/cart\"> (or navigate()), which updates the URL without reloading.",
+      "why_convincing": "The app is an SPA, and <Link> renders an <a> element too, so the two look interchangeable."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: <a href> triggers a full reload, wiping in-memory state. Use <Link to=\"/cart\">.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Click the link with DevTools open: a full document request for /cart is made and the cart is empty.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "<Link to=\"/cart\">Cart ({items.length})</Link>",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The cart count drops to 0 after clicking the link."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what kind of navigation a plain anchor performs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes all links in an SPA avoid reloading."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Only the router's Link component intercepts clicks; a plain anchor loads a new document."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Watch the network panel as you click the link."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: <a href> reloads the page and resets in-memory state. Use <Link>."
+      }
+    ],
+    "repair": "Replace the anchor with the router's `<Link to=\"/cart\">`.",
+    "debrief": "Being an SPA is a property of how navigation is done, not of the app as a whole. One plain anchor quietly reloads everything. In-memory state is also lost on refresh, so persist anything users would miss.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-routing-state-management-003",
+    "subject": "frontend",
+    "topic": "Routing & State Management",
+    "subtopic": "Duplicated derived state",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "When the parent passes an updated products list (a new product arrives), does the visible list include it?",
+    "artifact_type": "component",
+    "artifact": {
+      "language": "jsx",
+      "code": "function ProductList({ products }) {\n  const [query, setQuery] = useState(\"\");\n  const [visible, setVisible] = useState(products);\n\n  function onSearch(q) {\n    setQuery(q);\n    setVisible(products.filter(p => p.name.includes(q)));\n  }\n  // renders <input onChange={e => onSearch(e.target.value)} /> and visible.map(...)\n}"
+    },
+    "ai_claim": "Yes. visible is computed from products whenever the user searches, so it always reflects the current products.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "visible starts as the full products list."
+      },
+      {
+        "index": 2,
+        "text": "Each search recomputes visible from products."
+      },
+      {
+        "index": 3,
+        "text": "So visible is always derived from products."
+      },
+      {
+        "index": 4,
+        "text": "A new product therefore appears in the list."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Recomputing derived state on only one of its inputs",
+      "explanation": "visible depends on both query and products, but it is recomputed only when the user searches. useState(products) uses the initial prop only once, so a new products prop leaves visible unchanged until the next keystroke. Derive it during render instead: const visible = products.filter(p => p.name.includes(query)).",
+      "why_convincing": "The search path works, and in a demo products rarely change while the page is open."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: visible is updated only on search, so new products are missing until the user types. Compute visible during render (useMemo if expensive).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Render with 3 products, then pass 4 without typing: only 3 are shown.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3",
+          "4"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "const visible = useMemo(() => products.filter(p => p.name.includes(query)), [products, query]);",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A product added by the parent never appears until the user searches again."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List every input that visible depends on."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims visible is always derived from products."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Derived values stored in state go stale when any input changes outside the update path."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Change the products prop without typing."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: visible updates only on search, so new products are missed. Derive it during render."
+      }
+    ],
+    "repair": "Remove the visible state; compute it from products and query while rendering.",
+    "debrief": "Storing derived data in state creates two sources of truth that must be kept in sync by hand. If a value can be computed from props and state, compute it - and memoise if needed.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-routing-state-management-004",
+    "subject": "frontend",
+    "topic": "Routing & State Management",
+    "subtopic": "Route parameters are strings",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "On /orders/42, is order 42 displayed?",
+    "artifact_type": "component",
+    "artifact": {
+      "language": "jsx",
+      "code": "function OrderPage({ orders }) {        // orders: [{ id: 42, ... }, ...]\n  const { id } = useParams();            // URL: /orders/42\n  const order = orders.find(o => o.id === id);\n  return order ? <OrderView order={order} /> : <p>Order not found</p>;\n}"
+    },
+    "ai_claim": "Yes. useParams gives id = 42 from the URL, and find returns the order whose id is 42.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The route /orders/:id matches /orders/42."
+      },
+      {
+        "index": 2,
+        "text": "useParams returns id as 42."
+      },
+      {
+        "index": 3,
+        "text": "orders.find compares each order's id with 42 using ===."
+      },
+      {
+        "index": 4,
+        "text": "Order 42 matches and is displayed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Assuming URL parameters keep their numeric type",
+      "explanation": "Everything in a URL is text, so useParams returns id as the string '42'. The order ids are numbers, and 42 === '42' is false, so find returns undefined and the page says 'Order not found'. Convert the parameter: Number(id).",
+      "why_convincing": "Printed on screen, 42 and '42' look identical."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "useParams returns '42' (a string), so the strict comparison with the number 42 fails. Compare with Number(id).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "'42' === 42 is false, so find returns undefined and 'Order not found' is shown.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "42"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "const order = orders.find(o => o.id === Number(id));",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Every order page shows 'Order not found'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the type of values that come from a URL."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states the value of id without its type."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Route parameters and query strings are always strings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate '42' === 42."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: id is the string '42', so === fails. Convert with Number(id)."
+      }
+    ],
+    "repair": "Convert the parameter with `Number(id)` (and handle NaN).",
+    "debrief": "URLs carry strings. Any value read from a route parameter, query string or form field needs explicit conversion before being compared with typed data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-routing-state-management-005",
+    "subject": "frontend",
+    "topic": "Routing & State Management",
+    "subtopic": "Filters stored in the URL",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it correct that storing the filter in the URL means a refreshed page, a shared link and the Back button all show the matching filter?",
+    "artifact_type": "component",
+    "artifact": {
+      "language": "jsx",
+      "code": "function Products() {\n  const [params, setParams] = useSearchParams();\n  const category = params.get(\"category\") ?? \"all\";\n\n  return (\n    <select value={category}\n            onChange={e => setParams({ category: e.target.value })}>\n      ...\n    </select>\n  );\n}"
+    },
+    "ai_claim": "Yes. The filter lives in the query string, so refreshing or sharing the URL restores it, and each change adds a history entry that Back returns to.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Selecting a category calls setParams, which updates the URL, e.g. ?category=lamps."
+      },
+      {
+        "index": 2,
+        "text": "On load, category is read from the URL, so a refresh or shared link restores it."
+      },
+      {
+        "index": 3,
+        "text": "setParams pushes a new history entry by default."
+      },
+      {
+        "index": 4,
+        "text": "Pressing Back restores the previous URL and therefore the previous filter."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. With the URL as the source of truth for the filter, the view is reproducible from the link, and history navigation works for free. (Pass { replace: true } if every change should not create a history entry.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Select 'lamps', refresh: 'lamps' is still selected; press Back: the previous filter returns.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "useSearchParams' setter navigates, pushing a history entry unless replace is set.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where the filter's value is read from on first render."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 relies on the URL being the only source of the filter."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "State kept in the URL survives reloads, can be shared, and participates in history."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try refresh, copy-link and Back in turn."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The URL is the single source of truth, so refresh, sharing and Back all work. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "State that describes what the user is looking at - filters, tabs, pages, search terms - often belongs in the URL. Unlike in-memory state, it survives reloads and can be bookmarked and shared.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

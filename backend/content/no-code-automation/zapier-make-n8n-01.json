@@ -1,0 +1,472 @@
+[
+  {
+    "id": "nc-zapier-make-n8n-001",
+    "subject": "no-code-automation",
+    "topic": "Zapier / Make / n8n",
+    "subtopic": "Counting Zapier tasks",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will 1,000 runs stay within the 2,000-task plan?",
+    "artifact_type": "automation_run",
+    "artifact": {
+      "workflow": "Zap: Trigger (new form entry) -> Action 1 (create CRM contact) -> Action 2 (add to mailing list) -> Action 3 (Slack message) -> Action 4 (log to Sheets)\nExpected volume: 1,000 form entries per month.\nPlan limit: 2,000 tasks/month.\nAI: \"1,000 runs use 1,000 tasks, well within the limit.\""
+    },
+    "ai_claim": "Yes. Each Zap run counts as one task, so 1,000 runs use 1,000 tasks.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The Zap runs once per form entry."
+      },
+      {
+        "index": 2,
+        "text": "There are 1,000 entries."
+      },
+      {
+        "index": 3,
+        "text": "Each run is one task."
+      },
+      {
+        "index": 4,
+        "text": "So 1,000 tasks are used."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Counting runs instead of action steps",
+      "explanation": "In Zapier, each successful action step counts as a task (the trigger does not). With 4 actions per run, 1,000 runs use about 4,000 tasks - double the plan limit. Once the limit is reached, Zaps stop running until the next cycle or an upgrade. Estimate usage per action step.",
+      "why_convincing": "'One run, one task' sounds natural."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 4 actions x 1,000 runs = 4,000 tasks, over the 2,000 limit.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "1,000 runs x 4 action steps = 4,000 tasks",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4,000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Zapier counts each successful action step as a task.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The Zap stops mid-month when the task limit is reached."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how Zapier counts tasks."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 counts runs."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Each action step that runs is a task."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply runs by action steps."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 4,000 tasks are used."
+      }
+    ],
+    "repair": "Budget 4 tasks per run, reduce steps, or upgrade the plan.",
+    "debrief": "Pricing units differ by platform (tasks, operations, executions). Model usage in the platform's unit.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-zapier-make-n8n-002",
+    "subject": "no-code-automation",
+    "topic": "Zapier / Make / n8n",
+    "subtopic": "Operations after a Make iterator",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is about 1,200 operations a month the right estimate?",
+    "artifact_type": "automation_run",
+    "artifact": {
+      "workflow": "Make scenario: Webhook (1 order) -> Iterator (line items) -> HTTP request (update stock) -> Google Sheets (add row)\nTypical order: 50 line items; 300 orders/month.\nAI: \"Each run uses about 4 operations - one per module - so 1,200 operations a month.\""
+    },
+    "ai_claim": "Yes. The scenario has 4 modules, so each run uses 4 operations: 300 runs x 4 = 1,200.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "There are 4 modules."
+      },
+      {
+        "index": 2,
+        "text": "Each module uses one operation per run."
+      },
+      {
+        "index": 3,
+        "text": "300 runs x 4 = 1,200."
+      },
+      {
+        "index": 4,
+        "text": "So about 1,200 operations a month."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Ignoring that modules after an iterator run per item",
+      "explanation": "Make counts an operation each time a module processes a bundle. The iterator turns one order into 50 bundles, so the HTTP and Sheets modules each run 50 times per order: about 1 + 1 + 50 + 50 = 102 operations per run, roughly 30,600 per month - 25 times the estimate.",
+      "why_convincing": "Counting modules is the obvious first estimate."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: modules after the iterator run 50 times per order. About 102 operations per run, ~30,600 per month.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "per order: webhook 1 + iterator 1 + HTTP 50 + Sheets 50 = 102; x 300 = 30,600",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "102",
+          "30,600"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "In Make, each module execution on a bundle counts as an operation.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The monthly operations allowance is exhausted in the first week."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count bundles after the iterator."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes one execution per module."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Modules downstream of an iterator run for each item."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute operations for one 50-item order."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: modules run per item. ~30,600 operations a month."
+      }
+    ],
+    "repair": "Estimate per bundle; batch API updates or aggregate rows to reduce operations.",
+    "debrief": "Iterators multiply everything downstream - cost included.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-zapier-make-n8n-003",
+    "subject": "no-code-automation",
+    "topic": "Zapier / Make / n8n",
+    "subtopic": "n8n test URLs",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will payment events sent to the Test URL be processed by the active workflow?",
+    "artifact_type": "trigger_config",
+    "artifact": {
+      "workflow": "n8n Webhook node. The payment provider was configured with the node's Test URL (.../webhook-test/...), copied while building.\nThe workflow is activated.\nAI: \"The workflow is active, so every payment event will be processed.\""
+    },
+    "ai_claim": "Yes. The workflow is active and the provider sends to its webhook URL, so every payment event is processed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The provider sends events to the webhook URL."
+      },
+      {
+        "index": 2,
+        "text": "The workflow is active."
+      },
+      {
+        "index": 3,
+        "text": "Active workflows process incoming webhooks."
+      },
+      {
+        "index": 4,
+        "text": "So every event is processed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 1,
+      "misconception": "Pointing a production integration at a test endpoint",
+      "explanation": "n8n webhook nodes have two URLs. The Test URL only accepts calls while the editor is listening for a test event; the Production URL (.../webhook/...) receives calls when the workflow is active. The provider is configured with the Test URL, so production events fail (404) and are lost. Update the provider to the Production URL.",
+      "why_convincing": "Both URLs look alike, and the test one worked during building."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the Test URL only works while listening in the editor. Configure the provider with the Production URL.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "provider POSTs to /webhook-test/... -> 404 'webhook is not registered' when the editor is not listening",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "404"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "n8n's Test URL is for editor testing; the Production URL serves active workflows.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Payments made overnight never reach the workflow."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the URL the provider uses with the node's URLs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 assumes the configured URL is the production endpoint."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "n8n separates test and production webhook URLs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send an event with the editor closed."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: the provider uses the Test URL. Switch to the Production URL."
+      }
+    ],
+    "repair": "Configure the provider with the Production URL and verify with a live test event.",
+    "debrief": "Test endpoints are for building. Before going live, check every external system points at production.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-zapier-make-n8n-004",
+    "subject": "no-code-automation",
+    "topic": "Zapier / Make / n8n",
+    "subtopic": "Sharing a template with keys inside",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it safe to share this blueprint publicly?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "A Make scenario's HTTP module calls the SMS provider with the header 'Authorization: Bearer sk_live_...' typed directly into the module.\nThe team exports the scenario as a blueprint and posts it in a public community forum to help others.\nAI: \"Blueprints only contain the workflow structure, so it's safe to share.\""
+    },
+    "ai_claim": "Yes. A blueprint describes the modules and their connections, not credentials, so sharing it exposes nothing sensitive.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The blueprint captures modules and mappings."
+      },
+      {
+        "index": 2,
+        "text": "Credentials are stored in connections."
+      },
+      {
+        "index": 3,
+        "text": "Connections are not exported."
+      },
+      {
+        "index": 4,
+        "text": "So the blueprint is safe to share."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Hardcoding a secret into a module field",
+      "explanation": "Credentials stored in platform connections are usually excluded from exports, but values typed into module fields - such as this Authorization header - are part of the module configuration and are exported with it. The live SMS key is now public. Rotate the key, store secrets in connections or credential stores, and review exports before sharing.",
+      "why_convincing": "Steps 2 and 3 are true for proper connections."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the key typed into the header is in the blueprint. Rotate it and use a connection/credential store.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Opening the exported JSON shows \"Authorization\": \"Bearer sk_live_...\" in the HTTP module's headers.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Secrets must be stored in credential stores, never typed into workflow fields.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Anyone reading the forum post can send SMS on the company's account."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where the key was entered."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the key is in a connection."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Module field values are exported with the workflow."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Search the exported file for 'Bearer'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the key is in a module field and was exported."
+      }
+    ],
+    "repair": "Rotate the key; use a credential/connection for authentication; scrub exports.",
+    "debrief": "Treat workflow exports like code: review them for secrets before sharing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-zapier-make-n8n-005",
+    "subject": "no-code-automation",
+    "topic": "Zapier / Make / n8n",
+    "subtopic": "An n8n error workflow",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this setup makes failures in production workflows visible quickly?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "All production n8n workflows set 'Error Workflow' to 'Ops Alerts'.\n'Ops Alerts' starts with an Error Trigger node and posts the failed workflow's name, the failing node, the error message and an execution link to the #ops-alerts channel."
+    },
+    "ai_claim": "Yes. When any workflow that uses it fails, n8n runs the error workflow, which posts who failed, where, why and a link to the execution, so the team sees and can investigate failures immediately.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each production workflow names 'Ops Alerts' as its error workflow."
+      },
+      {
+        "index": 2,
+        "text": "On a failed execution, n8n triggers the Error Trigger."
+      },
+      {
+        "index": 3,
+        "text": "The alert includes workflow, node, error and a link."
+      },
+      {
+        "index": 4,
+        "text": "The team sees failures quickly and can drill in."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Centralised error workflows with actionable context are a standard way to monitor no-code automations.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "invoice-sync fails at node 'Update CRM' (401) -> Ops Alerts posts details and link in #ops-alerts",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "401"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the team learns about a failed run today."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 makes alerts actionable."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Central error handling turns silent failures into alerts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Simulate a failing node."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Failures become visible quickly. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Automations fail silently unless someone builds the alarm. Error workflows are that alarm.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

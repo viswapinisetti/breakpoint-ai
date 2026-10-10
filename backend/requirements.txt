@@ -1,0 +1,11 @@
+fastapi==0.121.2
+uvicorn[standard]==0.40.0
+sqlalchemy==2.0.44
+alembic==1.19.2
+pydantic==2.12.4
+pydantic-settings==2.13.0
+anthropic==1.4.0
+openai==3.8.0
+python-dotenv==1.2.1
+# OIDC bearer-token verification (app/auth/oidc.py).
+PyJWT[crypto]==2.10.1

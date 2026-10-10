@@ -1,0 +1,522 @@
+[
+  {
+    "id": "da-data-storytelling-001",
+    "subject": "data-analytics",
+    "topic": "Data Storytelling",
+    "subtopic": "Choosing a flattering start date",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the headline give a fair picture of sales in the first half of the year?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Monthly sales (Rs lakh): Jan 50, Feb 48, Mar 35, Apr 40, May 43, Jun 45",
+      "headline": "\"Sales up 29% since March\""
+    },
+    "ai_claim": "Yes. Sales rose from 35 in March to 45 in June, which is 29% growth, so the business is growing strongly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "March sales were 35 lakh."
+      },
+      {
+        "index": 2,
+        "text": "June sales were 45 lakh."
+      },
+      {
+        "index": 3,
+        "text": "(45 - 35) / 35 = 29%."
+      },
+      {
+        "index": 4,
+        "text": "So sales are growing strongly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Drawing a trend from a cherry-picked start",
+      "explanation": "The arithmetic is right, but March was the lowest month of the year. From January, sales fell from 50 to 45, a 10% decline. Picking the trough as the starting point turns a decline into 'growth'. A fair headline would say sales recovered from a March dip but remain 10% below January.",
+      "why_convincing": "The numbers in the headline are accurate."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: measured from January, sales fell 10%. The 29% comes from starting at the March low.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(45 - 50) / 50 = -10%",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "10"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "March (35) is the lowest month in the series.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "35"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Starting from January shows a 10% decline."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at where the comparison starts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 generalises from one chosen window."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Start dates can be chosen to make any trend look good."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare June with January."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: March was the low point. From January, sales fell 10%."
+      }
+    ],
+    "repair": "Show the full period and describe it honestly: 'recovering from a March dip, still 10% below January'.",
+    "debrief": "Every comparison involves a choice of baseline. Ask why a story starts where it does, especially when it starts at a low point.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-data-storytelling-002",
+    "subject": "data-analytics",
+    "topic": "Data Storytelling",
+    "subtopic": "Headline and chart disagree",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the data support the headline 'Customers are spending more'?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Q1 vs Q2\nCustomers: 10,000 -> 13,000\nAverage basket: Rs 800 -> Rs 700\nTotal revenue: Rs 80L -> Rs 91L",
+      "headline": "\"Customers are spending more\""
+    },
+    "ai_claim": "Yes. Revenue rose from 80 lakh to 91 lakh, so customers are spending more.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Total revenue rose from 80 lakh to 91 lakh."
+      },
+      {
+        "index": 2,
+        "text": "Revenue is what customers spend."
+      },
+      {
+        "index": 3,
+        "text": "More revenue means customers are spending more."
+      },
+      {
+        "index": 4,
+        "text": "So the headline is supported."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Confusing total spending with spending per customer",
+      "explanation": "Revenue rose because there were 30% more customers. Each customer spent less: the average basket fell from Rs 800 to Rs 700. 'Customers are spending more' reads as per-customer spending, which declined. Accurate: 'More customers, smaller baskets'.",
+      "why_convincing": "Total revenue did rise, and it is the most prominent number."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: per-customer spending fell from Rs 800 to Rs 700; revenue grew only because customer numbers grew.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Average basket fell from Rs 800 to Rs 700.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "800",
+          "700"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "13,000 x 700 = 91 lakh; 10,000 x 800 = 80 lakh",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Each customer spent Rs 100 less in Q2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate the number of customers from spending per customer."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates total revenue with per-customer spending."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Revenue = customers x average basket."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the average basket."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: baskets shrank; revenue grew because customers grew."
+      }
+    ],
+    "repair": "Headline: 'More customers, smaller baskets: revenue up 14%'.",
+    "debrief": "Headlines are claims. Decompose totals into their drivers (count x average) and check which one the headline is really about.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-data-storytelling-003",
+    "subject": "data-analytics",
+    "topic": "Data Storytelling",
+    "subtopic": "'Doubled' when it did not",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "By what percentage did sales grow from 2024 to 2025?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Annual sales (Rs crore)",
+        "columns": [
+          "Year",
+          "Sales"
+        ],
+        "rows": [
+          [
+            "2024",
+            1.2
+          ],
+          [
+            "2025",
+            2.1
+          ]
+        ]
+      }
+    },
+    "ai_claim": "100. Sales went from about 1 crore to about 2 crore, so they doubled - 100% growth.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "2024 sales were about 1 crore."
+      },
+      {
+        "index": 2,
+        "text": "2025 sales were about 2 crore."
+      },
+      {
+        "index": 3,
+        "text": "Going from 1 to 2 is doubling."
+      },
+      {
+        "index": 4,
+        "text": "So growth was 100%."
+      }
+    ],
+    "ai_final_answer": "100",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 1,
+      "misconception": "Rounding before calculating",
+      "explanation": "Rounding 1.2 down to 1 and 2.1 down to 2 distorts the ratio. The actual growth is (2.1 - 1.2) / 1.2 = 75%. 'Doubled' overstates it by a third. Calculate from the exact figures and round only the result.",
+      "why_convincing": "'About 1 crore' and 'about 2 crore' each sound fair on their own."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "(2.1 - 1.2) / 1.2 = 75%.",
+    "canonical_answer": "75",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(2.1 - 1.2) / 1.2 x 100 = 75",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "75"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "2.1 is not double 1.2; double would be 2.4."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Use the exact figures."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 rounds before calculating."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Round the result, never the inputs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute (2.1 - 1.2) / 1.2."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: rounding the inputs inflates growth. The actual growth is 75%."
+      }
+    ],
+    "repair": "",
+    "debrief": "Rounding inputs can change a conclusion ('doubled'). Keep full precision through the calculation and round only what you present.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (2.1 - 1.2) / 1.2 * 100",
+      "flawed_solver": "answer = (2 - 1) / 1 * 100"
+    }
+  },
+  {
+    "id": "da-data-storytelling-004",
+    "subject": "data-analytics",
+    "topic": "Data Storytelling",
+    "subtopic": "Counts without a rate",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the data show that complaints became less frequent after the policy?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "before_after": {
+        "title": "New returns policy",
+        "columns": [
+          "Period",
+          "Orders",
+          "Complaints"
+        ],
+        "rows": [
+          [
+            "3 months before",
+            "50,000",
+            "500"
+          ],
+          [
+            "3 months after",
+            "35,000",
+            "400"
+          ]
+        ]
+      },
+      "headline": "\"New policy cut complaints by 20%\""
+    },
+    "ai_claim": "Yes. Complaints fell from 500 to 400, a 20% reduction, so complaints became less frequent.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Complaints were 500 before the policy."
+      },
+      {
+        "index": 2,
+        "text": "They were 400 after."
+      },
+      {
+        "index": 3,
+        "text": "(500 - 400) / 500 = 20% fewer complaints."
+      },
+      {
+        "index": 4,
+        "text": "So complaints became less frequent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Reading a count drop as a rate drop",
+      "explanation": "Orders fell 30% over the same period. Per 1,000 orders, complaints rose from 10 (500 / 50,000) to about 11.4 (400 / 35,000). The absolute drop comes from fewer orders, not fewer problems per order. Report complaints per 1,000 orders.",
+      "why_convincing": "The counts genuinely fell, and the percentage is computed correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the complaint rate rose from 10 to about 11.4 per 1,000 orders. The count fell only because orders fell.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "500 / 50,000 x 1,000 = 10; 400 / 35,000 x 1,000 = 11.4",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10",
+          "11.4"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Orders fell from 50,000 to 35,000.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "35,000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Per order, complaints increased by about 14%."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what happened to the number of orders."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 treats a count as a frequency."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Frequency needs a rate: complaints per order."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute complaints per 1,000 orders in each period."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the rate rose from 10 to 11.4 per 1,000 orders."
+      }
+    ],
+    "repair": "Report complaints per 1,000 orders, and check whether the policy affected order volume.",
+    "debrief": "When the base changes, counts mislead. Normalise by exposure (orders, users, days) before claiming something became more or less frequent.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-data-storytelling-005",
+    "subject": "data-analytics",
+    "topic": "Data Storytelling",
+    "subtopic": "Showing forecast uncertainty",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this is an honest way to present the forecast?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Line chart: monthly demand, actuals to September, forecast for Oct-Dec\nForecast drawn as a line with a shaded band: 80% prediction interval\nDecember: point forecast 12,000 units, band 10,500-13,800",
+      "note": "Caption: 'We expect about 12,000 units in December; there is roughly an 80% chance it falls between 10,500 and 13,800.'"
+    },
+    "ai_claim": "Yes. It shows the most likely value and the uncertainty around it, and the caption explains the band in plain language, so readers can plan for a range rather than a single number.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The point forecast gives the central estimate: 12,000."
+      },
+      {
+        "index": 2,
+        "text": "The shaded band shows the 80% prediction interval."
+      },
+      {
+        "index": 3,
+        "text": "The caption translates the interval into plain language."
+      },
+      {
+        "index": 4,
+        "text": "Readers can plan stock for the range, not just the point."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Forecasts are uncertain, and showing a prediction interval with a plain-language explanation is the honest presentation.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "December's 80% interval is 10,500 to 13,800 around 12,000.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "10,500",
+          "13,800"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Communicating forecasts should include uncertainty, not only a point estimate.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about what a single number would hide."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains the band to non-experts."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A prediction interval communicates how wrong the forecast might be."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider planning stock with and without the band."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It shows the estimate and its uncertainty clearly. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Precise-looking single-number forecasts invite overconfidence. Intervals, explained in plain words, lead to better decisions.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,419 @@
+[
+  {
+    "id": "prg-strings-collections-001",
+    "subject": "programming",
+    "topic": "Strings & Collections",
+    "subtopic": "Repeated references in nested lists",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does make_grid(3) return a 3 x 3 grid in which only the top-left cell is 1?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def make_grid(n):\n    grid = [[0] * n] * n\n    grid[0][0] = 1\n    return grid"
+    },
+    "ai_claim": "Yes. It builds a 3 x 3 grid of zeros and sets only grid[0][0] to 1.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "[0] * n builds a row of n zeros."
+      },
+      {
+        "index": 2,
+        "text": "Multiplying that row by n creates n independent rows."
+      },
+      {
+        "index": 3,
+        "text": "grid[0][0] = 1 changes only the first cell of the first row."
+      },
+      {
+        "index": 4,
+        "text": "make_grid(3) is [[1, 0, 0], [0, 0, 0], [0, 0, 0]]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Believing list multiplication copies nested lists",
+      "explanation": "[row] * n repeats a reference to the same row object n times. All three 'rows' are one list, so setting grid[0][0] changes every row: [[1, 0, 0], [1, 0, 0], [1, 0, 0]]. Use [[0] * n for _ in range(n)].",
+      "why_convincing": "[0] * n works perfectly for numbers, so the same operator one level up looks equally safe. Printing the empty grid shows nothing wrong."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The outer multiplication repeats one row object. After grid[0][0] = 1 every row shows the change: [[1, 0, 0], [1, 0, 0], [1, 0, 0]]. Build rows independently with a comprehension.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "make_grid(3) returns [[1, 0, 0], [1, 0, 0], [1, 0, 0]].",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "grid = [[0] * n for _ in range(n)]",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "make_grid(2) returns [[1, 0], [1, 0]]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the rows are separate objects."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 claims the rows are independent."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Multiplying a list repeats references to its elements; it does not copy them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print make_grid(3) and look at every row."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: all rows are the same list, so the result is [[1, 0, 0], [1, 0, 0], [1, 0, 0]]. Use a comprehension to build separate rows."
+      }
+    ],
+    "repair": "Use `grid = [[0] * n for _ in range(n)]`.",
+    "debrief": "Aliasing bugs are invisible until something is mutated, because identical references look exactly like identical copies. Whenever nested mutable structures are built with *, check whether the inner objects are shared. The test is to change one element and inspect the whole structure.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "make_grid",
+      "ai_code": "def make_grid(n):\n    grid = [[0] * n] * n\n    grid[0][0] = 1\n    return grid",
+      "reference_code": "def make_grid(n):\n    grid = [[0] * n for _ in range(n)]\n    grid[0][0] = 1\n    return grid",
+      "test_inputs": [
+        "(1,)",
+        "(2,)",
+        "(3,)"
+      ],
+      "counterexample_input": "(3,)"
+    }
+  },
+  {
+    "id": "prg-strings-collections-002",
+    "subject": "programming",
+    "topic": "Strings & Collections",
+    "subtopic": "Removing items while iterating",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does remove_negatives(nums) remove every negative number from the list?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def remove_negatives(nums):\n    for x in nums:\n        if x < 0:\n            nums.remove(x)\n    return nums"
+    },
+    "ai_claim": "Yes. It visits every element and removes each one that is negative.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The loop visits each element of nums."
+      },
+      {
+        "index": 2,
+        "text": "Whenever an element is negative, it is removed from the list."
+      },
+      {
+        "index": 3,
+        "text": "Removing an element does not affect which elements the loop visits next."
+      },
+      {
+        "index": 4,
+        "text": "The function returns the list with all negatives removed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Mutating a list while iterating over it",
+      "explanation": "The for loop tracks an index. Removing the current element shifts the next one into its position, and the loop then moves past it. With [-1, -2, 3], -1 is removed, -2 slides into index 0, and the loop continues at index 1: the result is [-2, 3].",
+      "why_convincing": "With isolated negatives such as [1, -2, 3] the function works, so casual tests pass. The bug needs two negatives in a row."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Removing elements during iteration skips the element after each removal. remove_negatives([-1, -2, 3]) returns [-2, 3]. Build a new list instead: [x for x in nums if x >= 0].",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "remove_negatives([-1, -2, 3]) returns [-2, 3].",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-2"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "index 0: remove -1 -> list [-2, 3]; index 1: 3 is kept; -2 is never visited",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "remove_negatives([-1, -2, 3]) returns [-2, 3]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the function with negative numbers next to each other."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims that removals do not affect the iteration."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A for loop over a list advances an index; removing an element shifts the later elements left."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace remove_negatives([-1, -2, 3]) index by index."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: each removal makes the loop skip the next element, so [-1, -2, 3] becomes [-2, 3]. Filter into a new list instead."
+      }
+    ],
+    "repair": "Return `[x for x in nums if x >= 0]` instead of mutating the list during the loop.",
+    "debrief": "Changing a collection while iterating over it breaks the iterator's bookkeeping, and the damage depends on the data, so simple tests pass. Adjacent matching elements are the standard test case. The habit is simple: iterate over one collection and write to another.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "remove_negatives",
+      "ai_code": "def remove_negatives(nums):\n    for x in nums:\n        if x < 0:\n            nums.remove(x)\n    return nums",
+      "reference_code": "def remove_negatives(nums):\n    return [x for x in nums if x >= 0]",
+      "test_inputs": [
+        "([1, -2, 3],)",
+        "([],)",
+        "([-1, -2, 3],)"
+      ],
+      "counterexample_input": "([-1, -2, 3],)"
+    }
+  },
+  {
+    "id": "prg-strings-collections-003",
+    "subject": "programming",
+    "topic": "Strings & Collections",
+    "subtopic": "Strings are immutable",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does clean_phone('98765 43210') return '9876543210'?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def clean_phone(s):\n    s.replace(\"-\", \"\")\n    s.replace(\" \", \"\")\n    return s"
+    },
+    "ai_claim": "Yes. It removes hyphens and spaces, leaving only the digits.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "s.replace('-', '') removes every hyphen from s."
+      },
+      {
+        "index": 2,
+        "text": "s.replace(' ', '') removes every space from s."
+      },
+      {
+        "index": 3,
+        "text": "After both replacements, s contains only digits."
+      },
+      {
+        "index": 4,
+        "text": "clean_phone('98765 43210') returns '9876543210'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 1,
+      "misconception": "Expecting str.replace to modify the string in place",
+      "explanation": "Strings are immutable. replace returns a new string and leaves s unchanged, and here the result is discarded. The function returns its input unchanged: '98765 43210'. Write s = s.replace(...).",
+      "why_convincing": "Many list methods (append, sort) do modify in place, so a method call on its own line looks like it changes the object."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "str.replace returns a new string; the original is never changed. Both results are discarded, so clean_phone returns '98765 43210'. Fix: s = s.replace('-', '').replace(' ', '').",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "clean_phone('98765 43210') returns '98765 43210' unchanged.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "98765"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "s = s.replace('-', '').replace(' ', '')",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "clean_phone('98765-43210') returns '98765-43210'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether each method call changes s or produces something new."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Look at what happens to the result of s.replace in step 1."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Python strings are immutable: string methods return new strings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call clean_phone with a number containing a space and compare input and output."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: replace returns a new string that is thrown away, so the input comes back unchanged. Assign the result: s = s.replace(...)."
+      }
+    ],
+    "repair": "Use `return s.replace('-', '').replace(' ', '')`.",
+    "debrief": "Whether a method mutates its object or returns a new one is part of its contract, and strings never mutate. A method call whose result is ignored is a warning sign worth training your eye on. The test is trivial but decisive: compare the output with the input.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "clean_phone",
+      "ai_code": "def clean_phone(s):\n    s.replace(\"-\", \"\")\n    s.replace(\" \", \"\")\n    return s",
+      "reference_code": "def clean_phone(s):\n    return s.replace('-', '').replace(' ', '')",
+      "test_inputs": [
+        "('9876543210',)",
+        "('98765 43210',)",
+        "('98765-43210',)"
+      ],
+      "counterexample_input": "('98765 43210',)"
+    }
+  },
+  {
+    "id": "prg-strings-collections-004",
+    "subject": "programming",
+    "topic": "Strings & Collections",
+    "subtopic": "Tie-breaking with max and dict order",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The requirement says: return the most frequent word, and in a tie return the word that appeared first in the list. Does top_word meet it?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def top_word(words):\n    counts = {}\n    for w in words:\n        counts[w] = counts.get(w, 0) + 1\n    return max(counts, key=counts.get)"
+    },
+    "ai_claim": "Yes. Dicts keep insertion order and max returns the first of equal maxima, so ties go to the word seen first.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "counts is built in the order words first appear, and Python dicts preserve insertion order."
+      },
+      {
+        "index": 2,
+        "text": "max(counts, key=counts.get) scans the keys in that order."
+      },
+      {
+        "index": 3,
+        "text": "When several keys share the highest count, max returns the first one it met."
+      },
+      {
+        "index": 4,
+        "text": "So ties go to the word that appeared first, and top_word meets the requirement."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Since Python 3.7, dicts preserve insertion order, so counts' keys are in order of first appearance. max returns the first maximal element encountered, so ties resolve to the earliest-appearing word.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "top_word(['b', 'a', 'b', 'a']) returns 'b', the first to appear.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Tie-breaking behaviour is easy to get wrong; check how it is decided here."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 3 each rely on a language guarantee."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Dicts preserve insertion order (Python 3.7+), and max returns the first maximal item it encounters."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run top_word(['b', 'a', 'b', 'a']) and top_word(['a', 'b', 'c', 'b', 'c'])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Both guarantees hold, so ties go to the first-appearing word. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Tie-breaking rules are a frequent source of silent bugs, and code that relies on dictionary order looks fragile. Here it rests on two documented guarantees - insertion-ordered dicts and max returning the first maximum - so it is correct. Verifying means naming the guarantee and testing a tie, not assuming the worst.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "top_word",
+      "ai_code": "def top_word(words):\n    counts = {}\n    for w in words:\n        counts[w] = counts.get(w, 0) + 1\n    return max(counts, key=counts.get)",
+      "reference_code": "def top_word(words):\n    best, best_count, counts = None, 0, {}\n    for w in words:\n        counts[w] = counts.get(w, 0) + 1\n    for w in words:\n        if counts[w] > best_count:\n            best, best_count = w, counts[w]\n    return best",
+      "test_inputs": [
+        "(['b', 'a', 'b', 'a'],)",
+        "(['x'],)",
+        "(['a', 'b', 'c', 'b', 'c'],)"
+      ]
+    }
+  }
+]

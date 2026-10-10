@@ -1,0 +1,299 @@
+[
+  {
+    "id": "apt-numbers-lcm-hcf-001",
+    "subject": "aptitude",
+    "topic": "Numbers, LCM & HCF",
+    "subtopic": "HCF and LCM of three numbers",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The HCF of three numbers is 6 and their LCM is 180. Two of the numbers are 12 and 18. What is the smallest possible value of the third number?",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "The third number is 5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "For two numbers, HCF x LCM equals the product of the numbers."
+      },
+      {
+        "index": 2,
+        "text": "With three numbers the same identity gives 12 x 18 x x = 6 x 180."
+      },
+      {
+        "index": 3,
+        "text": "So 216x = 1080, which gives x = 5."
+      },
+      {
+        "index": 4,
+        "text": "The smallest possible third number is 5."
+      }
+    ],
+    "ai_final_answer": "5",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Extending the two-number identity HCF x LCM = product to three numbers",
+      "explanation": "HCF x LCM = product holds only for two numbers. For three it fails in general. Here the third number must be a multiple of 6 (so the HCF stays 6) and must bring the factor 5 (LCM(12, 18) = 36, but the LCM must be 180). The smallest such number is 30: HCF(12, 18, 30) = 6 and LCM(12, 18, 30) = 180.",
+      "why_convincing": "The two-number identity is so familiar that applying it to three numbers feels like a natural extension, and the arithmetic afterwards is clean. The answer 5 is not even a multiple of the HCF 6, but nobody checks once the equation balances."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The third number x must keep the HCF at 6, so x is a multiple of 6. LCM(12, 18) = 36 = 2^2 x 3^2, and the LCM must become 180 = 2^2 x 3^2 x 5, so x must contain the factor 5 and divide 180. The multiples of 30 that divide 180 are 30, 60, 90 and 180; the smallest is 30. Check: HCF(12, 18, 30) = 6 and LCM(12, 18, 30) = 180.",
+    "canonical_answer": "30",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "5 is not a multiple of the HCF 6, so it cannot be one of the numbers.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "5",
+          "6"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "HCF(12, 18, 30) = 6 and LCM(12, 18, 30) = 180.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "30",
+          "180"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "For 2, 3 and 4: HCF = 1 and LCM = 12, but the product is 24, not 1 x 12."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the identity used in step 2 is true for the number of values involved."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 applies a rule that you learned for pairs of numbers."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "HCF x LCM = product is guaranteed only for two numbers. Every number in the set must also be a multiple of the HCF."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test whether 5 can be one of three numbers whose HCF is 6, then search the multiples of 6 that make the LCM 180."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the product identity does not hold for three numbers. The third number must be a multiple of 6 containing the factor 5, and the smallest that keeps the LCM at 180 is 30."
+      }
+    ],
+    "repair": "Replace steps 2-4: the third number must be a multiple of 6 and must supply the factor 5 so the LCM becomes 180. The smallest such number is 30.",
+    "debrief": "The HCF x LCM identity is a property of exactly two numbers; with three, the product is usually larger than HCF x LCM. The warning sign was available immediately: an answer of 5 cannot belong to a set whose HCF is 6. Whenever a formula produces an answer, check it against the conditions of the problem itself, not only against the formula.",
+    "transfer_check": {
+      "question": "The HCF of three numbers is 4 and their LCM is 120. Two of them are 8 and 12. What is the smallest possible third number?",
+      "answer": "20",
+      "explanation": "It must be a multiple of 4 that supplies the factor 5: 20 works, since HCF(8, 12, 20) = 4 and LCM(8, 12, 20) = 120."
+    },
+    "validation_payload": {
+      "solver": "x = 1\nwhile not (math.gcd(math.gcd(12, 18), x) == 6 and math.lcm(12, 18, x) == 180):\n    x += 1\nanswer = x",
+      "flawed_solver": "answer = Fraction(6 * 180, 12 * 18)"
+    }
+  },
+  {
+    "id": "apt-numbers-lcm-hcf-002",
+    "subject": "aptitude",
+    "topic": "Numbers, LCM & HCF",
+    "subtopic": "HCF-LCM product for a pair",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The HCF of two numbers is 12 and their LCM is 360. One of the numbers is 60. What is the other number?",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "The other number is 72.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "For any two positive integers, HCF x LCM equals the product of the two numbers."
+      },
+      {
+        "index": 2,
+        "text": "So 60 x (other number) = 12 x 360 = 4320."
+      },
+      {
+        "index": 3,
+        "text": "The other number is 4320 / 60 = 72."
+      },
+      {
+        "index": 4,
+        "text": "Check: 60 = 12 x 5 and 72 = 12 x 6 with 5 and 6 coprime, so the HCF is 12 and the LCM is 12 x 5 x 6 = 360."
+      }
+    ],
+    "ai_final_answer": "72",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "HCF x LCM = product holds for two numbers: other = 12 x 360 / 60 = 72. Verification: HCF(60, 72) = 12 and LCM(60, 72) = 360.",
+    "canonical_answer": "72",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "12 x 360 / 60 = 72, and HCF(60, 72) = 12, LCM(60, 72) = 360.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "72"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Decide whether the identity in step 1 applies to this problem."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 uses a rule about pairs of numbers; count how many numbers are involved here."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "HCF x LCM = product is exactly true for two positive integers."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute HCF(60, 72) and LCM(60, 72) directly and compare them with the given values."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. For two numbers HCF x LCM = product, so the other number is 4320 / 60 = 72, and step 4 confirms it. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "This identity is often misapplied to three numbers, which is why it looks suspicious here. With exactly two numbers it holds, and step 4 does what every careful solver should: it verifies the answer against both given conditions. Approving correct work that includes its own check is part of verification, too.",
+    "transfer_check": {
+      "question": "The HCF of two numbers is 15 and their LCM is 450. One number is 90. What is the other?",
+      "answer": "75",
+      "explanation": "15 x 450 / 90 = 75; HCF(90, 75) = 15 and LCM(90, 75) = 450."
+    },
+    "validation_payload": {
+      "solver": "x = 12 * 360 // 60\nassert math.gcd(60, x) == 12 and math.lcm(60, x) == 360\nanswer = x"
+    }
+  },
+  {
+    "id": "apt-numbers-lcm-hcf-003",
+    "subject": "aptitude",
+    "topic": "Numbers, LCM & HCF",
+    "subtopic": "Highest power dividing a factorial",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the largest integer k such that 6^k divides 40! (40 factorial)?",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "The largest power of 6 that divides 40! is 6^7.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Use Legendre's formula: the exponent of p in n! is floor(n/p) + floor(n/p^2) + floor(n/p^3) + ..."
+      },
+      {
+        "index": 2,
+        "text": "Apply it with p = 6: floor(40/6) + floor(40/36) = 6 + 1 = 7."
+      },
+      {
+        "index": 3,
+        "text": "The next term uses 6^3 = 216, which exceeds 40, so it adds nothing."
+      },
+      {
+        "index": 4,
+        "text": "Therefore k = 7."
+      }
+    ],
+    "ai_final_answer": "7",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Applying Legendre's formula to a composite number",
+      "explanation": "Legendre's formula counts the exponent of a prime. 6 = 2 x 3, so count each prime: 2 appears 20 + 10 + 5 + 2 + 1 = 38 times in 40!, and 3 appears 13 + 4 + 1 = 18 times. Each factor 6 needs one 2 and one 3, so k = min(38, 18) = 18.",
+      "why_convincing": "The formula is correct and the arithmetic is flawless, so the calculation looks rigorous. The single hidden condition - p must be prime - is easy to forget because the formula's shape works for any number you plug in."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "6 = 2 x 3. Exponent of 2 in 40!: 20 + 10 + 5 + 2 + 1 = 38. Exponent of 3: 13 + 4 + 1 = 18. Each 6 needs one 2 and one 3, so the largest k is min(38, 18) = 18.",
+    "canonical_answer": "18",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "The exponent of 3 in 40! is 13 + 4 + 1 = 18, which limits the power of 6.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "18"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "In 4!, floor(4/6) = 0, yet 24 = 6 x 4 is divisible by 6.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "24"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "4! = 24 is divisible by 6, but floor(4/6) = 0 predicts no factor of 6 at all."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the conditions under which the formula in step 1 is valid."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Look at the number step 2 substitutes into the formula."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Legendre's formula counts powers of a prime. A composite base must be broken into its prime factors."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the powers of 2 and of 3 in 40! separately, then decide which one limits the number of 6s."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 applies Legendre's formula to 6, which is not prime. 40! has 38 factors of 2 and 18 factors of 3, so the largest power of 6 is 6^18."
+      }
+    ],
+    "repair": "Replace step 2: count primes separately. The exponent of 2 is 38 and of 3 is 18, so k = min(38, 18) = 18.",
+    "debrief": "A formula carries its conditions with it, and Legendre's formula is only valid for primes. Plugging in 6 produces a tidy number that is simply meaningless: it misses every 6 built from a 2 and a 3 that come from different factors. A quick sanity test with a small case, such as 4! = 24, exposes the error at once. Checking a formula on a case you can compute by hand is one of the fastest verification habits there is.",
+    "transfer_check": {
+      "question": "What is the largest integer k such that 10^k divides 50!?",
+      "answer": "12",
+      "explanation": "10 = 2 x 5. 50! has 47 factors of 2 and 10 + 2 = 12 factors of 5, so k = 12."
+    },
+    "validation_payload": {
+      "solver": "def power(n, p):\n    k, q = 0, p\n    while q <= n:\n        k += n // q\n        q *= p\n    return k\nanswer = min(power(40, 2), power(40, 3))",
+      "flawed_solver": "answer = 40 // 6 + 40 // 36"
+    }
+  }
+]

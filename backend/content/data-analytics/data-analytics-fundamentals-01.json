@@ -1,0 +1,564 @@
+[
+  {
+    "id": "da-data-analytics-fundamentals-001",
+    "subject": "data-analytics",
+    "topic": "Data Analytics Fundamentals",
+    "subtopic": "Correlation is not causation",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the chart show that hiring more staff will raise a store's sales?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Scatter plot: 40 stores\nx axis: staff on shift (4 to 20)\ny axis: daily sales (Rs 40k to Rs 400k)\nClear upward trend, correlation r = 0.86",
+      "caption": "Proposal: hire more staff in every store to raise sales."
+    },
+    "ai_claim": "Yes. Stores with more staff have much higher sales, with a strong correlation of 0.86, so adding staff will increase sales.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The chart covers 40 stores."
+      },
+      {
+        "index": 2,
+        "text": "Staff numbers and sales rise together, r = 0.86."
+      },
+      {
+        "index": 3,
+        "text": "A strong correlation means staff levels drive sales."
+      },
+      {
+        "index": 4,
+        "text": "So hiring more staff will raise sales."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Reading correlation as causation",
+      "explanation": "The data show that the two move together, not why. Busy stores are given more staff because they are busy: large, well-located stores have both more staff and more sales. Adding staff to a quiet store will not bring customers. Establishing cause needs an experiment (add staff in some stores, compare with similar stores) or careful control for store size and footfall.",
+      "why_convincing": "r = 0.86 is strong, and the causal story is intuitive."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the correlation is likely driven by store size and footfall, which determine both. Test the effect with a controlled trial before hiring.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Staffing is usually planned from expected footfall, so causation can run from sales to staff.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Correlation does not establish causation; confounders can drive both variables.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.86"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A small store with extra staff still has the same number of customers."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which variable might be causing which."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 turns a correlation into a cause."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A confounder - store size or footfall - can drive both staff and sales."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Think about how managers decide staffing levels."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: correlation does not show causation. Test with a controlled experiment."
+      }
+    ],
+    "repair": "Run a controlled staffing trial, or compare stores with similar footfall.",
+    "debrief": "The most common analytics error is recommending an action from a correlation. Before 'X drives Y', ask what else could make them rise together, and whether Y could cause X.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-data-analytics-fundamentals-002",
+    "subject": "data-analytics",
+    "topic": "Data Analytics Fundamentals",
+    "subtopic": "Percent versus percentage points",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "By what percentage did the conversion rate increase from July to August?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Checkout conversion rate",
+        "columns": [
+          "Month",
+          "Conversion rate"
+        ],
+        "rows": [
+          [
+            "July",
+            "2%"
+          ],
+          [
+            "August",
+            "3%"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "It increased by 1%: from 2% to 3%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "July's conversion rate is 2%."
+      },
+      {
+        "index": 2,
+        "text": "August's is 3%."
+      },
+      {
+        "index": 3,
+        "text": "The change is 3% - 2% = 1%."
+      },
+      {
+        "index": 4,
+        "text": "So the conversion rate increased by 1%."
+      }
+    ],
+    "ai_final_answer": "1",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 3,
+      "misconception": "Confusing percentage points with percent change",
+      "explanation": "3% - 2% is a change of 1 percentage point. The percentage increase is relative to the starting value: (3 - 2) / 2 = 50%. Reporting '1%' understates the improvement fifty-fold.",
+      "why_convincing": "Both values are percentages, so subtracting them feels like it gives a percentage change."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The rate rose 1 percentage point, which is a 50% increase: (3 - 2) / 2 x 100 = 50.",
+    "canonical_answer": "50",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(3 - 2) / 2 x 100 = 50%",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "50"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Percent change = (new - old) / old; the difference of two percentages is in percentage points.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If the rate went from 1% to 2%, subtraction gives '1%', but conversions doubled."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate 'percentage points' from 'percent change'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 subtracts two percentages."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Percent change is measured relative to the starting value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide the change by July's rate."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: that is 1 percentage point; the percent increase is 50%."
+      }
+    ],
+    "repair": "",
+    "debrief": "With rates, always say which you mean: '+1 percentage point' or '+50%'. The two can differ enormously, and mixing them up is one of the most common reporting errors.",
+    "transfer_check": {
+      "question": "A churn rate falls from 8% to 6%. By what percentage did it decrease?",
+      "answer": "25",
+      "explanation": "(8 - 6) / 8 = 25%, a 2-percentage-point drop."
+    },
+    "validation_payload": {
+      "solver": "answer = (3 - 2) / 2 * 100",
+      "flawed_solver": "answer = 3 - 2"
+    }
+  },
+  {
+    "id": "da-data-analytics-fundamentals-003",
+    "subject": "data-analytics",
+    "topic": "Data Analytics Fundamentals",
+    "subtopic": "Surveying only current customers",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the survey support the headline that 90% of the company's customers are satisfied?",
+    "artifact_type": "kpi_definition",
+    "artifact": {
+      "survey": "In-app satisfaction survey, shown to customers who logged in during September.\nResponses: 2,000. Satisfied or very satisfied: 90%.",
+      "headline": "Slide: \"90% of our customers are satisfied\""
+    },
+    "ai_claim": "Yes. 2,000 responses is a large sample, and 90% of them were satisfied, so 90% of customers are satisfied.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The survey collected 2,000 responses."
+      },
+      {
+        "index": 2,
+        "text": "90% of respondents were satisfied."
+      },
+      {
+        "index": 3,
+        "text": "A sample of 2,000 is large enough to represent all customers."
+      },
+      {
+        "index": 4,
+        "text": "So 90% of customers are satisfied."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Treating a large sample as a representative one",
+      "explanation": "The survey reached only customers who logged in during September - the most engaged ones - and only those who chose to answer. Unhappy customers who stopped using the app were never asked. Sample size reduces random error, but not selection bias: 2,000 engaged users can be 90% satisfied while the whole customer base is not. Survey a random sample of all customers, including lapsed ones.",
+      "why_convincing": "2,000 feels decisive, and the percentage is computed correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the sample excludes lapsed and less engaged customers, so it overstates satisfaction. The headline should say '90% of active app users who responded'.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Only customers who logged in during September could see the survey.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "A larger biased sample does not remove bias; representativeness depends on how respondents are selected.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2,000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Customers who churned in August had no way to respond."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who could not have answered the survey."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes size makes the sample representative."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Selection bias comes from who is included, not from how many."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider customers who stopped using the app."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the sample only includes active, willing respondents. It does not represent all customers."
+      }
+    ],
+    "repair": "Qualify the headline, or survey a random sample of all customers, including lapsed ones.",
+    "debrief": "Sample size and sample quality are different things. Always ask how respondents were selected, and state the population a result actually describes.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-data-analytics-fundamentals-004",
+    "subject": "data-analytics",
+    "topic": "Data Analytics Fundamentals",
+    "subtopic": "Share of customers versus share of revenue",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What percentage of Q2 revenue came from repeat customers?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Customers and revenue, Q2",
+        "columns": [
+          "Segment",
+          "Customers",
+          "Revenue (Rs)"
+        ],
+        "rows": [
+          [
+            "New",
+            800,
+            400000
+          ],
+          [
+            "Repeat",
+            200,
+            600000
+          ]
+        ]
+      }
+    },
+    "ai_claim": "20%. There are 200 repeat customers out of 1,000, so repeat customers account for 20%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "There are 800 new and 200 repeat customers: 1,000 in total."
+      },
+      {
+        "index": 2,
+        "text": "Repeat customers are 200 of them."
+      },
+      {
+        "index": 3,
+        "text": "200 / 1,000 = 20%."
+      },
+      {
+        "index": 4,
+        "text": "So 20% of revenue came from repeat customers."
+      }
+    ],
+    "ai_final_answer": "20",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Answering a different question from the one asked",
+      "explanation": "The question asks for the share of revenue, and the calculation uses the share of customers. Repeat customers are 20% of customers but brought in Rs 600,000 of Rs 1,000,000: 60% of revenue.",
+      "why_convincing": "The numbers come from the right table and the arithmetic is correct."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Repeat revenue / total revenue = 600,000 / 1,000,000 = 60%.",
+    "canonical_answer": "60",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "600,000 / (400,000 + 600,000) x 100 = 60",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "60"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Repeat customers' revenue is Rs 600,000.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "600000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The 20% figure describes customers, not revenue."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Re-read what the question asks for a share of."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 picks the customer count."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Share of revenue uses the revenue column."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide repeat revenue by total revenue."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: it uses customers instead of revenue. Repeat customers produce 60% of revenue."
+      }
+    ],
+    "repair": "",
+    "debrief": "'Share of what?' is the first question in any percentage. Here the answer changes from 20% to 60% depending on the denominator, and the business meaning changes with it.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 600000 / (400000 + 600000) * 100",
+      "flawed_solver": "answer = 200 / (800 + 200) * 100"
+    }
+  },
+  {
+    "id": "da-data-analytics-fundamentals-005",
+    "subject": "data-analytics",
+    "topic": "Data Analytics Fundamentals",
+    "subtopic": "Median of a skewed distribution",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the median order value, in rupees?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Order values this week (Rs)",
+        "columns": [
+          "Order",
+          "Value"
+        ],
+        "rows": [
+          [
+            "A",
+            200
+          ],
+          [
+            "B",
+            250
+          ],
+          [
+            "C",
+            300
+          ],
+          [
+            "D",
+            350
+          ],
+          [
+            "E",
+            400
+          ],
+          [
+            "F",
+            9000
+          ]
+        ]
+      }
+    },
+    "ai_claim": "325. Sorted, the values are 200, 250, 300, 350, 400, 9000; with six values the median is the average of the middle two, (300 + 350) / 2 = 325.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Sort the values: 200, 250, 300, 350, 400, 9000."
+      },
+      {
+        "index": 2,
+        "text": "There are six values, an even number."
+      },
+      {
+        "index": 3,
+        "text": "The median is the mean of the 3rd and 4th values: 300 and 350."
+      },
+      {
+        "index": 4,
+        "text": "(300 + 350) / 2 = 325."
+      }
+    ],
+    "ai_final_answer": "325",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: the median is 325. (The mean is 1,750 because of the single 9,000 order, which is why the median better describes a typical order here.)",
+    "canonical_answer": "325",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(300 + 350) / 2 = 325",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "325"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The mean is 10,500 / 6 = 1,750, pulled up by order F.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1750"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Sort the values first."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 handles an even number of values."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "For an even count, the median is the average of the two middle values."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find the 3rd and 4th values."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The median is (300 + 350) / 2 = 325. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "With skewed data, the median resists outliers that drag the mean. Reporting both, and saying which one a dashboard shows, avoids misleading 'average' figures.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "v = sorted([200, 250, 300, 350, 400, 9000]); answer = (v[2] + v[3]) / 2"
+    }
+  }
+]

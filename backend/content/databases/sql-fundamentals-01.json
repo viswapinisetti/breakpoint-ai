@@ -1,0 +1,639 @@
+[
+  {
+    "id": "db-sql-fundamentals-001",
+    "subject": "databases",
+    "topic": "SQL Fundamentals",
+    "subtopic": "Comparing with NULL using =",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this query return the products that have no discount (Atlas, Jazz LP and Lamp)?",
+    "artifact_type": "sql",
+    "artifact": {
+      "products": {
+        "title": "products",
+        "columns": [
+          "name",
+          "category",
+          "price",
+          "discount"
+        ],
+        "rows": [
+          [
+            "Atlas",
+            "books",
+            25,
+            "NULL"
+          ],
+          [
+            "Primer",
+            "books",
+            8,
+            2
+          ],
+          [
+            "Jazz LP",
+            "music",
+            30,
+            "NULL"
+          ],
+          [
+            "Folk CD",
+            "music",
+            6,
+            1
+          ],
+          [
+            "Lamp",
+            "home",
+            9,
+            "NULL"
+          ]
+        ]
+      },
+      "query": "SELECT name FROM products\nWHERE discount = NULL;"
+    },
+    "ai_claim": "Yes. Products without a discount have NULL in the discount column, and the query selects rows where discount equals NULL.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A missing discount is stored as NULL."
+      },
+      {
+        "index": 2,
+        "text": "Atlas, Jazz LP and Lamp have NULL discounts."
+      },
+      {
+        "index": 3,
+        "text": "discount = NULL is true for those three rows."
+      },
+      {
+        "index": 4,
+        "text": "So the query returns Atlas, Jazz LP and Lamp."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Testing for NULL with =",
+      "explanation": "Any comparison with NULL, including NULL = NULL, yields UNKNOWN, and WHERE keeps only TRUE rows. The query returns no rows at all. Testing for missing values requires IS NULL.",
+      "why_convincing": "In most programming languages, comparing to null with == works, so = NULL reads naturally."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The query returns zero rows, because discount = NULL is never TRUE. Use WHERE discount IS NULL.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The query returns 0 rows on this table.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "SELECT name FROM products WHERE discount IS NULL;",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Even the row with a NULL discount fails the test, since NULL = NULL is UNKNOWN."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the comparison evaluates to for a NULL row."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims discount = NULL is true for some rows."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Comparisons with NULL return UNKNOWN; SQL provides IS NULL for this test."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate NULL = NULL."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: discount = NULL is never TRUE, so no rows are returned. Use IS NULL."
+      }
+    ],
+    "repair": "Use `WHERE discount IS NULL`.",
+    "debrief": "NULL is not a value but a marker for 'unknown', so it cannot be tested with = or <>. Use IS NULL, IS NOT NULL, or IS DISTINCT FROM. A query that silently returns nothing is the typical sign.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-sql-fundamentals-002",
+    "subject": "databases",
+    "topic": "SQL Fundamentals",
+    "subtopic": "AND binds tighter than OR",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: cheap books and cheap music (price under 10). Does this query return only Primer and Folk CD?",
+    "artifact_type": "sql",
+    "artifact": {
+      "products": {
+        "title": "products",
+        "columns": [
+          "name",
+          "category",
+          "price",
+          "discount"
+        ],
+        "rows": [
+          [
+            "Atlas",
+            "books",
+            25,
+            "NULL"
+          ],
+          [
+            "Primer",
+            "books",
+            8,
+            2
+          ],
+          [
+            "Jazz LP",
+            "music",
+            30,
+            "NULL"
+          ],
+          [
+            "Folk CD",
+            "music",
+            6,
+            1
+          ],
+          [
+            "Lamp",
+            "home",
+            9,
+            "NULL"
+          ]
+        ]
+      },
+      "query": "SELECT name FROM products\nWHERE category = 'books' OR category = 'music' AND price < 10;"
+    },
+    "ai_claim": "Yes. It selects books or music with a price under 10, which is Primer and Folk CD.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The condition picks rows whose category is books or music."
+      },
+      {
+        "index": 2,
+        "text": "Among those, it keeps rows with price < 10."
+      },
+      {
+        "index": 3,
+        "text": "Primer (books, 8) and Folk CD (music, 6) qualify."
+      },
+      {
+        "index": 4,
+        "text": "So the query returns Primer and Folk CD."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Ignoring operator precedence",
+      "explanation": "AND binds more tightly than OR, so the condition means category = 'books' OR (category = 'music' AND price < 10). Every book is returned whatever its price, so Atlas (25) appears too. Parentheses are needed around the OR.",
+      "why_convincing": "The query reads left to right like the English requirement, which hides how the database groups it."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The query returns Atlas, Primer and Folk CD. Write WHERE (category = 'books' OR category = 'music') AND price < 10, or category IN ('books', 'music') AND price < 10.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Atlas (books, 25) is returned although its price is not under 10.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "25"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "WHERE category IN ('books', 'music') AND price < 10",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Atlas, priced 25, appears in the result."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how SQL groups a condition that mixes AND and OR."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the price test applies to both categories."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "AND has higher precedence than OR."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate the condition for Atlas."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the price test applies only to music, so Atlas (25) is returned. Add parentheses or use IN."
+      }
+    ],
+    "repair": "Use `WHERE category IN ('books', 'music') AND price < 10`.",
+    "debrief": "Precedence bugs return plausible, extra rows rather than errors. Whenever AND and OR are mixed, add parentheses even if you know the rules; it documents the intent. Test with a row that fails only the condition you think applies to everything.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-sql-fundamentals-003",
+    "subject": "databases",
+    "topic": "SQL Fundamentals",
+    "subtopic": "DISTINCT applies to the whole row",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: list each city once. Does this query return two rows, Pune and Delhi?",
+    "artifact_type": "sql",
+    "artifact": {
+      "customers": {
+        "title": "customers",
+        "columns": [
+          "name",
+          "city"
+        ],
+        "rows": [
+          [
+            "Asha",
+            "Pune"
+          ],
+          [
+            "Ben",
+            "Pune"
+          ],
+          [
+            "Chen",
+            "Delhi"
+          ],
+          [
+            "Dev",
+            "Pune"
+          ]
+        ]
+      },
+      "query": "SELECT DISTINCT city, name\nFROM customers;"
+    },
+    "ai_claim": "Yes. DISTINCT removes the duplicate cities, so each city appears once: Pune and Delhi.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "DISTINCT removes duplicate values."
+      },
+      {
+        "index": 2,
+        "text": "It is written next to city, so it removes duplicate cities."
+      },
+      {
+        "index": 3,
+        "text": "Pune appears three times and Delhi once."
+      },
+      {
+        "index": 4,
+        "text": "So two rows are returned."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Thinking DISTINCT applies to the first column",
+      "explanation": "DISTINCT applies to the entire selected row, not the column it is written beside. Each (city, name) pair is unique here, so all four rows come back. To list each city once, select only city (or GROUP BY city).",
+      "why_convincing": "Writing DISTINCT directly before city makes it look like a modifier of that column."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "All 4 rows are returned, because every (city, name) combination is distinct. Use SELECT DISTINCT city FROM customers.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The query returns 4 rows, one per customer.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "SELECT DISTINCT city FROM customers;",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "(Pune, Asha) and (Pune, Ben) are different rows, so both remain."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what DISTINCT compares."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says DISTINCT applies to city because of where it is written."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "DISTINCT removes rows that are identical in every selected column."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the rows (Pune, Asha) and (Pune, Ben)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: DISTINCT applies to the whole row, so all 4 rows remain. Select only city."
+      }
+    ],
+    "repair": "Select only the city column: `SELECT DISTINCT city FROM customers;`.",
+    "debrief": "DISTINCT is a row-level operation. Adding columns to a DISTINCT query changes what counts as a duplicate, and is a common cause of 'duplicate' reports that suddenly grow. Ask which columns define uniqueness, and select only those.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-sql-fundamentals-004",
+    "subject": "databases",
+    "topic": "SQL Fundamentals",
+    "subtopic": "Integer division",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In PostgreSQL, does the query report a pass percentage of 75 for Maths?",
+    "artifact_type": "sql",
+    "artifact": {
+      "results": {
+        "title": "results",
+        "columns": [
+          "subject",
+          "total",
+          "passed"
+        ],
+        "rows": [
+          [
+            "Maths",
+            4,
+            3
+          ]
+        ]
+      },
+      "query": "SELECT subject, passed / total * 100 AS pass_pct\nFROM results;   -- total and passed are INTEGER columns"
+    },
+    "ai_claim": "Yes. 3 out of 4 passed; 3 / 4 is 0.75, and multiplying by 100 gives 75.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "passed is 3 and total is 4."
+      },
+      {
+        "index": 2,
+        "text": "3 / 4 = 0.75."
+      },
+      {
+        "index": 3,
+        "text": "0.75 x 100 = 75."
+      },
+      {
+        "index": 4,
+        "text": "So pass_pct is 75."
+      }
+    ],
+    "ai_final_answer": "75",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming division produces a decimal",
+      "explanation": "Both columns are integers, so / performs integer division and truncates: 3 / 4 is 0, and 0 x 100 is 0. The query reports 0. Multiply first (passed * 100 / total gives 75) or cast to a decimal (passed::numeric / total * 100).",
+      "why_convincing": "The arithmetic is correct on paper; the step that fails is the database's type rule, which the paper version ignores."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "With INTEGER columns, 3 / 4 = 0, so pass_pct is 0. Use 100.0 * passed / total, or cast to NUMERIC.",
+    "canonical_answer": "0",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "passed / total = 3 / 4 = 0 in integer arithmetic, so pass_pct = 0.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "SELECT subject, 100.0 * passed / total AS pass_pct FROM results;",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "100"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Any pass rate below 100% shows as 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the data types of the two columns being divided."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes 3 / 4 gives 0.75 in SQL."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Dividing two integers in PostgreSQL (and SQLite, SQL Server) truncates to an integer."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate 3 / 4 with integer operands."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: integer division gives 0, so pass_pct is 0. Use 100.0 * passed / total."
+      }
+    ],
+    "repair": "Write `100.0 * passed / total` (or `passed::numeric / total * 100`).",
+    "debrief": "The same expression gives different answers depending on operand types. Integer division is a silent source of zeros in reports. When a ratio is computed in SQL, check the column types, and put a decimal literal first to force decimal arithmetic.",
+    "transfer_check": {
+      "question": "With integer columns, what does 7 / 2 return in PostgreSQL?",
+      "answer": "3",
+      "explanation": "Integer division truncates 3.5 to 3."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "db-sql-fundamentals-005",
+    "subject": "databases",
+    "topic": "SQL Fundamentals",
+    "subtopic": "WHERE versus HAVING",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: customers whose paid orders total more than 100, with that total. Does the query return customer 1 (120) and customer 3 (150), and exclude refunded orders from the totals?",
+    "artifact_type": "sql",
+    "artifact": {
+      "orders": {
+        "title": "orders",
+        "columns": [
+          "customer_id",
+          "amount",
+          "status"
+        ],
+        "rows": [
+          [
+            1,
+            80,
+            "paid"
+          ],
+          [
+            1,
+            40,
+            "paid"
+          ],
+          [
+            1,
+            500,
+            "refunded"
+          ],
+          [
+            2,
+            90,
+            "paid"
+          ],
+          [
+            3,
+            150,
+            "paid"
+          ]
+        ]
+      },
+      "query": "SELECT customer_id, SUM(amount) AS total\nFROM orders\nWHERE status = 'paid'\nGROUP BY customer_id\nHAVING SUM(amount) > 100;"
+    },
+    "ai_claim": "Yes. WHERE removes the refunded row before grouping, and HAVING keeps only groups whose paid total exceeds 100.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "WHERE filters individual rows before grouping, so the refunded 500 is removed."
+      },
+      {
+        "index": 2,
+        "text": "GROUP BY sums the remaining paid rows per customer: 1 -> 120, 2 -> 90, 3 -> 150."
+      },
+      {
+        "index": 3,
+        "text": "HAVING filters groups after aggregation, keeping totals above 100."
+      },
+      {
+        "index": 4,
+        "text": "Result: customer 1 with 120 and customer 3 with 150."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. WHERE filters rows before aggregation and HAVING filters aggregated groups. Putting the status test in HAVING would be invalid or wrong, and without WHERE customer 1's total would include the refund (620).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "after WHERE: (1,80), (1,40), (2,90), (3,150); groups: 1=120, 2=90, 3=150; HAVING > 100 keeps 1 and 3",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "120",
+          "150"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check at which stage each clause filters."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 says the refunded row is removed before grouping."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "WHERE works on rows before GROUP BY; HAVING works on groups after it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute each customer's total with and without the refunded row."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. WHERE removes the refund before grouping, and HAVING keeps totals over 100: customers 1 (120) and 3 (150). The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The logical order of a SELECT - FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY - decides what each clause can see. Row conditions go in WHERE, aggregate conditions in HAVING. The claim placed each condition at the right stage.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,475 @@
+[
+  {
+    "id": "dsa-heaps-priority-queues-001",
+    "subject": "dsa",
+    "topic": "Heaps & Priority Queues",
+    "subtopic": "heapq is a min-heap",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does largest(nums) return the largest number in the list?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "import heapq\n\ndef largest(nums):\n    h = list(nums)\n    heapq.heapify(h)\n    return heapq.heappop(h)"
+    },
+    "ai_claim": "Yes. heapify builds a heap, and popping a heap returns its top element, the largest value.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "heapify rearranges the list into a heap in O(n)."
+      },
+      {
+        "index": 2,
+        "text": "A heap keeps its top element at index 0."
+      },
+      {
+        "index": 3,
+        "text": "The top of the heap is the largest value."
+      },
+      {
+        "index": 4,
+        "text": "So heappop returns the largest number."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming Python's heap is a max-heap",
+      "explanation": "heapq implements a min-heap: the smallest element is at index 0, and heappop returns it. largest([5, 1, 9]) returns 1. For the maximum, use max(nums), or push negated values to simulate a max-heap.",
+      "why_convincing": "'Heap' is often introduced as a max-heap in textbooks, and the word 'top' suggests the biggest."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "heapq is a min-heap, so the function returns the smallest value: largest([5, 1, 9]) is 1. Use max(nums), or negate values for a max-heap.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "largest([5, 1, 9]) returns 1.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "largest([5, 1, 9]) returns 1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which kind of heap Python's heapq module implements."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states which value is at the top."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "heapq keeps the smallest element at index 0."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call largest([5, 1, 9])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: heapq is a min-heap, so heappop returns the smallest value, 1. Use max() or negated values."
+      }
+    ],
+    "repair": "Return `max(nums)`, or use a max-heap by pushing `-x` and negating the popped value.",
+    "debrief": "Min-heap versus max-heap is a convention, and libraries choose differently: Python's heapq is a min-heap, Java's PriorityQueue is too by default. Check the library's convention before relying on 'the top'.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "largest",
+      "ai_code": "import heapq\n\ndef largest(nums):\n    h = list(nums)\n    heapq.heapify(h)\n    return heapq.heappop(h)",
+      "reference_code": "def largest(nums):\n    return max(nums)",
+      "test_inputs": [
+        "([7],)",
+        "([5, 1, 9],)"
+      ],
+      "counterexample_input": "([5, 1, 9],)"
+    }
+  },
+  {
+    "id": "dsa-heaps-priority-queues-002",
+    "subject": "dsa",
+    "topic": "Heaps & Priority Queues",
+    "subtopic": "Heap order is not sorted order",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does k_largest([5, 1, 9, 3, 7], 3) return the three largest values in descending order, [9, 7, 5]?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "import heapq\n\ndef k_largest(nums, k):\n    h = []\n    for x in nums:\n        heapq.heappush(h, x)\n        if len(h) > k:\n            heapq.heappop(h)\n    return h"
+    },
+    "ai_claim": "Yes. The heap keeps the k largest values, and they come out in descending order.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each value is pushed onto a heap of at most k elements."
+      },
+      {
+        "index": 2,
+        "text": "When the heap grows beyond k, the smallest value is popped, so the heap always holds the k largest seen so far."
+      },
+      {
+        "index": 3,
+        "text": "After all values are processed, the heap contains 9, 7 and 5."
+      },
+      {
+        "index": 4,
+        "text": "The heap list is returned in descending order: [9, 7, 5]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 4,
+      "misconception": "Treating a heap's internal list as sorted output",
+      "explanation": "Steps 1-3 are correct: the heap holds the right values. But a heap's list is in heap order (each parent no larger than its children), not sorted, and it is a min-heap, so the smallest is first. The function returns [5, 7, 9]. Use sorted(h, reverse=True) or heapq.nlargest(k, nums).",
+      "why_convincing": "The algorithm's hard part is right, which makes the final formatting step seem too obvious to check."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The heap holds {5, 7, 9} but returns it in heap order: [5, 7, 9]. Return sorted(h, reverse=True), or use heapq.nlargest(k, nums).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "k_largest([5, 1, 9, 3, 7], 3) returns [5, 7, 9].",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "5",
+          "7",
+          "9"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "k_largest([5, 1, 9, 3, 7], 3) returns [5, 7, 9]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate which values are returned from the order they are returned in."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 describes the order of the returned list."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A heap's underlying list satisfies the heap property, which is weaker than being sorted."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print the heap list at the end."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the heap list is in min-heap order, [5, 7, 9]. Sort it in reverse or use heapq.nlargest."
+      }
+    ],
+    "repair": "Return `sorted(h, reverse=True)` (or use `heapq.nlargest(k, nums)`).",
+    "debrief": "A heap guarantees only that the smallest element is first; the rest of its list is partially ordered. Returning the internal list leaks an implementation detail as if it were a result. When a function promises an order, check the exact order it returns.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "k_largest",
+      "ai_code": "import heapq\n\ndef k_largest(nums, k):\n    h = []\n    for x in nums:\n        heapq.heappush(h, x)\n        if len(h) > k:\n            heapq.heappop(h)\n    return h",
+      "reference_code": "def k_largest(nums, k):\n    return sorted(nums, reverse=True)[:k]",
+      "test_inputs": [
+        "([4, 2], 1)",
+        "([5, 1, 9, 3, 7], 3)"
+      ],
+      "counterexample_input": "([5, 1, 9, 3, 7], 3)"
+    }
+  },
+  {
+    "id": "dsa-heaps-priority-queues-003",
+    "subject": "dsa",
+    "topic": "Heaps & Priority Queues",
+    "subtopic": "Priority scheduling with tuples",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does run_order return the tasks in the order they should run: lowest priority number first, with ties broken alphabetically by name?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "import heapq\n\ndef run_order(tasks):\n    \"\"\"tasks: [priority, name] pairs; a lower number runs first, ties by name.\"\"\"\n    h = [(p, name) for p, name in tasks]\n    heapq.heapify(h)\n    return [heapq.heappop(h)[1] for _ in range(len(h))]"
+    },
+    "ai_claim": "Yes. Tuples compare by priority first and then by name, so the min-heap pops tasks in exactly that order.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each task becomes a (priority, name) tuple."
+      },
+      {
+        "index": 2,
+        "text": "Python compares tuples element by element: priority first, then name when priorities are equal."
+      },
+      {
+        "index": 3,
+        "text": "heapq is a min-heap, so each pop returns the smallest remaining tuple."
+      },
+      {
+        "index": 4,
+        "text": "So tasks come out by priority, with ties in alphabetical order."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Lexicographic tuple comparison gives the required ordering, and repeated heappop yields tuples in ascending order.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "run_order([[2, 'b'], [1, 'z'], [2, 'a']]) returns ['z', 'a', 'b'].",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1",
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how Python compares tuples."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes tie-breaking."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tuples compare lexicographically: first elements, then second elements on a tie."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace run_order([[2, 'b'], [1, 'z'], [2, 'a']])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Tuple comparison orders by priority then name, and the min-heap pops in that order. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Tuple ordering is a compact, correct way to express multi-key priorities in Python. The one thing to verify is the tie-breaker, and here it matches the requirement. (With non-comparable payloads, add a counter as the second element.)",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "run_order",
+      "ai_code": "import heapq\n\ndef run_order(tasks):\n    \"\"\"tasks: [priority, name] pairs; a lower number runs first, ties by name.\"\"\"\n    h = [(p, name) for p, name in tasks]\n    heapq.heapify(h)\n    return [heapq.heappop(h)[1] for _ in range(len(h))]",
+      "reference_code": "def run_order(tasks):\n    return [name for p, name in sorted((p, name) for p, name in tasks)]",
+      "test_inputs": [
+        "([[2, 'b'], [1, 'z'], [2, 'a']],)",
+        "([],)",
+        "([[5, 'x']],)"
+      ]
+    }
+  },
+  {
+    "id": "dsa-heaps-priority-queues-004",
+    "subject": "dsa",
+    "topic": "Heaps & Priority Queues",
+    "subtopic": "Cost of heapify",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it correct that heapq.heapify builds a heap from n values in O(n) time, faster than pushing them one at a time, which costs O(n log n)?",
+    "artifact_type": "complexity_analysis",
+    "artifact": {
+      "language": "python",
+      "code": "import heapq\n\nh = list(values)   # n values\nheapq.heapify(h)"
+    },
+    "ai_claim": "Yes. heapify sifts down from the last parent to the root, and the total work is O(n); n separate pushes cost O(n log n).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "heapify sifts down each non-leaf node, starting from the bottom."
+      },
+      {
+        "index": 2,
+        "text": "Most nodes are near the bottom, where a sift-down moves only a level or two."
+      },
+      {
+        "index": 3,
+        "text": "Summing the work over all levels gives a total proportional to n."
+      },
+      {
+        "index": 4,
+        "text": "Pushing n values one by one costs up to O(log n) each, O(n log n) in total."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Bottom-up heap construction is O(n): half the nodes are leaves (no work), a quarter move at most one level, and so on - a series that sums to O(n). Repeated heappush is O(n log n).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "n/4 x 1 + n/8 x 2 + n/16 x 3 + ... < n",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4",
+          "8"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate bottom-up construction from inserting one element at a time."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 is the key observation. Check how many nodes sit near the bottom."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In a complete binary tree about half the nodes are leaves, and a quarter are one level above them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add up the maximum sift-down distance over all levels."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The sift-down distances sum to O(n), while n pushes cost O(n log n). The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Heap construction is the classic case where the naive bound (n nodes x log n each) overestimates the real cost, because most nodes sit near the bottom. The claim gets the careful analysis right. When a sum of per-item costs varies by position, add it up level by level instead of multiplying the worst case by n.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dsa-heaps-priority-queues-005",
+    "subject": "dsa",
+    "topic": "Heaps & Priority Queues",
+    "subtopic": "Which task runs first",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Which task does this program print?",
+    "artifact_type": "algorithm",
+    "artifact": {
+      "language": "python",
+      "code": "import heapq\nfrom config import PRIORITY   # e.g. PRIORITY['urgent'], PRIORITY['backup']\n\nqueue = []\nheapq.heappush(queue, (PRIORITY[\"backup\"], \"backup\"))\nheapq.heappush(queue, (PRIORITY[\"urgent\"], \"urgent\"))\nprint(heapq.heappop(queue)[1])"
+    },
+    "ai_claim": "It prints 'urgent', because urgent tasks have the highest priority.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Both tasks are pushed with their priority values from the config."
+      },
+      {
+        "index": 2,
+        "text": "heappop returns the tuple with the smallest priority value."
+      },
+      {
+        "index": 3,
+        "text": "The config gives urgent the most important priority, which is the smallest number."
+      },
+      {
+        "index": 4,
+        "text": "So the program prints 'urgent'."
+      }
+    ],
+    "ai_final_answer": "urgent",
+    "simulated_confidence": 93,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The values in PRIORITY. heapq pops the smallest number first, so the result depends on whether the config encodes importance as a small number (1 = most urgent) or a large one (10 = most urgent). The config is not shown.",
+    "resolving_scenarios": [
+      "PRIORITY = {'urgent': 1, 'backup': 5}: (1, 'urgent') is smallest, so 'urgent' is printed.",
+      "PRIORITY = {'urgent': 10, 'backup': 1} (higher means more important): (1, 'backup') is smallest, so 'backup' is printed."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "heapq pops the smallest priority value; which task that is depends on the config's numbers and convention, which are not given. Step 3 assumes the convention.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "With PRIORITY = {'urgent': 10, 'backup': 1}, the program prints 'backup'.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10",
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If higher numbers mean more urgent, 'backup' is popped first."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where step 3's fact comes from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes how the config encodes priority."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "heapq always pops the smallest value; what 'smallest' means depends on the numbers chosen."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try both conventions: urgent = 1 and urgent = 10."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes the config's convention. With urgent = 1 it prints 'urgent'; with urgent = 10 it prints 'backup'. It cannot be decided."
+      }
+    ],
+    "repair": "Show the PRIORITY values, or document the convention (lower number = more urgent) and push accordingly.",
+    "debrief": "Priority numbers are a convention, and 'priority 1' means most important in some systems and least in others. Combined with a min-heap, the convention decides the outcome. When code depends on configuration you cannot see, name the configuration instead of assuming it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,478 @@
+[
+  {
+    "id": "be-docker-deployment-001",
+    "subject": "backend",
+    "topic": "Docker & Deployment",
+    "subtopic": "Binding to localhost inside a container",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the API respond at http://localhost:8000 on the host machine?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "dockerfile",
+      "code": "# Dockerfile\nFROM python:3.12-slim\nWORKDIR /app\nCOPY . .\nRUN pip install -r requirements.txt\nCMD [\"uvicorn\", \"app.main:app\", \"--host\", \"127.0.0.1\", \"--port\", \"8000\"]\n\n# Run: docker run -p 8000:8000 shop-api\n# Then open http://localhost:8000 on the host"
+    },
+    "ai_claim": "Yes. The server listens on 127.0.0.1:8000, and -p 8000:8000 publishes that port to the host's localhost.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Uvicorn listens on port 8000."
+      },
+      {
+        "index": 2,
+        "text": "-p 8000:8000 forwards the host's port 8000 to the container's port 8000."
+      },
+      {
+        "index": 3,
+        "text": "127.0.0.1 is localhost, and the host connects to localhost."
+      },
+      {
+        "index": 4,
+        "text": "So the API responds on the host."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming the container's localhost is the host's localhost",
+      "explanation": "Inside the container, 127.0.0.1 is the container's own loopback interface. Docker forwards published traffic to the container's network interface, not its loopback, so nothing is listening there and the connection is reset. Bind to 0.0.0.0 inside containers.",
+      "why_convincing": "The same command works perfectly when run directly on a laptop."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the server listens only on the container's loopback, which port forwarding cannot reach. Use --host 0.0.0.0.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "curl http://localhost:8000 on the host fails with 'connection reset by peer'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Each container has its own network namespace; 127.0.0.1 inside it is not the host.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The port is published, but every request is refused."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which network interface 127.0.0.1 refers to inside the container."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates the container's localhost with the host's."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A container has its own network namespace and loopback interface."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "curl the published port from the host."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 127.0.0.1 is the container's own loopback. Bind to 0.0.0.0."
+      }
+    ],
+    "repair": "Start Uvicorn with `--host 0.0.0.0`.",
+    "debrief": "Containers are separate network hosts. Settings that make sense on a laptop - binding to localhost, connecting to localhost - mean something different inside them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-docker-deployment-002",
+    "subject": "backend",
+    "topic": "Docker & Deployment",
+    "subtopic": "Layer order and build cache",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After changing one line of application code, does the rebuild skip reinstalling dependencies?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "dockerfile",
+      "code": "FROM python:3.12-slim\nWORKDIR /app\nCOPY . .\nRUN pip install -r requirements.txt   # about 4 minutes\nCMD [\"uvicorn\", \"app.main:app\", \"--host\", \"0.0.0.0\"]"
+    },
+    "ai_claim": "Yes. Docker caches the pip install layer, and requirements.txt did not change, so the rebuild reuses the cached dependencies.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Docker caches each layer of the build."
+      },
+      {
+        "index": 2,
+        "text": "requirements.txt is unchanged."
+      },
+      {
+        "index": 3,
+        "text": "So the pip install layer is reused from cache."
+      },
+      {
+        "index": 4,
+        "text": "Only the code change is rebuilt."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Ignoring what invalidates a layer",
+      "explanation": "A layer's cache depends on everything before it. COPY . . copies the whole project, so any code change invalidates that layer and every later one, including pip install. Every edit costs the full 4-minute install. Copy requirements.txt and install first, then copy the rest of the code.",
+      "why_convincing": "Step 2 is true, and it is the reason people expect the cache to hold."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: COPY . . changes whenever code changes, invalidating the pip install layer after it. COPY requirements.txt first, RUN pip install, then COPY . . .",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "code edit -> COPY . . layer changes -> cache invalid for RUN pip install -> reinstall (about 4 minutes)",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Docker reuses a layer only if it and all previous layers are unchanged.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Every one-line change triggers a full dependency install."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which instruction the code change affects first."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 looks only at requirements.txt."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A changed layer invalidates the cache for every instruction after it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find where the code is copied relative to pip install."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: COPY . . comes first and changes with the code, so pip reinstalls. Copy requirements.txt first."
+      }
+    ],
+    "repair": "COPY requirements.txt ., RUN pip install -r requirements.txt, then COPY . . .",
+    "debrief": "Order Dockerfile instructions from least to most frequently changing. Dependency manifests go before source code so the slow install layer stays cached.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-docker-deployment-003",
+    "subject": "backend",
+    "topic": "Docker & Deployment",
+    "subtopic": "localhost between containers",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the api container connect to the database with this DATABASE_URL?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "yaml",
+      "code": "# docker-compose.yml\nservices:\n  api:\n    build: .\n    environment:\n      DATABASE_URL: postgresql://app:secret@localhost:5432/shop\n    ports: [\"8000:8000\"]\n  db:\n    image: postgres:16\n    ports: [\"5432:5432\"]"
+    },
+    "ai_claim": "Yes. Postgres publishes port 5432 on localhost, and the API connects to localhost:5432, so it reaches the database.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The db service publishes port 5432."
+      },
+      {
+        "index": 2,
+        "text": "Published ports are available on localhost."
+      },
+      {
+        "index": 3,
+        "text": "The API connects to localhost:5432."
+      },
+      {
+        "index": 4,
+        "text": "So it reaches Postgres."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Pointing a container at the wrong host",
+      "explanation": "Inside the api container, localhost is the api container itself, where nothing listens on 5432. Published ports are on the host machine, not inside other containers. Compose puts both services on one network with DNS names, so the URL should use the service name: postgresql://app:secret@db:5432/shop.",
+      "why_convincing": "The same URL works from the host, for example in a local database client."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: localhost inside the api container is not the db container. Use the service name db as the host.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The api container logs 'connection refused' for localhost:5432.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5432"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Compose services reach each other by service name on the shared network.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The API fails to start with a connection-refused error."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what localhost means inside the api container."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes localhost reaches the db container."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Each container has its own localhost; Compose provides DNS names for services."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Replace localhost with the database service's name."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: localhost is the api container. Use db:5432."
+      }
+    ],
+    "repair": "Set `DATABASE_URL: postgresql://app:secret@db:5432/shop`.",
+    "debrief": "In container networks, each service is a separate host found by name. 'localhost' is almost never the right address for another service.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-docker-deployment-004",
+    "subject": "backend",
+    "topic": "Docker & Deployment",
+    "subtopic": "Secrets baked into images",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are the secrets in .env protected, since the application reads them only at runtime?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "dockerfile",
+      "code": "FROM python:3.12-slim\nWORKDIR /app\nCOPY . .                 # the project folder includes .env with DB and payment keys\nRUN pip install -r requirements.txt\nCMD [\"python\", \"-m\", \"app\"]\n\n# The image is pushed to a registry shared with contractors."
+    },
+    "ai_claim": "Yes. The secrets are only used when the app runs, and image layers are just build artifacts, so they are not exposed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The .env file is read by the app at startup."
+      },
+      {
+        "index": 2,
+        "text": "The image contains the application files."
+      },
+      {
+        "index": 3,
+        "text": "Build artifacts are not a place people look for secrets."
+      },
+      {
+        "index": 4,
+        "text": "So the keys are protected."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Assuming image contents are private",
+      "explanation": "COPY . . puts .env into an image layer. Anyone who can pull the image - every contractor with registry access - can read it with docker run --rm image cat .env or by extracting layers. Deleting it in a later layer does not help, because earlier layers are kept. Add .env to .dockerignore and inject secrets at runtime (environment variables or a secrets manager).",
+      "why_convincing": "The secrets are not printed anywhere and the image works normally."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the .env file is inside the image, readable by anyone who can pull it. Exclude it with .dockerignore and provide secrets at runtime.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "docker run --rm shop-api cat /app/.env prints the payment key.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Image layers are immutable archives; anything copied in is retrievable by anyone with the image.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A contractor pulls the image and reads the keys."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what COPY . . includes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes nobody reads image contents."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Anyone with pull access can read every file in every layer."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run cat /app/.env in the image."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the .env file is inside the image and readable. Use .dockerignore and runtime secrets."
+      }
+    ],
+    "repair": "Add .env to .dockerignore; pass secrets at runtime via the orchestrator or a secrets manager; rotate the exposed keys.",
+    "debrief": "Images are distributed artifacts; treat everything in them as public to anyone who can pull. Secrets belong to the runtime environment.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-docker-deployment-005",
+    "subject": "backend",
+    "topic": "Docker & Deployment",
+    "subtopic": "Waiting for a healthy database",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that with this configuration, Compose starts the api container only after Postgres is accepting connections?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "yaml",
+      "code": "services:\n  db:\n    image: postgres:16\n    healthcheck:\n      test: [\"CMD-SHELL\", \"pg_isready -U app -d shop\"]\n      interval: 5s\n      retries: 10\n  api:\n    build: .\n    depends_on:\n      db:\n        condition: service_healthy"
+    },
+    "ai_claim": "Yes. condition: service_healthy makes Compose wait until the db health check passes, and pg_isready passes only once Postgres accepts connections.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The db service defines a health check using pg_isready."
+      },
+      {
+        "index": 2,
+        "text": "pg_isready succeeds only when the server accepts connections."
+      },
+      {
+        "index": 3,
+        "text": "depends_on with condition: service_healthy waits for that health check to pass."
+      },
+      {
+        "index": 4,
+        "text": "So the api starts after the database is ready."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Plain depends_on only orders container start-up; the service_healthy condition waits for readiness. (The app should still retry connections, since the database can restart later.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "db starts -> pg_isready fails, fails, succeeds -> db healthy -> api starts",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Compose's depends_on condition service_healthy waits for the dependency's health check to report healthy.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Distinguish 'container started' from 'database ready'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on the service_healthy condition."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Without a condition, depends_on only waits for the container to start."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Watch docker compose up output for the health state."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The api waits for the health check, which passes only when Postgres accepts connections. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Start-up order is not readiness. Health checks plus service_healthy express readiness properly; connection retries in the app handle everything that happens after start-up.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

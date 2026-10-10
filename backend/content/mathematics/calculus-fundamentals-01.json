@@ -1,0 +1,489 @@
+[
+  {
+    "id": "mat-calculus-fundamentals-001",
+    "subject": "mathematics",
+    "topic": "Calculus Fundamentals",
+    "subtopic": "The product rule",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is f'(1), to 6 decimal places?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "f(x) = x^2 e^x.  Find f'(1).\nAI working: f'(x) = (x^2)' (e^x)' = 2x e^x, so f'(1) = 2e = 5.436564"
+    },
+    "ai_claim": "5.436564. The derivative of a product is the product of the derivatives: 2x e^x, which is 2e at x = 1.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "(x^2)' = 2x."
+      },
+      {
+        "index": 2,
+        "text": "(e^x)' = e^x."
+      },
+      {
+        "index": 3,
+        "text": "f'(x) = (x^2)' x (e^x)' = 2x e^x."
+      },
+      {
+        "index": 4,
+        "text": "f'(1) = 2e = 5.436564."
+      }
+    ],
+    "ai_final_answer": "5.436564",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Multiplying derivatives instead of using the product rule",
+      "explanation": "The product rule is (uv)' = u'v + uv'. Here f'(x) = 2x e^x + x^2 e^x = (2x + x^2) e^x, so f'(1) = 3e = 8.154845.",
+      "why_convincing": "The derivative of a sum is the sum of derivatives, so the product version looks analogous."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "f'(x) = (2x + x^2) e^x; f'(1) = 3e = 8.154845.",
+    "canonical_answer": "8.154845",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "(uv)' = u'v + uv'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "calculation",
+        "summary": "2(1)e + (1)^2 e = 3e = 8.154845",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "8.154845"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "For f(x) = x . x = x^2, multiplying derivatives gives 1, but f'(x) = 2x."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the method on x . x."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 multiplies the derivatives."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Product rule: (uv)' = u'v + uv'."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply it with u = x^2 and v = e^x."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: f'(1) = 3e = 8.154845."
+      }
+    ],
+    "repair": "",
+    "debrief": "A one-line test (x times x) refutes the 'multiply the derivatives' rule instantly.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 3 * math.e",
+      "flawed_solver": "answer = 2 * math.e"
+    }
+  },
+  {
+    "id": "mat-calculus-fundamentals-002",
+    "subject": "mathematics",
+    "topic": "Calculus Fundamentals",
+    "subtopic": "The chain rule",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is g'(0)?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "g(x) = (3x + 1)^5.  Find g'(0).\nAI working: g'(x) = 5(3x + 1)^4, so g'(0) = 5."
+    },
+    "ai_claim": "5. By the power rule, g'(x) = 5(3x + 1)^4, and at x = 0 this is 5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "g is a fifth power."
+      },
+      {
+        "index": 2,
+        "text": "The power rule gives 5(3x + 1)^4."
+      },
+      {
+        "index": 3,
+        "text": "At x = 0: 5 x 1^4 = 5."
+      },
+      {
+        "index": 4,
+        "text": "So g'(0) = 5."
+      }
+    ],
+    "ai_final_answer": "5",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 2,
+      "misconception": "Forgetting the derivative of the inner function",
+      "explanation": "g is a composition: the outer function u^5 and the inner function u = 3x + 1. The chain rule multiplies by the inner derivative, 3: g'(x) = 5(3x + 1)^4 x 3 = 15(3x + 1)^4, so g'(0) = 15.",
+      "why_convincing": "The power rule step itself is done correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "g'(x) = 15(3x + 1)^4; g'(0) = 15.",
+    "canonical_answer": "15",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Chain rule: (f(u(x)))' = f'(u) u'(x).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "calculation",
+        "summary": "5 x 1^4 x 3 = 15",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "15"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "For (3x)^1 = 3x, the method would give derivative 1 instead of 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Identify the inner function."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 differentiates only the outer power."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Chain rule: multiply by the derivative of the inside."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Differentiate 3x + 1."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: multiply by 3. g'(0) = 15."
+      }
+    ],
+    "repair": "",
+    "debrief": "Whenever the argument of a function is not just x, the chain rule applies. It is the rule behind backpropagation.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 5 * (3 * 0 + 1) ** 4 * 3",
+      "flawed_solver": "answer = 5 * (3 * 0 + 1) ** 4"
+    }
+  },
+  {
+    "id": "mat-calculus-fundamentals-003",
+    "subject": "mathematics",
+    "topic": "Calculus Fundamentals",
+    "subtopic": "Area under |x|",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the value of the integral of |x| from -1 to 1?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Evaluate the integral of |x| from -1 to 1.\nAI working: an antiderivative of |x| is x^2 / 2; [x^2 / 2] from -1 to 1 = 1/2 - 1/2 = 0."
+    },
+    "ai_claim": "0. The antiderivative x^2 / 2 takes the same value at -1 and 1, so the integral is 0.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "An antiderivative of |x| is x^2 / 2."
+      },
+      {
+        "index": 2,
+        "text": "At x = 1 it is 1/2."
+      },
+      {
+        "index": 3,
+        "text": "At x = -1 it is 1/2."
+      },
+      {
+        "index": 4,
+        "text": "The integral is 1/2 - 1/2 = 0."
+      }
+    ],
+    "ai_final_answer": "0",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 1,
+      "misconception": "Using an antiderivative that is wrong on part of the interval",
+      "explanation": "x^2 / 2 is an antiderivative of x, not of |x|: its derivative is x, which is negative for x < 0. |x| is never negative, so its integral over an interval of positive length cannot be 0. Split at 0: the integral from -1 to 0 of -x is 1/2, and from 0 to 1 of x is 1/2, totalling 1.",
+      "why_convincing": "x^2 / 2 is correct for x >= 0, and the evaluation looks tidy."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Split at 0: 1/2 + 1/2 = 1.",
+    "canonical_answer": "1",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "integral from -1 to 0 of (-x) dx = 1/2; integral from 0 to 1 of x dx = 1/2; total 1",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "|x| >= 0 everywhere and is positive except at 0, so the integral must be positive.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The region under |x| is two triangles of area 1/2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Can the integral of a non-negative function be 0?"
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 gives an antiderivative. Differentiate it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An antiderivative's derivative must equal the integrand on the whole interval."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Split the integral at 0."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: x^2 / 2 differentiates to x, not |x|. The integral is 1."
+      }
+    ],
+    "repair": "",
+    "debrief": "Sanity checks from geometry - here, two triangles - catch errors that symbolic manipulation hides.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = Fraction(1, 2) + Fraction(1, 2)",
+      "flawed_solver": "answer = Fraction(1, 2) - Fraction(1, 2)"
+    }
+  },
+  {
+    "id": "mat-calculus-fundamentals-004",
+    "subject": "mathematics",
+    "topic": "Calculus Fundamentals",
+    "subtopic": "Limits that look like 0/0",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the limit of sin(x) / x as x approaches 0?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Find the limit of sin(x) / x as x -> 0.\nAI working: substitute x = 0: sin(0) / 0 = 0 / 0 = 0."
+    },
+    "ai_claim": "0. Substituting x = 0 gives 0 in the numerator, so the limit is 0.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Substitute x = 0."
+      },
+      {
+        "index": 2,
+        "text": "sin(0) = 0."
+      },
+      {
+        "index": 3,
+        "text": "0 divided by anything is 0."
+      },
+      {
+        "index": 4,
+        "text": "So the limit is 0."
+      }
+    ],
+    "ai_final_answer": "0",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Treating 0/0 as 0",
+      "explanation": "0/0 is undefined, not 0: it signals that the limit depends on how fast numerator and denominator shrink. Near 0, sin(x) is approximately x, so sin(x)/x approaches 1 (e.g. sin(0.01)/0.01 = 0.99998). L'Hopital's rule gives cos(0)/1 = 1.",
+      "why_convincing": "0 divided by a non-zero number is 0, and the denominator's zero is easy to overlook."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The limit is 1 (sin x ~ x near 0; or L'Hopital: cos 0 / 1 = 1).",
+    "canonical_answer": "1",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "sin(0.01) / 0.01 = 0.99998",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.99998"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "0/0 is an indeterminate form; the limit must be found by other means.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "At x = 0.001, sin(x)/x is 0.9999998, nowhere near 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Evaluate sin(x)/x for a small x."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats 0/0 as 0."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "0/0 is indeterminate."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try x = 0.01."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 0/0 is undefined; the limit is 1."
+      }
+    ],
+    "repair": "",
+    "debrief": "Indeterminate forms are invitations to look closer, not answers. Numerical checks near the point are a quick guide.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 1",
+      "flawed_solver": "answer = 0"
+    }
+  },
+  {
+    "id": "mat-calculus-fundamentals-005",
+    "subject": "mathematics",
+    "topic": "Calculus Fundamentals",
+    "subtopic": "A definite integral",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the integral of 3x^2 from 0 to 2?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Evaluate the integral of 3x^2 from 0 to 2.\nAI working: an antiderivative is x^3; [x^3] from 0 to 2 = 8 - 0 = 8."
+    },
+    "ai_claim": "8. x^3 is an antiderivative of 3x^2, and 2^3 - 0^3 = 8.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "d/dx(x^3) = 3x^2, so x^3 is an antiderivative."
+      },
+      {
+        "index": 2,
+        "text": "By the fundamental theorem, the integral is F(2) - F(0)."
+      },
+      {
+        "index": 3,
+        "text": "F(2) = 8, F(0) = 0."
+      },
+      {
+        "index": 4,
+        "text": "The integral is 8."
+      }
+    ],
+    "ai_final_answer": "8",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 8.",
+    "canonical_answer": "8",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "2^3 - 0^3 = 8",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "8"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Differentiate the proposed antiderivative."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 applies the fundamental theorem."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The integral from a to b of f = F(b) - F(a), where F' = f."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute F(2) - F(0)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The integral is 8. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Checking an antiderivative by differentiating it is a one-line verification worth doing every time.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 2 ** 3 - 0 ** 3"
+    }
+  }
+]

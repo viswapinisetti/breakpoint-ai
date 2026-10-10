@@ -1,0 +1,38 @@
+[
+  {
+    "id": "eng-val-003",
+    "subject": "english",
+    "topic": "Essential Grammar",
+    "subtopic": "Collective nouns",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this sentence correct in formal written English? \"The committee has published its findings, and the members have signed their names.\"",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "The committee has published its findings, and the members have signed their names."
+    },
+    "ai_claim": "The sentence is correct: both verbs agree with their subjects.",
+    "ai_solution": [
+      {"index": 1, "text": "\"The committee\" is a collective noun treated here as a single body, so it takes the singular \"has\" and the singular possessive \"its\"."},
+      {"index": 2, "text": "\"The members\" is a plural noun referring to the individuals, so it takes the plural \"have\" and the plural possessive \"their\"."},
+      {"index": 3, "text": "Each clause is internally consistent in number, so the sentence is correct as written."}
+    ],
+    "ai_final_answer": "correct",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. A collective noun takes a singular verb when the group acts as one unit, which is the case for \"has published its findings\", and \"the members\" is straightforwardly plural. Number agreement is consistent within each clause and the possessives match their antecedents. Mixing the two in one sentence is acceptable because the subjects are different nouns, not the same noun treated two ways.",
+    "canonical_answer": "correct",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Identify the subject of each clause separately before judging the verbs."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 treat two different subjects. Check whether that is legitimate."},
+      {"level": 3, "kind": "concept", "text": "A collective noun may take a singular verb when the group acts as a unit; a plural noun naming the individuals takes a plural verb."},
+      {"level": 4, "kind": "strong", "text": "Check that each possessive matches the noun it refers back to: \"its\" to committee, \"their\" to members."},
+      {"level": 5, "kind": "reveal", "text": "This sentence is correct. The two clauses have different subjects, so the shift from singular to plural is not an inconsistency. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "The trap here is a rule half-remembered: \"be consistent about collective nouns\" applies within a single reference, not across a sentence containing two different subjects. \"The committee\" and \"the members\" are distinct nouns and take their own agreement. A reviewer who challenges this is applying a real rule in a place it does not govern, which is the same failure mode as the AI in the other English challenges — just from the opposite direction.",
+    "validation_payload": {}
+  }
+]

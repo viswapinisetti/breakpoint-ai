@@ -1,0 +1,386 @@
+[
+  {
+    "id": "be-authentication-authorization-001",
+    "subject": "backend",
+    "topic": "Authentication & Authorization",
+    "subtopic": "Decoding a JWT without verifying it",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it safe to trust claims['sub'] here, since the tokens are issued by our own login endpoint?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "import jwt\n\ndef current_user(token: str = Depends(bearer)):\n    claims = jwt.decode(token, options={\"verify_signature\": False})\n    return users.get(claims[\"sub\"])"
+    },
+    "ai_claim": "Yes. Our server issues the tokens, so the sub claim always identifies the user who logged in.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The login endpoint signs tokens with our secret."
+      },
+      {
+        "index": 2,
+        "text": "Clients send the token back on each request."
+      },
+      {
+        "index": 3,
+        "text": "Since we issued the tokens, their contents are trustworthy."
+      },
+      {
+        "index": 4,
+        "text": "So claims['sub'] identifies the logged-in user."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Trusting a token without checking its signature",
+      "explanation": "A JWT's payload is just base64-encoded JSON; anyone can create one. The signature is the only thing that proves our server issued it, and this code skips checking it. An attacker can craft a token with sub set to any user id - an admin's, for example - and be logged in as them. Verify with jwt.decode(token, SECRET, algorithms=['HS256']).",
+      "why_convincing": "Tokens that our server issued do contain correct claims; the code just cannot tell those tokens apart from forged ones."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not safe: without signature verification, a forged token with any sub is accepted. Decode with the secret and an explicit algorithms list.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A hand-made token with payload {\"sub\": \"1\"} and any signature authenticates as user 1.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A JWT's integrity comes only from verifying its signature; the payload is readable and forgeable.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Anyone can log in as any user by editing the payload."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what proves a token came from our server."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 trusts the token's contents because of where tokens usually come from."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The signature is the only proof of origin, and the code disables its check."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Create a token by hand with a different sub."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: unverified tokens can be forged. Verify the signature with the secret."
+      }
+    ],
+    "repair": "Use `jwt.decode(token, SECRET, algorithms=[\"HS256\"])` and reject invalid tokens.",
+    "debrief": "Authentication data from the client is only as trustworthy as its verification. A JWT without a verified signature is an ordinary, attacker-controlled JSON object.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-authentication-authorization-002",
+    "subject": "backend",
+    "topic": "Authentication & Authorization",
+    "subtopic": "Fast hashes for passwords",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If the users table leaks, are the passwords still safe because only SHA-256 hashes are stored?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "import hashlib\n\ndef store_password(user, password):\n    user.password_hash = hashlib.sha256(password.encode()).hexdigest()"
+    },
+    "ai_claim": "Yes. SHA-256 is a secure one-way hash that cannot be reversed, so attackers cannot recover the passwords.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "SHA-256 is a cryptographic hash function."
+      },
+      {
+        "index": 2,
+        "text": "It cannot be inverted to recover the input."
+      },
+      {
+        "index": 3,
+        "text": "Only the hashes are stored."
+      },
+      {
+        "index": 4,
+        "text": "So the passwords stay safe after a leak."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 4,
+      "misconception": "Equating 'irreversible' with 'uncrackable'",
+      "explanation": "Attackers do not invert the hash; they guess. SHA-256 is designed to be fast - a GPU computes billions per second - and without a salt, identical passwords share a hash, so precomputed tables and a single pass over a wordlist crack most real passwords. Password storage needs a slow, salted algorithm: bcrypt, scrypt or Argon2.",
+      "why_convincing": "Steps 1-3 are true statements about SHA-256."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: unsalted fast hashes are cracked by guessing at enormous speed. Use Argon2id or bcrypt with a per-user salt.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "sha256('password123') is the same for every user and appears in public lookup tables.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "123"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "OWASP: store passwords with a slow, salted algorithm such as Argon2id, scrypt or bcrypt.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Common passwords are recovered instantly from a lookup table."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about how attackers actually recover passwords from hashes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 concludes safety from irreversibility."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Password cracking works by guessing and hashing candidates; fast, unsalted hashes make that cheap."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look up the SHA-256 of a common password."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: fast unsalted hashes are cracked by guessing. Use Argon2id or bcrypt."
+      }
+    ],
+    "repair": "Hash with Argon2id (e.g. argon2-cffi) or bcrypt, which include a salt and are deliberately slow.",
+    "debrief": "General-purpose hashes are built for speed, the opposite of what password storage needs. Password hashing is a separate category of algorithm, designed to make each guess expensive.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-authentication-authorization-003",
+    "subject": "backend",
+    "topic": "Authentication & Authorization",
+    "subtopic": "Server-side session logout",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After logout, would a stolen copy of the old session_id cookie stop working?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/logout\")\ndef logout(request: Request, db=Depends(get_db)):\n    sid = request.cookies.get(\"session_id\")\n    db.execute(delete(Session).where(Session.id == sid))\n    db.commit()\n    resp = Response(status_code=204)\n    resp.delete_cookie(\"session_id\")\n    return resp\n\n# Every authenticated request looks up session_id in the sessions table."
+    },
+    "ai_claim": "Yes. The session row is deleted, and every request looks up the session in the table, so the old id no longer authenticates anyone.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Authentication looks up the session_id in the sessions table."
+      },
+      {
+        "index": 2,
+        "text": "Logout deletes that row and commits."
+      },
+      {
+        "index": 3,
+        "text": "A request with the old session_id finds no row."
+      },
+      {
+        "index": 4,
+        "text": "So the stolen cookie no longer works."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. With server-side sessions, the server holds the authority: deleting the row revokes the session immediately, whatever copies of the cookie exist.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Replay a request with the old session_id after logout: the server responds 401.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "401"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Server-side sessions can be revoked centrally because validity is checked against server state on every request.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where the session's validity is decided."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on every request checking the table."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Revocation works when the server checks its own state rather than trusting the token alone."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Replay the old cookie after logout."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Deleting the session row revokes it for every copy of the cookie. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Server-side sessions make logout real: the server decides validity. Compare this with stateless tokens, where logout on the client does nothing to a stolen copy.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-authentication-authorization-004",
+    "subject": "backend",
+    "topic": "Authentication & Authorization",
+    "subtopic": "Logging out of a stateless JWT",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After this logout, would an attacker who had copied the access token earlier be locked out?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// Frontend logout\nfunction logout() {\n  localStorage.removeItem(\"access_token\");   // JWT, exp = 7 days\n  location.href = \"/login\";\n}\n\n// Backend: verifies the JWT signature and exp; keeps no session state."
+    },
+    "ai_claim": "Yes. Logging out deletes the token, so it can no longer be used, and the attacker's copy is invalidated along with it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The token is stored in localStorage."
+      },
+      {
+        "index": 2,
+        "text": "Logout removes it from localStorage."
+      },
+      {
+        "index": 3,
+        "text": "Once the token is removed, it is no longer valid."
+      },
+      {
+        "index": 4,
+        "text": "So the attacker's copy stops working."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Treating deletion of one copy as revocation",
+      "explanation": "Removing the token only deletes this browser's copy. The backend accepts any correctly signed token until exp, and it keeps no state that logout could change, so a stolen copy works for up to 7 days. Revocation needs server state (a denylist of token ids, a per-user token version) or short-lived access tokens with revocable refresh tokens.",
+      "why_convincing": "From the user's point of view they are logged out, which is all a normal test checks."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the stolen token remains valid until it expires, up to 7 days. Use short-lived access tokens plus server-side revocation (denylist or token version).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Call the API with the copied token after logout: it succeeds until exp.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "A stateless token is valid wherever its signature and expiry check out; the server cannot revoke it without state.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "7"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The copied token keeps working for the rest of its 7-day lifetime."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate deleting a copy of the token from making the token invalid."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes removal from localStorage affects validity."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Stateless tokens are validated by signature and expiry alone."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Use the copied token after logout."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the backend keeps no state, so other copies remain valid until exp. Add revocation and shorter lifetimes."
+      }
+    ],
+    "repair": "Shorten access-token lifetime and add server-side revocation (token denylist or per-user token version).",
+    "debrief": "Stateless authentication trades revocability for simplicity. Logout, password changes and 'sign out everywhere' all require some server state; design for it before a token leaks.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,483 @@
+[
+  {
+    "id": "cs-database-fundamentals-001",
+    "subject": "computer-science",
+    "topic": "Database Fundamentals",
+    "subtopic": "Primary keys and NULL",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can a primary key column contain NULL for rows whose id is not yet known?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. A primary key must be unique, and NULL is not equal to any value, so NULLs do not break uniqueness.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A primary key uniquely identifies each row."
+      },
+      {
+        "index": 2,
+        "text": "NULL means 'unknown' and is not equal to any other value, even another NULL."
+      },
+      {
+        "index": 3,
+        "text": "So several NULLs do not violate uniqueness."
+      },
+      {
+        "index": 4,
+        "text": "A primary key column can therefore hold NULL."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 4,
+      "misconception": "Treating a primary key as merely a UNIQUE constraint",
+      "explanation": "A primary key is UNIQUE and NOT NULL: every row must have a known, distinct key, because the key is how the row is identified and referenced. The NULL reasoning in step 2 applies to UNIQUE columns (which in most systems do allow NULLs), not to primary keys.",
+      "why_convincing": "Steps 1-3 are true statements about uniqueness and NULL, so the conclusion seems to follow."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Primary key columns are implicitly NOT NULL. Rows need an id when inserted - use an auto-generated key if the natural id is not known yet.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "PRIMARY KEY = UNIQUE + NOT NULL.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "INSERT INTO students (id, name) VALUES (NULL, 'Asha') fails with a NOT NULL violation when id is the primary key.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Inserting a row with a NULL primary key is rejected by the database."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what a primary key guarantees besides uniqueness."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 concludes from uniqueness alone."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A primary key is both unique and NOT NULL."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try inserting a row with a NULL primary key."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: primary keys are NOT NULL as well as unique, so NULL is rejected. Use an auto-generated key instead."
+      }
+    ],
+    "repair": "Replace step 4: a primary key is NOT NULL, so every row needs a value; use an auto-generated id if needed.",
+    "debrief": "Constraints are defined precisely: UNIQUE and PRIMARY KEY differ exactly on NULL. The reasoning here was correct about UNIQUE and applied it to the wrong constraint. A row that can have no identity cannot be referenced reliably, which is why the NOT NULL rule exists.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-database-fundamentals-002",
+    "subject": "computer-science",
+    "topic": "Database Fundamentals",
+    "subtopic": "What a foreign key requires",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Must the values in orders.customer_id be unique, so that each customer appears at most once in orders?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "schema": "customers(id PRIMARY KEY, name)\norders(id PRIMARY KEY, customer_id REFERENCES customers(id), total)"
+    },
+    "ai_claim": "Yes. customer_id is a foreign key to a primary key, and keys must be unique.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "orders.customer_id references customers.id."
+      },
+      {
+        "index": 2,
+        "text": "customers.id is a primary key, so it is unique."
+      },
+      {
+        "index": 3,
+        "text": "A foreign key inherits the uniqueness of the key it references."
+      },
+      {
+        "index": 4,
+        "text": "So each customer_id can appear only once in orders."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Believing a foreign key must be unique",
+      "explanation": "A foreign key only requires that each value exists in the referenced column (or is NULL). It says nothing about uniqueness in the referencing table. Many orders can share the same customer_id - that is exactly how a one-to-many relationship is represented.",
+      "why_convincing": "The referenced column is unique, and 'key' in the name suggests uniqueness everywhere the key appears."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. The foreign key enforces that every customer_id exists in customers.id; duplicates are allowed, which models one customer having many orders.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "orders rows (1, 7, 500) and (2, 7, 300): customer 7 has two orders, which the schema allows.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "7"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A foreign key constrains existence (referential integrity), not uniqueness.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Customer 7 placing two orders produces two rows with customer_id = 7."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate what the referenced column guarantees from what the referencing column must satisfy."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 transfers uniqueness across the relationship."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A foreign key guarantees referential integrity: every value must exist in the referenced table."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask how one customer with many orders would be stored."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: foreign keys require existence, not uniqueness, so a customer can appear in many orders."
+      }
+    ],
+    "repair": "Replace steps 3-4: the foreign key only requires each customer_id to exist in customers; it may repeat.",
+    "debrief": "Relationships are encoded by where the foreign key sits, and a repeating foreign key is what 'one-to-many' means. If it had to be unique, the relationship would be one-to-one. Reading a schema, ask of each foreign key: how many rows on this side can point at one row on the other?",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-database-fundamentals-003",
+    "subject": "computer-science",
+    "topic": "Database Fundamentals",
+    "subtopic": "Views are not copies",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After this view is created, does querying active_students avoid reading the students table, because the view stores its own copy of the rows?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "sql": "CREATE VIEW active_students AS\nSELECT id, name FROM students WHERE status = 'active';"
+    },
+    "ai_claim": "Yes. The view saves the selected rows, so later queries read the view instead of the students table.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "CREATE VIEW defines active_students from a query on students."
+      },
+      {
+        "index": 2,
+        "text": "The view stores the rows that query returned."
+      },
+      {
+        "index": 3,
+        "text": "Later queries on active_students read those stored rows."
+      },
+      {
+        "index": 4,
+        "text": "So the students table is not read again."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Treating a standard view as a stored copy",
+      "explanation": "A standard view stores only its query definition. Each query on active_students is rewritten into a query on students, so the base table is read every time and the results are always current. Stored results belong to materialised views, a separate feature that must be refreshed.",
+      "why_convincing": "A view behaves like a table in SELECT statements, so it is natural to assume it holds data like one."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. A (non-materialised) view is a saved query; querying it reads students every time and always reflects the current data.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Update a student's status to 'inactive'; the next query on active_students no longer returns them, with no refresh.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "A view stores its definition, not its data; materialised views store data.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Rows added to students after the view was created appear in the view immediately."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what CREATE VIEW actually saves."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says the view stores rows."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A standard view is a named query that runs against its base tables each time it is used."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Insert a new active student after creating the view, then query the view."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: a view stores only its query, so every query reads students and sees current data."
+      }
+    ],
+    "repair": "Replace steps 2-4: the view stores only its definition, so each query reads the students table.",
+    "debrief": "Views are an abstraction over queries, not a cache. That is why they always show current data and why they rarely make queries faster by themselves. When performance or freshness matters, know whether you are using a view or a materialised view, because they make opposite trade-offs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-database-fundamentals-004",
+    "subject": "computer-science",
+    "topic": "Database Fundamentals",
+    "subtopic": "First normal form",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this table in first normal form (1NF)?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "table": {
+        "columns": [
+          "student_id",
+          "name",
+          "phones"
+        ],
+        "rows": [
+          [
+            "S1",
+            "Asha",
+            "98450 11111, 98450 22222"
+          ],
+          [
+            "S2",
+            "Ravi",
+            "99000 33333"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. Every cell holds a single string, so the table is in 1NF.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "1NF requires each cell to hold a single value."
+      },
+      {
+        "index": 2,
+        "text": "The phones column holds one string in each row."
+      },
+      {
+        "index": 3,
+        "text": "A string is a single value."
+      },
+      {
+        "index": 4,
+        "text": "So the table is in first normal form."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Counting a packed list as one atomic value",
+      "explanation": "1NF requires atomic values: one fact per cell, with no repeating groups. 'phone1, phone2' packs two facts into one string, so the table is not in 1NF. Move phones into a separate table (student_id, phone) with one row per number.",
+      "why_convincing": "The storage type is technically a single string, which lets the reasoning satisfy the letter of the rule while breaking its purpose."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. The phones cell holds a list of values, which is a repeating group. Normalise into student_phones(student_id, phone).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "1NF: every attribute value is atomic - one value per cell, no lists.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Finding everyone with phone 98450 22222 requires string searching inside cells.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "98450"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Querying 'students with phone 98450 22222' needs LIKE '%...%' matching on the packed string."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how many facts one cell contains."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 counts a comma-separated list as one value."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Atomic means one indivisible fact per cell, regardless of the data type used to store it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try to query all students who have a particular phone number."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the string packs several phone numbers, so the table violates 1NF. Split phones into their own table."
+      }
+    ],
+    "repair": "Create student_phones(student_id, phone) with one row per phone number.",
+    "debrief": "Normal forms are about facts, not storage types. Packing a list into one string satisfies 'one value per cell' in form but defeats it in practice: indexing, searching and updating individual numbers all become string manipulation. Test atomicity by trying to query one element of the cell.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-database-fundamentals-005",
+    "subject": "computer-science",
+    "topic": "Database Fundamentals",
+    "subtopic": "DELETE, TRUNCATE and DROP",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this summary correct? DELETE removes rows (optionally filtered by WHERE) while keeping the table; TRUNCATE removes all rows but keeps the table's structure; DROP TABLE removes the table itself, structure and data.",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. DELETE and TRUNCATE remove rows and keep the table; DROP removes the table entirely.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "DELETE FROM t WHERE ... removes only matching rows; without WHERE it removes every row."
+      },
+      {
+        "index": 2,
+        "text": "TRUNCATE TABLE t removes all rows, cannot take a WHERE clause, and keeps the table's definition."
+      },
+      {
+        "index": 3,
+        "text": "DROP TABLE t removes the table's definition along with its data."
+      },
+      {
+        "index": 4,
+        "text": "So the summary is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. DELETE is row-by-row and filterable; TRUNCATE empties the table (usually faster, and it cannot be filtered); DROP removes the table itself. Details such as transaction and trigger behaviour vary by database, but the summary holds.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "After TRUNCATE, SELECT * returns 0 rows; after DROP, SELECT * fails because the table no longer exists.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each command's effect on rows and on the table definition separately."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says TRUNCATE keeps the structure. Verify it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "DELETE and TRUNCATE are data operations; DROP removes the object itself."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what SELECT returns after TRUNCATE, and after DROP."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. DELETE and TRUNCATE remove rows while keeping the table; DROP removes the table. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Three commands that all 'remove data' differ in scope, and confusing them has cost many teams a table. The summary distinguishes rows from structure precisely. Before running any destructive command, name what it removes - some rows, all rows, or the table itself.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

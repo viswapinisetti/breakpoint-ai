@@ -1,0 +1,87 @@
+[
+  {
+    "id": "ai-src-002",
+    "subject": "ai",
+    "topic": "Large Language Models",
+    "subtopic": "Unsupported source claims",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "An assistant was asked what the refund window is. It was given the policy excerpt below and produced the answer that follows. Is the answer fully supported by the excerpt?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "source_excerpt": "Section 4.2 — Returns. Customers may return unopened items within 30 days of delivery for a full refund. Opened items are assessed case by case.",
+      "assistant_answer": "According to Section 4.2, you can return items within 30 days for a full refund, and opened items qualify for a partial refund of 50%."
+    },
+    "ai_claim": "The answer is fully grounded in the supplied policy excerpt.",
+    "ai_solution": [
+      {"index": 1, "text": "The answer cites Section 4.2, which is the section supplied."},
+      {"index": 2, "text": "The 30-day window and the full refund for unopened items both appear verbatim in the excerpt."},
+      {"index": 3, "text": "The treatment of opened items is also addressed in the excerpt, so that part of the answer is covered too."},
+      {"index": 4, "text": "Every element of the answer traces to the source. The answer is fully grounded."}
+    ],
+    "ai_final_answer": "grounded",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F14",
+      "location": 3,
+      "misconception": "Treating a topic being mentioned as the claim being supported",
+      "explanation": "The excerpt says opened items are \"assessed case by case\" — it states no percentage at all. The assistant's \"partial refund of 50%\" is invented. The topic appears in the source; the specific claim does not.",
+      "why_convincing": "Steps 1 and 2 are exactly right, and the fabricated detail sits next to two verifiable ones. The excerpt does discuss opened items, so a reviewer skimming for topic coverage finds a match and moves on."
+    },
+    "canonical_solution": "Not fully grounded. The 30-day window and the full refund for unopened items are supported verbatim. The claim that opened items receive a 50% partial refund appears nowhere in the excerpt, which says only that they are assessed case by case. The correct answer would report that opened items are handled individually, and decline to state a figure.",
+    "canonical_answer": "not grounded",
+    "valid_evidence": [
+      {"type": "data_point", "summary": "The excerpt says \"case by case\", never 50%.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "contradiction", "summary": "The answer states a figure the source does not contain.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["Search the excerpt for \"50\" or \"partial\": neither string occurs. The figure has no source."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Check each claim in the answer against the exact words of the source, not against the topic."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 verify fine. Step 3 makes a different kind of claim — test it the same way."},
+      {"level": 3, "kind": "concept", "text": "A source mentioning a topic is not the same as a source supporting a specific claim about it."},
+      {"level": 4, "kind": "strong", "text": "Find the sentence in the excerpt that states a percentage for opened items."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 confuses topic coverage with support. The excerpt says opened items are \"assessed case by case\" and states no percentage; the 50% figure is fabricated."}
+    ],
+    "repair": "Step 3 should note that the excerpt states no percentage for opened items. The grounded answer is: unopened items, 30 days, full refund; opened items, assessed individually — no figure available.",
+    "debrief": "Grounding is checked claim by claim, not answer by answer. A fabricated detail placed among verified ones inherits their credibility, which is exactly why partially-grounded answers are more dangerous than wholly invented ones. The habit: for each factual assertion, find the span that supports it. If you cannot point at the words, the claim is unsupported no matter how relevant the document is.",
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-emb-003",
+    "subject": "ai",
+    "topic": "RAG & Vector Search",
+    "subtopic": "Similarity and relevance",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "An engineer explains why their retrieval system returns poor results for negated queries. Is the explanation sound?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "claim": "Query: \"contracts that are NOT governed by English law\" returns mostly English-law contracts."
+    },
+    "ai_claim": "The system behaves this way because embedding similarity measures topical closeness, not logical negation — so the negation is largely ignored and the query lands near English-law contracts.",
+    "ai_solution": [
+      {"index": 1, "text": "The query is embedded into the same vector space as the documents."},
+      {"index": 2, "text": "Nearest-neighbour search ranks documents by geometric proximity to the query vector."},
+      {"index": 3, "text": "Proximity in that space reflects topical and lexical similarity; it has no operator that inverts a region of the space."},
+      {"index": 4, "text": "So \"NOT governed by English law\" embeds close to \"governed by English law\", because the two share almost all their content words. The negation is not honoured, and English-law contracts rank highly."}
+    ],
+    "ai_final_answer": "sound",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "canonical_solution": "Sound. Dense retrieval scores documents by vector proximity, and negation is not a geometric operation in that space — a query and its negation share nearly all their tokens and therefore embed close together. The standard mitigations are metadata filtering (exclude by a governing-law field), hybrid retrieval with a structured predicate, or query rewriting that turns the negation into an explicit filter rather than leaving it in the text.",
+    "canonical_answer": "sound",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask whether each step describes what the system actually computes."},
+      {"level": 2, "kind": "direction", "text": "Step 3 makes a claim about what proximity does and does not encode. Test it."},
+      {"level": 3, "kind": "concept", "text": "Nearest-neighbour search ranks by distance. Nothing in that operation implements logical negation."},
+      {"level": 4, "kind": "strong", "text": "Consider how much of the query text changes when \"NOT\" is added, and how much the vector moves."},
+      {"level": 5, "kind": "reveal", "text": "This explanation is correct. Negation is not a geometric operation, the two queries share nearly all their content, and the observed behaviour follows. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "It is worth being able to approve a correct mechanistic explanation as confidently as you can reject a wrong one. The test applied here is the same either way: does each step describe an operation the system actually performs? Retrieval really does rank by distance, and distance really has no negation operator — so the conclusion follows. Reaching for a fix (metadata filters, hybrid retrieval) is the next step, not evidence the diagnosis was wrong.",
+    "validation_payload": {}
+  }
+]

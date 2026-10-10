@@ -1,0 +1,518 @@
+[
+  {
+    "id": "dsa-stacks-queues-001",
+    "subject": "dsa",
+    "topic": "Stacks & Queues",
+    "subtopic": "Counting brackets instead of matching them",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does balanced(s) return True exactly when every bracket in s is closed by the matching bracket type, in the right order?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def balanced(s):\n    count = 0\n    for c in s:\n        if c in \"([{\":\n            count += 1\n        elif c in \")]}\":\n            count -= 1\n    return count == 0"
+    },
+    "ai_claim": "Yes. Every opener adds 1 and every closer subtracts 1, so a final count of 0 means all brackets are matched.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each opening bracket increases count by 1."
+      },
+      {
+        "index": 2,
+        "text": "Each closing bracket decreases it by 1."
+      },
+      {
+        "index": 3,
+        "text": "A final count of 0 means every opener has a matching closer in the right order."
+      },
+      {
+        "index": 4,
+        "text": "So balanced(s) is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Treating equal counts as correct nesting",
+      "explanation": "A count of 0 only means the numbers of openers and closers are equal. It ignores types and order: '([)]' and ')(' both end at 0 but are not balanced. Matching needs a stack: push openers, and on each closer pop and check that it is the matching type.",
+      "why_convincing": "Counting works for a single bracket type in the common case, and simple tests like '(())' pass."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The counter ignores bracket type and order. balanced('([)]') and balanced(')(') both return True. Use a stack of openers and check each closer against the top.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "balanced('([)]') returns True, but the brackets are interleaved.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "balanced(')(') returns True; the first character closes nothing.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "balanced(')(') returns True."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test strings with mixed bracket types and unusual orders."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims a count of 0 implies correct order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A count records how many brackets are open, not which kind or in what order."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run balanced on '([)]' and on ')('."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: equal counts ignore type and order, so '([)]' and ')(' pass. Use a stack to match each closer."
+      }
+    ],
+    "repair": "Push each opener onto a stack; for each closer, pop and check it matches; the string is balanced if the stack ends empty.",
+    "debrief": "A counter compresses the bracket sequence into one number and loses exactly the information nesting depends on. Stacks exist for last-opened, first-closed structure. Build test cases that keep the counts equal but break the order.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "balanced",
+      "ai_code": "def balanced(s):\n    count = 0\n    for c in s:\n        if c in \"([{\":\n            count += 1\n        elif c in \")]}\":\n            count -= 1\n    return count == 0",
+      "reference_code": "def balanced(s):\n    pairs = {')': '(', ']': '[', '}': '{'}\n    stack = []\n    for c in s:\n        if c in '([{':\n            stack.append(c)\n        elif c in pairs:\n            if not stack or stack.pop() != pairs[c]:\n                return False\n    return not stack",
+      "test_inputs": [
+        "('()[]',)",
+        "('(()',)",
+        "('([)]',)",
+        "(')(',)"
+      ],
+      "counterexample_input": "('([)]',)"
+    }
+  },
+  {
+    "id": "dsa-stacks-queues-002",
+    "subject": "dsa",
+    "topic": "Stacks & Queues",
+    "subtopic": "Dequeuing from the front of a list",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the time complexity of dequeue() when the queue holds n items?",
+    "artifact_type": "complexity_analysis",
+    "artifact": {
+      "language": "python",
+      "code": "queue = []\n\ndef enqueue(x):\n    queue.append(x)\n\ndef dequeue():\n    return queue.pop(0)"
+    },
+    "ai_claim": "dequeue is O(1): pop removes one item, and removing an item takes constant time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "enqueue appends to the end of the list in O(1) amortised time."
+      },
+      {
+        "index": 2,
+        "text": "dequeue removes the first item with pop(0)."
+      },
+      {
+        "index": 3,
+        "text": "Removing a single item is a constant amount of work."
+      },
+      {
+        "index": 4,
+        "text": "So dequeue is O(1)."
+      }
+    ],
+    "ai_final_answer": "O(1)",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 3,
+      "misconception": "Assuming removal from the front of an array is constant time",
+      "explanation": "A Python list is a dynamic array. pop(0) removes the first element and then shifts every remaining element one place to the left, which is O(n). pop() from the end is O(1). collections.deque provides O(1) popleft for queues.",
+      "why_convincing": "pop() at the end really is O(1), and pop(0) looks like the same operation with an argument."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "pop(0) shifts n - 1 elements, so dequeue is O(n). Use collections.deque and popleft() for O(1) dequeues.",
+    "canonical_answer": "O(n)",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "pop(0) on [a, b, c, d] moves b, c and d one slot left: n - 1 moves",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Dequeuing all 100,000 items one by one does about 5,000,000,000 element moves in total.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "100000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Draining a 100,000-item list with pop(0) is dramatically slower than with deque.popleft()."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about how a list stores its elements in memory."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats removing the first item like removing the last."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A dynamic array must keep its elements contiguous, so removing from the front shifts everything after it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the element moves needed for pop(0) on a list of n items."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: pop(0) shifts every remaining element, so it is O(n). Use collections.deque."
+      }
+    ],
+    "repair": "Use `collections.deque` with `append` and `popleft`, both O(1).",
+    "debrief": "The cost of an operation depends on the underlying structure, not on how short the method call looks. Arrays are cheap at the end and expensive at the front, which is why queues are built on deques or linked structures. When a data structure is used as a queue, check the cost of the removal end.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dsa-stacks-queues-003",
+    "subject": "dsa",
+    "topic": "Stacks & Queues",
+    "subtopic": "Minimum stack after pops",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After push(5), push(2), pop(), does get_min() return 5, the smallest item still on the stack?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "class MinStack:\n    def __init__(self):\n        self.items = []\n        self.min = None\n\n    def push(self, x):\n        self.items.append(x)\n        if self.min is None or x < self.min:\n            self.min = x\n\n    def pop(self):\n        return self.items.pop()\n\n    def get_min(self):\n        return self.min"
+    },
+    "ai_claim": "Yes. get_min returns the minimum, which is updated whenever a smaller value is pushed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "push(5) makes 5 the minimum."
+      },
+      {
+        "index": 2,
+        "text": "push(2) makes 2 the new minimum."
+      },
+      {
+        "index": 3,
+        "text": "pop() removes 2, and the stack is left holding only 5."
+      },
+      {
+        "index": 4,
+        "text": "get_min() therefore returns 5."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 4,
+      "misconception": "Forgetting to restore the minimum after a pop",
+      "explanation": "self.min is updated on push but never on pop. After 2 is popped, self.min is still 2, so get_min() returns 2 although 2 is no longer on the stack. A correct min-stack keeps a parallel stack of minimums (push min(x, current_min) and pop it with each item).",
+      "why_convincing": "Step 3 correctly describes the stack's contents, and it is natural to assume the minimum follows them."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "pop never updates self.min, so get_min() returns the stale value 2. Keep a second stack of running minimums so each pop restores the previous minimum.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "push 5, push 2, pop, get_min -> 2 (should be 5).",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "2",
+          "5"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "items [5, 2] min 2 -> pop -> items [5], min still 2",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "After push(5), push(2), pop(), get_min() returns 2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which methods change self.min."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes the minimum follows the pop."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "When the minimum is removed, the previous minimum must be recovered."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace self.min through push 5, push 2, pop."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: pop does not update self.min, so get_min returns the removed 2. Keep a stack of minimums."
+      }
+    ],
+    "repair": "Maintain `self.mins`, pushing `min(x, self.mins[-1])` on push and popping it on pop; get_min returns `self.mins[-1]`.",
+    "debrief": "Cached summaries - a minimum, a total, a count - must be updated by every operation that changes the data, including removals. The classic min-stack keeps history, because a single variable cannot remember what the minimum was before. Test cached values after each kind of operation.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "run",
+      "ai_code": "class MinStack:\n    def __init__(self):\n        self.items = []\n        self.min = None\n\n    def push(self, x):\n        self.items.append(x)\n        if self.min is None or x < self.min:\n            self.min = x\n\n    def pop(self):\n        return self.items.pop()\n\n    def get_min(self):\n        return self.min\n\ndef run(ops):\n    s = MinStack()\n    out = []\n    for op in ops:\n        if op[0] == 'push':\n            s.push(op[1])\n        elif op[0] == 'pop':\n            s.pop()\n        else:\n            out.append(s.get_min())\n    return out",
+      "reference_code": "def run(ops):\n    items, out = [], []\n    for op in ops:\n        if op[0] == 'push':\n            items.append(op[1])\n        elif op[0] == 'pop':\n            items.pop()\n        else:\n            out.append(min(items))\n    return out",
+      "test_inputs": [
+        "([['push', 3], ['min']],)",
+        "([['push', 5], ['push', 7], ['pop'], ['min']],)",
+        "([['push', 5], ['push', 2], ['pop'], ['min']],)"
+      ],
+      "counterexample_input": "([['push', 5], ['push', 2], ['pop'], ['min']],)"
+    }
+  },
+  {
+    "id": "dsa-stacks-queues-004",
+    "subject": "dsa",
+    "topic": "Stacks & Queues",
+    "subtopic": "Stacks give depth-first order",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For the tree {'A': ['B', 'C'], 'B': ['D'], 'C': ['E']} rooted at 'A', does level_order return the nodes level by level: A, B, C, D, E?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def level_order(tree, root):\n    \"\"\"tree maps each node to its list of children.\"\"\"\n    order, stack = [], [root]\n    while stack:\n        node = stack.pop()\n        order.append(node)\n        stack.extend(tree.get(node, []))\n    return order"
+    },
+    "ai_claim": "Yes. It visits the root, then its children, then their children, so the nodes come out level by level.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The traversal starts with the root A."
+      },
+      {
+        "index": 2,
+        "text": "Each visited node's children are added to the collection of nodes to visit."
+      },
+      {
+        "index": 3,
+        "text": "Children are always visited after their parents, so nodes come out level by level."
+      },
+      {
+        "index": 4,
+        "text": "level_order returns A, B, C, D, E."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Using a stack where breadth-first order needs a queue",
+      "explanation": "Taking nodes from the end of a list (stack.pop()) gives last-in, first-out order: depth-first. After A, the children B and C are pushed and C is popped first, then C's child E, then B and D: the result is A, C, E, B, D. Level order needs a queue (collections.deque with popleft).",
+      "why_convincing": "Step 3 is true - children are visited after parents - but that holds for depth-first order too, so it does not establish level order."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "With a stack the traversal is depth-first: A, C, E, B, D. Use a queue (deque.popleft) for breadth-first, level-by-level order.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "level_order returns ['A', 'C', 'E', 'B', 'D'].",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "stack [A] -> pop A, push B, C -> pop C, push E -> pop E -> pop B, push D -> pop D",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The result visits E (level 3) before B (level 2)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which end of the list nodes are taken from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3's reasoning also fits depth-first order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A stack gives last-in, first-out order; breadth-first traversal needs first-in, first-out."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace the traversal with the given tree."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 does not prove level order: stack.pop() gives depth-first order A, C, E, B, D. Use a queue."
+      }
+    ],
+    "repair": "Use `queue = collections.deque([root])` and `queue.popleft()`.",
+    "debrief": "Breadth-first and depth-first traversal are the same loop with a different container: queue versus stack. That makes the choice of container the whole algorithm. When reviewing a traversal, find the line that removes the next node and check which end it takes from.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "level_order",
+      "ai_code": "def level_order(tree, root):\n    \"\"\"tree maps each node to its list of children.\"\"\"\n    order, stack = [], [root]\n    while stack:\n        node = stack.pop()\n        order.append(node)\n        stack.extend(tree.get(node, []))\n    return order",
+      "reference_code": "from collections import deque\n\ndef level_order(tree, root):\n    order, queue = [], deque([root])\n    while queue:\n        node = queue.popleft()\n        order.append(node)\n        queue.extend(tree.get(node, []))\n    return order",
+      "test_inputs": [
+        "({'A': []}, 'A')",
+        "({'A': ['B', 'C'], 'B': ['D'], 'C': ['E']}, 'A')"
+      ],
+      "counterexample_input": "({'A': ['B', 'C'], 'B': ['D'], 'C': ['E']}, 'A')"
+    }
+  },
+  {
+    "id": "dsa-stacks-queues-005",
+    "subject": "dsa",
+    "topic": "Stacks & Queues",
+    "subtopic": "Circular buffer indexing",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does RingBuffer behave as a fixed-capacity FIFO queue: items come out in the order they went in, pushing when full raises OverflowError, and popping when empty raises IndexError?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "class RingBuffer:\n    def __init__(self, capacity):\n        self.buf = [None] * capacity\n        self.head = 0\n        self.size = 0\n\n    def push(self, x):\n        if self.size == len(self.buf):\n            raise OverflowError(\"full\")\n        self.buf[(self.head + self.size) % len(self.buf)] = x\n        self.size += 1\n\n    def pop(self):\n        if self.size == 0:\n            raise IndexError(\"empty\")\n        x = self.buf[self.head]\n        self.head = (self.head + 1) % len(self.buf)\n        self.size -= 1\n        return x"
+    },
+    "ai_claim": "Yes. The modulo arithmetic wraps both ends around the array, and size guards the full and empty cases.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "head is the index of the oldest item and size is the number of items stored."
+      },
+      {
+        "index": 2,
+        "text": "push writes at (head + size) % capacity, the slot just after the newest item, wrapping around the end."
+      },
+      {
+        "index": 3,
+        "text": "pop reads at head, then advances head with (head + 1) % capacity, so items leave in arrival order."
+      },
+      {
+        "index": 4,
+        "text": "size == capacity rejects a push and size == 0 rejects a pop, so the error cases are handled."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Tracking head and size (rather than head and tail) avoids the classic full/empty ambiguity, and the modulo arithmetic keeps both positions inside the array. All operations are O(1).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "cap 3: push 1, 2; pop -> 1; push 3, 4 (wraps to slot 0); push 5 -> OverflowError; pops -> 2, 3, 4; pop -> IndexError",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1",
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the wrap-around case and the full/empty cases."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 computes the write position. Test it after the head has moved."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Keeping an explicit size distinguishes a full buffer from an empty one."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace pushes and pops that make the write position wrap past the end of the array."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Writes and reads wrap with modulo arithmetic, and size handles full and empty. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Circular buffers are a favourite source of off-by-one bugs, especially in telling 'full' from 'empty' when head equals tail. This version sidesteps the problem by storing the size explicitly. Verify ring buffers by tracing a sequence that wraps around at least once.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "run",
+      "ai_code": "class RingBuffer:\n    def __init__(self, capacity):\n        self.buf = [None] * capacity\n        self.head = 0\n        self.size = 0\n\n    def push(self, x):\n        if self.size == len(self.buf):\n            raise OverflowError(\"full\")\n        self.buf[(self.head + self.size) % len(self.buf)] = x\n        self.size += 1\n\n    def pop(self):\n        if self.size == 0:\n            raise IndexError(\"empty\")\n        x = self.buf[self.head]\n        self.head = (self.head + 1) % len(self.buf)\n        self.size -= 1\n        return x\n\ndef run(capacity, ops):\n    rb = RingBuffer(capacity)\n    out = []\n    for op in ops:\n        try:\n            if op[0] == 'push':\n                rb.push(op[1])\n            else:\n                out.append(rb.pop())\n        except (OverflowError, IndexError) as e:\n            out.append(type(e).__name__)\n    return out",
+      "reference_code": "from collections import deque\n\ndef run(capacity, ops):\n    q, out = deque(), []\n    for op in ops:\n        if op[0] == 'push':\n            if len(q) == capacity:\n                out.append('OverflowError')\n            else:\n                q.append(op[1])\n        else:\n            out.append(q.popleft() if q else 'IndexError')\n    return out",
+      "test_inputs": [
+        "(3, [['push', 1], ['push', 2], ['pop'], ['push', 3], ['push', 4], ['push', 5], ['pop'], ['pop'], ['pop'], ['pop']])",
+        "(1, [['pop'], ['push', 9], ['pop']])"
+      ]
+    }
+  }
+]

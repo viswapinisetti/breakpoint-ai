@@ -1,0 +1,472 @@
+[
+  {
+    "id": "nc-webhooks-api-integration-001",
+    "subject": "no-code-automation",
+    "topic": "Webhooks & API Integration",
+    "subtopic": "An unverified catch hook",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is every call to this webhook guaranteed to be a real payment?",
+    "artifact_type": "trigger_config",
+    "artifact": {
+      "workflow": "Trigger: Catch webhook at https://hooks.example-automation.com/abc123 (no secret, no signature check)\nActions: create a paid order in the ERP and dispatch the shipment.\nAI: \"Only our payment provider knows this URL, so every call is a real payment.\""
+    },
+    "ai_claim": "Yes. The URL is long and random and was only given to the payment provider, so only it sends requests there.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The URL was configured only in the payment provider."
+      },
+      {
+        "index": 2,
+        "text": "It is long and random."
+      },
+      {
+        "index": 3,
+        "text": "So only the provider can call it."
+      },
+      {
+        "index": 4,
+        "text": "Every call is a real payment."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Trusting a webhook URL as authentication",
+      "explanation": "Anyone who learns the URL - from logs, a browser extension, a shared screenshot, a former employee - can POST a fake 'payment succeeded' event and receive free shipments. Verify the provider's signature (HMAC with a shared secret) or confirm the payment via the provider's API before acting.",
+      "why_convincing": "A random URL is hard to guess."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: anyone with the URL can send fake payments. Verify signatures or confirm with the provider's API.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "curl -X POST the URL with a forged 'payment.succeeded' body creates a paid order and dispatches goods.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Webhooks must be authenticated (signatures or verification calls), not just obscure.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A leaked URL lets anyone trigger shipments."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what stops someone else posting to the URL."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on secrecy of the URL."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Webhook receivers must verify the sender."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send a forged request."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: URLs leak. Verify signatures."
+      }
+    ],
+    "repair": "Verify the provider's signature header, or fetch the payment from the provider's API before acting.",
+    "debrief": "A webhook endpoint is a public door. Verification is the lock.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-webhooks-api-integration-002",
+    "subject": "no-code-automation",
+    "topic": "Webhooks & API Integration",
+    "subtopic": "Only the first page of results",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will all 2,300 contacts receive the newsletter?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "HTTP module: GET https://crm.example.com/api/contacts\nThe API returns 100 contacts per page with a 'next_page' link; the account has 2,300 contacts.\nNext step: send the monthly newsletter to every contact returned.\nAI: \"All 2,300 contacts will receive the newsletter.\""
+    },
+    "ai_claim": "Yes. The request fetches the contacts from the CRM, and the newsletter goes to every contact returned.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The HTTP module calls the contacts endpoint."
+      },
+      {
+        "index": 2,
+        "text": "The CRM returns the contacts."
+      },
+      {
+        "index": 3,
+        "text": "The newsletter is sent to each one."
+      },
+      {
+        "index": 4,
+        "text": "So all 2,300 contacts receive it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Ignoring pagination",
+      "explanation": "The API returns only the first page - 100 contacts - plus a link to the next page. Without following next_page until it is empty, 2,200 contacts are never fetched. Use the module's pagination setting or a loop that requests pages until there is no next link.",
+      "why_convincing": "Small test accounts fit on one page, so everything looks complete."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: only the first 100 contacts are fetched. Follow next_page until all 23 pages are retrieved.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "response: 100 items, next_page=...&page=2 -> never requested",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "100"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Paginated APIs require repeated requests to retrieve all results.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Only 100 of 2,300 contacts get the newsletter."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the items in one response."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes one request returns everything."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Follow pagination links until exhausted."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for next_page in the response."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: only one page is fetched."
+      }
+    ],
+    "repair": "Enable pagination (or loop over next_page) to fetch all 23 pages.",
+    "debrief": "Assume every list endpoint is paginated until the documentation says otherwise.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-webhooks-api-integration-003",
+    "subject": "no-code-automation",
+    "topic": "Webhooks & API Integration",
+    "subtopic": "Calling a rate-limited API in a loop",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will all 500 prices be updated in under a minute?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Iterator over 500 products -> HTTP PUT to the shop API to update each price (runs as fast as possible, about 500 requests in 40 seconds).\nAPI documentation: limit 60 requests per minute; excess requests get 429 Too Many Requests.\nAI: \"All 500 prices will be updated in under a minute.\""
+    },
+    "ai_claim": "Yes. The loop sends all 500 requests within 40 seconds, so every price is updated in under a minute.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The iterator sends 500 PUT requests."
+      },
+      {
+        "index": 2,
+        "text": "They are sent in about 40 seconds."
+      },
+      {
+        "index": 3,
+        "text": "Each request updates one price."
+      },
+      {
+        "index": 4,
+        "text": "So all prices are updated in under a minute."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Ignoring the API's rate limit",
+      "explanation": "At 60 requests per minute, only about 60 of the burst succeed; the rest receive 429 and, unless the workflow retries, those prices are never updated - leaving a mix of old and new prices. Throttle to the limit (a sleep or rate-limit setting), handle 429 with retry after the Retry-After delay, or use a bulk endpoint. 500 updates at 60/min take about 8.5 minutes.",
+      "why_convincing": "The loop itself runs quickly, which looks like success."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the API accepts 60 requests per minute, so most requests get 429. Throttle, retry on 429, or use a bulk endpoint.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "requests 1-60 -> 200; requests 61-500 -> 429 Too Many Requests",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "60",
+          "429"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Respect documented rate limits; handle 429 with backoff.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "440 products keep their old prices."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the request rate with the documented limit."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every request succeeds."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "APIs reject requests beyond their rate limit."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check responses after the 60th request."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: most requests are rejected. Throttle and retry."
+      }
+    ],
+    "repair": "Throttle to 60/min, retry 429 responses after Retry-After, or use a bulk update endpoint.",
+    "debrief": "External APIs set the pace. Integrations must slow down to it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-webhooks-api-integration-004",
+    "subject": "no-code-automation",
+    "topic": "Webhooks & API Integration",
+    "subtopic": "Building JSON by string concatenation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the request body valid JSON for every customer?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "HTTP body (raw text):\n{\"customer\": \"{{name}}\", \"note\": \"{{note}}\"}\nA customer's note: She said \"call after 6\" please\nAI: \"The request body is valid JSON for every customer.\""
+    },
+    "ai_claim": "Yes. The template is valid JSON with the fields filled in, so every request body is valid.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The template is a JSON object."
+      },
+      {
+        "index": 2,
+        "text": "The name and note are inserted as values."
+      },
+      {
+        "index": 3,
+        "text": "The result keeps the JSON structure."
+      },
+      {
+        "index": 4,
+        "text": "So every body is valid JSON."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Inserting unescaped text into JSON",
+      "explanation": "The inserted note contains double quotes, which end the JSON string early: {\"note\": \"She said \"call after 6\" please\"} is invalid, so the API rejects the request (400). Newlines and backslashes cause the same problem. Use the platform's JSON body builder (key-value fields) or a JSON-escape function for inserted values.",
+      "why_convincing": "Templates with typical test values produce valid JSON."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: quotes in the note break the JSON. Build the body with structured fields or escape values.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The request with the sample note returns 400: 'Unexpected token c in JSON at position 42'.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "400"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Values inserted into JSON must be escaped; structured builders do this automatically.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A note containing a newline also breaks the body."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Insert the sample note into the template by hand."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes any text fits inside the quotes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Quotes and newlines must be escaped in JSON strings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send a note containing quotes."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: unescaped quotes break the JSON."
+      }
+    ],
+    "repair": "Use the HTTP module's JSON/key-value body option instead of raw text.",
+    "debrief": "Building structured formats with string templates fails on the first unusual input. Use structure-aware builders.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-webhooks-api-integration-005",
+    "subject": "no-code-automation",
+    "topic": "Webhooks & API Integration",
+    "subtopic": "Store first, then process",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this design avoids losing events and makes failures recoverable?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Webhook workflow A: receive the event -> save the raw payload to a 'webhook_events' table with the event ID (unique) -> respond 200.\nWorkflow B (every minute): process unprocessed events from the table, marking each as processed; failures stay unprocessed and alert after 3 attempts."
+    },
+    "ai_claim": "Yes. Every event is stored before acknowledgement, the unique ID prevents duplicates, and processing is retried from the table, so a failure in processing never loses the event and can be replayed after a fix.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Events are persisted before the 200 response."
+      },
+      {
+        "index": 2,
+        "text": "The unique event ID blocks duplicate inserts."
+      },
+      {
+        "index": 3,
+        "text": "Processing reads from the table and marks progress."
+      },
+      {
+        "index": 4,
+        "text": "Failed events remain for retry and alerting."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Separating receipt (durable storage) from processing is a robust pattern for webhooks in no-code and code alike.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "CRM down 09:00-09:20 -> events stored -> B retries -> all processed at 09:21",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "09:21"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what happens if processing fails."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 guarantees nothing is lost."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Durable storage plus retries makes processing recoverable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Simulate a 20-minute CRM outage."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Events are never lost. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Acknowledge fast, store durably, process separately: a pattern that survives outages.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

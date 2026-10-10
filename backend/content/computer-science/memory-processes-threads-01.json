@@ -1,0 +1,439 @@
+[
+  {
+    "id": "cs-memory-processes-threads-001",
+    "subject": "computer-science",
+    "topic": "Memory, Processes & Threads",
+    "subtopic": "What threads share",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Two threads in the same process increment the same global variable counter. Does each thread work on its own private copy of counter?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. Each thread gets its own copy of the process's variables, so they do not interfere.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A thread is an independent path of execution."
+      },
+      {
+        "index": 2,
+        "text": "Each thread has its own stack and registers."
+      },
+      {
+        "index": 3,
+        "text": "Each thread also gets its own copy of the global variables."
+      },
+      {
+        "index": 4,
+        "text": "So each thread increments its own private counter."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating threads like separate processes",
+      "explanation": "Threads in one process share the same address space: globals, heap and open files. Only the stack, registers and thread-local storage are per-thread. Both threads update the same counter, which is exactly why unsynchronised access causes races.",
+      "why_convincing": "Step 2 is true, and the per-thread stack makes 'each thread has its own copy' sound like a general rule. Processes, unlike threads, really do get separate copies."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Threads share the process's global variables and heap; only stacks, registers and thread-local storage are private. Both threads modify the same counter and need synchronisation.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Threads of one process share the address space; only stack, registers and thread-local storage are per-thread.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "contradiction",
+        "summary": "Race conditions on shared variables could not exist if each thread had its own copy.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Two threads each adding 1 to a shared counter 1,000 times can leave it below 2,000, which is only possible if they share it."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate what is per-thread from what is per-process."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 extends step 2's per-thread stack to global variables."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Threads share their process's memory; processes do not share memory with each other by default."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask why mutexes exist for threads at all."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: globals and the heap are shared by all threads in a process, so both threads update the same counter."
+      }
+    ],
+    "repair": "Replace step 3: global variables and the heap are shared between threads; only stacks and registers are private.",
+    "debrief": "The line between thread and process is about memory: processes are isolated, threads are not. That sharing is what makes threads cheap to communicate and dangerous to program. When reasoning about concurrency, first list which data is shared, because every shared, mutable item needs protection.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-memory-processes-threads-002",
+    "subject": "computer-science",
+    "topic": "Memory, Processes & Threads",
+    "subtopic": "Non-atomic increments",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Two threads run work() concurrently with no locking. Is the final value of counter always 2,000,000?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "language": "c",
+      "code": "int counter = 0;  /* shared */\n\nvoid *work(void *arg) {\n    for (int i = 0; i < 1000000; i++)\n        counter += 1;   /* no lock */\n    return NULL;\n}\n/* two threads run work() at the same time */"
+    },
+    "ai_claim": "Yes. `counter += 1` is a single statement, so each increment happens completely, and 2 x 1,000,000 = 2,000,000.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each thread performs 1,000,000 increments."
+      },
+      {
+        "index": 2,
+        "text": "`counter += 1` is a single statement, so it executes as one indivisible operation."
+      },
+      {
+        "index": 3,
+        "text": "No increment can be lost, since each one completes before another starts."
+      },
+      {
+        "index": 4,
+        "text": "The final value is always 2,000,000."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Treating one source statement as one atomic machine operation",
+      "explanation": "counter += 1 compiles to a read, an add and a write. Two threads can both read the same value, both add 1 and both write it back, losing one increment. The final value is often less than 2,000,000 and varies between runs. A mutex or an atomic increment is required.",
+      "why_convincing": "At the source level the statement looks indivisible, and on a single core with a lucky schedule the answer can even come out right."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. The increment is a read-modify-write sequence; interleaving loses updates, so the result is usually below 2,000,000 and nondeterministic. Use a mutex or an atomic operation such as atomic_fetch_add.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "T1 reads 5; T2 reads 5; T1 writes 6; T2 writes 6 -> one increment lost",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "5",
+          "6"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Unsynchronised read-modify-write on shared data is a data race.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Interleaving T1 read, T2 read, T1 write, T2 write increments counter once instead of twice."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about what the processor actually does for `counter += 1`."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats one line of C as one indivisible operation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An increment is a load, an add and a store; another thread can run between them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Interleave the load, add and store of two threads and track counter's value."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the increment is read-modify-write, so concurrent updates can be lost and the total is often below 2,000,000. Use a lock or an atomic."
+      }
+    ],
+    "repair": "Protect the increment with a mutex, or use an atomic increment.",
+    "debrief": "Atomicity is a property of machine operations, not of source lines. Race conditions are dangerous precisely because they are intermittent: tests can pass many times before the bad interleaving appears. Treat every unsynchronised write to shared data as a bug, whether or not a test has caught it yet.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-memory-processes-threads-003",
+    "subject": "computer-science",
+    "topic": "Memory, Processes & Threads",
+    "subtopic": "Stack and heap lifetimes",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In C, are a function's local variables freed automatically when it returns, while memory obtained with malloc stays allocated until free is called?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. Locals live on the calling thread's stack and disappear on return; malloc'd memory lives on the heap until freed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Local (automatic) variables are stored in the function's stack frame."
+      },
+      {
+        "index": 2,
+        "text": "The stack frame is popped when the function returns, so its locals no longer exist."
+      },
+      {
+        "index": 3,
+        "text": "malloc allocates from the heap, which is not tied to any function call."
+      },
+      {
+        "index": 4,
+        "text": "Heap memory stays allocated until free is called (or the process exits)."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Automatic storage lasts for the duration of the call; allocated storage lasts until free. This is why returning a pointer to a local variable is a bug, while returning a malloc'd pointer is fine (if the caller frees it).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Automatic storage ends when the function returns; allocated storage lasts until free().",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each half of the claim separately."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 is the claim about locals; step 4 the claim about the heap."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "C has automatic storage (stack) and allocated storage (heap), with different lifetimes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what happens if a function returns a pointer to one of its locals."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Locals end with the stack frame; heap memory lasts until free. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Lifetime is the property that matters most for memory bugs: dangling pointers come from outliving a stack frame, and leaks from never ending a heap allocation. The explanation states both lifetimes precisely. When reviewing C code, ask of every pointer: whose lifetime does it depend on?",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-memory-processes-threads-004",
+    "subject": "computer-science",
+    "topic": "Memory, Processes & Threads",
+    "subtopic": "Thread versus process switches",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is switching between two threads of the same process generally cheaper than switching between two different processes?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. Threads share an address space, so the switch does not need to change the memory mappings.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A context switch saves one execution context and restores another."
+      },
+      {
+        "index": 2,
+        "text": "Between processes, the OS must also switch the address space (page tables), which invalidates cached translations."
+      },
+      {
+        "index": 3,
+        "text": "Threads of the same process share one address space, so only registers and the stack pointer change."
+      },
+      {
+        "index": 4,
+        "text": "So a thread switch within a process is generally cheaper."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A process switch changes address spaces, which disturbs the TLB and caches; a thread switch within one process keeps the same mappings, so it costs less.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Switching address spaces changes page tables and disturbs the TLB; threads of one process share one address space.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Identify what differs between two threads and between two processes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 names the extra cost of a process switch. Verify it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The address space (page tables) belongs to the process, not the thread."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List what must change for each kind of switch."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. A process switch must change the address space; a thread switch within a process need not. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cost differences follow from what state has to change. Threads were introduced largely to make concurrency cheaper within one address space, at the price of shared-memory hazards. Reasoning from 'what must be saved and restored' explains the performance of threads, processes and even coroutines.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-memory-processes-threads-005",
+    "subject": "computer-science",
+    "topic": "Memory, Processes & Threads",
+    "subtopic": "Leaks and ownership",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does a program that uses make_label leak memory?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "language": "c",
+      "code": "char *make_label(int id) {\n    char *s = malloc(32);\n    snprintf(s, 32, \"item-%d\", id);\n    return s;\n}"
+    },
+    "ai_claim": "Yes. make_label allocates with malloc and never calls free, so it leaks.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "make_label allocates 32 bytes on the heap."
+      },
+      {
+        "index": 2,
+        "text": "It writes the label into that memory and returns the pointer."
+      },
+      {
+        "index": 3,
+        "text": "make_label itself never calls free."
+      },
+      {
+        "index": 4,
+        "text": "Nothing in the program frees the label, so the program leaks memory."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The code that calls make_label. Returning a malloc'd pointer transfers ownership to the caller; whether memory leaks depends on whether callers free it, and no caller is shown.",
+    "resolving_scenarios": [
+      "The caller does `char *l = make_label(7); puts(l); free(l);`: no leak.",
+      "The caller does `puts(make_label(7));` in a loop: every label is lost, so the program leaks."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "A function that returns allocated memory is not a leak by itself; it hands ownership to its caller. Whether the program leaks depends on the callers, which are not shown. The claim in step 4 goes beyond the evidence.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A caller that calls free(label) after use leaves no leak.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "`char *l = make_label(1); free(l);` allocates and frees correctly."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who is responsible for freeing memory returned by a function."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 makes a claim about the whole program. Check what was shown."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Returning allocated memory transfers ownership; the caller must free it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write one caller that leaks and one that does not."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 assumes the callers never free the label, but no caller is shown. The program may or may not leak."
+      }
+    ],
+    "repair": "Show the calling code (or document that the caller must free the result) before judging whether the program leaks.",
+    "debrief": "Memory ownership can be passed from function to function, so a leak is a property of the whole program, not of the allocating line. Step 3 is true and step 4 does not follow from it. When a verdict needs code you have not seen, name the missing code instead of guessing its behaviour.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

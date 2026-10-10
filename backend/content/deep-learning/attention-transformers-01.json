@@ -1,0 +1,468 @@
+[
+  {
+    "id": "dl-attention-transformers-001",
+    "subject": "deep-learning",
+    "topic": "Attention & Transformers",
+    "subtopic": "Scaling attention scores",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the scaled score used inside the softmax?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "# Scaled dot-product attention with d_k = 64\n# One raw score q . k = 16\n# AI working: scaled score = 16 / d_k = 16 / 64 = 0.25"
+    },
+    "ai_claim": "0.25. Scaled dot-product attention divides the score by d_k: 16 / 64 = 0.25.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The raw score is q . k = 16."
+      },
+      {
+        "index": 2,
+        "text": "Scores are scaled by the key dimension."
+      },
+      {
+        "index": 3,
+        "text": "The scale divides by d_k = 64."
+      },
+      {
+        "index": 4,
+        "text": "So the scaled score is 0.25."
+      }
+    ],
+    "ai_final_answer": "0.25",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 3,
+      "misconception": "Dividing by d_k instead of sqrt(d_k)",
+      "explanation": "Attention(Q, K, V) = softmax(Q K^T / sqrt(d_k)) V. The scale is sqrt(64) = 8, so the scaled score is 16 / 8 = 2. Dividing by 64 over-shrinks scores and makes the softmax nearly uniform.",
+      "why_convincing": "The scale does depend on d_k; only the square root is missing."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "16 / sqrt(64) = 2.",
+    "canonical_answer": "2",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "sqrt(64) = 8; 16 / 8 = 2",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With division by d_k, scores in large models become nearly identical after softmax."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall the formula for scaled dot-product attention."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 uses d_k itself as the divisor."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The divisor is sqrt(d_k), which keeps score variance about 1."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Take the square root of 64."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: divide by sqrt(64) = 8. The scaled score is 2."
+      }
+    ],
+    "repair": "",
+    "debrief": "The sqrt(d_k) scale keeps dot products of random vectors at unit variance, so softmax neither saturates nor flattens.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 16 / math.sqrt(64)",
+      "flawed_solver": "answer = 16 / 64"
+    }
+  },
+  {
+    "id": "dl-attention-transformers-002",
+    "subject": "deep-learning",
+    "topic": "Attention & Transformers",
+    "subtopic": "Attention without positions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can this encoder distinguish the two sentences?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "# A transformer encoder built from self-attention and feed-forward layers only.\n# Token embeddings are fed in directly: no positional encodings are added.\n# Task: distinguish \"dog bites man\" from \"man bites dog\"."
+    },
+    "ai_claim": "Yes. Self-attention lets every token look at every other token, so the model sees how the words relate and can tell the sentences apart.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Self-attention relates every token to every other token."
+      },
+      {
+        "index": 2,
+        "text": "So the model sees the relationships between words."
+      },
+      {
+        "index": 3,
+        "text": "The relationships reveal the word order."
+      },
+      {
+        "index": 4,
+        "text": "So it can distinguish the sentences."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming attention encodes order",
+      "explanation": "Self-attention is permutation-equivariant: reordering the input tokens reorders the outputs in the same way, and a pooled (order-free) summary is identical. Both sentences contain the same tokens, so without positional encodings the model cannot tell them apart. Add positional encodings (sinusoidal, learned or rotary).",
+      "why_convincing": "Attention clearly models relationships between words, which feels like it includes order."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without positional information, self-attention treats the input as a set. Add positional encodings.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Swapping 'dog' and 'man' swaps their output vectors; the pooled output is unchanged.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "The model's logits for the two sentences are identical.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The model assigns the same meaning to both sentences."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what changes when the tokens are reordered."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes relationships reveal order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Self-attention is permutation-equivariant without position information."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Swap two tokens and compare the outputs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: attention alone ignores order. Add positional encodings."
+      }
+    ],
+    "repair": "Add positional encodings to the token embeddings.",
+    "debrief": "Transformers learn order only because positions are injected. Remove them and the model sees a bag of tokens.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-attention-transformers-003",
+    "subject": "deep-learning",
+    "topic": "Attention & Transformers",
+    "subtopic": "Training without a causal mask",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the near-zero training loss show the model has learned to predict the next token?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# Decoder-only language model, trained to predict token t+1 from tokens <= t\nlogits = model(tokens)            # self-attention with no causal mask\nloss = F.cross_entropy(logits[:, :-1].reshape(-1, V), tokens[:, 1:].reshape(-1))\n# Training loss falls to near 0 within an hour."
+    },
+    "ai_claim": "Yes. The loss measures next-token prediction, and it is almost 0, so the model predicts the next token almost perfectly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The loss compares predictions at position t with token t + 1."
+      },
+      {
+        "index": 2,
+        "text": "It falls to nearly 0."
+      },
+      {
+        "index": 3,
+        "text": "So the model predicts the next token almost perfectly."
+      },
+      {
+        "index": 4,
+        "text": "It has learned language modelling."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Letting the model see the tokens it must predict",
+      "explanation": "Without a causal mask, position t attends to all positions, including t + 1, so the model can simply copy the next token. The near-zero loss reflects this leak, and at generation time (when future tokens do not exist) the model fails. Apply a causal (upper-triangular) mask in self-attention.",
+      "why_convincing": "A falling loss is usually a sign of learning."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the model sees future tokens and copies them. Add a causal attention mask.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Position t's attention weights include position t + 1, whose embedding is the target.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Generating text token by token produces gibberish despite the low loss.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The model's generated text is poor although its loss is near 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which positions each token can attend to."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 trusts the loss."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Language models must be prevented from seeing future tokens."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the attention mask."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without a causal mask the target leaks. Add the mask."
+      }
+    ],
+    "repair": "Pass a causal mask (e.g. `is_causal=True` in scaled_dot_product_attention).",
+    "debrief": "A loss that falls too fast is a leakage alarm. In sequence models, masks are what enforce 'only the past'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-attention-transformers-004",
+    "subject": "deep-learning",
+    "topic": "Attention & Transformers",
+    "subtopic": "Attention cost with longer context",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "By what factor does the attention score matrix's memory grow when the context doubles from 4,000 to 8,000 tokens?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "# Standard self-attention; context length raised from 4,000 to 8,000 tokens\n# AI note: \"Doubling the context doubles the attention memory.\""
+    },
+    "ai_claim": "2. The context is twice as long, so attention needs twice the memory.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The context grows from 4,000 to 8,000 tokens."
+      },
+      {
+        "index": 2,
+        "text": "Attention memory is proportional to the number of tokens."
+      },
+      {
+        "index": 3,
+        "text": "8,000 / 4,000 = 2."
+      },
+      {
+        "index": 4,
+        "text": "So memory doubles."
+      }
+    ],
+    "ai_final_answer": "2",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming attention scales linearly with length",
+      "explanation": "Every token attends to every token, so the score matrix is n x n. Doubling n multiplies it by 2^2 = 4 (per head and layer). This quadratic cost is why long contexts need memory-efficient kernels (e.g. FlashAttention) or sparse and linear attention variants.",
+      "why_convincing": "Many parts of a transformer (embeddings, feed-forward layers) do scale linearly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The n x n matrix grows by (8,000 / 4,000)^2 = 4.",
+    "canonical_answer": "4",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "8,000^2 / 4,000^2 = 64,000,000 / 16,000,000 = 4",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A 16,000-token context would need 16 times the memory of 4,000."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the entries in the attention score matrix."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes linear scaling."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Self-attention compares every pair of tokens: n^2 scores."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 8,000^2 / 4,000^2."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: attention memory grows quadratically, by 4."
+      }
+    ],
+    "repair": "",
+    "debrief": "Quadratic attention cost is the central constraint on context length and the motivation for efficient attention methods.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (8000 / 4000) ** 2",
+      "flawed_solver": "answer = 8000 / 4000"
+    }
+  },
+  {
+    "id": "dl-attention-transformers-005",
+    "subject": "deep-learning",
+    "topic": "Attention & Transformers",
+    "subtopic": "Attention weights sum to one",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that the weights are about [0.665, 0.245, 0.090], sum to 1, and make the output a weighted average of the value vectors?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "scores = torch.tensor([2.0, 1.0, 0.0])      # one query against three keys (already scaled)\nweights = torch.softmax(scores, dim=-1)\noutput = weights @ values                    # values: (3, d)"
+    },
+    "ai_claim": "Yes. Softmax exponentiates and normalises: e^2, e^1 and e^0 divided by their sum give about 0.665, 0.245 and 0.090. They sum to 1, so the output is a convex combination of the values.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "exp(2) = 7.389, exp(1) = 2.718, exp(0) = 1."
+      },
+      {
+        "index": 2,
+        "text": "Their sum is 11.107."
+      },
+      {
+        "index": 3,
+        "text": "Dividing gives 0.665, 0.245 and 0.090, which sum to 1."
+      },
+      {
+        "index": 4,
+        "text": "The output is a weighted average of the three value vectors."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Softmax weights are positive and sum to one, so attention output lies in the convex hull of the value vectors.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "7.389 / 11.107 = 0.665; 2.718 / 11.107 = 0.245; 1 / 11.107 = 0.090",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.665"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute the softmax by hand."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 checks the normalisation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Softmax outputs are positive and sum to 1."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Exponentiate the scores."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The weights are about [0.665, 0.245, 0.090]. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Attention is a learned, data-dependent weighted average. Seeing it as a convex combination explains both its power and its limits.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

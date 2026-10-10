@@ -1,0 +1,475 @@
+[
+  {
+    "id": "api-http-api-fundamentals-001",
+    "subject": "api-integration",
+    "topic": "HTTP & API Fundamentals",
+    "subtopic": "Unencoded query strings",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the API receive the search term 'salt & pepper'?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "term = \"salt & pepper\"\nurl = f\"https://api.recipes.example/search?q={term}&page=1\"\nresp = httpx.get(url)"
+    },
+    "ai_claim": "Yes. The term is placed in the q parameter, so the API receives q = 'salt & pepper'.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The URL is built with q set to the search term."
+      },
+      {
+        "index": 2,
+        "text": "The term is 'salt & pepper'."
+      },
+      {
+        "index": 3,
+        "text": "The query string carries the whole term as q's value."
+      },
+      {
+        "index": 4,
+        "text": "So the API searches for 'salt & pepper'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Inserting raw text into a query string",
+      "explanation": "& separates parameters in a query string, and spaces must be encoded. The server parses q=salt (with a trailing space) followed by a separate parameter named ' pepper', so it searches for 'salt '. Values must be URL-encoded: pass params={'q': term, 'page': 1} and let the client encode them (q=salt+%26+pepper).",
+      "why_convincing": "Terms without special characters work, which covers most manual tests."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the & splits the value, so q becomes 'salt '. Use httpx.get(url, params={'q': term, 'page': 1}).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "parse_qs of the query gives q = ['salt '] and a separate ' pepper' parameter.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "httpx.get(base, params={'q': 'salt & pepper'}) sends q=salt+%26+pepper.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The API searches for 'salt ' instead of 'salt & pepper'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look for characters with special meaning in a URL."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the whole term stays in q."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "& separates query parameters; values must be percent-encoded."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Parse the resulting URL's query string."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: & ends the q parameter. Pass the term through params so it is encoded."
+      }
+    ],
+    "repair": "Pass query parameters via `params={...}` so they are URL-encoded.",
+    "debrief": "Building URLs with string formatting breaks on &, #, ?, spaces and non-ASCII text. Let the HTTP client encode parameters; it is correct for every input, not just the common ones.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-http-api-fundamentals-002",
+    "subject": "api-integration",
+    "topic": "HTTP & API Fundamentals",
+    "subtopic": "Requests without a timeout",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If the partner's server accepts the connection but never responds, does get_rates fail quickly so checkout can fall back?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "import requests\n\ndef get_rates():\n    return requests.get(\"https://fx.partner.example/rates\").json()\n\n# Called while rendering the checkout page."
+    },
+    "ai_claim": "Yes. requests applies a default timeout, so a hung server raises an exception after a short wait.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "get_rates sends a GET request."
+      },
+      {
+        "index": 2,
+        "text": "The partner server hangs without responding."
+      },
+      {
+        "index": 3,
+        "text": "requests times out after its default limit."
+      },
+      {
+        "index": 4,
+        "text": "The exception lets checkout fall back quickly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming the HTTP library has a default timeout",
+      "explanation": "requests has no default timeout: without timeout=..., it waits indefinitely for a response. A hung partner freezes the checkout worker, and enough of them exhaust the worker pool. Always pass timeout=(connect, read), e.g. timeout=(3, 5). (httpx, by contrast, defaults to 5 seconds.)",
+      "why_convincing": "Other clients do have defaults, and most servers respond, so the missing timeout never shows in testing."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: requests waits forever without a timeout argument. Pass timeout=(3, 5) and handle requests.Timeout.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Point get_rates at a server that accepts but never replies: the call blocks indefinitely.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "requests documentation: 'Nearly all production code should use this parameter... requests do not time out unless a timeout value is set explicitly.'",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A hung partner stalls every checkout request."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the library's default timeout."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a default limit exists."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "requests waits indefinitely unless timeout is passed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call get_rates against a server that never responds."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: requests has no default timeout. Pass timeout explicitly."
+      }
+    ],
+    "repair": "Use `requests.get(url, timeout=(3, 5))` and handle `requests.Timeout`.",
+    "debrief": "Every network call needs a timeout, because 'slow' and 'never' are indistinguishable without one. Check each library's default instead of assuming; they differ.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-http-api-fundamentals-003",
+    "subject": "api-integration",
+    "topic": "HTTP & API Fundamentals",
+    "subtopic": "Sending JSON without a JSON content type",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the API parse this body as JSON?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "language": "python",
+      "code": "body = {\"product_id\": 7, \"qty\": 2}\nresp = httpx.post(\n    \"https://api.shop.example/orders\",\n    content=json.dumps(body),\n)\n\n# The API parses request bodies according to their Content-Type header."
+    },
+    "ai_claim": "Yes. json.dumps produces a JSON string, and that string is sent as the request body, so the API reads JSON.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "json.dumps turns the dict into a JSON string."
+      },
+      {
+        "index": 2,
+        "text": "The string is sent as the request body."
+      },
+      {
+        "index": 3,
+        "text": "The body is valid JSON."
+      },
+      {
+        "index": 4,
+        "text": "So the API parses it as JSON."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Assuming valid JSON text is enough",
+      "explanation": "Servers decide how to parse a body from its Content-Type header. Sending raw content sets no application/json header, so an API that parses by content type rejects it (415 Unsupported Media Type or a validation error) or treats it as text. Use json=body, which serialises the data and sets Content-Type: application/json.",
+      "why_convincing": "The bytes on the wire are exactly the right JSON, so the problem is invisible in the body."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: no Content-Type: application/json header is sent. Use httpx.post(url, json=body).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "httpx.Request('POST', url, content=json.dumps(body)).headers has no content-type.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "With json=body, the request carries Content-Type: application/json.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The API responds 415 Unsupported Media Type."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the request's headers, not just its body."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes valid JSON text is sufficient."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Servers choose a parser from the Content-Type header."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Inspect the headers of the prepared request."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without Content-Type: application/json the API will not parse it as JSON. Use json=body."
+      }
+    ],
+    "repair": "Use `httpx.post(url, json=body)`.",
+    "debrief": "HTTP bodies are bytes plus a label. Getting the label wrong is as bad as getting the bytes wrong. Prefer client helpers (json=) that set both.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-http-api-fundamentals-004",
+    "subject": "api-integration",
+    "topic": "HTTP & API Fundamentals",
+    "subtopic": "202 Accepted is not done",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the export file ready to download as soon as this response arrives?",
+    "artifact_type": "api_response",
+    "artifact": {
+      "request": "POST /reports/export  {\"month\": \"2026-08\"}",
+      "response": "HTTP/1.1 202 Accepted\nLocation: /reports/export/jobs/5521\n\n{\"job_id\": 5521, \"status\": \"queued\"}"
+    },
+    "ai_claim": "Yes. 202 is a success status in the 2xx range, so the export has been created and can be downloaded now.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The server responded with a 2xx status."
+      },
+      {
+        "index": 2,
+        "text": "2xx means the request succeeded."
+      },
+      {
+        "index": 3,
+        "text": "The request was to create the export, so the export now exists."
+      },
+      {
+        "index": 4,
+        "text": "It can be downloaded immediately."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Reading 'accepted' as 'completed'",
+      "explanation": "202 Accepted means the request was accepted for processing, which has not finished (the body even says status: queued). The client must poll the job at the Location URL (or wait for a webhook) until it reports completion and a download link.",
+      "why_convincing": "Most 2xx responses do mean the work is done."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 202 means queued, not finished. Poll /reports/export/jobs/5521 until the status is complete.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The body reports status 'queued' for job 5521.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5521"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "POST -> 202 + job 5521 -> GET job: queued -> running -> done + download URL",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "202"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An immediate download attempt returns 404 or 'not ready'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the status code and the body together."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the work is complete."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "202 Accepted means processing will happen later."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the status field in the body."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 202 means queued, not done. Poll the job URL."
+      }
+    ],
+    "repair": "Poll the Location URL (with backoff) until the job reports completion.",
+    "debrief": "Status codes carry precise meanings within a class. 200, 201, 202 and 204 all mean success, but only 202 says the work is still pending.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-http-api-fundamentals-005",
+    "subject": "api-integration",
+    "topic": "HTTP & API Fundamentals",
+    "subtopic": "Reusing connections",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that the shared Client is faster than separate httpx.get calls for 500 products?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "client = httpx.Client(base_url=\"https://api.catalog.example\", timeout=5)\n\ndef sync_products(ids):\n    return [client.get(f\"/products/{i}\").json() for i in ids]\n\n# Versus calling httpx.get(...) separately for each id."
+    },
+    "ai_claim": "Yes. A Client keeps connections open and reuses them, so after the first request there is no new TCP and TLS handshake per call.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "httpx.get creates and closes a new connection for each call."
+      },
+      {
+        "index": 2,
+        "text": "Each new HTTPS connection costs a TCP handshake and a TLS handshake."
+      },
+      {
+        "index": 3,
+        "text": "A Client pools connections to the same host and reuses them."
+      },
+      {
+        "index": 4,
+        "text": "So 500 calls pay the handshake cost roughly once instead of 500 times."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Connection pooling amortises TCP and TLS set-up across requests, which is often a large share of latency for small API calls.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "At 80 ms of handshakes per connection, 500 separate connections spend about 40 s on set-up alone.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "500",
+          "40"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the connections each approach opens."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 describes the Client's pooling."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "HTTP clients with a session or pool keep connections alive for reuse."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Estimate the handshake time for 500 new connections."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Pooling avoids a handshake per request. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "For many calls to one host, use a client object (httpx.Client, requests.Session) rather than one-off functions. The speed-up comes from connection reuse, and the client is also the right place to set timeouts and headers once.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

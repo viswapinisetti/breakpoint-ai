@@ -1,0 +1,133 @@
+[
+  {
+    "id": "cs-sched-001",
+    "subject": "computer-science",
+    "topic": "Operating Systems",
+    "subtopic": "Scheduling and starvation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this scheduling policy prevent starvation?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "policy": "Strict priority scheduling: the runnable process with the highest priority always runs. Priorities are fixed at process creation. Among processes of equal priority, round-robin with a 10 ms quantum."
+    },
+    "ai_claim": "This policy prevents starvation, because round-robin guarantees every process eventually gets the CPU.",
+    "ai_solution": [
+      {"index": 1, "text": "Round-robin cycles through the runnable processes at a given priority, so none of them waits indefinitely behind another."},
+      {"index": 2, "text": "The 10 ms quantum bounds how long any single process can hold the CPU before being preempted."},
+      {"index": 3, "text": "Since every process belongs to some priority level, and each level is scheduled round-robin, every process is eventually scheduled."},
+      {"index": 4, "text": "Starvation is therefore prevented."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming fairness within a level implies fairness across levels",
+      "explanation": "Round-robin is only reached once a level is selected, and strict priority never selects a lower level while any higher-priority process is runnable. A steady supply of high-priority work starves the low-priority processes indefinitely. Priorities are fixed, so nothing ever lifts them out.",
+      "why_convincing": "Steps 1 and 2 are both true, and round-robin genuinely is a fairness mechanism. The argument quietly generalises fairness *within* a priority level into fairness *across* levels, which the policy never provides."
+    },
+    "canonical_solution": "No. Strict priority with fixed priorities permits indefinite starvation: while any higher-priority process is runnable, lower levels are never selected, so their round-robin queue never advances. Aging — raising the priority of a process that has waited a long time — is the standard fix, and it is exactly what \"priorities are fixed at creation\" rules out.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "counterexample", "summary": "A continuously runnable high-priority process starves lower levels.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "rule", "summary": "Round-robin provides fairness within a level, not across levels.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["One priority-1 process in an infinite loop, plus a priority-5 process. The priority-5 process never runs again, and no quantum expiry changes that."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what has to happen before round-robin is consulted at all."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are correct. Examine the generalisation made in step 3."},
+      {"level": 3, "kind": "concept", "text": "Strict priority selects a level first; the fairness mechanism operates only inside the selected level."},
+      {"level": 4, "kind": "strong", "text": "Construct a workload where one high-priority process is always runnable."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 extends within-level fairness to across-level fairness. Strict priority never selects a lower level while a higher one is runnable, so with fixed priorities a low-priority process can starve forever."}
+    ],
+    "repair": "Step 3 should conclude that round-robin only bounds waiting within a level. To prevent starvation, add aging so a long-waiting process rises in priority — which requires priorities not to be fixed at creation.",
+    "debrief": "Guarantees have scopes. Round-robin really does bound waiting, but only among processes competing at the same level, and the policy chooses the level first. Whenever a system claims to prevent a bad outcome, identify precisely which set of things the guarantee ranges over — and then look for something outside that set. Here the escape hatch is one line of the policy: priorities are fixed.",
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-tcp-002",
+    "subject": "computer-science",
+    "topic": "Computer Networks",
+    "subtopic": "Transport guarantees",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this claim about TCP correct?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "claim": "Our service writes each message with a single socket write() on a TCP connection, so the receiver reads each message separately."
+    },
+    "ai_claim": "This is safe: TCP guarantees reliable, ordered delivery, so each write arrives at the receiver as its own read.",
+    "ai_solution": [
+      {"index": 1, "text": "TCP provides reliable delivery: bytes sent are delivered, retransmitting as needed."},
+      {"index": 2, "text": "TCP provides ordered delivery: bytes arrive in the order they were sent."},
+      {"index": 3, "text": "Since each message is written with one write() call, and delivery is reliable and ordered, each message arrives intact and separate."},
+      {"index": 4, "text": "The receiver can therefore treat each read() as exactly one message."}
+    ],
+    "ai_final_answer": "safe",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Treating TCP as message-oriented rather than a byte stream",
+      "explanation": "TCP is a byte stream: it preserves the order and integrity of bytes, but not the boundaries between writes. Two writes may be coalesced into one read, and one write may be split across several reads. The application must frame its own messages — length prefix or delimiter.",
+      "why_convincing": "Steps 1 and 2 state the two guarantees accurately, and they are the two everyone remembers. Message boundaries are a third property TCP simply does not offer, and its absence is invisible on a fast local network where writes usually do arrive one-to-one."
+    },
+    "canonical_solution": "Not safe. TCP guarantees reliability and ordering of bytes, not preservation of write boundaries. Nagle's algorithm, segmentation and receive-buffer behaviour can coalesce or split writes. The application must impose framing — for example a 4-byte length prefix before each message, or a delimiter the payload cannot contain.",
+    "canonical_answer": "not safe",
+    "valid_evidence": [
+      {"type": "rule", "summary": "TCP is a byte stream; it does not preserve message boundaries.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "counterexample", "summary": "Two rapid writes arriving in one read.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["Two 10-byte writes sent back to back frequently arrive as a single 20-byte read, and the receiver has no way to tell where the first message ended."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "List exactly which guarantees TCP provides, and check the conclusion uses only those."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are accurate. Step 3 uses them to conclude something else — check whether it follows."},
+      {"level": 3, "kind": "concept", "text": "Reliability and ordering are properties of bytes. Message boundaries are a separate property."},
+      {"level": 4, "kind": "strong", "text": "Ask what the receiver observes when two writes are sent a microsecond apart."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 assumes TCP preserves write boundaries. It does not — TCP is a byte stream, and writes can be coalesced or split. The application must frame its own messages."}
+    ],
+    "repair": "Step 3 should note that TCP preserves bytes, not boundaries. Add explicit framing: prefix each message with its length, and have the receiver read that many bytes before treating the message as complete.",
+    "debrief": "The reliable failure mode here is a correct list of guarantees followed by a conclusion that needs one more. TCP's two famous properties are true and are not enough. When a system's guarantees are cited, write down what is being concluded and check it against the list item by item — the missing property is usually the one nobody names, because it is defined by its absence.",
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-hash-003",
+    "subject": "computer-science",
+    "topic": "Security Fundamentals",
+    "subtopic": "Password storage",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this password-storage design sound?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "design": "Store bcrypt(password, cost=12) with a per-user random salt generated by the bcrypt library. On login, verify with a constant-time comparison. Never log or return the hash."
+    },
+    "ai_claim": "This is a sound design for storing passwords.",
+    "ai_solution": [
+      {"index": 1, "text": "bcrypt is a deliberately slow, adaptive hash designed for passwords, unlike a general-purpose hash such as SHA-256."},
+      {"index": 2, "text": "A per-user random salt means identical passwords produce different hashes, so precomputed tables do not apply and one cracked hash does not reveal others."},
+      {"index": 3, "text": "A cost factor of 12 sets the work per verification high enough to make large-scale offline guessing expensive, and can be raised as hardware improves."},
+      {"index": 4, "text": "Constant-time comparison avoids leaking information through timing. The design is sound."}
+    ],
+    "ai_final_answer": "sound",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "canonical_solution": "Sound. bcrypt with a per-user random salt and an adaptive cost is a standard, current recommendation for password storage; cost 12 is a reasonable setting; and constant-time verification is correct. The salt being library-generated is fine — bcrypt embeds it in the output string. Argon2id is often preferred for new systems, but that is a refinement, not a defect in this design.",
+    "canonical_answer": "sound",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Check each element against what it is supposed to defend."},
+      {"level": 2, "kind": "direction", "text": "Look for the usual defects: a fast hash, a missing salt, a shared salt, a fixed low cost."},
+      {"level": 3, "kind": "concept", "text": "Password storage needs a slow adaptive hash, a per-user salt, and a tunable work factor."},
+      {"level": 4, "kind": "strong", "text": "Ask what an attacker with the full hash table can do here, and how expensive it is."},
+      {"level": 5, "kind": "reveal", "text": "This design is sound: bcrypt is an adaptive password hash, the salt is per-user and random, cost 12 is reasonable and adjustable, and verification is constant-time. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "Security review has a strong pull toward finding something wrong, and a design that is genuinely fine will still attract objections — \"why not Argon2id?\", \"is 12 enough?\". Those are refinements to discuss, not defects to report, and conflating the two costs a reviewer credibility. The discipline is to name what each control defends against and check it does so: slow hash against brute force, per-user salt against precomputation and cross-account reuse, adaptive cost against hardware improvement.",
+    "validation_payload": {}
+  }
+]

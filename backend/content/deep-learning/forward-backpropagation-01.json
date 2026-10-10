@@ -1,0 +1,480 @@
+[
+  {
+    "id": "dl-forward-backpropagation-001",
+    "subject": "deep-learning",
+    "topic": "Forward & Backpropagation",
+    "subtopic": "A forward pass through ReLU",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is y?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "# One neuron: y = relu(w * x + b)\nw, b, x = 2.0, 1.0, -3.0\n# AI working: w * x + b = -6 + 1 = -5, so y = -5"
+    },
+    "ai_claim": "-5. The pre-activation is 2 x -3 + 1 = -5, so the neuron outputs -5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "w x = 2 x -3 = -6."
+      },
+      {
+        "index": 2,
+        "text": "Adding b gives -5."
+      },
+      {
+        "index": 3,
+        "text": "The neuron outputs its weighted sum."
+      },
+      {
+        "index": 4,
+        "text": "So y = -5."
+      }
+    ],
+    "ai_final_answer": "-5",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 3,
+      "misconception": "Skipping the activation function",
+      "explanation": "The neuron applies ReLU to the weighted sum: relu(-5) = max(0, -5) = 0. The pre-activation is -5, but the output is 0.",
+      "why_convincing": "Steps 1 and 2 correctly compute the pre-activation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "y = relu(-5) = 0.",
+    "canonical_answer": "0",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "max(0, -5) = 0",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A ReLU neuron can never output a negative value."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the last operation of the neuron."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 outputs the weighted sum directly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The output is the activation applied to the weighted sum."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply ReLU to -5."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: relu(-5) = 0."
+      }
+    ],
+    "repair": "",
+    "debrief": "Keep pre-activations and activations separate when tracing a network by hand; backprop needs both.",
+    "transfer_check": {
+      "question": "With the same neuron, what is y for x = 2?",
+      "answer": "5",
+      "explanation": "2 x 2 + 1 = 5, and relu(5) = 5."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-forward-backpropagation-002",
+    "subject": "deep-learning",
+    "topic": "Forward & Backpropagation",
+    "subtopic": "Gradient of a squared error",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is dL/dw?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "# L = (w * x - y)^2 with w = 2, x = 3, y = 5\n# AI working: dL/dw = 2 (w x - y) = 2 (6 - 5) = 2"
+    },
+    "ai_claim": "2. The derivative of a square is twice the inside: 2(wx - y) = 2(1) = 2.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The error is wx - y = 6 - 5 = 1."
+      },
+      {
+        "index": 2,
+        "text": "The derivative of u^2 is 2u."
+      },
+      {
+        "index": 3,
+        "text": "So dL/dw = 2(wx - y)."
+      },
+      {
+        "index": 4,
+        "text": "= 2."
+      }
+    ],
+    "ai_final_answer": "2",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 3,
+      "misconception": "Forgetting the inner derivative in the chain rule",
+      "explanation": "L = u^2 with u = wx - y. dL/dw = dL/du x du/dw = 2u x x = 2 x 1 x 3 = 6. Step 3 omits du/dw = x.",
+      "why_convincing": "The outer derivative is right, and it is the familiar part."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "dL/dw = 2(wx - y) x = 2 x 1 x 3 = 6.",
+    "canonical_answer": "6",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "2 x 1 x 3 = 6",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "torch autograd with w = 2.0 (requires_grad) gives w.grad = 6.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A finite difference (L(2.001) - L(1.999)) / 0.002 gives 6."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Identify the inner function."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 applies only the outer derivative."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Chain rule: multiply by du/dw."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Differentiate wx - y with respect to w."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: multiply by x = 3. The gradient is 6."
+      }
+    ],
+    "repair": "",
+    "debrief": "Backpropagation is the chain rule applied layer by layer. Dropping one local derivative breaks every gradient upstream.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 2 * (2 * 3 - 5) * 3",
+      "flawed_solver": "answer = 2 * (2 * 3 - 5)"
+    }
+  },
+  {
+    "id": "dl-forward-backpropagation-003",
+    "subject": "deep-learning",
+    "topic": "Forward & Backpropagation",
+    "subtopic": "Vanishing gradients through sigmoids",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do the early layers receive gradients of similar size to the last layer?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "# 10 stacked layers, each followed by a sigmoid activation\n# AI note: \"The gradient reaching layer 1 is about as large as at layer 10, so all layers learn at similar speed.\""
+    },
+    "ai_claim": "Yes. Backpropagation passes the gradient back through every layer, so layer 1 receives it just like layer 10.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The loss gradient is computed at the output."
+      },
+      {
+        "index": 2,
+        "text": "Backpropagation passes it through each layer."
+      },
+      {
+        "index": 3,
+        "text": "Each layer passes the gradient on without shrinking it."
+      },
+      {
+        "index": 4,
+        "text": "So early layers learn as fast as late ones."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming gradients pass through activations unchanged",
+      "explanation": "Each sigmoid multiplies the gradient by its derivative, which is at most 0.25. Through 10 sigmoids the factor is at most 0.25^10, about 9.5 x 10^-7 (weights can shrink or grow it further). Early layers receive vanishing gradients and barely learn. ReLU activations, residual connections and normalisation mitigate this.",
+      "why_convincing": "Backprop does reach every layer; the question is how much of the signal survives."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: sigmoid derivatives (at most 0.25) shrink the gradient by up to 0.25^10 ~ 10^-6 over 10 layers.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "0.25^10 = 9.5 x 10^-7",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.25"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "Logging gradient norms shows layer 1's norm is about 10^-6 of layer 10's.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Layer 1's weights hardly change during training."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the maximum derivative of the sigmoid."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes each layer passes the gradient unchanged."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Each activation multiplies the gradient by its local derivative."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Raise 0.25 to the 10th power."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the gradient shrinks by up to 0.25 per layer."
+      }
+    ],
+    "repair": "Use ReLU-family activations, residual connections and batch/layer normalisation.",
+    "debrief": "Gradient magnitude is a product of local derivatives. Products of numbers below 1 vanish; above 1 they explode.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-forward-backpropagation-004",
+    "subject": "deep-learning",
+    "topic": "Forward & Backpropagation",
+    "subtopic": "Accumulated gradients",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does each optimiser step use only the current batch's gradient?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "for x, y in loader:\n    loss = loss_fn(model(x), y)\n    loss.backward()\n    optimizer.step()\n# optimizer.zero_grad() is never called"
+    },
+    "ai_claim": "Yes. loss.backward() computes the gradient of the current batch's loss, and optimizer.step() applies it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each iteration computes the batch loss."
+      },
+      {
+        "index": 2,
+        "text": "backward() computes its gradient."
+      },
+      {
+        "index": 3,
+        "text": "step() updates the weights with that gradient."
+      },
+      {
+        "index": 4,
+        "text": "So each step uses only the current batch."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 2,
+      "misconception": "Not clearing gradients between steps",
+      "explanation": "In PyTorch, backward() adds to the .grad buffers rather than replacing them. Without optimizer.zero_grad(), step k uses the sum of gradients from batches 1..k, so updates grow and point in stale directions; training becomes unstable or diverges. Call optimizer.zero_grad() before (or after) each step.",
+      "why_convincing": "Accumulating is intentional for gradient accumulation, and the loop looks complete."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: gradients accumulate across iterations. Call optimizer.zero_grad() each step.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "step 1 uses g1; step 2 uses g1 + g2; step 3 uses g1 + g2 + g3 ...",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Printing a weight's .grad norm shows it growing every iteration.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The gradient norm increases steadily across batches."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what backward() does to existing .grad values."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes gradients are replaced."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "PyTorch accumulates gradients by default."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print a parameter's .grad after two iterations."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: gradients accumulate. Add optimizer.zero_grad()."
+      }
+    ],
+    "repair": "Add `optimizer.zero_grad()` at the start of each iteration.",
+    "debrief": "PyTorch accumulates gradients so that you can deliberately sum over micro-batches. Forgetting to zero them is one of the most common training bugs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-forward-backpropagation-005",
+    "subject": "deep-learning",
+    "topic": "Forward & Backpropagation",
+    "subtopic": "Gradients through ReLU",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's gradient dL/dz = [0, -0.4, 0.5] correct?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "# z = [-1.5, 0.7, 2.0] are pre-activations; a = relu(z)\n# Upstream gradient dL/da = [0.3, -0.4, 0.5]\n# AI working: dL/dz = dL/da * relu'(z) = [0.3 x 0, -0.4 x 1, 0.5 x 1] = [0, -0.4, 0.5]"
+    },
+    "ai_claim": "Yes. ReLU's derivative is 0 for negative inputs and 1 for positive ones, so the first element's gradient is blocked and the others pass through unchanged.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "relu'(z) = 0 for z < 0 and 1 for z > 0."
+      },
+      {
+        "index": 2,
+        "text": "relu'(z) = [0, 1, 1]."
+      },
+      {
+        "index": 3,
+        "text": "dL/dz = dL/da multiplied element-wise by relu'(z)."
+      },
+      {
+        "index": 4,
+        "text": "= [0, -0.4, 0.5]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. ReLU gates gradients: units with negative pre-activation pass no gradient, which is how 'dead' units arise if they stay negative for all inputs.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "[0.3, -0.4, 0.5] x [0, 1, 1] = [0, -0.4, 0.5]",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-0.4",
+          "0.5"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find ReLU's derivative for each pre-activation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 multiplies element-wise."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The local gradient of ReLU is 0 or 1."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply the upstream gradient by [0, 1, 1]."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. dL/dz = [0, -0.4, 0.5]. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Tracing gradients through one activation by hand is the best way to understand backprop - and why ReLU networks can have dead units.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

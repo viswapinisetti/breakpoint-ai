@@ -1,0 +1,139 @@
+[
+  {
+    "id": "dl-shape-001",
+    "subject": "deep-learning",
+    "topic": "CNN & Computer Vision",
+    "subtopic": "Tensor shape mismatch",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this network run on a 32x32 RGB input?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "model = nn.Sequential(\n    nn.Conv2d(3, 16, kernel_size=3, padding=1),   # 32x32 -> 32x32\n    nn.ReLU(),\n    nn.MaxPool2d(2),                              # 32x32 -> 16x16\n    nn.Conv2d(16, 32, kernel_size=3, padding=1),  # 16x16 -> 16x16\n    nn.ReLU(),\n    nn.MaxPool2d(2),                              # 16x16 -> 8x8\n    nn.Flatten(),\n    nn.Linear(32 * 16 * 16, 10),\n)"
+    },
+    "ai_claim": "Yes — the channel counts line up between the convolutions and the flatten feeds the linear layer, so the shapes are consistent throughout.",
+    "ai_solution": [
+      {"index": 1, "text": "The first convolution takes 3 input channels, matching RGB, and produces 16."},
+      {"index": 2, "text": "The second takes those 16 and produces 32, so the channel dimensions chain correctly."},
+      {"index": 3, "text": "Padding of 1 with a 3x3 kernel preserves the spatial size, so only the pooling layers change it."},
+      {"index": 4, "text": "Flatten produces a vector of 32 x 16 x 16, which is exactly what the linear layer expects. The network runs."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 4,
+      "misconception": "Computing the flattened size from an intermediate spatial dimension rather than the final one",
+      "explanation": "Two MaxPool2d(2) layers halve the spatial size twice: 32 -> 16 -> 8. At the flatten the tensor is 32 channels x 8 x 8 = 2,048, not 32 x 16 x 16 = 8,192. The linear layer expects four times as many inputs as it receives, and the forward pass raises a shape error.",
+      "why_convincing": "Steps 1 to 3 are all correct, including the observation that padding preserves spatial size — which is exactly the fact that makes 16 feel like the right number. The comments in the code even trace the sizes correctly down to 8x8, and the mistake contradicts the code's own annotation."
+    },
+    "canonical_solution": "No. After two poolings the spatial dimensions are 8x8, so the flattened vector is 32 x 8 x 8 = 2,048. The layer is declared as nn.Linear(32 * 16 * 16, 10) = 8,192 inputs, so the forward pass fails with a shape mismatch. It should be nn.Linear(32 * 8 * 8, 10).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "calculation", "summary": "Trace the spatial dimensions through both poolings.", "must_reference_step": 4, "must_contain_values": ["8", "2048"]},
+      {"type": "trace", "summary": "The declared input size is four times the actual one.", "must_reference_step": 4, "must_contain_values": ["8192", "2048"]}
+    ],
+    "counterexamples": ["32 -> pool -> 16 -> pool -> 8. The flatten yields 32*8*8 = 2,048 while the layer declares 8,192."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Track the spatial dimensions layer by layer, separately from the channels."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 to 3 are correct. Check the number step 4 uses for the spatial size."},
+      {"level": 3, "kind": "concept", "text": "Each MaxPool2d(2) halves height and width. The flatten sees the size after every pooling."},
+      {"level": 4, "kind": "strong", "text": "Write out the spatial size after each layer, starting from 32."},
+      {"level": 5, "kind": "reveal", "text": "Step 4 uses 16x16, the size after the first pooling. After the second it is 8x8, so the flatten gives 32*8*8 = 2,048, not 8,192. Use nn.Linear(32 * 8 * 8, 10)."}
+    ],
+    "repair": "Change the final layer to nn.Linear(32 * 8 * 8, 10). The flattened tensor is 32 channels of 8x8 after two halvings.",
+    "debrief": "Shape bugs are arithmetic, and the arithmetic is easy — which is why they are usually caught by the crash rather than the review. The reliable method is to write the running shape beside every layer and carry it forward, rather than reading the declared size and checking it looks plausible. Note that the code's own comments were correct here and the reasoning still contradicted them: an annotation is not a check.",
+    "validation_payload": {
+      "solver": "spatial = 32\nfor _ in range(2):\n    spatial = spatial // 2\nanswer = 32 * spatial * spatial",
+      "flawed_solver": "spatial = 32 // 2\nanswer = 32 * spatial * spatial"
+    }
+  },
+  {
+    "id": "dl-loss-002",
+    "subject": "deep-learning",
+    "topic": "Neural Network Fundamentals",
+    "subtopic": "Loss and activation pairing",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this classifier's output layer and loss correctly paired?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "self.out = nn.Linear(128, 10)\n\ndef forward(self, x):\n    return F.softmax(self.out(x), dim=1)\n\nloss_fn = nn.CrossEntropyLoss()\nloss = loss_fn(model(x), labels)"
+    },
+    "ai_claim": "Yes — softmax turns the outputs into a probability distribution and cross-entropy is the standard loss for multi-class classification, so they belong together.",
+    "ai_solution": [
+      {"index": 1, "text": "The final linear layer produces 10 values, one per class."},
+      {"index": 2, "text": "Softmax normalises them into a probability distribution summing to 1."},
+      {"index": 3, "text": "Cross-entropy is the standard loss for multi-class classification over a probability distribution."},
+      {"index": 4, "text": "So softmax followed by CrossEntropyLoss is the correct pairing."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 4,
+      "misconception": "Applying softmax before a loss that already applies it",
+      "explanation": "PyTorch's nn.CrossEntropyLoss expects raw logits — it applies log_softmax internally. Passing an explicit softmax applies it twice, flattening the gradients and slowing or stalling training. The model should return self.out(x) directly. Nothing crashes; the model simply learns badly, which is far harder to notice than an error.",
+      "why_convincing": "Steps 1 to 3 are each true, and the pairing of softmax with cross-entropy is mathematically correct as a concept — it is only this library's convention that folds the softmax into the loss. The failure is silent, so the code appears to work."
+    },
+    "canonical_solution": "No. nn.CrossEntropyLoss applies log_softmax internally and expects raw logits. The explicit softmax in forward() applies it a second time, which shrinks gradients and degrades training without raising an error. Return self.out(x) from forward, and apply softmax separately at inference if probabilities are needed for display.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "trace", "summary": "Trace forward() into the loss: softmax runs in the model and log_softmax runs again inside nn.CrossEntropyLoss, so the outputs are normalised twice.", "must_reference_step": 4, "must_contain_values": []},
+      {"type": "test_case", "summary": "Logits [10, 0] with target 0: the loss on raw logits is about 0.00005, but after the extra softmax it is 0.313 and can never fall below ln(1 + e^-1), however confident the model is.", "must_reference_step": 4, "must_contain_values": []}
+    ],
+    "counterexamples": ["Compare training curves with and without the explicit softmax: the doubled version converges markedly more slowly, with no error raised."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what the loss function expects as input in this specific library."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 to 3 are conceptually right. Step 4 assumes the library's convention matches."},
+      {"level": 3, "kind": "concept", "text": "Some frameworks fold the softmax into the loss for numerical stability, so the loss takes logits."},
+      {"level": 4, "kind": "strong", "text": "Look up whether nn.CrossEntropyLoss applies log_softmax internally."},
+      {"level": 5, "kind": "reveal", "text": "Step 4 misses that nn.CrossEntropyLoss already applies log_softmax. Softmax is applied twice, which flattens gradients and degrades training silently. Return raw logits."}
+    ],
+    "repair": "Return `self.out(x)` from forward() and pass those logits to the loss. If you need probabilities for inference or display, apply softmax there, outside the training path.",
+    "debrief": "Conceptually-correct code can still be wrong against a library's convention, and this class of bug is silent: no exception, just worse results. The habit is to check what a loss function expects rather than what the mathematics suggests it should — and to be suspicious of any model that trains but underperforms without an obvious cause.",
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-transfer-003",
+    "subject": "deep-learning",
+    "topic": "Embeddings & Transfer Learning",
+    "subtopic": "Freezing and batch normalisation",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this fine-tuning setup correct?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "backbone = resnet50(weights=\"IMAGENET1K_V2\")\nfor p in backbone.parameters():\n    p.requires_grad = False\n\nbackbone.fc = nn.Linear(2048, num_classes)   # new head, trainable by default\n\nmodel = backbone\nmodel.train()\nmodel.backbone_eval_bn()   # sets all BatchNorm layers to eval mode\n\noptimizer = torch.optim.Adam(\n    [p for p in model.parameters() if p.requires_grad], lr=1e-3\n)"
+    },
+    "ai_claim": "Correct — the backbone is frozen, the new head is trainable, BatchNorm is held in eval mode, and the optimizer receives only the trainable parameters.",
+    "ai_solution": [
+      {"index": 1, "text": "Every backbone parameter has requires_grad set to False, so gradients do not flow into the pretrained weights."},
+      {"index": 2, "text": "Replacing `fc` creates a fresh Linear whose parameters default to requires_grad=True, so the head trains."},
+      {"index": 3, "text": "BatchNorm layers are put in eval mode, so they use the pretrained running statistics rather than recomputing them from small batches of the new data."},
+      {"index": 4, "text": "The optimizer is given only parameters with requires_grad=True, so frozen weights are not updated even by weight decay or momentum."}
+    ],
+    "ai_final_answer": "correct",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "canonical_solution": "Correct, and it handles the two things this pattern usually gets wrong. Freezing parameters alone does not stop BatchNorm from updating its running statistics — those are buffers, not parameters, and are updated in train mode regardless of requires_grad — so putting BN in eval mode is necessary. And filtering the optimizer's parameter list matters because an optimizer with weight decay can modify parameters that receive no gradient. The head is correctly left trainable.",
+    "canonical_answer": "correct",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what freezing parameters does and does not stop from changing."},
+      {"level": 2, "kind": "direction", "text": "Step 3 addresses BatchNorm specifically. Ask why that is needed if the parameters are already frozen."},
+      {"level": 3, "kind": "concept", "text": "BatchNorm running statistics are buffers, not parameters, and update in train mode regardless of requires_grad."},
+      {"level": 4, "kind": "strong", "text": "Ask what an optimizer with weight decay does to a parameter that receives no gradient."},
+      {"level": 5, "kind": "reveal", "text": "This setup is correct, and it handles both traps: BatchNorm buffers are held via eval mode, and the optimizer receives only trainable parameters. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "\"Frozen\" is a weaker guarantee than it sounds: `requires_grad = False` stops gradients, not every form of change. BatchNorm buffers update in train mode regardless, and an optimizer with weight decay can shrink parameters that receive no gradient at all. This code closes both gaps, which is why approving it requires knowing that they exist — the reviewer has to check what freezing does *not* cover.",
+    "validation_payload": {}
+  }
+]

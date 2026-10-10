@@ -1,0 +1,138 @@
+[
+  {
+    "id": "ml-metric-001",
+    "subject": "machine-learning",
+    "topic": "Model Evaluation & Cross-Validation",
+    "subtopic": "Accuracy on imbalanced data",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A churn model is evaluated on the confusion matrix below. Is the conclusion justified?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "confusion_matrix": "                 predicted: stay   predicted: churn\nactual: stay          9,300                200\nactual: churn           420                 80",
+      "reported": "Accuracy = (9300 + 80) / 10000 = 93.8%"
+    },
+    "ai_claim": "At 93.8% accuracy the model comfortably beats our 90% target, so it is ready to drive the retention campaign.",
+    "ai_solution": [
+      {"index": 1, "text": "The matrix covers 10,000 customers, of whom 500 actually churned."},
+      {"index": 2, "text": "Correct predictions total 9,300 + 80 = 9,380, giving 93.8% accuracy."},
+      {"index": 3, "text": "The agreed deployment threshold is 90% accuracy."},
+      {"index": 4, "text": "93.8% clears that threshold, so the model is ready to drive the retention campaign."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 4,
+      "misconception": "Judging a rare-event model by overall accuracy",
+      "explanation": "The model catches 80 of 500 churners — recall of 16%. A model predicting 'stay' for everyone would score 95% accuracy, beating this one, while identifying nobody to retain. For a retention campaign the operative metrics are recall (how many at-risk customers are found) and precision (80/280 = 28.6%, how many alerts are worth acting on).",
+      "why_convincing": "Steps 1 to 3 are arithmetically correct and the threshold was agreed in advance, which makes step 4 feel like following the process rather than making a judgment. The confusion matrix contains everything needed to see the problem; accuracy simply summarises it away."
+    },
+    "canonical_solution": "Not justified. Recall on the churn class is 80/500 = 16% — the model misses 84% of the customers the campaign exists to reach. Precision is 80/280 = 28.6%. The majority-class baseline ('nobody churns') scores 95% accuracy, higher than this model, which shows accuracy cannot discriminate here. Decide on recall and precision against the campaign's cost of a missed churner versus a wasted contact.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "calculation", "summary": "Recall on the churn class.", "must_reference_step": 4, "must_contain_values": ["80", "500", "16"]},
+      {"type": "counterexample", "summary": "The always-stay baseline scores 95%.", "must_reference_step": 4, "must_contain_values": ["95"]}
+    ],
+    "counterexamples": ["Predicting 'stay' for all 10,000 customers gives 9,500/10,000 = 95% accuracy — better than the model, and useless."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask whether the chosen metric can tell a useful model from a useless one on this data."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 to 3 are correct. Examine what step 4 concludes from them."},
+      {"level": 3, "kind": "concept", "text": "For a rare positive class, accuracy is dominated by the majority and hides failure on the class you care about."},
+      {"level": 4, "kind": "strong", "text": "Compute recall on the churn class, and the accuracy of predicting 'stay' for everyone."},
+      {"level": 5, "kind": "reveal", "text": "Step 4 treats accuracy as decisive. Recall is 80/500 = 16%, and an always-stay baseline scores 95% — higher than the model. Decide on recall and precision instead."}
+    ],
+    "repair": "Step 4 should compare against the 95% majority-class baseline and report recall (16%) and precision (28.6%) on the churn class. Set the threshold from the cost of a missed churner against a wasted contact, not from overall accuracy.",
+    "debrief": "A confusion matrix contains the whole truth; accuracy is a lossy summary of it that discards exactly the distinction a rare-event problem turns on. Whenever a single number is offered as a decision criterion, compute what a trivial baseline scores on the same data. If the baseline is close, the metric is describing the class balance rather than the model.",
+    "validation_payload": {
+      "solver": "answer = round(80 / 500 * 100, 1)",
+      "flawed_solver": "answer = round((9300 + 80) / 10000 * 100, 1)"
+    }
+  },
+  {
+    "id": "ml-leak-002",
+    "subject": "machine-learning",
+    "topic": "Data Preprocessing & Feature Engineering",
+    "subtopic": "Target leakage",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A loan-default model reaches 0.98 AUC. Is this explanation of the result sound?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "features": "applicant_income, credit_score, loan_amount, employment_years,\nnum_collections_calls, days_since_last_payment, account_status_code",
+      "note": "account_status_code takes values: current, late_30, late_60, default_written_off.\nThe target is: did this loan default?"
+    },
+    "ai_claim": "The 0.98 AUC reflects genuinely strong signal: credit score and income are well-established predictors, and the model has found their interaction.",
+    "ai_solution": [
+      {"index": 1, "text": "Credit score and income are established predictors of default, so strong performance is plausible."},
+      {"index": 2, "text": "The train/test split was random and stratified, and preprocessing was fitted on the training fold only."},
+      {"index": 3, "text": "No row appears in both folds, so there is no train/test contamination."},
+      {"index": 4, "text": "The 0.98 AUC therefore reflects real predictive signal in the features."}
+    ],
+    "ai_final_answer": "sound",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 4,
+      "misconception": "Checking for train/test contamination while missing leakage from a feature that encodes the target",
+      "explanation": "`account_status_code` includes the value `default_written_off`, which is a direct record of the outcome being predicted — it is only known after default has occurred. `num_collections_calls` and `days_since_last_payment` are similarly post-hoc. The model is largely reading the answer, and none of these values will be available at scoring time for a new application.",
+      "why_convincing": "Steps 2 and 3 describe a genuinely careful methodology, and they rule out the leakage everyone checks for — row overlap. Feature leakage is a different mechanism entirely, and the offending column looks like ordinary account metadata."
+    },
+    "canonical_solution": "Not sound. `account_status_code` can take the value `default_written_off`, which is the target restated as a feature; `num_collections_calls` and `days_since_last_payment` are also recorded after the fact. The split is clean and the preprocessing is correct, but the feature set leaks. Rebuild using only information available at application time and re-measure — expect a substantially lower AUC that is actually attainable in production.",
+    "canonical_answer": "not sound",
+    "valid_evidence": [
+      {"type": "data_point", "summary": "account_status_code takes the value default_written_off, a record of the outcome being predicted.", "must_reference_step": 4, "must_contain_values": []},
+      {"type": "test_case", "summary": "Score a brand-new application: account_status_code, num_collections_calls and days_since_last_payment do not exist yet, so the model cannot use them in production.", "must_reference_step": 4, "must_contain_values": []}
+    ],
+    "counterexamples": ["For a brand-new application, account_status_code cannot be anything but 'current' — the value that carries the signal only exists after the outcome."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "For each feature, ask when its value becomes known."},
+      {"level": 2, "kind": "direction", "text": "Steps 2 and 3 rule out row overlap. Ask whether that is the only kind of leakage."},
+      {"level": 3, "kind": "concept", "text": "A feature that is only knowable after the outcome leaks the target, however clean the split."},
+      {"level": 4, "kind": "strong", "text": "Read the possible values of account_status_code against the definition of the target."},
+      {"level": 5, "kind": "reveal", "text": "Step 4 misses feature leakage. account_status_code includes 'default_written_off', which is the outcome itself, and two other features are recorded post-hoc. The split is clean; the features are not."}
+    ],
+    "repair": "Drop account_status_code, num_collections_calls and days_since_last_payment, or replace them with values as they stood at application time. Retrain and re-measure; the honest AUC will be much lower and will reflect what is achievable in production.",
+    "debrief": "Leakage has two distinct mechanisms and checking one says nothing about the other. Row overlap is what everyone tests for; a feature that postdates the outcome is far more common and far harder to see, because it looks like ordinary data. The reliable test is temporal: for each feature, ask whether its value is knowable at the moment the prediction must be made. An implausibly good score is the symptom that should start this audit, not end it.",
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-cv-003",
+    "subject": "machine-learning",
+    "topic": "Model Evaluation & Cross-Validation",
+    "subtopic": "Nested cross-validation",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this evaluation protocol sound?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "protocol": "Outer loop: 5-fold CV over the full dataset.\n  For each outer fold:\n    Inner loop: 5-fold CV on the outer training fold only, to select hyperparameters.\n    Refit the best configuration on the whole outer training fold.\n    Score once on the held-out outer fold.\nReport the mean of the five outer scores."
+    },
+    "ai_claim": "Sound — nested CV keeps hyperparameter selection inside the training data, so the reported score is an unbiased estimate of generalisation.",
+    "ai_solution": [
+      {"index": 1, "text": "Hyperparameters are chosen using only the inner folds, which are drawn entirely from the outer training fold."},
+      {"index": 2, "text": "The outer test fold takes no part in selection — it is untouched until the final scoring step."},
+      {"index": 3, "text": "Each outer fold therefore yields a score on data that influenced neither the fit nor the configuration choice."},
+      {"index": 4, "text": "Averaging the five outer scores gives an estimate that is not inflated by selection on the test data."}
+    ],
+    "ai_final_answer": "sound",
+    "simulated_confidence": 87,
+    "truth_state": "valid",
+    "canonical_solution": "Sound. This is textbook nested cross-validation. The common error it avoids is selecting hyperparameters by cross-validation and then reporting that same cross-validated score — which is optimistically biased, because the configuration was chosen to maximise it. Here selection happens strictly inside each outer training fold and the outer fold is scored once, so the estimate is unbiased for the whole model-selection procedure.",
+    "canonical_answer": "sound",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Trace which data influences the hyperparameter choice, and which data is scored."},
+      {"level": 2, "kind": "direction", "text": "Check step 2: is the outer fold genuinely untouched during selection?"},
+      {"level": 3, "kind": "concept", "text": "A score is biased when the data it is computed on influenced any choice made about the model."},
+      {"level": 4, "kind": "strong", "text": "Ask what would be wrong with a single CV loop that both selected and reported."},
+      {"level": 5, "kind": "reveal", "text": "This protocol is sound. Selection happens strictly within each outer training fold, the outer fold is scored once, and the mean is unbiased. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "Nested CV is easy to reject because it looks elaborate, and elaborate protocols attract suspicion. The question that settles it is narrow: did any data used to compute the reported score also influence a choice about the model? Here it did not. Note what makes the estimate meaningful — it estimates the performance of the whole *procedure*, selection included, which is the thing you would actually deploy.",
+    "validation_payload": {}
+  }
+]

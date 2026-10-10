@@ -1,0 +1,508 @@
+[
+  {
+    "id": "db-joins-aggregations-subqueries-001",
+    "subject": "databases",
+    "topic": "Joins, Aggregations & Subqueries",
+    "subtopic": "Join fan-out inflates sums",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this query report each customer's total spend - 150 for customer 1 and 80 for customer 2?",
+    "artifact_type": "sql",
+    "artifact": {
+      "orders": {
+        "title": "orders",
+        "columns": [
+          "id",
+          "customer_id",
+          "amount"
+        ],
+        "rows": [
+          [
+            1,
+            1,
+            100
+          ],
+          [
+            2,
+            1,
+            50
+          ],
+          [
+            3,
+            2,
+            80
+          ]
+        ]
+      },
+      "order_items": {
+        "title": "order_items",
+        "columns": [
+          "order_id",
+          "product"
+        ],
+        "rows": [
+          [
+            1,
+            "pen"
+          ],
+          [
+            1,
+            "ink"
+          ],
+          [
+            1,
+            "pad"
+          ],
+          [
+            2,
+            "cap"
+          ],
+          [
+            3,
+            "mug"
+          ],
+          [
+            3,
+            "tea"
+          ]
+        ]
+      },
+      "query": "SELECT o.customer_id, SUM(o.amount) AS total_spent\nFROM orders o\nJOIN order_items i ON i.order_id = o.id\nGROUP BY o.customer_id;"
+    },
+    "ai_claim": "Yes. It joins each order to its items and sums the order amounts per customer: 100 + 50 = 150 for customer 1 and 80 for customer 2.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The join connects each order to its items."
+      },
+      {
+        "index": 2,
+        "text": "Customer 1 has orders of 100 and 50; customer 2 has one order of 80."
+      },
+      {
+        "index": 3,
+        "text": "SUM(o.amount) adds the order amounts for each customer."
+      },
+      {
+        "index": 4,
+        "text": "So the totals are 150 and 80."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Summing a column repeated by a one-to-many join",
+      "explanation": "The join produces one row per order item, so each order's amount is repeated once per item. Order 1 (three items) contributes 100 three times. SUM(o.amount) gives 350 for customer 1 and 160 for customer 2. Either drop the unnecessary join or aggregate items separately before joining.",
+      "why_convincing": "Step 2's arithmetic is exactly right for the orders table; the join silently changes the rows being summed."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The join multiplies rows: customer 1 gets 100 x 3 + 50 x 1 = 350, customer 2 gets 80 x 2 = 160. Sum orders.amount without joining order_items.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The query returns 350 for customer 1 and 160 for customer 2.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "350",
+          "160"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "joined rows for customer 1: 100, 100, 100, 50 -> SUM = 350",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "350"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "SELECT customer_id, SUM(amount) FROM orders GROUP BY customer_id;",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Order 1's amount appears three times after the join."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count how many rows the join produces for order 1."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 sums o.amount over the joined rows, not over orders."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A one-to-many join repeats the 'one' side's columns once per matching row."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write out the joined rows for customer 1."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the join repeats order amounts per item, giving 350 and 160. Remove the join or aggregate first."
+      }
+    ],
+    "repair": "Aggregate orders on their own: `SELECT customer_id, SUM(amount) FROM orders GROUP BY customer_id`.",
+    "debrief": "Fan-out is the most common silent error in reporting SQL: a join to a child table multiplies the parent's rows, and every SUM or COUNT on the parent inflates. Before aggregating, ask what one row of the joined result represents.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-joins-aggregations-subqueries-002",
+    "subject": "databases",
+    "topic": "Joins, Aggregations & Subqueries",
+    "subtopic": "NOT EXISTS and NULLs",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: customers who have never placed an order. Does this query return Ben and Chen, even though orders contains a row with a NULL customer_id?",
+    "artifact_type": "sql",
+    "artifact": {
+      "customers": {
+        "title": "customers",
+        "columns": [
+          "id",
+          "name"
+        ],
+        "rows": [
+          [
+            1,
+            "Asha"
+          ],
+          [
+            2,
+            "Ben"
+          ],
+          [
+            3,
+            "Chen"
+          ]
+        ]
+      },
+      "orders": {
+        "title": "orders",
+        "columns": [
+          "id",
+          "customer_id"
+        ],
+        "rows": [
+          [
+            10,
+            1
+          ],
+          [
+            11,
+            "NULL"
+          ]
+        ]
+      },
+      "query": "SELECT c.name\nFROM customers c\nWHERE NOT EXISTS (\n  SELECT 1 FROM orders o WHERE o.customer_id = c.id\n);"
+    },
+    "ai_claim": "Yes. NOT EXISTS checks, for each customer, whether any order matches; the NULL row matches nobody, so Ben and Chen are returned.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "For Asha (id 1), order 10 matches, so EXISTS is true and she is excluded."
+      },
+      {
+        "index": 2,
+        "text": "For Ben and Chen, no order has a matching customer_id."
+      },
+      {
+        "index": 3,
+        "text": "The NULL row never satisfies o.customer_id = c.id, so it does not match anyone."
+      },
+      {
+        "index": 4,
+        "text": "NOT EXISTS is true for Ben and Chen, so both are returned."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. NOT EXISTS only asks whether a matching row exists, so a NULL in orders.customer_id is harmless. (The NOT IN version, WHERE id NOT IN (SELECT customer_id FROM orders), would return no rows at all because of the NULL.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Asha: order 10 matches -> excluded; Ben, Chen: no match -> returned",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how the NULL row behaves inside the subquery."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims the NULL row matches nobody."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "NOT EXISTS depends only on whether matching rows exist, unlike NOT IN, which compares against every value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate the subquery for Ben."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. NOT EXISTS is unaffected by the NULL row, so Ben and Chen are returned. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "NOT EXISTS is the robust way to write anti-joins. The alternative, NOT IN over a column that can contain NULL, returns nothing at all, because 'x NOT IN (1, NULL)' is never TRUE. The claim chose the construct that handles NULLs correctly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-joins-aggregations-subqueries-003",
+    "subject": "databases",
+    "topic": "Joins, Aggregations & Subqueries",
+    "subtopic": "Latest row per group with ties",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this query return each customer's most recent order - and, when a customer has two orders at the same latest time, both of them?",
+    "artifact_type": "sql",
+    "artifact": {
+      "orders": {
+        "title": "orders",
+        "columns": [
+          "id",
+          "customer_id",
+          "created_at"
+        ],
+        "rows": [
+          [
+            1,
+            1,
+            "2026-01-05"
+          ],
+          [
+            2,
+            1,
+            "2026-02-10"
+          ],
+          [
+            3,
+            2,
+            "2026-01-20"
+          ],
+          [
+            4,
+            2,
+            "2026-01-20"
+          ]
+        ]
+      },
+      "query": "SELECT o.*\nFROM orders o\nWHERE o.created_at = (\n  SELECT MAX(o2.created_at)\n  FROM orders o2\n  WHERE o2.customer_id = o.customer_id\n);"
+    },
+    "ai_claim": "Yes. For each order, the subquery finds that customer's latest time, and the order is kept if it matches. Ties at the latest time are all kept: here orders 2, 3 and 4.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The correlated subquery computes MAX(created_at) for the current order's customer."
+      },
+      {
+        "index": 2,
+        "text": "Customer 1's latest is 2026-02-10, which matches only order 2."
+      },
+      {
+        "index": 3,
+        "text": "Customer 2's latest is 2026-01-20, which matches both orders 3 and 4."
+      },
+      {
+        "index": 4,
+        "text": "The result is orders 2, 3 and 4."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The correlated subquery returns every order whose time equals its customer's maximum, so ties are all included. (Use ROW_NUMBER() if exactly one row per customer is required.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The result contains orders 2, 3 and 4.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2",
+          "3",
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what happens when two orders share the latest time."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims both tied orders are kept."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A correlated subquery is evaluated per outer row, and equality keeps every row that matches the maximum."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate the subquery for orders 3 and 4."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Every order matching its customer's latest time is kept, including ties: orders 2, 3 and 4. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "'Latest per group' has two variants: all rows at the latest time (this query) or exactly one row (ROW_NUMBER with a tie-breaker). The claim states which one it delivers, and that statement is correct.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-joins-aggregations-subqueries-004",
+    "subject": "databases",
+    "topic": "Joins, Aggregations & Subqueries",
+    "subtopic": "Grouping by a non-unique column",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The result row for Asha Rao shows 900. Is 900 the total spend of the customer Asha Rao with id 4?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "customers(id, name)\norders(id, customer_id, amount)",
+      "result": {
+        "title": "result",
+        "columns": [
+          "name",
+          "total"
+        ],
+        "rows": [
+          [
+            "Asha Rao",
+            900
+          ],
+          [
+            "Ben Das",
+            300
+          ]
+        ]
+      },
+      "query": "SELECT c.name, SUM(o.amount) AS total\nFROM customers c\nJOIN orders o ON o.customer_id = c.id\nGROUP BY c.name;"
+    },
+    "ai_claim": "Yes. The query sums each customer's orders, and Asha Rao's total is 900.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The join links each order to the customer who placed it."
+      },
+      {
+        "index": 2,
+        "text": "GROUP BY c.name produces one row per customer."
+      },
+      {
+        "index": 3,
+        "text": "Customer 4 is Asha Rao, so her orders are in the Asha Rao group."
+      },
+      {
+        "index": 4,
+        "text": "So customer 4's total spend is 900."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether another customer is also named Asha Rao. The query groups by name, not id, so customers who share a name are merged into one row. The customers table is not shown.",
+    "resolving_scenarios": [
+      "Only customer 4 is named Asha Rao: 900 is her total.",
+      "Customers 4 and 12 are both named Asha Rao, with 600 and 300: the row combines them, and customer 4 spent 600."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Step 2 assumes names identify customers. Without the customers table, 900 may combine several people. Group by c.id (and c.name) to get a per-customer total.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If customers 4 and 12 are both Asha Rao with 600 and 300, the row shows 900 but customer 4 spent 600.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "600",
+          "300",
+          "900"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Two customers named Asha Rao would be merged into one row."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the query groups by."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats one name as one customer."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "GROUP BY merges all rows with the same value; names are not guaranteed to be unique."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a second customer with the same name."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes names are unique. If only customer 4 is Asha Rao, 900 is right; if another Asha Rao exists, it is not. It cannot be decided."
+      }
+    ],
+    "repair": "GROUP BY c.id, c.name so each customer is a separate row.",
+    "debrief": "Grouping by a label instead of a key merges distinct entities that share the label. Whether it matters depends on data you have not seen - so the right move is to name that data, and to group by the key in the query.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,474 @@
+[
+  {
+    "id": "pe-structured-output-json-001",
+    "subject": "prompt-engineering",
+    "topic": "Structured Output & JSON",
+    "subtopic": "'Return JSON' without a schema",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the code always find the keys name, phone and city?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Extract the customer's details from the message and return JSON.\n<message>{message}</message>",
+      "code": "data = json.loads(response); save(data['name'], data['phone'], data['city'])"
+    },
+    "ai_claim": "Yes. The model returns JSON with the customer's details, so the code can read name, phone and city.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The prompt asks for JSON."
+      },
+      {
+        "index": 2,
+        "text": "The model extracts the customer's details."
+      },
+      {
+        "index": 3,
+        "text": "So the JSON contains name, phone and city."
+      },
+      {
+        "index": 4,
+        "text": "The code reads them."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Expecting specific keys without specifying them",
+      "explanation": "The prompt never names the keys. The model may use 'customer_name', 'mobile', 'location', nest them under 'customer', or omit missing fields - so data['phone'] raises KeyError. Specify the exact schema (keys, types, and what to do when a value is missing), and validate the output.",
+      "why_convincing": "The keys seem obvious to whoever wrote the code."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: key names are unspecified, so they vary. Give an explicit schema and validate.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Outputs across 20 messages use 'mobile', 'phone_number' and 'phone' for the same field.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "20"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Return JSON exactly: {\"name\": string, \"phone\": string or null, \"city\": string or null}.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A response using 'mobile' breaks data['phone']."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where the key names are specified."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the model chooses the code's keys."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Structured output needs an explicit schema."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the prompt on several messages."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: keys are unspecified. Provide a schema."
+      }
+    ],
+    "repair": "Specify the schema (or use schema-constrained output) and validate before saving.",
+    "debrief": "A contract between a prompt and code must be written down: key names, types and null handling.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-structured-output-json-002",
+    "subject": "prompt-engineering",
+    "topic": "Structured Output & JSON",
+    "subtopic": "JSON wrapped in prose",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will json.loads(response) parse this output?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Return the product attributes as JSON.",
+      "response": "Sure! Here are the attributes:\n```json\n{\"color\": \"red\", \"size\": \"M\"}\n```\nLet me know if you need anything else.",
+      "code": "attrs = json.loads(response)"
+    },
+    "ai_claim": "Yes. The model returned JSON as instructed, so json.loads parses it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The prompt asks for JSON."
+      },
+      {
+        "index": 2,
+        "text": "The response contains a JSON object."
+      },
+      {
+        "index": 3,
+        "text": "json.loads parses JSON."
+      },
+      {
+        "index": 4,
+        "text": "So parsing succeeds."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Parsing the whole response as JSON",
+      "explanation": "The response includes a greeting, Markdown code fences and a closing line, so the full string is not valid JSON and json.loads raises JSONDecodeError. Instruct the model to output only the JSON (or use a structured-output / tool-call feature), and parse defensively (extract the object, validate).",
+      "why_convincing": "The JSON part itself is valid."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the prose and code fences make the string invalid JSON. Use structured output or extract and validate the object.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "json.loads(response) raises JSONDecodeError: Expecting value: line 1 column 1.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Output only a JSON object with keys color and size. No other text.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The first character is 'S', not '{'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the whole response, not just the JSON inside it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the response is pure JSON."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models often add prose and fences unless constrained."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Parse the exact response string."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the response is not pure JSON."
+      }
+    ],
+    "repair": "Use structured output/tool calling, or instruct 'JSON only' and extract/validate robustly.",
+    "debrief": "Build parsers for the output you actually receive, and constrain the output where the platform allows.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-structured-output-json-003",
+    "subject": "prompt-engineering",
+    "topic": "Structured Output & JSON",
+    "subtopic": "Valid JSON, invalid values",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the json.loads check ensure the output is usable downstream?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "prompt": "Return JSON: {\"priority\": \"low\" | \"medium\" | \"high\", \"summary\": string}",
+      "check": "Output accepted if json.loads succeeds.",
+      "sample_output": "{\"priority\": \"URGENT!!\", \"summary\": \"Server down\"}"
+    },
+    "ai_claim": "Yes. If json.loads succeeds, the output is valid JSON, so it is ready for the downstream system.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The check parses the output."
+      },
+      {
+        "index": 2,
+        "text": "Parsing succeeds for valid JSON."
+      },
+      {
+        "index": 3,
+        "text": "Valid JSON is usable downstream."
+      },
+      {
+        "index": 4,
+        "text": "So accepted outputs are usable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Validating syntax but not the schema",
+      "explanation": "json.loads only checks syntax. 'URGENT!!' is valid JSON but not one of the allowed values, so the ticketing system rejects it or misroutes it. Validate against the schema (allowed enum values, required keys, types) with a validator such as Pydantic or jsonschema, and retry or repair on failure.",
+      "why_convincing": "Parsing succeeding feels like validation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: syntax checks miss invalid values like 'URGENT!!'. Validate against the schema.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The sample output parses but priority 'URGENT!!' is not in {low, medium, high}.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Validate with a Pydantic model: priority: Literal['low', 'medium', 'high']; retry once on failure.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'URGENT!!' passes the check."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the sample output against the allowed values."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates valid JSON with usable data."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Schema validation checks values, not just syntax."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Validate priority against the enum."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the value is invalid. Validate the schema."
+      }
+    ],
+    "repair": "Validate with a schema (Pydantic/jsonschema) and retry or fall back on failure.",
+    "debrief": "Treat model output like any external input: parse, then validate against a schema.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-structured-output-json-004",
+    "subject": "prompt-engineering",
+    "topic": "Structured Output & JSON",
+    "subtopic": "Unspecified date format",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the extracted dates be reliably usable by the warehouse system?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Extract the delivery date from the customer's message and return {\"date\": ...}.",
+      "examples_in_messages": "\"deliver on 3/4\", \"next Friday\", \"4th April\"",
+      "downstream": "The warehouse system parses the date as YYYY-MM-DD."
+    },
+    "ai_claim": "Yes. The model extracts the date the customer mentioned, so the warehouse gets the right date.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Customers mention delivery dates."
+      },
+      {
+        "index": 2,
+        "text": "The model extracts them."
+      },
+      {
+        "index": 3,
+        "text": "The extracted date is the customer's date."
+      },
+      {
+        "index": 4,
+        "text": "So the warehouse gets the right date."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F15",
+      "location": 3,
+      "misconception": "Leaving format and interpretation rules unspecified",
+      "explanation": "The prompt specifies neither the output format nor how to interpret ambiguous or relative dates. The model may return '3/4', '2026-03-04' or '2026-04-03' for the same message, and 'next Friday' needs today's date to resolve. Specify ISO format, the day-first convention used by customers, the reference date, and returning null with a flag when ambiguous.",
+      "why_convincing": "The date seems obvious in each message."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: format and interpretation are unspecified. Require YYYY-MM-DD, give today's date and the day-first convention, and flag ambiguity.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "'deliver on 3/4' is returned as '3/4', '2026-03-04' and '2026-04-03' in different runs.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Today is {today}. Customers write dates day-first. Return {\"date\": \"YYYY-MM-DD\"} or {\"date\": null, \"ambiguous\": true}.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'next Friday' cannot be resolved without today's date."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what format the warehouse needs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes one clear date."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Dates need explicit formats, conventions and reference points."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try 'deliver on 3/4' and 'next Friday'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: format and interpretation are unspecified."
+      }
+    ],
+    "repair": "Specify ISO format, convention, reference date and an ambiguity flag.",
+    "debrief": "Dates, currencies and units are where structured outputs most often go wrong. Specify them precisely.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-structured-output-json-005",
+    "subject": "prompt-engineering",
+    "topic": "Structured Output & JSON",
+    "subtopic": "Schema-constrained output with validation",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this design reliably produces valid, usable ticket records?",
+    "artifact_type": "guardrail",
+    "artifact": {
+      "prompt": "Tool definition: record_ticket(priority: enum[low, medium, high], category: enum[billing, technical, account], summary: string <= 200 chars)\nThe application forces the model to call this tool, validates the arguments with Pydantic, and on failure re-asks once with the validation error; after a second failure the ticket goes to manual triage."
+    },
+    "ai_claim": "Yes. Forcing a tool call constrains the shape of the output, Pydantic enforces types, enums and lengths, one retry with the error message fixes most failures, and manual triage catches the rest.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The tool schema defines required fields, enums and limits."
+      },
+      {
+        "index": 2,
+        "text": "Forcing the tool call yields arguments in that shape."
+      },
+      {
+        "index": 3,
+        "text": "Pydantic validation rejects anything outside the schema."
+      },
+      {
+        "index": 4,
+        "text": "A single retry with the error, then manual fallback, ensures no invalid record is stored."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Schema-constrained generation plus validation, bounded retries and a human fallback is a robust production pattern.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "model -> tool args -> Pydantic -> (fail -> retry with error -> fail -> manual triage) -> stored record",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow an invalid output through the pipeline."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 covers repeated failures."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Robust structured output combines constraints, validation, retries and fallback."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace what happens after two failures."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The design guarantees only valid records are stored. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "No single mechanism is enough; layered constraints and validation with a fallback make structured output dependable.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,378 @@
+[
+  {
+    "id": "dev-kubernetes-fundamentals-001",
+    "subject": "devops",
+    "topic": "Kubernetes Fundamentals",
+    "subtopic": "Rolling updates without readiness probes",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will users see no errors during a rolling update?",
+    "artifact_type": "k8s_manifest",
+    "artifact": {
+      "language": "yaml",
+      "manifest": "apiVersion: apps/v1\nkind: Deployment\nmetadata: {name: api}\nspec:\n  replicas: 3\n  strategy: {type: RollingUpdate}\n  template:\n    spec:\n      containers:\n        - name: api\n          image: acme/api:2.4.0     # takes about 40 s to load its model before serving\n          ports: [{containerPort: 8080}]\n          # no readinessProbe\n# AI: \"Rolling updates replace pods gradually, so users see no errors during deploys.\""
+    },
+    "ai_claim": "Yes. RollingUpdate replaces pods one at a time, so old pods keep serving until new ones are ready.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "RollingUpdate replaces pods gradually."
+      },
+      {
+        "index": 2,
+        "text": "Old pods keep running while new pods start."
+      },
+      {
+        "index": 3,
+        "text": "New pods receive traffic when ready."
+      },
+      {
+        "index": 4,
+        "text": "So users see no errors."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Relying on 'ready' without defining readiness",
+      "explanation": "Without a readinessProbe, Kubernetes considers a pod ready as soon as its container starts. New pods join the Service immediately, 40 seconds before the app can serve, and old pods are terminated. Requests routed to new pods fail during that window. Add a readinessProbe on a health endpoint that returns success only after the model has loaded.",
+      "why_convincing": "Rolling updates are designed for zero downtime - given correct readiness signals."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without a readiness probe, pods receive traffic before the app is ready. Add a readinessProbe.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "new pod container starts -> immediately Ready -> added to endpoints -> requests fail for ~40 s",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "40"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "readinessProbe:\n  httpGet: {path: /ready, port: 8080}\n  periodSeconds: 5",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Error rates spike for 40 seconds during each deploy."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how Kubernetes decides a pod is ready."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes readiness means the app can serve."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Without a readinessProbe, a started container counts as ready."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider the 40-second model load."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: pods get traffic before they can serve. Add a readiness probe."
+      }
+    ],
+    "repair": "Add a readinessProbe (and a startupProbe for slow starts).",
+    "debrief": "Zero-downtime deploys depend on accurate readiness signals. Kubernetes only knows what the probes tell it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-kubernetes-fundamentals-002",
+    "subject": "devops",
+    "topic": "Kubernetes Fundamentals",
+    "subtopic": "No resource requests or limits",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it fine to omit resource requests and limits for this worker?",
+    "artifact_type": "k8s_manifest",
+    "artifact": {
+      "language": "yaml",
+      "manifest": "containers:\n  - name: report-worker\n    image: acme/reports:1.8\n    # no resources section\n# The worker occasionally loads a 6 GB file into memory.\n# AI: \"Kubernetes schedules and isolates pods automatically, so resources don't need to be specified.\""
+    },
+    "ai_claim": "Yes. Kubernetes schedules pods onto nodes with capacity and isolates them, so resource settings are unnecessary.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The scheduler places pods on nodes."
+      },
+      {
+        "index": 2,
+        "text": "It considers node capacity."
+      },
+      {
+        "index": 3,
+        "text": "Pods are isolated from each other."
+      },
+      {
+        "index": 4,
+        "text": "So resource settings are unnecessary."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 2,
+      "misconception": "Leaving scheduling and isolation without resource information",
+      "explanation": "The scheduler places pods using their requests; with none, it assumes the pod needs almost nothing and may pack it onto a busy node. Without limits, the worker's 6 GB spike can starve neighbours or trigger the node's out-of-memory killer, evicting other workloads. Set requests (typical usage) and a memory limit (the worst case), or run it on dedicated nodes.",
+      "why_convincing": "Kubernetes is often described as managing resources automatically."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without requests the scheduler cannot plan capacity, and without limits one pod can starve a node. Set requests and limits.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "worker spikes to 6 GB on a node with 4 GB free -> node OOM -> kubelet evicts other pods",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "resources:\n  requests: {cpu: 500m, memory: 1Gi}\n  limits: {memory: 7Gi}",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An unrelated API pod is evicted when the worker spikes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the scheduler uses to place pods."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the scheduler knows the pod's needs."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Requests drive scheduling; limits bound usage."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider the 6 GB spike."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: without requests and limits, capacity planning and isolation fail."
+      }
+    ],
+    "repair": "Define CPU/memory requests and memory limits from observed usage.",
+    "debrief": "Resource requests and limits are the contract between workloads and the scheduler.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-kubernetes-fundamentals-003",
+    "subject": "devops",
+    "topic": "Kubernetes Fundamentals",
+    "subtopic": "Keeping replicas through node maintenance",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this ensures at least 2 API pods stay available when nodes are drained for maintenance?",
+    "artifact_type": "k8s_manifest",
+    "artifact": {
+      "language": "yaml",
+      "manifest": "apiVersion: policy/v1\nkind: PodDisruptionBudget\nmetadata: {name: api-pdb}\nspec:\n  minAvailable: 2\n  selector: {matchLabels: {app: api}}\n# The api Deployment runs 3 replicas spread across nodes."
+    },
+    "ai_claim": "Yes. Voluntary evictions, such as kubectl drain, respect the PodDisruptionBudget: an eviction that would leave fewer than 2 available api pods is refused until a replacement is ready.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The Deployment runs 3 replicas."
+      },
+      {
+        "index": 2,
+        "text": "The PDB requires at least 2 available."
+      },
+      {
+        "index": 3,
+        "text": "Draining a node evicts pods through the eviction API, which checks the PDB."
+      },
+      {
+        "index": 4,
+        "text": "Evictions that would drop below 2 wait until replacements are ready."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct for voluntary disruptions. (PDBs do not prevent involuntary failures such as a node crash.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "drain node A (1 api pod) -> allowed (3 -> 2); drain node B immediately -> blocked until the replacement is Ready",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which disruptions a PDB governs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on the eviction API."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "PDBs limit voluntary disruptions like drains."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace draining two nodes in a row."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct for voluntary disruptions. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "PDBs make routine maintenance safe; replicas across nodes handle unplanned failures.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-kubernetes-fundamentals-004",
+    "subject": "devops",
+    "topic": "Kubernetes Fundamentals",
+    "subtopic": "Kubernetes Secrets are encoded",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it safe to commit this Secret manifest to Git?",
+    "artifact_type": "k8s_manifest",
+    "artifact": {
+      "language": "yaml",
+      "manifest": "apiVersion: v1\nkind: Secret\nmetadata: {name: db-creds}\ndata:\n  password: c3VwZXJzZWNyZXQxMjM=\n# This manifest is committed to the Git repository.\n# AI: \"Secret values are encrypted, so committing this file is safe.\""
+    },
+    "ai_claim": "Yes. Kubernetes Secrets store their values encrypted, so the password in the file cannot be read.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The value is stored in a Secret object."
+      },
+      {
+        "index": 2,
+        "text": "Secrets are Kubernetes' mechanism for sensitive data."
+      },
+      {
+        "index": 3,
+        "text": "The value is encrypted."
+      },
+      {
+        "index": 4,
+        "text": "So committing the file is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Mistaking base64 encoding for encryption",
+      "explanation": "Secret data is base64-encoded, not encrypted: 'c3VwZXJzZWNyZXQxMjM=' decodes to 'supersecret123' with a single command. Anyone with repository access has the password. Encryption at rest in etcd (if enabled) does not protect copies in Git. Use sealed-secrets, SOPS or an external secrets manager, and rotate this password.",
+      "why_convincing": "The value looks scrambled, and 'Secret' sounds protected."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: base64 decodes instantly to 'supersecret123'. Use sealed-secrets/SOPS or an external secrets manager, and rotate the password.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "echo c3VwZXJzZWNyZXQxMjM= | base64 -d -> supersecret123",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Store an encrypted SealedSecret (or reference an ExternalSecret) in Git instead of a plain Secret.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Decoding the value takes one command."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try decoding the value."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes encryption."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Kubernetes Secret manifests hold base64-encoded plaintext."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run base64 -d on the value."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: base64 is not encryption. Use an encryption tool and rotate."
+      }
+    ],
+    "repair": "Rotate the password; use sealed-secrets, SOPS or an external secrets manager.",
+    "debrief": "Encoding is a transport format; encryption requires a key. Secrets in Git must be encrypted with one.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,461 @@
+[
+  {
+    "id": "be-backend-framework-development-001",
+    "subject": "backend",
+    "topic": "Backend Framework Development",
+    "subtopic": "Mutable default arguments",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does each new post get exactly one tag - the one sent with its request?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "def build_tags(tag, tags=[]):\n    tags.append(tag)\n    return tags\n\n@app.post(\"/posts\")\ndef create_post(title: str, tag: str):\n    return posts.create(title=title, tags=build_tags(tag))"
+    },
+    "ai_claim": "Yes. build_tags starts from an empty list each call, appends the tag, and returns a one-element list.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "create_post calls build_tags(tag) without a tags argument."
+      },
+      {
+        "index": 2,
+        "text": "tags therefore defaults to a new empty list."
+      },
+      {
+        "index": 3,
+        "text": "The tag is appended."
+      },
+      {
+        "index": 4,
+        "text": "So each post gets a one-element list."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Assuming the default list is created on each call",
+      "explanation": "Python evaluates default arguments once, when the function is defined. Every call without a tags argument shares the same list, so tags accumulate across requests: the second post gets ['news', 'sport'], the third three tags, and so on for the life of the worker process. Use tags=None and create the list inside.",
+      "why_convincing": "The first request after a restart behaves exactly as described."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the default list is shared across calls, so tags from earlier requests accumulate. Use tags=None and tags = [] if tags is None else tags.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "build_tags('a') then build_tags('b') returns ['a', 'b'].",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Python evaluates default parameter values once, at function definition time.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The second post created after a restart has two tags."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Call build_tags twice and look at the second result."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes a new list each call."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Default values are evaluated once, when def runs, and then shared."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace build_tags('a') and then build_tags('b')."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the default list is shared, so tags accumulate. Use None as the default."
+      }
+    ],
+    "repair": "Use `def build_tags(tag, tags=None): tags = [] if tags is None else tags`.",
+    "debrief": "Mutable defaults are especially dangerous on servers, where one long-lived process handles many requests: state leaks between users. Use None and create the object inside the function.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-backend-framework-development-002",
+    "subject": "backend",
+    "topic": "Backend Framework Development",
+    "subtopic": "Blocking calls in async endpoints",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "With one Uvicorn worker, can the server handle other requests while one /weather call waits 2 seconds for the weather API?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "import requests\n\n@app.get(\"/weather\")\nasync def weather(city: str):\n    r = requests.get(f\"https://weather.example/api?city={city}\", timeout=5)  # about 2 s\n    return r.json()"
+    },
+    "ai_claim": "Yes. The endpoint is async def, so while it waits on the network, the event loop serves other requests.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "FastAPI runs async def endpoints on the event loop."
+      },
+      {
+        "index": 2,
+        "text": "The endpoint spends 2 seconds waiting for the network."
+      },
+      {
+        "index": 3,
+        "text": "Async code yields to other tasks while waiting."
+      },
+      {
+        "index": 4,
+        "text": "So other requests are served meanwhile."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Assuming async def makes every call inside it non-blocking",
+      "explanation": "Code yields to the event loop only at an await. requests.get is a blocking call with no await, so it blocks the single event loop thread for the full 2 seconds and every other request waits. Use an async client (await httpx.AsyncClient().get(...)) or declare the endpoint with plain def, which FastAPI runs in a thread pool.",
+      "why_convincing": "The endpoint is declared async and the work is I/O, which is the textbook case for async."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: requests.get blocks the event loop, so the worker is frozen for 2 seconds per call. Use httpx.AsyncClient with await, or a plain def endpoint.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Fire 5 concurrent /weather requests: they complete about 2 s apart, 10 s in total.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "An async function yields control only at await points; blocking calls block the event loop.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A health-check request waits 2 seconds behind a /weather call."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the await points in the endpoint."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes waiting inside async code always yields."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Only awaited operations give control back to the event loop."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check whether requests.get is awaited."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: requests.get blocks without awaiting, freezing the loop. Use an async client or a plain def endpoint."
+      }
+    ],
+    "repair": "Use `async with httpx.AsyncClient() as c: r = await c.get(...)`, or make the endpoint a plain def.",
+    "debrief": "async def is a promise to never block. One blocking library call inside it hurts more than a sync endpoint would, because FastAPI runs sync endpoints in a thread pool but trusts async ones to cooperate.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-backend-framework-development-003",
+    "subject": "backend",
+    "topic": "Backend Framework Development",
+    "subtopic": "Dependencies with yield",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the database session closed after every request - including requests where create_order raises an exception?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "def get_db():\n    db = SessionLocal()\n    try:\n        yield db\n    finally:\n        db.close()\n\n@app.post(\"/orders\")\ndef create_order(data: OrderIn, db: Session = Depends(get_db)):\n    return orders.create(db, data)   # may raise"
+    },
+    "ai_claim": "Yes. FastAPI runs the code after yield when the request finishes, and the finally block runs whether or not the endpoint raised, so db.close() always runs.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "FastAPI calls get_db and injects the yielded session."
+      },
+      {
+        "index": 2,
+        "text": "After the endpoint finishes, FastAPI resumes the generator."
+      },
+      {
+        "index": 3,
+        "text": "If the endpoint raised, the exception is thrown into the generator at the yield."
+      },
+      {
+        "index": 4,
+        "text": "Either way the finally block runs and closes the session."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A yield dependency behaves like a context manager: try/finally guarantees cleanup on success and on error.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Make create_order raise; a log line in the finally block still prints and the pool shows no leaked connection.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "FastAPI dependencies with yield run their exit code after the response, like a context manager.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what guarantees the cleanup runs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 relies on the finally block."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A generator's finally block runs when it is resumed, closed, or has an exception thrown in."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Raise inside create_order and watch for db.close()."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The finally block closes the session on success and failure. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Resource cleanup belongs in finally (or a context manager) so that exceptions cannot skip it. FastAPI's yield dependencies are designed around exactly this pattern.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-backend-framework-development-004",
+    "subject": "backend",
+    "topic": "Backend Framework Development",
+    "subtopic": "Route declaration order",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does GET /users/me return the current user rather than trying to look up a user with id 'me'?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "app.get(\"/users/me\", (req, res) => res.json(req.user));\napp.get(\"/users/:id\", (req, res) => res.json(users.find(req.params.id)));"
+    },
+    "ai_claim": "Yes. Express checks routes in the order they are registered; /users/me is registered first and matches, so its handler responds.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Express tries routes in registration order."
+      },
+      {
+        "index": 2,
+        "text": "/users/me is registered before /users/:id."
+      },
+      {
+        "index": 3,
+        "text": "The request matches /users/me exactly, and its handler sends a response."
+      },
+      {
+        "index": 4,
+        "text": "The /users/:id handler is never reached for this request."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The first matching route that responds wins. If /users/:id were registered first, it would capture 'me' as an id.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "GET /users/me returns the logged-in user.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Swapping the two lines makes GET /users/me call users.find('me').",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how Express chooses between two matching routes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 states the matching order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Express matches routes in the order they are added; the first handler that responds ends the request."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what happens if the lines were swapped."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. /users/me is registered first, so it handles the request. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Express matches routes in order, so specific routes must come before parameterised ones. The claim's reasoning depends on that order, which is correct here.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-backend-framework-development-005",
+    "subject": "backend",
+    "topic": "Backend Framework Development",
+    "subtopic": "Errors thrown in async route handlers",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If reports.load rejects, does the client receive the 500 JSON error from the error handler?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "app.get(\"/reports/:id\", async (req, res) => {\n  const report = await reports.load(req.params.id);   // may reject\n  res.json(report);\n});\n\n// error-handling middleware, registered last\napp.use((err, req, res, next) => {\n  res.status(500).json({ error: \"internal error\" });\n});\n// package.json lists \"express\" but the lockfile is not shown"
+    },
+    "ai_claim": "Yes. The error handler is registered last, so any error in a route - including a rejected await - is passed to it and the client gets the 500 response.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "reports.load rejects, so the await throws inside the handler."
+      },
+      {
+        "index": 2,
+        "text": "Express catches errors thrown in route handlers."
+      },
+      {
+        "index": 3,
+        "text": "It passes them to the error-handling middleware."
+      },
+      {
+        "index": 4,
+        "text": "The client receives a 500 JSON response."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The Express major version. Express 5 forwards rejected promises from async handlers to error middleware; Express 4 catches only synchronous throws, so a rejected promise becomes an unhandled rejection and the request hangs until it times out.",
+    "resolving_scenarios": [
+      "Express 5.x: the rejection is forwarded to the error handler and the client gets the 500 JSON.",
+      "Express 4.x: the rejection is unhandled, the error handler never runs, and the request hangs (or the process logs an unhandled rejection)."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the Express version, which is not shown. Step 2 is true for Express 5 and for synchronous errors in Express 4, but not for async errors in Express 4.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Under Express 4.18, the rejected await never reaches the error handler and the client waits until timeout.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "In Express 4 the request hangs instead of returning 500."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what determines whether async errors reach error middleware."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states a behaviour that changed between Express versions."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Express 5 handles rejected promises from handlers; Express 4 does not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Answer the question once for Express 4 and once for Express 5."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 depends on the version. Express 5 returns the 500; Express 4 leaves the request hanging. It cannot be decided."
+      }
+    ],
+    "repair": "State the Express version; on Express 4, wrap handlers (try/catch with next(err), or express-async-errors).",
+    "debrief": "Framework behaviour changes between major versions, and error handling is a common place for it. When correctness depends on the version, the version is part of the information needed.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

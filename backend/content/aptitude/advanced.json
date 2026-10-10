@@ -1,0 +1,234 @@
+[
+  {
+    "id": "apt-adv-031",
+    "subject": "aptitude",
+    "topic": "Permutations, Combinations & Probability",
+    "subtopic": "Conditional probability and the base rate",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A factory has two machines. Machine A makes 80% of the output with a 2% defect rate; Machine B makes 20% with a 6% defect rate. A randomly chosen item is defective. What is the probability it came from Machine B?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The probability is 6%, since that is Machine B's defect rate.",
+    "ai_solution": [
+      {"index": 1, "text": "Machine A produces 80% of items and Machine B produces 20%."},
+      {"index": 2, "text": "Machine B's defect rate is 6%, three times Machine A's 2%."},
+      {"index": 3, "text": "The item is defective, and Machine B's defect rate is 6%."},
+      {"index": 4, "text": "So the probability it came from Machine B is 6%."}
+    ],
+    "ai_final_answer": "6",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Reporting P(defective given B) when asked for P(B given defective)",
+      "explanation": "6% is the probability an item is defective given that it came from B — the reverse of what was asked. Working the frequencies: out of 1,000 items, A makes 800 with 16 defective and B makes 200 with 12 defective, so 28 defects in total and B accounts for 12 of them. That is 12/28 = 42.9%, not 6%.",
+      "why_convincing": "Steps 1 and 2 are correct, and 6% is a real number from the problem, so it feels sourced rather than invented. The two conditionals are also easy to conflate in words: 'B's defect rate' and 'the chance a defect came from B' sound like the same fact."
+    },
+    "canonical_solution": "Take 1,000 items. Machine A makes 800, of which 2% = 16 are defective. Machine B makes 200, of which 6% = 12 are defective. Total defects = 28. Given an item is defective, P(from B) = 12/28 = 3/7 = 42.86%. The 6% figure answers the opposite conditional.",
+    "canonical_answer": "42.857143",
+    "valid_evidence": [
+      {"type": "calculation", "summary": "Count defects from each machine and divide.", "must_reference_step": 3, "must_contain_values": ["12", "28"]},
+      {"type": "rule", "summary": "P(B|defective) is not P(defective|B).", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["If B made only 1% of output, its defect rate would still be 6% but almost no defect would come from B — so 6% cannot be the answer to the question asked."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Write down precisely which conditional probability the question asks for."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are correct. Check what quantity step 3 picks up."},
+      {"level": 3, "kind": "concept", "text": "P(A given B) and P(B given A) are different numbers; converting between them needs the base rates."},
+      {"level": 4, "kind": "strong", "text": "Take 1,000 items and count how many defects come from each machine."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 uses B's defect rate, which is P(defective | B). The question asks P(B | defective) = 12/28 = 42.86%."}
+    ],
+    "repair": "Replace steps 3 and 4 with a frequency count: 16 defects from A, 12 from B, 28 in total, so P(B | defective) = 12/28 = 42.86%.",
+    "debrief": "Reversed conditionals are the most common probability error and the hardest to see, because the wrong number is genuinely present in the problem. Natural frequencies defeat it: count actual items rather than manipulating percentages, and the two conditionals stop looking alike. Before computing anything, write the question as P(what | what) and check which one you were handed.",
+    "validation_payload": {
+      "solver": "total = 1000\na_items = total * 0.80\nb_items = total * 0.20\na_def = a_items * 0.02\nb_def = b_items * 0.06\nanswer = b_def / (a_def + b_def) * 100",
+      "flawed_solver": "answer = 6"
+    }
+  },
+  {
+    "id": "apt-adv-032",
+    "subject": "aptitude",
+    "topic": "Permutations, Combinations & Probability",
+    "subtopic": "Counting with a constraint",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many 4-digit numbers can be formed from the digits 1, 2, 3, 4, 5 without repetition, such that the number is even?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "There are 60 such numbers.",
+    "ai_solution": [
+      {"index": 1, "text": "Choosing 4 digits from 5 and arranging them gives 5 x 4 x 3 x 2 = 120 four-digit numbers in total."},
+      {"index": 2, "text": "A number is even when its last digit is even."},
+      {"index": 3, "text": "Half of all numbers are even, so half of 120 is 60."}
+    ],
+    "ai_final_answer": "60",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming a constraint splits the count evenly when the digit set is not balanced",
+      "explanation": "The available digits are 1, 2, 3, 4, 5 — three odd and two even. The last digit must be 2 or 4, so there are 2 choices for it and 4 x 3 x 2 = 24 arrangements of the remaining three positions, giving 2 x 24 = 48. The even/odd split is 48/72, not 60/60, because only two of the five digits are even.",
+      "why_convincing": "Steps 1 and 2 are both correct, and 'half of all numbers are even' is true for a balanced digit set — which this is not. The symmetry argument is fast and feels rigorous, and 60 is exactly the number a reader expects."
+    },
+    "canonical_solution": "Fix the last digit first, since that is what the constraint touches. It must be even: 2 choices (2 or 4). The remaining three positions are filled from the four unused digits: 4 x 3 x 2 = 24. Total = 2 x 24 = 48. Check: the odd-ending count is 3 x 24 = 72, and 48 + 72 = 120, matching step 1.",
+    "canonical_answer": "48",
+    "valid_evidence": [
+      {"type": "calculation", "summary": "Fix the even last digit, then count the rest.", "must_reference_step": 3, "must_contain_values": ["2", "24", "48"]},
+      {"type": "counterexample", "summary": "Only two of the five digits are even, so the split cannot be equal.", "must_reference_step": 3, "must_contain_values": ["48", "72"]}
+    ],
+    "counterexamples": ["Counting odd-ending numbers gives 3 x 24 = 72. Since 48 + 72 = 120, an even split of 60/60 is impossible."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Count how many of the available digits are even."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are correct. Step 3 assumes a symmetry — test it."},
+      {"level": 3, "kind": "concept", "text": "A parity constraint splits a count evenly only when the digit set has equally many odd and even digits."},
+      {"level": 4, "kind": "strong", "text": "Fix the last digit to an even value and count the arrangements of the other three positions."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 assumes an even split, but only 2 of the 5 digits are even. Fixing the last digit gives 2 x 4 x 3 x 2 = 48, and the odd count 72 confirms it sums to 120."}
+    ],
+    "repair": "Replace step 3 with a direct count: 2 choices for the even last digit, then 4 x 3 x 2 = 24 for the rest, giving 48. Verify against the odd count of 72, which sums to the 120 from step 1.",
+    "debrief": "Symmetry arguments are powerful and are the first thing to check rather than the last. Here the symmetry does not hold because the digit set is unbalanced, and the fix is to count the constrained position first. The complementary count is a free verification: if the even and odd counts do not sum to the unconstrained total, one of them is wrong.",
+    "validation_payload": {
+      "solver": "count = 0\nfor a in range(1, 6):\n    for b in range(1, 6):\n        for c in range(1, 6):\n            for d in range(1, 6):\n                if len({a, b, c, d}) == 4 and d % 2 == 0:\n                    count += 1\nanswer = count",
+      "flawed_solver": "total = 5 * 4 * 3 * 2\nanswer = total // 2"
+    }
+  },
+  {
+    "id": "apt-adv-033",
+    "subject": "aptitude",
+    "topic": "Numbers, LCM & HCF",
+    "subtopic": "Remainders and cyclicity",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the last digit of 7^100?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The last digit is 7.",
+    "ai_solution": [
+      {"index": 1, "text": "The last digits of powers of 7 repeat in a cycle: 7, 9, 3, 1, then 7 again. The cycle length is 4."},
+      {"index": 2, "text": "To find the position in the cycle, divide the exponent by 4: 100 / 4 = 25 remainder 0."},
+      {"index": 3, "text": "A remainder of 0 means we are at the start of the cycle, which is 7."},
+      {"index": 4, "text": "So the last digit of 7^100 is 7."}
+    ],
+    "ai_final_answer": "7",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Mapping a zero remainder to the first element of the cycle instead of the last",
+      "explanation": "A remainder of 0 means the exponent is an exact multiple of the cycle length, which lands on the *last* element, not the first. The cycle 7, 9, 3, 1 corresponds to exponents 1, 2, 3, 4; exponent 4 gives 1, and 100 is a multiple of 4, so 7^100 ends in 1. Check the small case: 7^4 = 2401.",
+      "why_convincing": "Steps 1 and 2 are exactly right — the cycle is correct and the division is correct. Only the interpretation of the zero remainder is wrong, and mapping 0 to 'position zero, the first item' feels natural to anyone used to zero-indexing."
+    },
+    "canonical_solution": "The cycle of last digits for powers of 7 is 7, 9, 3, 1 for exponents 1, 2, 3, 4. Since 100 = 4 x 25 with remainder 0, the exponent is a multiple of the cycle length and lands on the final element: 1. Verify with the smallest case: 7^4 = 2401, which ends in 1.",
+    "canonical_answer": "1",
+    "valid_evidence": [
+      {"type": "calculation", "summary": "7^4 = 2401 ends in 1, and 100 is a multiple of 4.", "must_reference_step": 3, "must_contain_values": ["2401", "1"]},
+      {"type": "rule", "summary": "A zero remainder lands on the last element of the cycle.", "must_reference_step": 3, "must_contain_values": ["1"]}
+    ],
+    "counterexamples": ["7^4 = 2401 ends in 1, not 7. Since 4 also leaves remainder 0 on division by 4, step 3's rule gives the wrong answer for the smallest test case."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Line the cycle up against the exponents it belongs to."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are correct. Check what a remainder of 0 actually means."},
+      {"level": 3, "kind": "concept", "text": "An exponent divisible by the cycle length completes the cycle, landing on its last element."},
+      {"level": 4, "kind": "strong", "text": "Compute 7^4 and read off its last digit."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 maps remainder 0 to the first element. It lands on the last: exponent 4 gives 1 (7^4 = 2401), and 100 is a multiple of 4, so the answer is 1."}
+    ],
+    "repair": "Step 3 should map a zero remainder to the final element of the cycle. Exponent 4 gives last digit 1, and 100 is a multiple of 4, so 7^100 ends in 1.",
+    "debrief": "Cyclicity questions are almost always lost at the zero remainder, because 'remainder 0' and 'position 0' feel like the same thing while the cycle is written 1-indexed. The test costs nothing: apply your rule to the smallest exponent that also gives remainder 0. If it fails on 7^4, it fails on 7^100.",
+    "validation_payload": {
+      "solver": "last = 1\nfor _ in range(100):\n    last = (last * 7) % 10\nanswer = last",
+      "flawed_solver": "cycle = [7, 9, 3, 1]\nremainder = 100 % 4\n# Flawed rule: remainder 0 means the start of the cycle.\nanswer = cycle[remainder]"
+    }
+  },
+  {
+    "id": "apt-adv-034",
+    "subject": "aptitude",
+    "topic": "Ratio, Proportion & Mixtures",
+    "subtopic": "Mixtures and successive replacement",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A 100-litre vessel is full of milk. 20 litres are removed and replaced with water. This is done a second time. How much milk remains?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "60 litres of milk remain.",
+    "ai_solution": [
+      {"index": 1, "text": "The vessel starts with 100 litres of milk."},
+      {"index": 2, "text": "The first operation removes 20 litres of milk, leaving 80 litres."},
+      {"index": 3, "text": "The second operation removes another 20 litres of milk, leaving 60 litres."},
+      {"index": 4, "text": "So 60 litres of milk remain."}
+    ],
+    "ai_final_answer": "60",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Treating the second removal as pure milk when the vessel now holds a mixture",
+      "explanation": "After the first replacement the vessel is 80 litres milk and 20 litres water, so the second 20 litres removed is a mixture — only 80% of it is milk, i.e. 16 litres. Milk remaining is 80 - 16 = 64 litres. The standard form is 100 x (1 - 20/100)² = 100 x 0.8² = 64.",
+      "why_convincing": "Steps 1 and 2 are correct, and step 3 mirrors step 2 exactly — which is precisely what makes it wrong, because the vessel's contents changed between the two operations. Repeating an operation that was valid once feels safe."
+    },
+    "canonical_solution": "Each replacement multiplies the remaining milk by (1 - 20/100) = 0.8. After two replacements: 100 x 0.8 x 0.8 = 64 litres. Step by step: after the first, 80 litres milk in 100 litres of liquid; the second removal of 20 litres takes 20 x 0.8 = 16 litres of milk, leaving 64.",
+    "canonical_answer": "64",
+    "valid_evidence": [
+      {"type": "calculation", "summary": "The second removal takes only 16 litres of milk.", "must_reference_step": 3, "must_contain_values": ["16", "64"]},
+      {"type": "rule", "summary": "Successive replacement multiplies by (1 - fraction) each time.", "must_reference_step": 3, "must_contain_values": ["64"]}
+    ],
+    "counterexamples": ["If the process were repeated five times, step 3's method would give 0 litres of milk, but the true answer is 100 x 0.8^5 = 32.77 litres — the vessel never runs out of milk entirely."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what the vessel contains at the moment of each removal."},
+      {"level": 2, "kind": "direction", "text": "Step 2 is correct. Ask why step 3 cannot simply repeat it."},
+      {"level": 3, "kind": "concept", "text": "Once water is added, any liquid removed is a mixture in proportion to the contents."},
+      {"level": 4, "kind": "strong", "text": "Work out how much of the second 20 litres is milk."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 treats the second removal as pure milk. The vessel is 80% milk by then, so 20 litres removes 16 litres of milk, leaving 64. Equivalently 100 x 0.8² = 64."}
+    ],
+    "repair": "Step 3 should note that the vessel is now 80% milk, so the 20 litres removed contains 16 litres of milk. Milk remaining = 80 - 16 = 64 litres, matching 100 x 0.8².",
+    "debrief": "This is the same failure as the reverse-percentage trap in a different costume: an operation is applied to a base that has changed since the last time it was valid. Repeating step 2 verbatim is what feels rigorous and is what breaks it. Whenever a process is applied repeatedly, ask what the state is at each application — and note that the multiplicative form makes the whole thing one line.",
+    "validation_payload": {
+      "solver": "milk = 100.0\nfor _ in range(2):\n    milk = milk - 20 * (milk / 100)\nanswer = milk",
+      "flawed_solver": "answer = 100 - 20 - 20"
+    }
+  },
+  {
+    "id": "apt-adv-035",
+    "subject": "aptitude",
+    "topic": "Permutations, Combinations & Probability",
+    "subtopic": "Inclusion-exclusion with three sets",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In a survey of 100 people, 60 like tea, 50 like coffee and 30 like both. How many like neither?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "20 people like neither.",
+    "ai_solution": [
+      {"index": 1, "text": "The number who like at least one drink is given by inclusion-exclusion: |T or C| = |T| + |C| - |T and C|."},
+      {"index": 2, "text": "Substituting: 60 + 50 - 30 = 80 people like at least one."},
+      {"index": 3, "text": "The survey covered 100 people, so those liking neither are 100 - 80 = 20."}
+    ],
+    "ai_final_answer": "20",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. Inclusion-exclusion is applied properly: the 30 who like both are counted in each of the 60 and the 50, so subtracting once removes exactly the double count, giving 80 who like at least one. The complement is 100 - 80 = 20. The consistency check also passes: tea-only is 30, coffee-only is 20, both is 30, neither is 20, and 30 + 20 + 30 + 20 = 100.",
+    "canonical_answer": "20",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "60 + 50 - 30 = 80 like at least one drink, so 100 - 80 = 20 like neither.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "80",
+          "20"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Check whether the overlap has been handled once, twice or not at all."},
+      {"level": 2, "kind": "direction", "text": "Verify the substitution in step 2 against the formula in step 1."},
+      {"level": 3, "kind": "concept", "text": "For a union of two sets, subtract the intersection exactly once."},
+      {"level": 4, "kind": "strong", "text": "Break the 100 into tea-only, coffee-only, both and neither, and check they sum to 100."},
+      {"level": 5, "kind": "reveal", "text": "This solution is correct: 60 + 50 - 30 = 80 like at least one, so 20 like neither. The four disjoint groups sum to 100. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "Set-counting questions are usually wrong in one of two ways — the overlap is not subtracted, or it is subtracted twice — so a reviewer primed on those may challenge a correct answer on reflex. The decomposition check settles it in seconds: split the population into disjoint groups (tea-only 30, coffee-only 20, both 30, neither 20) and confirm they sum to the total. If they do, the arithmetic is right.",
+    "validation_payload": {
+      "solver": "total = 100\ntea = 60\ncoffee = 50\nboth = 30\nat_least_one = tea + coffee - both\nanswer = total - at_least_one"
+    }
+  }
+]

@@ -1,0 +1,474 @@
+[
+  {
+    "id": "db-nosql-mongodb-001",
+    "subject": "databases",
+    "topic": "NoSQL & MongoDB",
+    "subtopic": "Schemaless collections",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this code safe from crashing on the email line for every document in the users collection?",
+    "artifact_type": "schema",
+    "artifact": {
+      "language": "javascript",
+      "code": "// users collection, no validator configured\nconst users = await db.collection(\"users\").find({}).toArray();\nconst emails = users.map(u => u.email.toLowerCase());"
+    },
+    "ai_claim": "Yes. The sign-up form always collects an email, and the first user document has one, so every user has an email field.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The sign-up form requires an email."
+      },
+      {
+        "index": 2,
+        "text": "The first document in the collection has an email field."
+      },
+      {
+        "index": 3,
+        "text": "Documents in a collection share the same structure."
+      },
+      {
+        "index": 4,
+        "text": "So u.email always exists and the code is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming documents in a collection share a schema",
+      "explanation": "Without a JSON Schema validator, MongoDB accepts any document shape. Imports, admin scripts, older app versions or other services can insert users without email, and one such document makes u.email.toLowerCase() throw TypeError. Add a validator requiring email, or handle the missing field.",
+      "why_convincing": "In a relational database, rows in a table do share a schema, and most documents here probably do have email."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not safe: a collection without a validator can contain documents missing email. Add a $jsonSchema validator with required: ['email'], and code defensively (u.email?.toLowerCase()).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "db.users.insertOne({ name: 'Ben' }) succeeds, and the map then throws TypeError.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "db.runCommand({ collMod: 'users', validator: { $jsonSchema: { required: ['email'] } } })",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A user created by an admin script without email crashes the map."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what enforces the shape of documents in this collection."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims documents share a structure."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "MongoDB enforces structure only when a schema validator is configured."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Insert a document with no email and rerun the code."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without a validator, documents can lack email, and the code throws. Add a validator or handle the missing field."
+      }
+    ],
+    "repair": "Add a `$jsonSchema` validator requiring email, and guard the access in code.",
+    "debrief": "'Schemaless' means the schema lives in your application instead of the database, so every reader must tolerate every shape ever written. Either enforce the schema with a validator or write readers that handle missing fields.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-nosql-mongodb-002",
+    "subject": "databases",
+    "topic": "NoSQL & MongoDB",
+    "subtopic": "Querying array fields",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this query match the Lamp document, whose tags field is the array ['home', 'sale']?",
+    "artifact_type": "sql",
+    "artifact": {
+      "language": "javascript",
+      "code": "// products: { name: 'Lamp', tags: ['home', 'sale'] }, ...\ndb.products.find({ tags: \"sale\" })"
+    },
+    "ai_claim": "No. The query asks for tags equal to the string 'sale', and the Lamp's tags is an array, not a string, so it does not match. Use $in or $elemMatch.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The filter compares tags with the string 'sale'."
+      },
+      {
+        "index": 2,
+        "text": "Lamp's tags is an array of two strings."
+      },
+      {
+        "index": 3,
+        "text": "An array is not equal to a string."
+      },
+      {
+        "index": 4,
+        "text": "So the Lamp is not matched; the query needs $elemMatch."
+      }
+    ],
+    "ai_final_answer": "no",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Applying scalar equality to an array field",
+      "explanation": "MongoDB treats an equality filter on an array field as 'the array contains this value'. { tags: 'sale' } matches every document whose tags array includes 'sale', so the Lamp is returned. $elemMatch is only needed for multiple conditions on the same element.",
+      "why_convincing": "In most languages and in SQL, comparing a list with a scalar is false, so step 3 sounds obviously right."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It matches: equality on an array field checks membership. { tags: 'sale' } returns the Lamp.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "db.products.find({ tags: 'sale' }) returns the Lamp document.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "To match the whole array exactly you would write { tags: ['home', 'sale'] }.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The query returns the Lamp."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how MongoDB interprets an equality filter on an array field."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 applies ordinary equality between an array and a string."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "For array fields, { field: value } matches if any element equals the value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the query against the Lamp document."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: MongoDB matches arrays containing the value, so the Lamp is returned."
+      }
+    ],
+    "repair": "Keep `{ tags: 'sale' }`; use $elemMatch only for several conditions on one element.",
+    "debrief": "Query semantics differ between databases. MongoDB's array matching is convenient, but it also means { tags: 'sale' } and { tags: ['sale'] } mean different things. Check the engine's rules rather than reasoning from another language.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-nosql-mongodb-003",
+    "subject": "databases",
+    "topic": "NoSQL & MongoDB",
+    "subtopic": "Embedding unbounded arrays",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this design keep working for a busy user over several years?",
+    "artifact_type": "schema",
+    "artifact": {
+      "language": "javascript",
+      "code": "// One document per user, with every activity event embedded:\n{\n  _id: 42,\n  name: \"Asha\",\n  events: [ { type: \"click\", at: ISODate(...) }, ... ]   // about 200 bytes each\n}\n// A busy user generates 100,000 events per year.\ndb.users.updateOne({ _id: 42 }, { $push: { events: newEvent } })"
+    },
+    "ai_claim": "Yes. Embedding keeps related data together, so one read returns the user and all their events, which is the recommended MongoDB pattern.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "MongoDB favours embedding data that is read together."
+      },
+      {
+        "index": 2,
+        "text": "A user's events are read with the user."
+      },
+      {
+        "index": 3,
+        "text": "$push appends each new event to the array."
+      },
+      {
+        "index": 4,
+        "text": "So the design scales as events accumulate."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 4,
+      "misconception": "Embedding a list that grows without limit",
+      "explanation": "A MongoDB document cannot exceed 16 MB. At about 200 bytes per event, 100,000 events a year is about 20 MB, so pushes start failing within the first year. Long before that, every read and update moves a huge document. Embed bounded data; store unbounded events in their own collection with user_id and an index.",
+      "why_convincing": "Embedding is a genuine MongoDB best practice - for data that stays small."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 100,000 x 200 bytes = 20 MB per year exceeds the 16 MB document limit in under a year. Put events in an events collection referencing user_id.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "100,000 events x 200 bytes = 20,000,000 bytes, over the 16 MB limit.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "16"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "events collection: { user_id: 42, type, at } with an index on { user_id: 1, at: -1 }",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After roughly 80,000 events, $push fails with a document-too-large error."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Estimate the size of a busy user's document after a year."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes the array can grow indefinitely."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "MongoDB caps each document at 16 MB."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply events per year by bytes per event."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the document passes 16 MB within a year. Move events to their own collection."
+      }
+    ],
+    "repair": "Store events in a separate collection keyed by user_id, indexed by (user_id, at).",
+    "debrief": "Embed when the embedded data is bounded and read together; reference when it grows without limit. The unbounded array is the most common MongoDB modelling mistake, and it fails suddenly - at the document size limit - after working well for months.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-nosql-mongodb-004",
+    "subject": "databases",
+    "topic": "NoSQL & MongoDB",
+    "subtopic": "Atomicity across documents",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If the application crashes between these two calls, is the transfer rolled back?",
+    "artifact_type": "sql",
+    "artifact": {
+      "language": "javascript",
+      "code": "await db.accounts.updateOne({ _id: \"A\" }, { $inc: { balance: -100 } });\nawait db.accounts.updateOne({ _id: \"B\" }, { $inc: { balance: 100 } });"
+    },
+    "ai_claim": "Yes. MongoDB operations are atomic, so the two updates succeed or fail together.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "updateOne is atomic in MongoDB."
+      },
+      {
+        "index": 2,
+        "text": "The transfer uses two updateOne calls."
+      },
+      {
+        "index": 3,
+        "text": "Atomic operations together form an atomic transfer."
+      },
+      {
+        "index": 4,
+        "text": "So a crash between them rolls back the debit."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Extending single-document atomicity to several documents",
+      "explanation": "MongoDB guarantees atomicity for a single document. The two updates are independent operations, so after a crash between them A has lost 100 and B has not received it. Multi-document atomicity requires a transaction (session.withTransaction) or a design that keeps the change in one document.",
+      "why_convincing": "Step 1 is true, and 'atomic' sounds like it applies to everything the code does."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: each updateOne is atomic only for its own document. Use a multi-document transaction via a session, or model the transfer so it changes one document.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "debit A commits -> crash -> credit to B never runs: 100 is lost",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "100"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "await session.withTransaction(async () => { /* both updateOne calls with { session } */ });",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A crash after the first call leaves A debited and B unchanged."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the scope of MongoDB's atomicity guarantee."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 combines two atomic operations into one atomic unit."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Single operations are atomic per document; spanning documents needs a transaction."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a crash right after the first call."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the updates are independent, so a crash loses 100. Use a transaction."
+      }
+    ],
+    "repair": "Wrap both updates in `session.withTransaction(...)`, passing `{ session }` to each.",
+    "debrief": "Two atomic steps do not make an atomic whole - the same lesson as SQL autocommit, in a document database. Know the unit of atomicity your datastore provides, and use transactions when an operation spans more than one unit.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-nosql-mongodb-005",
+    "subject": "databases",
+    "topic": "NoSQL & MongoDB",
+    "subtopic": "Aggregation pipeline order",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this pipeline return the three customers with the highest total of paid orders, with those totals?",
+    "artifact_type": "sql",
+    "artifact": {
+      "language": "javascript",
+      "code": "db.orders.aggregate([\n  { $match: { status: \"paid\" } },\n  { $group: { _id: \"$customer_id\", total: { $sum: \"$amount\" } } },\n  { $sort: { total: -1 } },\n  { $limit: 3 }\n])"
+    },
+    "ai_claim": "Yes. It filters to paid orders, sums amounts per customer, sorts by total from highest to lowest, and keeps the first three.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "$match keeps only paid orders, so refunds and pending orders are excluded before summing."
+      },
+      {
+        "index": 2,
+        "text": "$group creates one document per customer_id with the sum of amount."
+      },
+      {
+        "index": 3,
+        "text": "$sort orders those documents by total, descending."
+      },
+      {
+        "index": 4,
+        "text": "$limit keeps the top three."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Each stage feeds the next: filter, aggregate, sort and limit, in the right order. Placing $match first also lets MongoDB use an index on status.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "orders -> paid only -> {customer, total} -> sorted by total desc -> top 3",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that each stage receives the right input."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 filters before grouping. Would the result differ if the order were reversed?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Pipeline stages run in sequence, each on the previous stage's output."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace the documents through each stage."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It filters, groups, sorts and limits in the right order, returning the top three paid totals. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "An aggregation pipeline is read like SQL's logical order: filter rows ($match), group ($group), then order and limit. Getting $match before $group matters both for correctness (refunds excluded) and speed (index use).",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

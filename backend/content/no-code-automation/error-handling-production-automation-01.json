@@ -1,0 +1,376 @@
+[
+  {
+    "id": "nc-error-handling-production-automation-001",
+    "subject": "no-code-automation",
+    "topic": "Error Handling & Production Automation",
+    "subtopic": "Continue on fail",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does every order end up invoiced?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Workflow: new order -> create invoice in accounting (setting: 'continue on fail / ignore errors') -> email invoice to customer -> mark order 'invoiced'.\nAI: \"Ignoring errors keeps the workflow running, so every order ends up invoiced.\""
+    },
+    "ai_claim": "Yes. With errors ignored, the workflow always reaches the last step, so every order is marked invoiced.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The invoice step ignores errors."
+      },
+      {
+        "index": 2,
+        "text": "The workflow continues to the email step."
+      },
+      {
+        "index": 3,
+        "text": "It marks the order as invoiced."
+      },
+      {
+        "index": 4,
+        "text": "So every order is invoiced."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 1,
+      "misconception": "Suppressing errors instead of handling them",
+      "explanation": "When the accounting API fails, no invoice is created, but the workflow continues: the email has no invoice (or an empty one) and the order is marked 'invoiced' anyway. The failure is hidden, and the records are now wrong. Handle errors explicitly: stop or branch on failure, retry transient errors, alert, and only mark the order after the invoice exists.",
+      "why_convincing": "Keeping workflows running feels like reliability."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: failed invoices are silently marked as invoiced. Stop or branch on errors, retry, and alert.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "accounting API 503 -> error ignored -> email sent without invoice -> order marked 'invoiced'",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "503"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Failures should be handled explicitly, never silently ignored in critical steps.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Orders are marked invoiced with no invoice in accounting."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow a run where the invoice step fails."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 hides the failure."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Ignoring errors converts failures into wrong data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace the later steps after a failure."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: failures are hidden and records become wrong."
+      }
+    ],
+    "repair": "Remove 'continue on fail' on critical steps; add retries, an error branch and alerts.",
+    "debrief": "Silent failure is worse than loud failure: it corrupts records while looking healthy.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-error-handling-production-automation-002",
+    "subject": "no-code-automation",
+    "topic": "Error Handling & Production Automation",
+    "subtopic": "Mapping by column position",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the workflow still pay the right amounts to the right accounts?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "The workflow reads the 'Payouts' sheet and maps columns by position: column C = amount, column D = bank account.\nFinance inserts a new column 'Region' as column C.\nAI: \"The workflow still pays the right amounts to the right accounts.\""
+    },
+    "ai_claim": "Yes. The data are unchanged - only a new column was added - so payouts are still correct.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Amounts and bank accounts are unchanged."
+      },
+      {
+        "index": 2,
+        "text": "Only a new column was added."
+      },
+      {
+        "index": 3,
+        "text": "The workflow reads amounts and accounts."
+      },
+      {
+        "index": 4,
+        "text": "So payouts are correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on column positions",
+      "explanation": "Mapping by position means column C is now 'Region' and column D is now 'amount': the workflow reads a region name as the amount (failing or, with lenient parsing, paying garbage) and an amount as the bank account. Map by header name, protect the sheet's structure, and validate values (numeric amount, valid account format) before paying.",
+      "why_convincing": "People think of the columns by their names, not positions."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the inserted column shifts every mapping. Map by header name and validate values before paying.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "after insertion: C='North' (read as amount), D=45000 (read as account)",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "45000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Integrations should reference fields by stable names, not positions.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Payment amounts and destinations are scrambled."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what column C contains after the insertion."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the mapping follows the data."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Positional mappings break when structure changes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace one row after the change."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: every mapped column shifts."
+      }
+    ],
+    "repair": "Map by header names, lock the sheet structure, and validate before payment.",
+    "debrief": "Spreadsheets are edited by people. Automations reading them must survive structural changes - or detect them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-error-handling-production-automation-003",
+    "subject": "no-code-automation",
+    "topic": "Error Handling & Production Automation",
+    "subtopic": "Alerts and a dead-letter store",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this design prevents silent data loss while keeping the rest of the batch flowing?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Error route for the order-sync workflow: on any failure, save the failed item and error to a 'failed_items' table, post an alert to #ops with a link, and continue with the next item.\nA daily job retries items in failed_items and reports those still failing."
+    },
+    "ai_claim": "Yes. Failed items are captured with their errors instead of disappearing, the team is alerted, other items continue, and the daily retry recovers transient failures and highlights persistent ones.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Failures are stored with details."
+      },
+      {
+        "index": 2,
+        "text": "An alert makes them visible."
+      },
+      {
+        "index": 3,
+        "text": "Other items keep processing."
+      },
+      {
+        "index": 4,
+        "text": "A daily retry recovers or escalates them."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A dead-letter store plus alerting and retries is a robust pattern for batch automations.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "item 117 fails (timeout) -> stored + alert -> next day retry succeeds",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "117"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow one failed item."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 prevents loss."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Capture, alert, continue, retry."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a transient timeout."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Failures are captured and recovered. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Contrast this with 'continue on fail': both keep the batch moving, but only this one keeps the failures.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-error-handling-production-automation-004",
+    "subject": "no-code-automation",
+    "topic": "Error Handling & Production Automation",
+    "subtopic": "Retries without backoff",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do immediate retries give requests the best chance of getting through during the slowdown?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "HTTP step to a partner API: on error, retry immediately, up to 20 times.\nDuring a partner slowdown, 400 queued runs all start retrying at once.\nAI: \"Immediate retries give each request the best chance of getting through quickly.\""
+    },
+    "ai_claim": "Yes. Retrying straight away maximises attempts, so each request gets through as soon as the partner recovers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Requests fail during the slowdown."
+      },
+      {
+        "index": 2,
+        "text": "Each retries immediately."
+      },
+      {
+        "index": 3,
+        "text": "More attempts give more chances."
+      },
+      {
+        "index": 4,
+        "text": "So requests get through as soon as possible."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Retrying immediately against an overloaded service",
+      "explanation": "400 runs x up to 20 immediate retries means up to 8,000 extra requests hitting a partner that is already struggling. The retries deepen the overload (and may trigger rate limiting or blocking), delaying recovery for everyone. Use exponential backoff with jitter, honour Retry-After, cap attempts, and pause the workflow (circuit breaker) when failures persist.",
+      "why_convincing": "More attempts feel like more chances."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: immediate retries multiply load on the struggling partner. Use exponential backoff with jitter and a circuit breaker.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "400 runs x 20 immediate retries = up to 8,000 requests in seconds",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "8,000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Retry with exponential backoff and jitter; stop retrying when a dependency is down.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The partner blocks the account after the retry storm."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the requests during the slowdown."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 ignores the effect of retries on the partner."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Retries add load; backoff spreads it out."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply runs by retries."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: immediate retries overload the partner. Back off."
+      }
+    ],
+    "repair": "Use exponential backoff with jitter (e.g. 2, 4, 8, 16 s + random), honour Retry-After and cap attempts.",
+    "debrief": "Retries are load. Well-behaved automations back off when a dependency struggles.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

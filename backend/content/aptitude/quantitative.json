@@ -1,0 +1,992 @@
+[
+  {
+    "id": "apt-qr-036",
+    "subject": "aptitude",
+    "topic": "Numbers, LCM & HCF",
+    "subtopic": "HCF and LCM",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the smallest number that leaves a remainder of 3 when divided by 4, 6 and 10?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The smallest such number is 23.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A number leaving the same remainder with several divisors is a common multiple of them, shifted by the remainder."
+      },
+      {
+        "index": 2,
+        "text": "The LCM of 4, 6 and 10 is 20."
+      },
+      {
+        "index": 3,
+        "text": "The HCF of 4, 6 and 10 is 2, and 20 + 3 = 23, which is also 2 x 10 + 3."
+      },
+      {
+        "index": 4,
+        "text": "So the smallest number is 23."
+      }
+    ],
+    "ai_final_answer": "23",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Computing the LCM of 4, 6 and 10 incorrectly",
+      "explanation": "The LCM of 4, 6 and 10 is 60, not 20: 20 is not divisible by 6. Taking 60 + 3 = 63 gives the correct answer. Step 3's mention of the HCF is also irrelevant to the question and does not affect the result.",
+      "why_convincing": "20 is a common multiple of 4 and 10 and looks like the answer if the 6 is overlooked. Step 1 states the right method, so the approach is sound and only one arithmetic fact is wrong — and 23 does leave remainder 3 with 4 and 10, so a partial check passes."
+    },
+    "canonical_solution": "The method in step 1 is right: the number is LCM + remainder. But LCM(4, 6, 10) = 60, since 60 is the smallest number divisible by all three (20 fails on 6). So the answer is 60 + 3 = 63. Check: 63 = 4x15+3 = 6x10+3 = 10x6+3.",
+    "canonical_answer": "63",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "LCM(4,6,10) = 60, so the answer is 63.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "60",
+          "63"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "23 divided by 6 leaves remainder 5, not 3.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "23",
+          "6"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "23 / 6 = 3 remainder 5, so 23 does not satisfy the condition for the divisor 6."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the proposed answer against every divisor in the question."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1's method is correct. Check the number it computes in step 2."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The LCM must be divisible by every divisor, not just some of them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide 20 by 6 and see whether it goes exactly."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 gives 20, which is not divisible by 6. LCM(4,6,10) = 60, so the answer is 63."
+      }
+    ],
+    "repair": "Step 2 should give LCM(4, 6, 10) = 60. The answer is 60 + 3 = 63, which leaves remainder 3 with all three divisors.",
+    "debrief": "The cheapest check on any 'smallest number such that' question is to test the proposed answer against every condition. 23 passes for 4 and 10 and fails for 6 — a partial check would have confirmed it. Note also that step 3 introduces the HCF, which the question never needs; irrelevant machinery in a solution often signals that the author was not tracking what the method required.",
+    "validation_payload": {
+      "solver": "n = 4\nwhile True:\n    if n % 4 == 3 and n % 6 == 3 and n % 10 == 3:\n        answer = n\n        break\n    n += 1",
+      "flawed_solver": "lcm_of_4_and_10 = 20\nanswer = lcm_of_4_and_10 + 3"
+    }
+  },
+  {
+    "id": "apt-qr-037",
+    "subject": "aptitude",
+    "topic": "SI & CI",
+    "subtopic": "Simple and compound interest",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Rs 10,000 is invested at 10% per annum compounded annually. What is the amount after 2 years?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The amount is Rs 12,000.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The rate is 10% per annum and the period is 2 years."
+      },
+      {
+        "index": 2,
+        "text": "Interest for one year is 10% of 10,000 = Rs 1,000."
+      },
+      {
+        "index": 3,
+        "text": "Over two years that is 2 x 1,000 = Rs 2,000 of interest."
+      },
+      {
+        "index": 4,
+        "text": "The amount is 10,000 + 2,000 = Rs 12,000."
+      }
+    ],
+    "ai_final_answer": "12000",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Applying simple interest when the question specifies compounding",
+      "explanation": "Compounding means the second year's interest is computed on the new balance of Rs 11,000, giving Rs 1,100 rather than Rs 1,000. The amount is 10,000 x 1.10² = Rs 12,100. Step 3 multiplies the first year's interest by 2, which is the simple-interest method.",
+      "why_convincing": "Steps 1 and 2 are correct, and Rs 1,000 really is the first year's interest. The difference between the two methods is only Rs 100 on these numbers, so the answer is close enough not to look wrong."
+    },
+    "canonical_solution": "Compound interest multiplies the principal by (1 + r) each period: 10,000 x 1.10 x 1.10 = Rs 12,100. Year by year: Rs 1,000 interest in year one taking the balance to 11,000, then 10% of 11,000 = Rs 1,100 in year two. Simple interest would give Rs 12,000, which is what step 3 computes.",
+    "canonical_answer": "12100",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Year two interest is 10% of 11,000.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "11000",
+          "1100",
+          "12100"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Compounding applies the rate to the new balance each period.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "12100"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Over 10 years the gap is large: simple interest gives 20,000 while compounding gives 25,937 — the two methods are not interchangeable."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Note which kind of interest the question specifies."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 are correct. Check the method step 3 uses."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Compound interest is applied to the balance at the start of each period, which changes every year."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the second year's interest on the balance after year one."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 doubles the first year's interest, which is simple interest. Year two earns 10% of 11,000 = 1,100, so the amount is Rs 12,100."
+      }
+    ],
+    "repair": "Step 3 should compute the second year's interest on the year-one balance: 10% of 11,000 = Rs 1,100. Total amount = 10,000 + 1,000 + 1,100 = Rs 12,100, or 10,000 x 1.10².",
+    "debrief": "This is the changing-base failure again, in the setting where it costs money. Over two years the error is Rs 100 and easy to miss; over ten it is nearly Rs 6,000. Whenever a rate is applied more than once, ask what it is applied to each time — and notice that a small discrepancy is not evidence that a method is nearly right.",
+    "validation_payload": {
+      "solver": "answer = 10000 * 1.10 * 1.10",
+      "flawed_solver": "annual = 10000 * 0.10\nanswer = 10000 + 2 * annual"
+    }
+  },
+  {
+    "id": "apt-qr-038",
+    "subject": "aptitude",
+    "topic": "Time & Work",
+    "subtopic": "Pipes and cisterns with an outlet",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Pipe A fills a tank in 4 hours and pipe B fills it in 6 hours. An outlet pipe C empties it in 12 hours. If all three are opened together, how long does the tank take to fill?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The tank fills in 2 hours.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A fills 1/4 of the tank per hour and B fills 1/6 per hour."
+      },
+      {
+        "index": 2,
+        "text": "C empties 1/12 per hour."
+      },
+      {
+        "index": 3,
+        "text": "Combined rate = 1/4 + 1/6 + 1/12. Taking LCM 12: 3/12 + 2/12 + 1/12 = 6/12 = 1/2 per hour."
+      },
+      {
+        "index": 4,
+        "text": "Time = 1 / (1/2) = 2 hours."
+      }
+    ],
+    "ai_final_answer": "2",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 3,
+      "misconception": "Adding the outlet's rate instead of subtracting it",
+      "explanation": "C empties the tank, so its rate is negative: 1/4 + 1/6 - 1/12 = 3/12 + 2/12 - 1/12 = 4/12 = 1/3 per hour. The time is 3 hours. Step 3 adds all three rates, which would mean an outlet helps fill the tank.",
+      "why_convincing": "Step 2 correctly identifies C as an outlet, and the LCM arithmetic in step 3 is executed carefully - the sign is the only thing wrong. A clean answer of 2 hours also invites no suspicion."
+    },
+    "canonical_solution": "An outlet contributes a negative rate. Combined = 1/4 + 1/6 - 1/12 = (3 + 2 - 1)/12 = 4/12 = 1/3 per hour. Time = 3 hours.",
+    "canonical_answer": "3",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Subtract the outlet rate: 1/3 per hour.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "An emptying pipe contributes a negative rate.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If the outlet's rate were added, opening a bigger drain would fill the tank faster — which is absurd."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which pipes add water and which remove it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 identifies C correctly. Check the sign step 3 gives it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Rates combine additively with signs: inflow positive, outflow negative."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask whether opening a drain should make the tank fill faster or slower, then check the combined rate against that."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 adds the outlet rate. It must be subtracted: (3 + 2 - 1)/12 = 1/3 per hour, so the time is 3 hours."
+      }
+    ],
+    "repair": "Step 3 should read 1/4 + 1/6 - 1/12 = 4/12 = 1/3 per hour, giving a time of 3 hours.",
+    "debrief": "Sign errors survive because the arithmetic around them is careful, and careful arithmetic reads as correctness. The sanity check here is qualitative and instant: adding a drain must make filling slower, so if the combined rate went up, the sign is wrong. Direction-of-effect checks catch a whole class of error before any calculation.",
+    "validation_payload": {
+      "solver": "rate = Fraction(1, 4) + Fraction(1, 6) - Fraction(1, 12)\nanswer = float(1 / rate)",
+      "flawed_solver": "rate = Fraction(1, 4) + Fraction(1, 6) + Fraction(1, 12)\nanswer = float(1 / rate)"
+    }
+  },
+  {
+    "id": "apt-qr-039",
+    "subject": "aptitude",
+    "topic": "Time, Speed & Distance",
+    "subtopic": "Boats and streams",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A boat travels 12 km downstream and returns, taking 5 hours in total. If the stream flows at 2 km/h, what is the boat's speed in still water?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The boat's speed in still water is 5 km/h.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Let the still-water speed be b. Downstream speed is b + 2 and upstream is b - 2."
+      },
+      {
+        "index": 2,
+        "text": "Total distance is 12 + 12 = 24 km and total time is 5 hours."
+      },
+      {
+        "index": 3,
+        "text": "Average speed = 24 / 5 = 4.8 km/h, which is the boat's speed relative to the ground."
+      },
+      {
+        "index": 4,
+        "text": "Since the stream adds and subtracts equally, the still-water speed is about 5 km/h."
+      }
+    ],
+    "ai_final_answer": "5",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating average speed over a there-and-back trip as the still-water speed",
+      "explanation": "The boat spends longer going upstream than downstream, so the average ground speed is not the still-water speed. Set up the time equation instead: 12/(b+2) + 12/(b-2) = 5. This gives 24b = 5(b^2 - 4), so 5b^2 - 24b - 20 = 0 and b = 5.52 km/h. The 4.8 figure is a genuine average speed but answers a different question.",
+      "why_convincing": "Step 1 sets the problem up correctly, which suggests the right method is coming. Step 3's arithmetic is right and 4.8 is a real quantity. And 5 is close to the true 5.52, so the answer survives a rough plausibility check."
+    },
+    "canonical_solution": "Solve the time equation. 12/(b+2) + 12/(b-2) = 5. Combining: 12(b-2) + 12(b+2) = 5(b+2)(b-2), so 24b = 5(b^2 - 4), giving 5b^2 - 24b - 20 = 0. By the quadratic formula b = (24 + sqrt(576 + 400))/10 = (24 + sqrt(976))/10 = 5.5241 km/h. Substituting back: 12/7.5241 + 12/3.5241 = 1.5949 + 3.4051 = 5.0000 hours exactly. The average ground speed of 4.8 km/h is a different quantity, lower than the still-water speed because more time is spent against the current.",
+    "canonical_answer": "5.5241",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Solve 12/(b+2) + 12/(b-2) = 5.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5.52"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Check b = 5: the round trip takes 12/7 + 12/3 = 5.71 hours, not 5.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5.71"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Test b = 5: downstream 12/7 = 1.714 h, upstream 12/3 = 4 h, total 5.714 h — not the 5 hours stated."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Substitute the proposed answer back into the problem and check the total time."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 sets up the right variables. Ask why step 3 abandons them."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Average speed over unequal times is not the still-water speed; the two legs take different durations."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write the time for each leg as distance over speed, add them, and set the sum to 5."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 substitutes average ground speed for still-water speed. Solving 12/(b+2) + 12/(b-2) = 5 gives b = 5.52 km/h. Testing b = 5 yields 5.71 hours, not 5."
+      }
+    ],
+    "repair": "Abandon the average-speed shortcut and solve the time equation: 12/(b+2) + 12/(b-2) = 5, which reduces to 5b^2 - 24b - 20 = 0 and gives b = 5.52 km/h.",
+    "debrief": "Substituting the proposed answer back into the original problem is the single most reliable check in quantitative work, and it takes one line here: b = 5 gives a 5.71-hour trip, not 5. Note how the wrong answer stays close to the right one - closeness is not evidence, and a plausibility check would have passed this. Setting up variables correctly in step 1 and then not using them is a recognisable tell.",
+    "validation_payload": {
+      "solver": "a = 5\nb_coef = -24\nc = -20\nanswer = (-b_coef + math.sqrt(b_coef ** 2 - 4 * a * c)) / (2 * a)",
+      "flawed_solver": "average_ground_speed = 24 / 5\nanswer = round(average_ground_speed)"
+    }
+  },
+  {
+    "id": "apt-qr-040",
+    "subject": "aptitude",
+    "topic": "Averages, Ages & Partnerships",
+    "subtopic": "Partnership and profit sharing",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A invests Rs 30,000 for 12 months. B invests Rs 40,000 but joins after 3 months. A profit of Rs 26,000 is shared in proportion to capital and time. What is A's share?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "A's share is Rs 11,142.86.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Profit is shared in proportion to capital multiplied by time invested."
+      },
+      {
+        "index": 2,
+        "text": "A's contribution is 30,000 x 12 = 360,000."
+      },
+      {
+        "index": 3,
+        "text": "B's contribution is 40,000 x 12 = 480,000."
+      },
+      {
+        "index": 4,
+        "text": "A's share = 26,000 x 360,000 / 840,000 = Rs 11,142.86."
+      }
+    ],
+    "ai_final_answer": "11142.86",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Using the full period for a partner who joined late",
+      "explanation": "B joined after 3 months, so B invested for 9 months, not 12. B's contribution is 40,000 x 9 = 360,000, equal to A's. The ratio is 1:1 and A's share is Rs 13,000. Step 3 ignores a condition stated in the question.",
+      "why_convincing": "Steps 1, 2 and 4 are all correct — the method is right and the arithmetic is right. Only one input is wrong, and 12 appears legitimately in step 2, so reusing it in step 3 looks consistent rather than careless."
+    },
+    "canonical_solution": "B invested for 9 months, not 12. A: 30,000 x 12 = 360,000. B: 40,000 x 9 = 360,000. The ratio is 1:1, so A's share is 26,000 / 2 = Rs 13,000.",
+    "canonical_answer": "13000",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "B's contribution is 40,000 x 9 = 360,000.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "9",
+          "360000",
+          "13000"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The question says B joined after 3 months.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If B had really invested for 12 months, B's capital-months would exceed A's and B would take the larger share — but B started three months late."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that each partner's time period matches what the question states."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1, 2 and 4 are fine. Look at the numbers step 3 uses."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Capital-months uses each partner's own duration, which need not be the full period."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out how many months B was actually invested for."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 gives B 12 months, but B joined after 3, so it is 9. B's contribution is 40,000 x 9 = 360,000, equal to A's, and A's share is Rs 13,000."
+      }
+    ],
+    "repair": "Step 3 should read: B's contribution is 40,000 x 9 = 360,000. The ratio becomes 1:1, so A's share is Rs 13,000.",
+    "debrief": "A correct method with one wrong input produces a confident, precisely-stated, wrong answer — and Rs 11,142.86 looks more trustworthy for having decimals. The check is to tick off every condition in the question against the working: 'joins after 3 months' is a condition, and it appears nowhere in the calculation. An unused condition is as strong a signal as an unused column in a table.",
+    "validation_payload": {
+      "solver": "a_share_units = 30000 * 12\nb_share_units = 40000 * 9\nanswer = 26000 * a_share_units / (a_share_units + b_share_units)",
+      "flawed_solver": "a_share_units = 30000 * 12\nb_share_units = 40000 * 12\nanswer = round(26000 * a_share_units / (a_share_units + b_share_units), 2)"
+    }
+  },
+  {
+    "id": "apt-qr-041",
+    "subject": "aptitude",
+    "topic": "Percentages, Profit/Loss & Discounts",
+    "subtopic": "Successive discounts",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A shirt is marked at Rs 2,000. Two successive discounts of 20% and 10% are given. What is the final price?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The final price is Rs 1,440.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The first discount of 20% on Rs 2,000 is Rs 400, leaving Rs 1,600."
+      },
+      {
+        "index": 2,
+        "text": "The second discount of 10% is applied to the current price of Rs 1,600, which is Rs 160."
+      },
+      {
+        "index": 3,
+        "text": "The final price is 1,600 - 160 = Rs 1,440."
+      },
+      {
+        "index": 4,
+        "text": "Equivalently, 2,000 x 0.80 x 0.90 = Rs 1,440."
+      }
+    ],
+    "ai_final_answer": "1440",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. Successive discounts are multiplicative and each applies to the price current at that moment: 2,000 x 0.80 = 1,600, then 1,600 x 0.90 = 1,440. Step 4's single-line form confirms the same result. Note this is not a 30% discount — that would give Rs 1,400 — because the second discount applies to the reduced price.",
+    "canonical_answer": "1440",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "The second discount applies to 1600, not 2000: 2000 x 0.8 x 0.9 = 1440.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1600",
+          "1440"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the base each discount is applied to."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states which price the second discount uses. Verify it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Successive percentage changes are multiplicative, each applying to the current value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 2,000 x 0.80 x 0.90 independently and compare."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The second discount is taken on Rs 1,600, and 2,000 x 0.80 x 0.90 = 1,440 confirms it. Approving it was the right call."
+      }
+    ],
+    "repair": "",
+    "debrief": "Successive-discount questions are the archetypal changing-base trap, so a reviewer who has met the trap may challenge any answer here on instinct. This one handles the base correctly and says so explicitly in step 2. The confirming check is the multiplicative form in step 4 — and the useful thing to notice is what the answer is *not*: two discounts of 20% and 10% do not make 30%, which would give Rs 1,400.",
+    "validation_payload": {
+      "solver": "answer = 2000 * 0.80 * 0.90"
+    }
+  },
+  {
+    "id": "apt-qr-042",
+    "subject": "aptitude",
+    "topic": "SI & CI",
+    "subtopic": "Compound interest",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Find the compound interest on Rs 12,000 at 10% per annum for 2 years, compounded half-yearly.",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "given": [
+        "Principal Rs 12,000",
+        "Rate 10% per annum",
+        "Time 2 years",
+        "Compounded half-yearly"
+      ]
+    },
+    "ai_claim": "The compound interest is Rs 2,520.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Compound interest uses A = P(1 + r)^n, then CI = A - P."
+      },
+      {
+        "index": 2,
+        "text": "The principal is 12,000, the rate is 10% per annum and the time is 2 years."
+      },
+      {
+        "index": 3,
+        "text": "So r = 0.10 and n = 2."
+      },
+      {
+        "index": 4,
+        "text": "A = 12000 x (1.10)^2 = 12000 x 1.21 = 14,520."
+      },
+      {
+        "index": 5,
+        "text": "CI = 14,520 - 12,000 = Rs 2,520."
+      }
+    ],
+    "ai_final_answer": "2520",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Using the annual rate and the number of years when the compounding period is not a year",
+      "explanation": "Half-yearly compounding means the rate per period is 10%/2 = 5% and the number of periods is 2 x 2 = 4. The formula in step 1 is right; step 3 supplies it with the wrong r and n. A = 12000 x 1.05^4 = 14,586.075, so CI = 2,586.075. The stated 2,520 is the answer to a different question - annual compounding.",
+      "why_convincing": "The formula is quoted correctly, the arithmetic in step 4 is exact, and 10% and 2 years are literally the numbers in the question. The word 'half-yearly' has already been read and acknowledged in step 2, which makes it feel accounted for."
+    },
+    "canonical_solution": "Half-yearly compounding halves the rate and doubles the count of periods: r = 5% per half-year, n = 4 half-years. A = 12000 x (1.05)^4 = 12000 x 1.21550625 = 14,586.075. CI = 14,586.075 - 12,000 = Rs 2,586.075. Note it exceeds the annual-compounding figure of 2,520, which is the direction more frequent compounding always moves interest.",
+    "canonical_answer": "2586.075",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "r = 5% per period and n = 4 periods gives 12000(1.05^4) - 12000 = 2586.075.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2586.075",
+          "4"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "More frequent compounding at the same nominal rate must yield more interest, not the same.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If 'half-yearly' made no difference, 12,000 compounded monthly would also give 2,520, which it does not (2,634.6)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "One word in the question changes what r and n mean. Find it and check it was used."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 are fine. Look only at step 3."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "With half-yearly compounding the rate applies per half-year, and there are two half-years in a year."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute with r = 0.05 and n = 4 and compare with 2,520."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is the failure: r should be 5% and n should be 4. A = 12000(1.05^4) = 14,586.075, so CI = 2,586.075."
+      }
+    ],
+    "repair": "Set r = 10%/2 = 5% per half-year and n = 2 x 2 = 4 periods, giving CI = 12000(1.05^4) - 12000 = 2,586.075.",
+    "debrief": "Formula-quoting is not formula-applying. The failure here happens entirely in the step that decides what the symbols mean, which is the step people skim because it looks like bookkeeping. Whenever a compounding, sampling or billing period is mentioned, check r and n against that period before checking the arithmetic - and remember the sanity rule that more frequent compounding must yield strictly more interest.",
+    "transfer_check": {
+      "question": "What is the compound interest on Rs 8,000 at 20% per annum for 1 year, compounded half-yearly?",
+      "answer": "1680",
+      "explanation": "r = 10% per half-year, n = 2: 8000(1.1^2) - 8000 = 9680 - 8000 = 1,680."
+    },
+    "validation_payload": {
+      "solver": "p = Fraction(12000)\nr = Fraction(10, 100) / 2\nn = 2 * 2\nanswer = p * (1 + r) ** n - p\n",
+      "flawed_solver": "p = Fraction(12000)\nr = Fraction(10, 100)\nn = 2\nanswer = p * (1 + r) ** n - p\n"
+    }
+  },
+  {
+    "id": "apt-qr-043",
+    "subject": "aptitude",
+    "topic": "Averages, Ages & Partnerships",
+    "subtopic": "Partnership",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A invested Rs 30,000 and stayed in the business for 12 months. B invested Rs 45,000 and stayed for 8 months. They earned a profit of Rs 25,000. What is B's share?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "given": [
+        "A: Rs 30,000 for 12 months",
+        "B: Rs 45,000 for 8 months",
+        "Total profit Rs 25,000"
+      ]
+    },
+    "ai_claim": "B's share is Rs 15,000.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "In a partnership, profit is divided in the ratio of the partners' contributions."
+      },
+      {
+        "index": 2,
+        "text": "A contributed 30,000 and B contributed 45,000."
+      },
+      {
+        "index": 3,
+        "text": "So the ratio is 30,000 : 45,000 = 2 : 3."
+      },
+      {
+        "index": 4,
+        "text": "B's share is 3/5 of 25,000 = Rs 15,000."
+      }
+    ],
+    "ai_final_answer": "15000",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Dividing profit by capital alone when the partners invested for unequal durations",
+      "explanation": "When durations differ, profit divides in the ratio of capital x time, not capital. A: 30,000 x 12 = 360,000. B: 45,000 x 8 = 360,000. The ratio is 1 : 1, so B's share is 12,500, not 15,000. The two months figures are given precisely because they are meant to be used.",
+      "why_convincing": "Step 1 states a rule that is true when the durations are equal, and it is the rule most people remember. The two durations are mentioned in the question but never contradicted in the solution, so nothing looks omitted - and 2:3 is such a clean ratio that it reads as the intended one."
+    },
+    "canonical_solution": "Profit shares follow capital x time. A: 30,000 x 12 = 360,000 rupee-months. B: 45,000 x 8 = 360,000 rupee-months. The ratio is 1 : 1, so each receives 25,000/2 = Rs 12,500. B's larger capital is exactly offset by the shorter period.",
+    "canonical_answer": "12500",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "30,000 x 12 = 45,000 x 8 = 360,000, so the ratio is 1:1 and B gets 12,500.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "360000",
+          "12500"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Step 3 ignores the two durations the question supplies.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "12",
+          "8"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "If capital alone decided the split, a partner investing 45,000 for one day would get 3/5 of the profit."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "The question gives four numbers. Count how many the solution uses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Two of the given quantities never appear after step 2."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Partnership profit divides in the ratio of capital multiplied by the time it was invested."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out 30,000 x 12 and 45,000 x 8 and compare them."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is the failure: the ratio is capital x time = 360,000 : 360,000 = 1 : 1, so B's share is 12,500."
+      }
+    ],
+    "repair": "Use capital x time: 30,000 x 12 = 360,000 and 45,000 x 8 = 360,000, a 1:1 ratio, so B's share is 12,500.",
+    "debrief": "A quick audit that catches a large class of these: count the numbers in the question and check each one appears in the working. Here two of the four were quoted and then dropped. A solution that silently discards given data is either solving a simpler problem than the one asked, or the data was irrelevant - and irrelevant data in an aptitude question is rare enough to be worth suspecting.",
+    "transfer_check": {
+      "question": "P invests Rs 20,000 for 6 months and Q invests Rs 10,000 for 18 months. In what ratio (P:Q) do they share the profit?",
+      "answer": "2/3",
+      "explanation": "20,000 x 6 = 120,000 and 10,000 x 18 = 180,000, a ratio of 2:3."
+    },
+    "validation_payload": {
+      "solver": "a = 30000 * 12\nb = 45000 * 8\nanswer = Fraction(25000 * b, a + b)\n",
+      "flawed_solver": "a = 30000\nb = 45000\nanswer = Fraction(25000 * b, a + b)\n"
+    }
+  },
+  {
+    "id": "apt-qr-044",
+    "subject": "aptitude",
+    "topic": "Ratio, Proportion & Mixtures",
+    "subtopic": "Mixtures and alligation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A 40-litre mixture contains 25% acid. How many litres of pure acid must be added to make the mixture 40% acid?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "given": [
+        "40 litres of mixture",
+        "25% acid by volume",
+        "Target 40% acid"
+      ]
+    },
+    "ai_claim": "10 litres of pure acid must be added.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The mixture has 25% of 40 = 10 litres of acid and 30 litres of water."
+      },
+      {
+        "index": 2,
+        "text": "Adding x litres of pure acid adds only acid, so the water stays at 30 litres and the total becomes 40 + x."
+      },
+      {
+        "index": 3,
+        "text": "The acid becomes 10 + x litres, and we want (10 + x)/(40 + x) = 0.40."
+      },
+      {
+        "index": 4,
+        "text": "So 10 + x = 16 + 0.4x, giving 0.6x = 6 and x = 10."
+      },
+      {
+        "index": 5,
+        "text": "Check: 20 litres of acid in 50 litres is 40%. So 10 litres must be added."
+      }
+    ],
+    "ai_final_answer": "10",
+    "simulated_confidence": 74,
+    "truth_state": "valid",
+    "canonical_solution": "Initial acid = 25% of 40 = 10 L; water = 30 L. Adding x litres of pure acid leaves the water unchanged and raises both the acid and the total: (10 + x)/(40 + x) = 0.40, so 10 + x = 16 + 0.4x and x = 10. Checking: 20 L acid in 50 L total is exactly 40%. The answer is 10 litres, and the solution is correct at every step.",
+    "canonical_answer": "10",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "20/50 = 40%, so 10 litres is right.",
+        "must_reference_step": 5,
+        "must_contain_values": [
+          "20",
+          "50"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Adding pure acid leaves the water fixed, which is exactly what step 2 uses.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "30"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the two quantities that must not change when pure acid is added."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Verify step 1's split of 40 litres, then follow the water through to step 5."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The reliable invariant in these problems is the amount of the component you are not adding."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Substitute x = 10 back into the original condition and see whether it holds exactly."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Every step holds. Water stays at 30 L, acid goes 10 to 20, total 40 to 50, and 20/50 is exactly 40%. The correct verdict is to approve."
+      }
+    ],
+    "repair": "",
+    "debrief": "Approving is a judgment too, and it needs the same evidence as a challenge. What makes this one verifiable in seconds is the invariant: pure acid changes the acid and the total but not the water. Substituting the answer back into the original condition - 20 in 50 is 40% - is a check on the answer that does not depend on trusting any of the algebra that produced it. Look for that kind of independent check before approving.",
+    "transfer_check": {
+      "question": "A 60-litre mixture is 20% acid. How many litres of pure acid make it 50% acid?",
+      "answer": "36",
+      "explanation": "Acid 12 L, water 48 L. Water must be 50%, so the total becomes 96 L and the acid 48 L: add 36 L."
+    },
+    "validation_payload": {
+      "solver": "acid = Fraction(25, 100) * 40\nanswer = (Fraction(40, 100) * 40 - acid) / (1 - Fraction(40, 100))\n"
+    }
+  },
+  {
+    "id": "apt-qr-045",
+    "subject": "aptitude",
+    "topic": "Percentages, Profit/Loss & Discounts",
+    "subtopic": "Successive percentages",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A shop offers successive discounts of 20% and 10% on the marked price. What single discount percentage is equivalent?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "given": [
+        "First discount 20%",
+        "Second discount 10% on the reduced price"
+      ]
+    },
+    "ai_claim": "The equivalent single discount is 30%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The first discount removes 20% of the price."
+      },
+      {
+        "index": 2,
+        "text": "The second discount removes a further 10%."
+      },
+      {
+        "index": 3,
+        "text": "Two discounts applied one after the other remove 20% + 10% = 30% in total."
+      },
+      {
+        "index": 4,
+        "text": "So the equivalent single discount is 30%."
+      }
+    ],
+    "ai_final_answer": "30",
+    "simulated_confidence": 87,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Adding successive percentages, when the second applies to the already-reduced amount",
+      "explanation": "The 10% is taken off the price after the 20% cut, so it is 10% of 80%, not 10% of the marked price. The surviving fraction is 0.80 x 0.90 = 0.72, so the equivalent single discount is 28%, not 30%. On a marked price of 1,000 the shop charges 720, whereas a flat 30% discount would charge 700.",
+      "why_convincing": "Adding discounts is the intuitive move and gives a round number, and it errs by only two percentage points, which is small enough to survive a rough sanity check. It is also the direction that favours the customer, so it rarely gets challenged in practice."
+    },
+    "canonical_solution": "Track the surviving fraction rather than the discounts. After 20% off, 0.80 of the price remains; after a further 10% off that, 0.80 x 0.90 = 0.72 remains. The equivalent single discount is 1 - 0.72 = 28%. Concretely: 1,000 becomes 800, then 720 - a total reduction of 280, or 28%.",
+    "canonical_answer": "28",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "0.8 x 0.9 = 0.72, so the discount is 28%.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.72",
+          "28"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "On 1,000 the successive discounts give 720, not the 700 a 30% discount would give.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "720",
+          "700"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Marked price 1,000: 20% off gives 800, then 10% off gives 720. A single 30% discount would give 700.",
+      "Two successive 50% discounts would add to 100%, which would make the item free - it is in fact 75%."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the second percentage is a percentage of."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 are fine. Step 3 makes an assumption about how they combine."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Successive percentage changes multiply the surviving fractions; they do not add."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Take a marked price of 1,000 and apply the two discounts one at a time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is the failure: 0.8 x 0.9 = 0.72, so 28% is removed, not 30%. Two successive 50% discounts would otherwise make anything free."
+      }
+    ],
+    "repair": "Multiply the surviving fractions: 0.80 x 0.90 = 0.72, so the equivalent single discount is 28%.",
+    "debrief": "Percentages of different bases cannot be added, and the test for whether you have fallen for it is free: push the numbers to an extreme. Two successive 50% discounts would add to 100% and make the goods free, which is obviously wrong, so the addition rule is wrong in general - and a rule that is wrong in general was wrong here too, at 20% and 10%.",
+    "transfer_check": {
+      "question": "What single percentage discount is equivalent to successive discounts of 10% and 10%?",
+      "answer": "19",
+      "explanation": "0.9 x 0.9 = 0.81, so 19% is removed."
+    },
+    "validation_payload": {
+      "solver": "answer = (1 - Fraction(80, 100) * Fraction(90, 100)) * 100\n",
+      "flawed_solver": "answer = 20 + 10\n"
+    }
+  }
+]

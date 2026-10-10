@@ -1,0 +1,507 @@
+[
+  {
+    "id": "ml-hyperparameter-tuning-001",
+    "subject": "machine-learning",
+    "topic": "Hyperparameter Tuning",
+    "subtopic": "The best value at the edge of the grid",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the grid show that 0.1 is the optimal learning rate?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "grid": {
+        "title": "Grid search over learning_rate (validation AUC)",
+        "columns": [
+          "learning_rate",
+          "AUC"
+        ],
+        "rows": [
+          [
+            "0.1",
+            "0.871"
+          ],
+          [
+            "0.2",
+            "0.862"
+          ],
+          [
+            "0.3",
+            "0.850"
+          ]
+        ]
+      },
+      "conclusion": "\"The optimal learning rate is 0.1.\""
+    },
+    "ai_claim": "Yes. 0.1 gives the highest AUC in the search, so it is the optimal learning rate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Three learning rates were tried."
+      },
+      {
+        "index": 2,
+        "text": "0.1 scored highest, 0.871."
+      },
+      {
+        "index": 3,
+        "text": "The highest-scoring value is the optimum."
+      },
+      {
+        "index": 4,
+        "text": "So the optimal learning rate is 0.1."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Declaring an optimum at the boundary of the search",
+      "explanation": "AUC increases steadily as the learning rate decreases, and 0.1 is the smallest value tried. The optimum may lie below 0.1 - at 0.05 or 0.03 - outside the grid. When the best value is at the edge, extend the search in that direction (on a log scale).",
+      "why_convincing": "0.1 is genuinely the best of the values tried."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the best value is at the edge, and the trend suggests smaller rates may be better. Extend the grid to 0.05, 0.03, 0.01.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "AUC rises monotonically as learning_rate falls: 0.850, 0.862, 0.871.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.871"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "Extending the grid gives AUC 0.878 at 0.05.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.878"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The trend continues past 0.1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at where the best value sits in the grid."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats the best tried value as the optimum."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A best value on the boundary means the search range may be too narrow."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try 0.05."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the optimum may be below 0.1. Extend the grid."
+      }
+    ],
+    "repair": "Extend the search on a log scale below 0.1.",
+    "debrief": "Whenever the winner is the first or last value in a search range, widen the range before believing it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-hyperparameter-tuning-002",
+    "subject": "machine-learning",
+    "topic": "Hyperparameter Tuning",
+    "subtopic": "Grid search versus random search",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is grid search always better at finding good hyperparameters than random search here?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "option_a": "Grid search: 3 values for each of 6 hyperparameters = 729 fits.",
+      "option_b": "Random search: 60 fits sampled from the same ranges.",
+      "claim_in_review": "\"Grid search is always better because it tries far more combinations.\""
+    },
+    "ai_claim": "Yes. Grid search evaluates 729 combinations against random search's 60, so it explores the space more thoroughly and always finds better settings.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Grid search tries 729 combinations."
+      },
+      {
+        "index": 2,
+        "text": "Random search tries only 60."
+      },
+      {
+        "index": 3,
+        "text": "More combinations means more thorough exploration."
+      },
+      {
+        "index": 4,
+        "text": "So grid search always finds better settings."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming every hyperparameter matters equally",
+      "explanation": "Usually only a few hyperparameters matter. Grid search tests just 3 distinct values of each, however many combinations it runs; random search tries 60 distinct values of every hyperparameter. For the one or two that matter, random search explores far more finely at a twelfth of the cost (Bergstra and Bengio, 2012).",
+      "why_convincing": "729 sounds more thorough than 60."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: for the important hyperparameters, random search tests 60 distinct values against grid search's 3, often finding better settings with far fewer fits.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Distinct values of the key hyperparameter: grid 3, random 60.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3",
+          "60"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "If only learning_rate matters and its best value lies between grid points, random search is more likely to land near it.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The grid never tests values between its three points."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count distinct values of a single hyperparameter."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates combinations with exploration."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Random search covers important dimensions more finely."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine only one hyperparameter mattering."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: grid search tests only 3 values per hyperparameter."
+      }
+    ],
+    "repair": "Use random search (or Bayesian optimisation) with log-uniform ranges for scale parameters.",
+    "debrief": "Search efficiency depends on the effective dimensionality of the problem. Random and Bayesian search exploit the fact that few hyperparameters matter.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-hyperparameter-tuning-003",
+    "subject": "machine-learning",
+    "topic": "Hyperparameter Tuning",
+    "subtopic": "Feature selection outside the CV loop",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 0.94 a trustworthy estimate of accuracy on new samples?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# 20,000 features, 300 samples\nselector = SelectKBest(f_classif, k=50).fit(X, y)       # uses all 300 samples\nX_sel = selector.transform(X)\nsearch = GridSearchCV(SVC(), {\"C\": [0.1, 1, 10]}, cv=5).fit(X_sel, y)\nprint(search.best_score_)    # 0.94"
+    },
+    "ai_claim": "Yes. GridSearchCV used 5-fold cross-validation, so the score is measured on held-out folds and is trustworthy.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Features were selected first."
+      },
+      {
+        "index": 2,
+        "text": "GridSearchCV used 5-fold cross-validation."
+      },
+      {
+        "index": 3,
+        "text": "Each fold's score comes from data not used to fit the SVC."
+      },
+      {
+        "index": 4,
+        "text": "So 0.94 is trustworthy."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 1,
+      "misconception": "Selecting features on all data before cross-validation",
+      "explanation": "SelectKBest looked at every sample's label to pick 50 of 20,000 features, including the samples later used as validation folds. With so many features and few samples, some features correlate with the labels purely by chance, and selecting them on all data guarantees they 'work' in every fold. Even on random labels this setup can score far above chance. Put selection inside the pipeline so it is refitted per fold.",
+      "why_convincing": "The cross-validation itself is set up correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: feature selection saw the validation labels. Use Pipeline([('select', SelectKBest(k=50)), ('svc', SVC())]) inside GridSearchCV.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Shuffling y (random labels) still gives best_score_ around 0.80.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0.80"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "With selection inside the pipeline, the CV score drops to 0.68.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0.68"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The setup scores well even on random labels."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which data the feature selector saw."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 happens before the cross-validation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Every step that uses labels must be inside the CV loop."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the same code with shuffled labels."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: selection used validation labels. Put it in the pipeline."
+      }
+    ],
+    "repair": "Wrap selection and model in a Pipeline and tune the pipeline with GridSearchCV.",
+    "debrief": "Supervised preprocessing is part of the model. With many features and few samples, selection leakage can manufacture excellent scores from noise.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-hyperparameter-tuning-004",
+    "subject": "machine-learning",
+    "topic": "Hyperparameter Tuning",
+    "subtopic": "Linear grids for scale parameters",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this grid cover the plausible range of Ridge's alpha well?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "param_grid = {\"alpha\": [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]}\nsearch = GridSearchCV(Ridge(), param_grid, cv=5).fit(X, y)\n# AI note: \"10 values between 0.1 and 1.0 cover the regularisation range well.\""
+    },
+    "ai_claim": "Yes. Ten evenly spaced values between 0.1 and 1.0 test the regularisation strength thoroughly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "alpha controls regularisation strength."
+      },
+      {
+        "index": 2,
+        "text": "The grid tests 10 values."
+      },
+      {
+        "index": 3,
+        "text": "They are evenly spaced from 0.1 to 1.0."
+      },
+      {
+        "index": 4,
+        "text": "So the range is well covered."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Searching a scale parameter on a linear grid",
+      "explanation": "Regularisation strengths matter by orders of magnitude: the useful alpha could be 0.001 or 100. The grid spends all 10 values within one decade (0.1-1.0) and never tests below 0.1 or above 1. Search on a log scale, e.g. np.logspace(-3, 3, 13).",
+      "why_convincing": "Ten values sounds thorough."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the grid covers a single order of magnitude. Use a log-spaced grid such as 10^-3 to 10^3.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "All 10 values lie within one decade, 0.1 to 1.0.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.1",
+          "1.0"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "A log grid finds the best alpha at 30, with a better CV score.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "30"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The best alpha, 30, is outside the grid."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about how much alpha can vary in practice."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 judges coverage by count, not range."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Scale parameters should be searched on a log scale."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try alpha = 0.001 and alpha = 100."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the grid covers one decade. Use a log-spaced grid."
+      }
+    ],
+    "repair": "Use `np.logspace(-3, 3, 13)` for alpha.",
+    "debrief": "Learning rates, regularisation strengths and kernel widths are scale parameters; search them logarithmically.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-hyperparameter-tuning-005",
+    "subject": "machine-learning",
+    "topic": "Hyperparameter Tuning",
+    "subtopic": "Early stopping with patience",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this setup stops training at a good point and still gives an unbiased final estimate?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "model.fit(X_tr, y_tr,\n          eval_set=[(X_val, y_val)],\n          early_stopping_rounds=50)    # stop after 50 rounds without validation improvement\n# The model keeps the iteration with the best validation score.\n# Final performance is then measured once on a separate test set."
+    },
+    "ai_claim": "Yes. Training stops once validation loss has not improved for 50 rounds, and the best iteration is kept. Because the final score comes from a separate test set that played no part in stopping, it is unbiased.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "After each round, the validation loss is checked."
+      },
+      {
+        "index": 2,
+        "text": "If it does not improve for 50 rounds, training stops."
+      },
+      {
+        "index": 3,
+        "text": "The model reverts to the best iteration on the validation set."
+      },
+      {
+        "index": 4,
+        "text": "The test set was not used for stopping, so its score is unbiased."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The validation set tunes the number of rounds; the untouched test set evaluates. Patience avoids stopping on a noisy blip.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The validation set chooses the iteration; the test set is used once afterwards.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "50"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which data each set is used for."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 depends on the test set's separation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Early stopping is a form of tuning, so it needs its own validation data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask whether the test set influenced any decision."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Validation stops training; the test set gives an unbiased score. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Early stopping uses data to choose a hyperparameter (the number of rounds). Keeping the test set separate is what keeps the final number honest.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

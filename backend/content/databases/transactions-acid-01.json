@@ -1,0 +1,375 @@
+[
+  {
+    "id": "db-transactions-acid-001",
+    "subject": "databases",
+    "topic": "Transactions & ACID",
+    "subtopic": "Lost updates in read-modify-write",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Account 1 holds 1000. Two withdrawals of 300 run at the same moment. Is the final balance guaranteed to be 400?",
+    "artifact_type": "sql",
+    "artifact": {
+      "language": "python",
+      "code": "def withdraw(db, account_id, amount):\n    balance = db.query_one(\n        \"SELECT balance FROM accounts WHERE id = %s\", account_id)\n    if balance < amount:\n        raise ValueError(\"insufficient funds\")\n    db.execute(\"UPDATE accounts SET balance = %s WHERE id = %s\",\n               balance - amount, account_id)   # autocommit is on"
+    },
+    "ai_claim": "Yes. Each SQL statement is atomic, so the two withdrawals cannot interfere and the balance ends at 400.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each SELECT and UPDATE is executed atomically by the database."
+      },
+      {
+        "index": 2,
+        "text": "Each withdrawal reads the balance, checks it and writes the new value."
+      },
+      {
+        "index": 3,
+        "text": "Because the statements are atomic, the two withdrawals cannot interfere."
+      },
+      {
+        "index": 4,
+        "text": "So 1000 - 300 - 300 = 400."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Concluding that atomic statements make a sequence atomic",
+      "explanation": "Each statement is atomic, but the read and the write are separate. Both requests can read 1000 before either writes; each then writes 1000 - 300 = 700. The second write overwrites the first, and one withdrawal is lost: the balance is 700 after 600 was paid out. Use a single UPDATE ... SET balance = balance - 300 WHERE balance >= 300, or SELECT ... FOR UPDATE inside a transaction.",
+      "why_convincing": "Step 1 is true, and the sequence works perfectly when requests do not overlap."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not guaranteed: interleaved reads cause a lost update, leaving 700. Make the change in one statement (SET balance = balance - %s WHERE id = %s AND balance >= %s) or lock the row with SELECT ... FOR UPDATE in a transaction.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "A reads 1000, B reads 1000, A writes 700, B writes 700 -> final 700",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1000",
+          "700"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "UPDATE accounts SET balance = balance - 300 WHERE id = 1 AND balance >= 300;",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "300"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With both reads before either write, the final balance is 700."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Interleave the two requests' statements."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 extends atomicity from single statements to the whole function."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Atomic statements do not make a read-then-write sequence atomic."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Let both requests read the balance before either updates it."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: both read 1000 and both write 700, losing one withdrawal. Update in one statement or lock the row."
+      }
+    ],
+    "repair": "Use `UPDATE accounts SET balance = balance - %s WHERE id = %s AND balance >= %s` and check the affected row count.",
+    "debrief": "The lost update is the classic concurrency bug: correct in every single-user test, wrong under load. Atomicity of each statement says nothing about a sequence of them. Push the computation into one statement or hold a lock across the read and write.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-transactions-acid-002",
+    "subject": "databases",
+    "topic": "Transactions & ACID",
+    "subtopic": "Autocommit and partial transfers",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If the server crashes between the two statements, does the database undo the first update when it restarts?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "accounts(id, balance)   -- the connection runs in autocommit mode",
+      "query": "UPDATE accounts SET balance = balance - 500 WHERE id = 1;\n-- server crashes here\nUPDATE accounts SET balance = balance + 500 WHERE id = 2;"
+    },
+    "ai_claim": "Yes. Databases are atomic: a transfer either happens completely or not at all, so recovery rolls back the debit from account 1.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "ACID guarantees atomicity."
+      },
+      {
+        "index": 2,
+        "text": "The transfer consists of the debit and the credit."
+      },
+      {
+        "index": 3,
+        "text": "The transfer is one atomic unit, so a crash midway rolls back the debit."
+      },
+      {
+        "index": 4,
+        "text": "After recovery, both balances are unchanged."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming the database knows the statements belong together",
+      "explanation": "Atomicity applies to transactions, and in autocommit mode each statement is its own transaction. The debit committed as soon as it finished, and durability guarantees it survives the crash. After recovery, account 1 has lost 500 and account 2 never received it. Wrap both statements in BEGIN ... COMMIT.",
+      "why_convincing": "'Databases are ACID' is true, and the two statements obviously form one transfer to a human reader."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the debit was committed on its own and is kept after recovery, so 500 disappears. Put both updates in one explicit transaction.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "autocommit: UPDATE 1 commits -> crash -> recovery replays the committed debit; the credit never ran",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "500"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "BEGIN; UPDATE ... id = 1; UPDATE ... id = 2; COMMIT;",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After recovery account 1 is 500 lower and account 2 is unchanged."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what counts as one transaction in autocommit mode."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the database treats the two statements as a unit."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Atomicity is per transaction; without BEGIN, each statement commits on its own."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask whether the first UPDATE had committed before the crash."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: in autocommit each statement commits separately, so the debit survives. Wrap both in BEGIN ... COMMIT."
+      }
+    ],
+    "repair": "Wrap the debit and credit in one explicit transaction.",
+    "debrief": "The database cannot know which statements your business logic considers one operation; you tell it with transaction boundaries. Atomicity and durability then work exactly as promised - which, here, means durably keeping half a transfer.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-transactions-acid-003",
+    "subject": "databases",
+    "topic": "Transactions & ACID",
+    "subtopic": "Rolling back a failed transfer",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Account 1 holds 200 and account 2 holds 1000. After this runs, are both balances unchanged?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "CREATE TABLE accounts (\n  id INT PRIMARY KEY,\n  balance NUMERIC CHECK (balance >= 0)\n);",
+      "query": "BEGIN;\nUPDATE accounts SET balance = balance + 500 WHERE id = 2;\nUPDATE accounts SET balance = balance - 500 WHERE id = 1;  -- account 1 holds 200\nCOMMIT;\n-- the application issues ROLLBACK if any statement fails"
+    },
+    "ai_claim": "Yes. The debit would make account 1 negative, so the CHECK fails, the transaction is rolled back, and the credit to account 2 is undone too.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The credit to account 2 succeeds inside the transaction, but is not yet committed."
+      },
+      {
+        "index": 2,
+        "text": "The debit would set account 1 to -300, which violates CHECK (balance >= 0), so the statement fails."
+      },
+      {
+        "index": 3,
+        "text": "The failure aborts the transaction, and the application rolls it back."
+      },
+      {
+        "index": 4,
+        "text": "Rolling back undoes the credit, so account 1 stays 200 and account 2 stays 1000."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Uncommitted changes are undone by ROLLBACK, so the credit never becomes visible. The CHECK constraint plus the transaction make the transfer all-or-nothing.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "credit (uncommitted) -> debit violates CHECK (200 - 500 = -300) -> ROLLBACK -> balances 200 and 1000",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "200",
+          "1000"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow what happens to the first update when the second fails."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 depends on the credit not having been committed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Changes inside a transaction become permanent only at COMMIT; ROLLBACK discards them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute account 1's balance after the debit."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The CHECK fails, the transaction is rolled back, and the uncommitted credit is undone. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "This is atomicity used correctly: an explicit transaction, a constraint that detects the invalid state, and a rollback that undoes the earlier statement. Compare it with the autocommit transfer, where the same two statements were not protected.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-transactions-acid-004",
+    "subject": "databases",
+    "topic": "Transactions & ACID",
+    "subtopic": "Seeing another transaction's commit",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In PostgreSQL, what does session B's second SELECT return?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "orders(id, status)",
+      "query": "-- Session B\nBEGIN;\nSELECT COUNT(*) FROM orders WHERE status = 'new';   -- returns 5\n\n-- Session A, meanwhile:\n--   INSERT INTO orders (id, status) VALUES (99, 'new');\n--   COMMIT;\n\n-- Session B again, same transaction:\nSELECT COUNT(*) FROM orders WHERE status = 'new';"
+    },
+    "ai_claim": "It returns 6. Session A committed the new order before the second SELECT, so B sees it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The first SELECT counts 5 new orders."
+      },
+      {
+        "index": 2,
+        "text": "Session A inserts order 99 and commits."
+      },
+      {
+        "index": 3,
+        "text": "Committed data is visible to other transactions."
+      },
+      {
+        "index": 4,
+        "text": "So B's second SELECT counts 6."
+      }
+    ],
+    "ai_final_answer": "6",
+    "simulated_confidence": 94,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Session B's isolation level. Under READ COMMITTED, each statement sees data committed before it started; under REPEATABLE READ or SERIALIZABLE, the whole transaction sees the snapshot taken at its first query. The transaction's isolation level is not shown.",
+    "resolving_scenarios": [
+      "READ COMMITTED (PostgreSQL's default): the second SELECT sees A's commit and returns 6.",
+      "REPEATABLE READ or SERIALIZABLE: B keeps its original snapshot and returns 5."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on B's isolation level, which is not given: 6 under READ COMMITTED, 5 under REPEATABLE READ. Step 3 is true only for READ COMMITTED.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "With BEGIN ISOLATION LEVEL REPEATABLE READ, the second SELECT returns 5.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Under REPEATABLE READ, order 99 is invisible to B until B's transaction ends."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what decides when a transaction sees other sessions' commits."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a visibility rule without saying which isolation level it assumes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "READ COMMITTED takes a new snapshot per statement; REPEATABLE READ uses one snapshot for the whole transaction."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Answer the question once for each isolation level."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes READ COMMITTED. Under it the answer is 6; under REPEATABLE READ it is 5. It cannot be decided."
+      }
+    ],
+    "repair": "State the isolation level (for example BEGIN ISOLATION LEVEL REPEATABLE READ) and decide from it.",
+    "debrief": "Visibility of concurrent changes is exactly what isolation levels define, and the same statements give different answers under each. When a question about concurrency does not state the isolation level, the level is the missing information - even if the database has a default.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,440 @@
+[
+  {
+    "id": "eng-listening-pronunciation-001",
+    "subject": "english",
+    "topic": "Listening & Pronunciation",
+    "subtopic": "Stress shifts across word families",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are all three words stressed on the first syllable?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "Word family: photograph, photography, photographic\nAI: \"All three are stressed on the first syllable, like PHO-to-graph.\""
+    },
+    "ai_claim": "Yes. They share the root 'photo', so all three are stressed on the first syllable.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "All three share the root 'photo'."
+      },
+      {
+        "index": 2,
+        "text": "'Photograph' is stressed on PHO."
+      },
+      {
+        "index": 3,
+        "text": "Related words keep the same stress."
+      },
+      {
+        "index": 4,
+        "text": "So all three are stressed on the first syllable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Assuming stress stays fixed across a word family",
+      "explanation": "Stress often moves with suffixes: PHO-to-graph, pho-TO-gra-phy, pho-to-GRA-phic. Suffixes like -y (after -graph) and -ic shift stress (-ic puts it on the syllable before the suffix). Misplaced stress can make words hard to recognise.",
+      "why_convincing": "Shared roots suggest shared pronunciation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: stress moves: PHOtograph, phoTOgraphy, photoGRAPHic.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Words ending in -ic are usually stressed on the syllable before -ic; -graphy words on the syllable before -graphy.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "'pho-TO-gra-phy' is stressed on the second syllable.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Saying 'PHO-to-gra-phy' makes the word hard to recognise."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Say each word and listen for the strong syllable."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes stress is fixed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Suffixes can move word stress."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check a dictionary's stress marks."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: stress shifts with the suffix."
+      }
+    ],
+    "repair": "PHOtograph, phoTOgraphy, photoGRAPHic.",
+    "debrief": "Learn stress patterns by suffix: -tion, -ic and -ity move stress in predictable ways.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-listening-pronunciation-002",
+    "subject": "english",
+    "topic": "Listening & Pronunciation",
+    "subtopic": "'Can' or 'can't'",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it safe to book Tuesday without confirming?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "On a noisy call, the client said something like \"I can make Tuesday\" or \"I can't make Tuesday\" - the ending was unclear.\nAI: \"The client said they can make Tuesday, so book the meeting; no need to confirm.\""
+    },
+    "ai_claim": "Yes. The client said 'I can make Tuesday', so the meeting can be booked.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The client mentioned Tuesday."
+      },
+      {
+        "index": 2,
+        "text": "They said they can make it."
+      },
+      {
+        "index": 3,
+        "text": "So Tuesday works."
+      },
+      {
+        "index": 4,
+        "text": "Book without confirming."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Resolving an unclear word by assumption",
+      "explanation": "'Can' and 'can't' are hard to distinguish in fast or noisy speech, especially across accents: the final /t/ is often barely released, while 'can' in an affirmative sentence is usually unstressed and 'can't' stressed. With an unclear ending, the only safe move is to confirm: 'Just to confirm - Tuesday works for you?' - or confirm in writing.",
+      "why_convincing": "The first part of the phrase was clear."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the key word was unclear. Confirm before booking.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Confirm critical details when audio is unclear, especially can/can't, fifteen/fifty and dates.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "\"Sorry, the line was unclear - did you say you can or can't make Tuesday?\"",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If the client said 'can't', the booked meeting is wasted."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which word was actually unclear."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the clearer interpretation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Can/can't are easily confused in speech; confirm."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Think about stress in 'I CAN'T make it'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the key word was unclear. Confirm."
+      }
+    ],
+    "repair": "\"Just to confirm, does Tuesday work for you?\"",
+    "debrief": "In listening, uncertainty about a key word calls for confirmation, not interpretation.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-listening-pronunciation-003",
+    "subject": "english",
+    "topic": "Listening & Pronunciation",
+    "subtopic": "Silent letters",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right about these silent letters?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "Pronunciation notes: 'debt' is pronounced /det/ (silent b), 'receipt' is /rɪˈsiːt/ (silent p), and 'subtle' is /ˈsʌtl/ (silent b)."
+    },
+    "ai_claim": "Yes. In all three words the b or p is not pronounced: debt sounds like 'det', receipt like 'ri-SEET', subtle like 'SUT-l'.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "'Debt': the b is silent."
+      },
+      {
+        "index": 2,
+        "text": "'Receipt': the p is silent."
+      },
+      {
+        "index": 3,
+        "text": "'Subtle': the b is silent."
+      },
+      {
+        "index": 4,
+        "text": "So all three notes are correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. These silent letters come from historical spellings (Latin debitum, recepta, subtilis) and are not pronounced.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Dictionary pronunciations: debt /det/, receipt /rɪˈsiːt/, subtle /ˈsʌtl/.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each word in a pronunciation dictionary."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 covers 'receipt'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Some English spellings keep letters that are no longer pronounced."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Say 'receipt' without the p."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. All three letters are silent. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Silent letters are common in business vocabulary: receipt, debt, subtle, often (the t is silent for most speakers, though some pronounce it).",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-listening-pronunciation-004",
+    "subject": "english",
+    "topic": "Listening & Pronunciation",
+    "subtopic": "Pronouncing -ed endings",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "AI: \"The -ed ending has three pronunciations: /t/ in 'worked', /d/ in 'played', and /ɪd/ in 'wanted'.\""
+    },
+    "ai_claim": "Yes. After voiceless sounds (like k) -ed is /t/; after voiced sounds (like the vowel in 'play') it is /d/; after t or d it is /ɪd/, adding a syllable.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "'Work' ends in voiceless /k/, so -ed is /t/: worked."
+      },
+      {
+        "index": 2,
+        "text": "'Play' ends in a voiced vowel, so -ed is /d/: played."
+      },
+      {
+        "index": 3,
+        "text": "'Want' ends in /t/, so -ed is /ɪd/: want-ed."
+      },
+      {
+        "index": 4,
+        "text": "So the three examples are correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The -ed ending is /t/, /d/ or /ɪd/ depending on the final sound of the verb.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "-ed is /ɪd/ after /t/ or /d/, /t/ after other voiceless sounds, /d/ after other voiced sounds.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the last sound of each base verb."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 adds a syllable."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Voicing of the final sound decides the -ed pronunciation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Say 'worked' and 'wanted' aloud."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The rule and examples are right. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Adding an extra syllable to every -ed ('work-ed') is a common pronunciation error; the rule tells you when it belongs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-listening-pronunciation-005",
+    "subject": "english",
+    "topic": "Listening & Pronunciation",
+    "subtopic": "Did the client agree",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Did the client agree to the Friday deadline?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "Call transcript excerpt:\nYou: \"Can we move the delivery deadline to Friday?\"\nClient: \"Yeah... I mean, Friday... we'll see how it goes.\"\n(The call then moved to another topic.)"
+    },
+    "ai_claim": "Yes. The client said 'Yeah' and mentioned Friday, so they agreed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The client began with 'Yeah'."
+      },
+      {
+        "index": 2,
+        "text": "They mentioned Friday."
+      },
+      {
+        "index": 3,
+        "text": "'Yeah' signals agreement."
+      },
+      {
+        "index": 4,
+        "text": "So they agreed to Friday."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The client's actual commitment. 'Yeah... I mean... we'll see how it goes' can be a hesitant acceptance or a polite way of avoiding commitment, and tone and context (not in the transcript) matter. No explicit agreement was given.",
+    "resolving_scenarios": [
+      "The client's tone was positive and they simply meant 'yes, Friday should be fine': the deadline is agreed.",
+      "'We'll see how it goes' signalled reluctance: the client has not committed, and Friday may be rejected later."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The words are ambiguous; Step 3 reads 'Yeah' as agreement despite the hedging that follows. Confirm in writing.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "'We'll see how it goes' is often used to avoid a direct no.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The client may later say they never agreed to Friday."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the whole reply, not just its first word."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on 'Yeah'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Hedges like 'we'll see' can soften or withdraw agreement."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider the reply said with a hesitant tone."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 ignores the hedging. It may be a yes or a polite non-commitment. It cannot be decided."
+      }
+    ],
+    "repair": "Follow up: \"Just to confirm, are we agreed on Friday as the new deadline?\" and put it in writing.",
+    "debrief": "In professional listening, ambiguous agreement should be confirmed explicitly - ideally in writing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

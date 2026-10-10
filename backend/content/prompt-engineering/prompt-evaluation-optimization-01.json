@@ -1,0 +1,457 @@
+[
+  {
+    "id": "pe-prompt-evaluation-optimization-001",
+    "subject": "prompt-engineering",
+    "topic": "Prompt Evaluation & Optimization",
+    "subtopic": "Three examples as proof",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this test show v2 is better?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "prompt": "Prompt v2 adds 'Think step by step'. The author tried 3 questions: v1 got 2 right, v2 got 3 right.\nConclusion: \"v2 is 50% better.\""
+    },
+    "ai_claim": "Yes. v2 answered 3 of 3 correctly against v1's 2 of 3, which is 50% more correct answers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "v1 got 2 of 3 questions right."
+      },
+      {
+        "index": 2,
+        "text": "v2 got 3 of 3 right."
+      },
+      {
+        "index": 3,
+        "text": "3 is 50% more than 2."
+      },
+      {
+        "index": 4,
+        "text": "So v2 is 50% better."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 4,
+      "misconception": "Drawing conclusions from a tiny sample",
+      "explanation": "A difference of one question out of three is well within random variation; rerunning v1 might give 3/3. Model outputs also vary between runs. Compare prompts on a fixed, representative set (e.g. 200 cases), run several times if sampling is involved, and look at per-case differences.",
+      "why_convincing": "The arithmetic is correct and the direction looks clear."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: one question out of three is noise. Evaluate on a large fixed set.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Rerunning v1 on the same 3 questions gives 3/3 on the second attempt.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "On 200 questions, v1 scores 81% and v2 82%.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "81",
+          "82"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A second run of v1 matches v2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the evidence behind the conclusion."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 generalises from 3 questions."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Small samples cannot distinguish real improvements from noise."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rerun v1."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: 3 questions cannot show a difference."
+      }
+    ],
+    "repair": "Build a fixed evaluation set of at least a few hundred representative cases.",
+    "debrief": "Prompt tweaking without a real evaluation set is guessing with extra steps.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-prompt-evaluation-optimization-002",
+    "subject": "prompt-engineering",
+    "topic": "Prompt Evaluation & Optimization",
+    "subtopic": "Tuning until the eval set is perfect",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does 60/60 show the prompt extracts perfectly on new documents?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "prompt": "A team revised their extraction prompt 40 times, each time checking accuracy on the same 60-document evaluation set, until it reached 60/60.\nClaim: \"The prompt now extracts perfectly.\""
+    },
+    "ai_claim": "Yes. The prompt gets every evaluation document right, so it extracts perfectly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The evaluation set has 60 documents."
+      },
+      {
+        "index": 2,
+        "text": "The final prompt gets all 60 right."
+      },
+      {
+        "index": 3,
+        "text": "The evaluation set represents real documents."
+      },
+      {
+        "index": 4,
+        "text": "So extraction is perfect."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Overfitting a prompt to its evaluation set",
+      "explanation": "After 40 revisions guided by the same 60 documents, the prompt has been tuned to their quirks (special-case instructions for particular layouts). The set no longer gives an unbiased estimate. Keep a separate held-out test set that is not used during iteration, and measure on it only at the end.",
+      "why_convincing": "Prompts do not have weights, so overfitting seems impossible."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the prompt was tuned on these 60 documents. Measure on a held-out set.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "On 100 new documents, accuracy is 88%.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "88"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "revisions 31-40 each added a rule for one specific failing document",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "40"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "New document layouts fail."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how many decisions were made using this set."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the set is still unbiased."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Iterating against one set overfits to it, even for prompts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test on new documents."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the prompt is overfit to the eval set."
+      }
+    ],
+    "repair": "Split into a development set for iteration and a locked test set.",
+    "debrief": "Prompts can overfit just like models. The discipline of held-out test data applies.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-prompt-evaluation-optimization-003",
+    "subject": "prompt-engineering",
+    "topic": "Prompt Evaluation & Optimization",
+    "subtopic": "Comparing prompts on a shared set",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this comparison is well designed and supports choosing B?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "prompt": "Prompts A and B were each run on the same 200 held-out support tickets.\nA rubric (correct category, required fields present, policy followed) was applied by two reviewers blind to which prompt produced each output.\nResults: A 78%, B 86%; per-ticket comparison: B better on 31 tickets, A better on 15, tie on 154."
+    },
+    "ai_claim": "Yes. Both prompts saw identical tickets, reviewers were blind and used a rubric, and the paired comparison shows B winning on twice as many tickets as A, which supports B.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Identical held-out tickets make the comparison fair."
+      },
+      {
+        "index": 2,
+        "text": "A rubric and blind reviewers reduce bias."
+      },
+      {
+        "index": 3,
+        "text": "The paired results show B better on 31 tickets and A on 15."
+      },
+      {
+        "index": 4,
+        "text": "So the evidence favours B."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A paired comparison on the same held-out set with blind rubric grading is sound; 31 vs 15 is a clear advantage (a sign test gives p of about 0.03).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Per-ticket results: B better on 31, A better on 15.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "31",
+          "15"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check fairness, grading and statistics."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 uses a paired comparison."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Same inputs, blind rubric grading and paired analysis make comparisons trustworthy."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the wins and losses per ticket."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The comparison is sound and favours B. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Paired comparisons on shared inputs are the most sensitive way to compare prompts.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-prompt-evaluation-optimization-004",
+    "subject": "prompt-engineering",
+    "topic": "Prompt Evaluation & Optimization",
+    "subtopic": "A regression suite for prompt changes",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this process protects against prompt changes that break existing behaviour?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "prompt": "Every prompt change triggers an automated suite: 150 saved cases (including 30 past failures and 20 injection attempts), with expected outputs or rubric checks.\nThe change ships only if no previously passing case fails."
+    },
+    "ai_claim": "Yes. Rerunning saved cases after each change catches regressions, including reintroducing fixed bugs and new injection weaknesses, before they reach users.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Saved cases capture expected behaviour."
+      },
+      {
+        "index": 2,
+        "text": "Past failures ensure fixed bugs stay fixed."
+      },
+      {
+        "index": 3,
+        "text": "Injection attempts check that security holds."
+      },
+      {
+        "index": 4,
+        "text": "Blocking releases on new failures prevents regressions shipping."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Regression suites are as important for prompts as for code, because small wording changes can alter behaviour unexpectedly.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "A wording change that shortened the prompt failed 4 of the 20 injection cases and was blocked.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "4",
+          "20"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what could go wrong when a prompt changes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 keeps past fixes in place."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Regression tests protect existing behaviour during changes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a change that weakens injection resistance."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The suite catches regressions. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Treat prompts as code: version them, review them and test them on every change.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-prompt-evaluation-optimization-005",
+    "subject": "prompt-engineering",
+    "topic": "Prompt Evaluation & Optimization",
+    "subtopic": "Is 84% better than 81%",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is prompt B better than prompt A?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "prompt": "Prompt A: 81/100 correct. Prompt B: 84/100 correct.\nThe two prompts were run on different random samples of 100 tickets each; per-ticket results are not available."
+    },
+    "ai_claim": "Yes. B scored 84% against A's 81%, three points higher, so B is the better prompt.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A scored 81%."
+      },
+      {
+        "index": 2,
+        "text": "B scored 84%."
+      },
+      {
+        "index": 3,
+        "text": "84% is higher than 81%."
+      },
+      {
+        "index": 4,
+        "text": "So B is better."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether the difference is larger than noise. With 100 different tickets per prompt, each accuracy has a standard error of about 4 percentage points, so a 3-point gap is well within chance; the samples may also differ in difficulty. A paired comparison on the same tickets is needed.",
+    "resolving_scenarios": [
+      "On the same 300 tickets, B beats A on 25 and loses on 8: B is genuinely better.",
+      "On the same tickets, B wins 12 and loses 11: the prompts are equivalent, and the 3-point gap came from sample differences."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The evidence cannot distinguish a real improvement from noise. Step 3 compares numbers from different samples without uncertainty.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Standard error of 82% with n = 100 is sqrt(0.82 x 0.18 / 100) = 0.038, about 4 points - larger than the gap.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.038"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Re-sampling 100 tickets could reverse the order."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Estimate the uncertainty of each score."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 compares numbers from different samples."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Fair comparisons use the same inputs and account for noise."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the standard error for 100 tickets."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 ignores noise and sample differences. B may or may not be better. It cannot be decided."
+      }
+    ],
+    "repair": "Run both prompts on the same tickets and compare per-ticket results.",
+    "debrief": "Small differences need paired evidence and uncertainty estimates.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

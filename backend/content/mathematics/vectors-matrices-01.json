@@ -1,0 +1,497 @@
+[
+  {
+    "id": "mat-vectors-matrices-001",
+    "subject": "mathematics",
+    "topic": "Vectors & Matrices",
+    "subtopic": "Matrix multiplication is not element-wise",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the top-left entry of the matrix product AB?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "A = [[1, 2], [3, 4]],  B = [[5, 6], [7, 8]]\nAI working: AB = [[1x5, 2x6], [3x7, 4x8]] = [[5, 12], [21, 32]]"
+    },
+    "ai_claim": "5. Matrix products multiply matching entries, so the top-left entry is 1 x 5 = 5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "AB is computed entry by entry."
+      },
+      {
+        "index": 2,
+        "text": "Each entry is the product of the entries in the same position."
+      },
+      {
+        "index": 3,
+        "text": "Top-left: 1 x 5."
+      },
+      {
+        "index": 4,
+        "text": "= 5."
+      }
+    ],
+    "ai_final_answer": "5",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Multiplying matrices element by element",
+      "explanation": "Entry (i, j) of AB is the dot product of row i of A with column j of B. Top-left: (1, 2) . (5, 7) = 1 x 5 + 2 x 7 = 19. The element-wise product (Hadamard product) is a different operation.",
+      "why_convincing": "Element-wise multiplication is how matrices are added, and how NumPy's * operator works."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "(AB)[0][0] = 1 x 5 + 2 x 7 = 19.",
+    "canonical_answer": "19",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "row 1 of A . column 1 of B = 1 x 5 + 2 x 7 = 19",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "19"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "(AB)ij = sum over k of Aik x Bkj.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A 2x3 matrix times a 3x2 matrix is defined, but element-wise multiplication of them is not."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall how an entry of a matrix product is defined."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 multiplies entries in the same position."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Each entry is a row-by-column dot product."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute row 1 of A times column 1 of B."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: matrix multiplication uses dot products. The entry is 19."
+      }
+    ],
+    "repair": "",
+    "debrief": "Matrix multiplication composes linear maps; element-wise multiplication is a separate operation (in NumPy, @ versus *).",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "A = [[1, 2], [3, 4]]; B = [[5, 6], [7, 8]]; answer = A[0][0] * B[0][0] + A[0][1] * B[1][0]",
+      "flawed_solver": "answer = 1 * 5"
+    }
+  },
+  {
+    "id": "mat-vectors-matrices-002",
+    "subject": "mathematics",
+    "topic": "Vectors & Matrices",
+    "subtopic": "Matrix products do not commute",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the top-right entry of BA?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "A = [[1, 2], [3, 4]],  B = [[0, 1], [1, 0]]\nAB = [[2, 1], [4, 3]]\nAI working: BA = AB, so the top-right entry of BA is 1."
+    },
+    "ai_claim": "1. Multiplying the same two matrices gives the same result in either order, so BA = AB, whose top-right entry is 1.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "AB = [[2, 1], [4, 3]]."
+      },
+      {
+        "index": 2,
+        "text": "Multiplication gives the same product in either order."
+      },
+      {
+        "index": 3,
+        "text": "So BA = AB."
+      },
+      {
+        "index": 4,
+        "text": "The top-right entry is 1."
+      }
+    ],
+    "ai_final_answer": "1",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Assuming matrix multiplication is commutative",
+      "explanation": "Matrix multiplication is generally not commutative. Here B swaps rows when it multiplies on the left and swaps columns on the right. BA = [[3, 4], [1, 2]], so its top-right entry is 0 x 2 + 1 x 4 = 4.",
+      "why_convincing": "Multiplication of numbers is commutative, and AB was computed correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "BA = [[3, 4], [1, 2]]; the top-right entry is 4.",
+    "canonical_answer": "4",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "row 1 of B (0, 1) . column 2 of A (2, 4) = 4",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "AB = [[2, 1], [4, 3]] but BA = [[3, 4], [1, 2]].",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "AB and BA differ in every entry."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute BA directly."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes order does not matter."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "For matrices, AB and BA are usually different."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Take row 1 of B and column 2 of A."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: BA is not AB. Its top-right entry is 4."
+      }
+    ],
+    "repair": "",
+    "debrief": "Order matters because matrix products compose transformations: 'swap then transform' differs from 'transform then swap'.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "A = [[1, 2], [3, 4]]; B = [[0, 1], [1, 0]]; answer = B[0][0] * A[0][1] + B[0][1] * A[1][1]",
+      "flawed_solver": "answer = 1"
+    }
+  },
+  {
+    "id": "mat-vectors-matrices-003",
+    "subject": "mathematics",
+    "topic": "Vectors & Matrices",
+    "subtopic": "Vector length",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the length (Euclidean norm) of v?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "v = (3, 4, 12)\nAI working: |v| = sqrt(3 + 4 + 12) = sqrt(19) = 4.358899"
+    },
+    "ai_claim": "4.358899. The length is the square root of the sum of the components: sqrt(19).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "v has components 3, 4 and 12."
+      },
+      {
+        "index": 2,
+        "text": "The length is sqrt of the sum of the components."
+      },
+      {
+        "index": 3,
+        "text": "3 + 4 + 12 = 19."
+      },
+      {
+        "index": 4,
+        "text": "|v| = sqrt(19) = 4.358899."
+      }
+    ],
+    "ai_final_answer": "4.358899",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Forgetting to square the components",
+      "explanation": "The Euclidean norm is the square root of the sum of the squared components: sqrt(9 + 16 + 144) = sqrt(169) = 13. It generalises Pythagoras to three dimensions.",
+      "why_convincing": "The overall shape - a square root of a sum - is right."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "|v| = sqrt(3^2 + 4^2 + 12^2) = sqrt(169) = 13.",
+    "canonical_answer": "13",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "9 + 16 + 144 = 169; sqrt(169) = 13",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "13"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "The length must be at least the largest component, 12, but 4.36 is smaller.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "12"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A vector (0, 0, 12) has length 12, but the formula would give sqrt(12) = 3.46."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall Pythagoras' theorem."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 omits a key operation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The norm squares each component before summing."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the answer with the largest component."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: square the components. |v| = 13."
+      }
+    ],
+    "repair": "",
+    "debrief": "A quick sanity check - the length is at least the largest component - catches formula slips immediately.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = math.sqrt(3 ** 2 + 4 ** 2 + 12 ** 2)",
+      "flawed_solver": "answer = math.sqrt(3 + 4 + 12)"
+    }
+  },
+  {
+    "id": "mat-vectors-matrices-004",
+    "subject": "mathematics",
+    "topic": "Vectors & Matrices",
+    "subtopic": "The dot product is not the angle",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the angle between a and b, in degrees?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "a = (1, 0),  b = (1, 1)\nAI working: a . b = 1 x 1 + 0 x 1 = 1. A dot product of 1 means the vectors point the same way, so the angle is 0 degrees."
+    },
+    "ai_claim": "0. Their dot product is 1, which means they point in the same direction.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "a . b = 1 x 1 + 0 x 1 = 1."
+      },
+      {
+        "index": 2,
+        "text": "A dot product of 1 means the vectors are parallel."
+      },
+      {
+        "index": 3,
+        "text": "Parallel vectors have an angle of 0 degrees."
+      },
+      {
+        "index": 4,
+        "text": "So the angle is 0."
+      }
+    ],
+    "ai_final_answer": "0",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Reading the raw dot product as the cosine",
+      "explanation": "a . b = |a||b| cos(theta). Only for unit vectors does a . b equal cos(theta). |b| = sqrt(2), so cos(theta) = 1 / (1 x sqrt(2)) = 0.7071, and theta = 45 degrees.",
+      "why_convincing": "For unit vectors, a dot product of 1 really does mean parallel."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "cos(theta) = 1 / sqrt(2), so theta = 45 degrees.",
+    "canonical_answer": "45",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "cos(theta) = 1 / (1 x sqrt(2)) = 0.7071; theta = 45 degrees",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "45"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "a and 10b have dot product 10, yet the angle is unchanged.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "b = (1, 1) visibly points diagonally, not along a."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether b is a unit vector."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 interprets the dot product directly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "a . b = |a| |b| cos(theta)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute |b|."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: divide by the lengths. The angle is 45 degrees."
+      }
+    ],
+    "repair": "",
+    "debrief": "The dot product mixes length and direction. Normalise first (cosine similarity) when only direction matters.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = math.degrees(math.acos(1 / (1 * math.sqrt(2))))",
+      "flawed_solver": "answer = 0"
+    }
+  },
+  {
+    "id": "mat-vectors-matrices-005",
+    "subject": "mathematics",
+    "topic": "Vectors & Matrices",
+    "subtopic": "Determinant of a product",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is det(AB)?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "det(A) = -2,  det(B) = 3   (both 3 x 3 matrices)\nAI working: det(AB) = det(A) x det(B) = -6"
+    },
+    "ai_claim": "-6. The determinant is multiplicative: det(AB) = det(A) det(B) = -2 x 3 = -6.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A and B are square matrices of the same size."
+      },
+      {
+        "index": 2,
+        "text": "The determinant of a product is the product of the determinants."
+      },
+      {
+        "index": 3,
+        "text": "det(A) det(B) = -2 x 3."
+      },
+      {
+        "index": 4,
+        "text": "= -6."
+      }
+    ],
+    "ai_final_answer": "-6",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: -6. det(AB) = det(A) det(B) for square matrices of the same size; geometrically, volume scale factors multiply.",
+    "canonical_answer": "-6",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "det(AB) = det(A) det(B).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "calculation",
+        "summary": "-2 x 3 = -6",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-6"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall how determinants behave under multiplication."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 uses the multiplicative property."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Determinants measure volume scaling; applying two maps multiplies the scalings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply -2 by 3."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. det(AB) = -6. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Determinants are multiplicative but not additive: det(AB) = det A det B, while det(A + B) has no such rule.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = -2 * 3"
+    }
+  }
+]

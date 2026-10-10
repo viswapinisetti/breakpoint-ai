@@ -1,0 +1,536 @@
+[
+  {
+    "id": "ml-clustering-001",
+    "subject": "machine-learning",
+    "topic": "Clustering",
+    "subtopic": "Cluster numbers carry no order",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does cluster 2's label show it is the highest-value segment?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "output": "KMeans(n_clusters=3) on customer spend features\nCluster sizes: 0 -> 4,100   1 -> 2,300   2 -> 900",
+      "slide": "\"Cluster 2 is our highest-value segment (it has the highest label).\""
+    },
+    "ai_claim": "Yes. K-means numbers clusters 0, 1 and 2, and cluster 2 has the highest number, so it is the highest-value segment.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "K-means produced clusters 0, 1 and 2."
+      },
+      {
+        "index": 2,
+        "text": "Higher labels correspond to higher values."
+      },
+      {
+        "index": 3,
+        "text": "Cluster 2 has the highest label."
+      },
+      {
+        "index": 4,
+        "text": "So it is the highest-value segment."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 2,
+      "misconception": "Reading meaning into arbitrary cluster labels",
+      "explanation": "Cluster ids are arbitrary names assigned by the algorithm and depend on random initialisation; rerunning can renumber them. To find the highest-value segment, profile each cluster: compare average spend, frequency and margin by cluster.",
+      "why_convincing": "Numbered labels look ordered."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: labels are arbitrary. Profile each cluster's average spend to find the highest-value one.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Rerunning with random_state=1 renames the 900-customer cluster to 0.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "900"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The output gives only cluster sizes, not their spend.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "After a rerun, the same customers can be cluster 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how k-means assigns cluster numbers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 attaches meaning to the labels."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Cluster ids are arbitrary; meaning comes from profiling."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rerun with a different seed."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: labels are arbitrary. Profile the clusters."
+      }
+    ],
+    "repair": "Compute mean spend, frequency and margin per cluster and name segments from those profiles.",
+    "debrief": "Clusters are only as meaningful as the profiles you build for them. Always describe them by their feature averages.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-clustering-002",
+    "subject": "machine-learning",
+    "topic": "Clustering",
+    "subtopic": "K-means and ring-shaped clusters",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will k-means separate the inner ring from the outer ring?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "data": "2D points forming two concentric rings: an inner ring of radius 1 and an outer ring of radius 5, 500 points each.",
+      "plan": "KMeans(n_clusters=2) to separate inner and outer rings."
+    },
+    "ai_claim": "Yes. There are two clearly separated groups, and k-means with k = 2 finds two clusters, so it will separate the rings.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The rings are clearly separated."
+      },
+      {
+        "index": 2,
+        "text": "There are two groups, so k = 2."
+      },
+      {
+        "index": 3,
+        "text": "K-means finds k clusters."
+      },
+      {
+        "index": 4,
+        "text": "So it separates the rings."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming k-means can find any shape of cluster",
+      "explanation": "K-means assigns each point to the nearest centroid, which produces convex, roughly spherical clusters split by straight boundaries. Both rings share the same centre, so the best two-centroid split cuts both rings in half (e.g. left vs right). Use a density-based method (DBSCAN), spectral clustering, or transform to polar coordinates (radius).",
+      "why_convincing": "The groups are obvious to the eye."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: k-means splits the plane with a straight boundary, cutting both rings. Use DBSCAN or spectral clustering (or cluster on radius).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Plotting k-means labels shows a left half and a right half, each containing parts of both rings.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Clustering on the feature radius = sqrt(x^2 + y^2) separates the rings perfectly.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Both centroids lie near the common centre, one on each side."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about the shape of the boundary between two centroids."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes k-means finds any grouping."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "K-means produces convex clusters separated by linear boundaries."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Where would two centroids settle for concentric rings?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: k-means cuts the rings in half. Use DBSCAN or spectral clustering."
+      }
+    ],
+    "repair": "Use DBSCAN or spectral clustering, or cluster on the radius.",
+    "debrief": "Every clustering algorithm has a built-in notion of what a cluster looks like. Pick one whose assumptions match the shapes in your data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-clustering-003",
+    "subject": "machine-learning",
+    "topic": "Clustering",
+    "subtopic": "Choosing k by inertia",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the lowest inertia show that k = 20 is the best number of clusters?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "inertia": {
+        "title": "K-means inertia (within-cluster sum of squares)",
+        "columns": [
+          "k",
+          "inertia"
+        ],
+        "rows": [
+          [
+            2,
+            "8,400"
+          ],
+          [
+            3,
+            "4,100"
+          ],
+          [
+            4,
+            "3,600"
+          ],
+          [
+            5,
+            "3,300"
+          ],
+          [
+            10,
+            "2,100"
+          ],
+          [
+            20,
+            "1,050"
+          ]
+        ]
+      },
+      "decision": "\"k = 20 is best because it has the lowest inertia.\""
+    },
+    "ai_claim": "Yes. Inertia measures how tight the clusters are, and k = 20 has the lowest value, so it gives the best clustering.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Lower inertia means tighter clusters."
+      },
+      {
+        "index": 2,
+        "text": "k = 20 has the lowest inertia, 1,050."
+      },
+      {
+        "index": 3,
+        "text": "Tighter clusters are better."
+      },
+      {
+        "index": 4,
+        "text": "So k = 20 is best."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Choosing k by a metric that always improves with k",
+      "explanation": "Inertia always decreases as k grows; with k equal to the number of points it is 0. Minimising it always picks the largest k tried. Look for the elbow - here the drop flattens after k = 3 (8,400 -> 4,100, then only -500) - or use silhouette scores and business usefulness.",
+      "why_convincing": "Lower inertia is genuinely 'tighter', which sounds like 'better'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: inertia always falls with k. The elbow at k = 3 (or silhouette analysis) is a better guide.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Drops: 2 -> 3 is 4,300; 3 -> 4 is only 500.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4,300",
+          "500"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "With one cluster per point, inertia is 0.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "k = 7,000 (one per customer) would have inertia 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what happens to inertia as k keeps increasing."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats lower inertia as always better."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Inertia decreases monotonically with k; look for diminishing returns."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the drop from each k to the next."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: inertia always falls. The elbow is at k = 3."
+      }
+    ],
+    "repair": "Use the elbow method, silhouette scores and interpretability to choose k.",
+    "debrief": "A metric that improves automatically with complexity cannot select complexity. Look for diminishing returns or use metrics that penalise it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-clustering-004",
+    "subject": "machine-learning",
+    "topic": "Clustering",
+    "subtopic": "One k-means run",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is a single k-means run with random initialisation a reliable basis for the final segments?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "km = KMeans(n_clusters=5, init=\"random\", n_init=1, random_state=None).fit(X)\nsegments = km.labels_\n# The segments are sent to the marketing team as final."
+    },
+    "ai_claim": "Yes. K-means always converges, so one run finds the clusters.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "K-means iterates until the assignments stop changing."
+      },
+      {
+        "index": 2,
+        "text": "It always converges."
+      },
+      {
+        "index": 3,
+        "text": "Convergence means the optimal clusters are found."
+      },
+      {
+        "index": 4,
+        "text": "So one run is enough."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Equating convergence with finding the best solution",
+      "explanation": "K-means always converges, but to a local optimum that depends on the initial centroids. Different random starts give different segments and different inertia. Use k-means++ initialisation with several restarts (n_init=10 or more), keep the lowest-inertia solution, and check stability across seeds.",
+      "why_convincing": "'Converges' sounds like 'finds the answer'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: k-means converges to a local optimum. Use k-means++ with many restarts and check stability.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Five runs with different seeds give inertia between 3,300 and 4,050 and different segment memberships.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3,300"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "n_init=1 and init='random' are used.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Rerunning the notebook changes which customers are in each segment."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Run the code several times."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates convergence with optimality."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "K-means finds local optima that depend on initialisation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare inertia across seeds."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: results depend on the start. Use many restarts."
+      }
+    ],
+    "repair": "Use `KMeans(n_clusters=5, init='k-means++', n_init=20, random_state=42)` and check stability.",
+    "debrief": "Results that change on rerun are not ready to hand to a business team. Restarts and fixed seeds make clustering reproducible.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-clustering-005",
+    "subject": "machine-learning",
+    "topic": "Clustering",
+    "subtopic": "Reading a silhouette score",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that k = 3 gives the best-separated clustering here?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "results": {
+        "title": "Silhouette score by k",
+        "columns": [
+          "k",
+          "silhouette"
+        ],
+        "rows": [
+          [
+            2,
+            "0.41"
+          ],
+          [
+            3,
+            "0.68"
+          ],
+          [
+            4,
+            "0.52"
+          ],
+          [
+            5,
+            "0.47"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. The silhouette compares each point's distance to its own cluster with the nearest other cluster; values near 1 mean well-separated clusters. k = 3 has the highest average, 0.68.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A point's silhouette is (b - a) / max(a, b), where a is its mean distance to its own cluster and b to the nearest other cluster."
+      },
+      {
+        "index": 2,
+        "text": "It ranges from -1 to 1; higher means better separated."
+      },
+      {
+        "index": 3,
+        "text": "The average silhouette is highest at k = 3 (0.68)."
+      },
+      {
+        "index": 4,
+        "text": "So k = 3 gives the best-separated clusters of those tried."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Silhouette analysis, unlike inertia, does not automatically improve with k, so its maximum is a reasonable choice (alongside interpretability).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Silhouette peaks at 0.68 for k = 3.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.68"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall what the silhouette measures."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 defines it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Silhouette balances cohesion and separation, so it can peak at an intermediate k."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find the largest value in the table."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. k = 3 has the best separation. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Silhouette complements the elbow method because it rewards separation, not just tightness.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

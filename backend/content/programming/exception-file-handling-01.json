@@ -1,0 +1,527 @@
+[
+  {
+    "id": "prg-exception-file-handling-001",
+    "subject": "programming",
+    "topic": "Exception & File Handling",
+    "subtopic": "return inside finally",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does parse_age(text) return the parsed age for valid input, and -1 only when the text is not a number?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def parse_age(text):\n    try:\n        return int(text)\n    finally:\n        return -1"
+    },
+    "ai_claim": "Yes. Valid text returns int(text), and the finally block supplies -1 as the fallback.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "For valid text such as '25', int(text) succeeds and its value is returned."
+      },
+      {
+        "index": 2,
+        "text": "For invalid text such as 'abc', int raises ValueError."
+      },
+      {
+        "index": 3,
+        "text": "The finally block runs only after a failure and returns -1 as the fallback."
+      },
+      {
+        "index": 4,
+        "text": "So parse_age returns the age for valid input and -1 otherwise."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Believing finally runs only on failure",
+      "explanation": "finally runs on every exit from the try block, including a successful return. A return inside finally replaces the value being returned, so parse_age('25') returns -1. The fallback belongs in `except ValueError:`.",
+      "why_convincing": "Reading try/finally like try/except is common, and the invalid-input case - the one that motivated the code - behaves exactly as intended."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "finally always runs, and its return overrides the try block's return, so parse_age returns -1 for every input. Use `except ValueError: return -1` instead.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "parse_age('25') returns -1.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "25",
+          "-1"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "except ValueError:\n    return -1",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "parse_age('25') returns -1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the function with valid input, not only invalid input."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 describes when finally runs."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A finally block runs on every exit from try, including a normal return, and a return inside it wins."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call parse_age('25') and look at the result."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: finally runs even after a successful return, and its return -1 replaces the age. Use except ValueError."
+      }
+    ],
+    "repair": "Replace `finally:` with `except ValueError:` so -1 is returned only when parsing fails.",
+    "debrief": "finally is for clean-up that must happen no matter what; except is for handling a specific failure. Returning from finally silently discards the real result, and newer Python versions warn about it for exactly that reason. When code has a fallback, test the success path too - here it is the success path that is broken.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "parse_age",
+      "ai_code": "def parse_age(text):\n    try:\n        return int(text)\n    finally:\n        return -1",
+      "reference_code": "def parse_age(text):\n    try:\n        return int(text)\n    except ValueError:\n        return -1",
+      "test_inputs": [
+        "('25',)",
+        "('abc',)",
+        "('0',)"
+      ],
+      "counterexample_input": "('25',)"
+    }
+  },
+  {
+    "id": "prg-exception-file-handling-002",
+    "subject": "programming",
+    "topic": "Exception & File Handling",
+    "subtopic": "Order of except clauses",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does safe_divide(1, 0) return 'cannot divide by zero'?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def safe_divide(a, b):\n    try:\n        return a / b\n    except Exception:\n        return \"error\"\n    except ZeroDivisionError:\n        return \"cannot divide by zero\""
+    },
+    "ai_claim": "Yes. Dividing by zero raises ZeroDivisionError, which the specific handler catches.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "1 / 0 raises ZeroDivisionError."
+      },
+      {
+        "index": 2,
+        "text": "Python picks the except clause that best matches the exception type."
+      },
+      {
+        "index": 3,
+        "text": "ZeroDivisionError matches its own handler exactly, so that handler runs."
+      },
+      {
+        "index": 4,
+        "text": "safe_divide(1, 0) returns 'cannot divide by zero'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Believing Python picks the most specific except clause",
+      "explanation": "Python checks except clauses from top to bottom and runs the first one that matches. ZeroDivisionError is a subclass of Exception, so `except Exception` catches it first and the function returns 'error'. The specific clause must come before the general one.",
+      "why_convincing": "Matching the most specific handler is how people think about exceptions, and some languages refuse to compile an unreachable handler, so the order looks harmless."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "except clauses are tried in order, and the first match wins. `except Exception` matches ZeroDivisionError, so safe_divide(1, 0) returns 'error'. Put `except ZeroDivisionError` first.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "safe_divide(1, 0) returns 'error'.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Move `except ZeroDivisionError` above `except Exception`.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "safe_divide(1, 0) returns 'error'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how Python chooses between several except clauses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes the matching rule."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Handlers are tested in order and the first matching one runs; subclasses match their base class."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call safe_divide(1, 0) and see which string comes back."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the first matching handler runs, and Exception matches ZeroDivisionError, so the result is 'error'. Put the specific handler first."
+      }
+    ],
+    "repair": "Swap the two except clauses so `except ZeroDivisionError` comes first.",
+    "debrief": "Exception handlers are an ordered list, not a lookup table. A broad handler placed early hides every specific handler after it, and the code still runs without complaint. Order handlers from most specific to most general, and test each branch you wrote.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "safe_divide",
+      "ai_code": "def safe_divide(a, b):\n    try:\n        return a / b\n    except Exception:\n        return \"error\"\n    except ZeroDivisionError:\n        return \"cannot divide by zero\"",
+      "reference_code": "def safe_divide(a, b):\n    try:\n        return a / b\n    except ZeroDivisionError:\n        return \"cannot divide by zero\"\n    except Exception:\n        return \"error\"",
+      "test_inputs": [
+        "(10, 2)",
+        "(1, 0)",
+        "('a', 1)"
+      ],
+      "counterexample_input": "(1, 0)"
+    }
+  },
+  {
+    "id": "prg-exception-file-handling-003",
+    "subject": "programming",
+    "topic": "Exception & File Handling",
+    "subtopic": "Line endings from files",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "count_errors receives a log file's lines exactly as `for line in open(path)` yields them. Does it count every line whose text is ERROR?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def count_errors(lines):\n    \"\"\"lines: a log file's lines, exactly as `for line in open(path)` yields them.\"\"\"\n    count = 0\n    for line in lines:\n        if line == \"ERROR\":\n            count += 1\n    return count"
+    },
+    "ai_claim": "Yes. It compares each line with 'ERROR' and counts the matches.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Iterating over an open file yields its lines one at a time."
+      },
+      {
+        "index": 2,
+        "text": "Each line is the text of that line, for example 'ERROR'."
+      },
+      {
+        "index": 3,
+        "text": "The comparison line == 'ERROR' matches every error line."
+      },
+      {
+        "index": 4,
+        "text": "count_errors counts every ERROR line."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Forgetting that file lines keep their newline",
+      "explanation": "Lines read from a file keep their trailing newline: the line is 'ERROR\\n', not 'ERROR'. Only a final line without a newline would match. Strip the newline first: line.rstrip('\\n') == 'ERROR'.",
+      "why_convincing": "print(line) shows ERROR with no visible difference, because the newline is whitespace. Hand-made test lists usually omit it."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "File iteration yields lines including '\\n', so 'ERROR\\n' == 'ERROR' is False and error lines are missed (except possibly the last line). Compare line.rstrip('\\n') (or line.strip()) instead.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "count_errors(['INFO\\n', 'ERROR\\n', 'ERROR\\n']) returns 0 instead of 2.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0",
+          "2"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "if line.rstrip('\\n') == 'ERROR':",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "count_errors(['INFO\\n', 'ERROR\\n', 'ERROR\\n']) returns 0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider exactly what characters each line contains."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes what a line from a file looks like."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Iterating a text file yields each line including its trailing newline."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call count_errors with lines ending in '\\n'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: lines from a file end with '\\n', so 'ERROR\\n' never equals 'ERROR'. Strip the newline before comparing."
+      }
+    ],
+    "repair": "Compare `line.rstrip('\\n') == 'ERROR'`.",
+    "debrief": "Invisible characters are a classic source of 'it looks equal but isn't' bugs, and newlines from file reading are the most common one. Test data typed by hand tends to be cleaner than real input, so build tests from the format the code will actually receive.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "count_errors",
+      "ai_code": "def count_errors(lines):\n    \"\"\"lines: a log file's lines, exactly as `for line in open(path)` yields them.\"\"\"\n    count = 0\n    for line in lines:\n        if line == \"ERROR\":\n            count += 1\n    return count",
+      "reference_code": "def count_errors(lines):\n    return sum(1 for line in lines if line.rstrip(\"\\n\") == \"ERROR\")",
+      "test_inputs": [
+        "(['ERROR'],)",
+        "(['INFO\\n', 'ERROR\\n', 'ERROR\\n'],)",
+        "([],)"
+      ],
+      "counterexample_input": "(['INFO\\n', 'ERROR\\n', 'ERROR\\n'],)"
+    }
+  },
+  {
+    "id": "prg-exception-file-handling-004",
+    "subject": "programming",
+    "topic": "Exception & File Handling",
+    "subtopic": "Catching only some failures",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does get_port(config) fall back to 8080 whenever the port setting is missing or is not a valid number?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def get_port(config):\n    try:\n        return int(config[\"port\"])\n    except KeyError:\n        return 8080"
+    },
+    "ai_claim": "Yes. Any problem reading the port is caught and 8080 is returned.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "If the 'port' key exists and holds '9000', int() converts it and 9000 is returned."
+      },
+      {
+        "index": 2,
+        "text": "If the key is missing, config['port'] raises KeyError."
+      },
+      {
+        "index": 3,
+        "text": "The except clause handles the failure and returns 8080, so any problem reading the port falls back to 8080."
+      },
+      {
+        "index": 4,
+        "text": "get_port meets the requirement."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming one except clause catches every failure",
+      "explanation": "`except KeyError` catches only KeyError. A present but invalid value such as 'abc' makes int() raise ValueError, which is not caught, so the function crashes instead of returning 8080. Catch (KeyError, ValueError).",
+      "why_convincing": "The missing-key case is the one people think of first, and it works. A config value that exists but is malformed feels unlikely until it happens in production."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "An invalid value raises ValueError from int(), which `except KeyError` does not catch: get_port({'port': 'abc'}) raises ValueError. Use `except (KeyError, ValueError):`.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "get_port({'port': 'abc'}) raises ValueError instead of returning 8080.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "8080"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "except (KeyError, ValueError):",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "get_port({'port': 'abc'}) raises ValueError."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List every way reading the port can fail."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 generalises from one exception type to 'any problem'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An except clause only catches the exception types it names."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call get_port({'port': 'abc'})."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: only KeyError is caught. An invalid value raises ValueError and crashes. Catch both exceptions."
+      }
+    ],
+    "repair": "Change the handler to `except (KeyError, ValueError): return 8080`.",
+    "debrief": "An except clause is a precise contract: it handles the exceptions it names and no others. When a requirement says 'whenever X fails', enumerate the failure modes - missing, malformed, wrong type - and check that each is caught. Here the missing case was handled and the malformed case was not.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "get_port",
+      "ai_code": "def get_port(config):\n    try:\n        return int(config[\"port\"])\n    except KeyError:\n        return 8080",
+      "reference_code": "def get_port(config):\n    try:\n        return int(config[\"port\"])\n    except (KeyError, ValueError):\n        return 8080",
+      "test_inputs": [
+        "({'port': '9000'},)",
+        "({},)",
+        "({'port': 'abc'},)"
+      ],
+      "counterexample_input": "({'port': 'abc'},)"
+    }
+  },
+  {
+    "id": "prg-exception-file-handling-005",
+    "subject": "programming",
+    "topic": "Exception & File Handling",
+    "subtopic": "Translating exceptions",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For a missing key, does read_setting raise LookupError (with a clear message) rather than KeyError, and otherwise return the value with surrounding spaces removed?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def read_setting(settings, key):\n    try:\n        value = settings[key]\n    except KeyError:\n        raise LookupError(f\"missing setting: {key}\") from None\n    return value.strip()"
+    },
+    "ai_claim": "Yes. A missing key is translated into LookupError with a message, and present values are stripped.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "settings[key] raises KeyError when the key is absent."
+      },
+      {
+        "index": 2,
+        "text": "The handler raises LookupError('missing setting: ...') instead; `from None` hides the original KeyError from the traceback."
+      },
+      {
+        "index": 3,
+        "text": "The exception the caller receives is a LookupError instance, not a KeyError."
+      },
+      {
+        "index": 4,
+        "text": "For a present key, value.strip() removes surrounding whitespace, so ' fast ' becomes 'fast'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The except clause replaces KeyError with a LookupError carrying a clear message; `from None` suppresses the chained context. Present values are stripped. read_setting({'mode': ' fast '}, 'mode') returns 'fast'.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "read_setting({}, 'mode') raises LookupError; read_setting({'mode': ' fast '}, 'mode') returns 'fast'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what `from None` does and what exception type the caller actually sees."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is the claim to test: which exception type escapes the function?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "`raise X from None` raises X and suppresses the automatic exception context."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call read_setting({}, 'mode') and inspect the type of the exception."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The caller receives a LookupError with a clear message, and present values are stripped. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Exception translation - catching a low-level error and raising one that fits your own API - is good practice, and `from None` keeps the traceback focused on the meaningful error. The code looks unusual, which is what makes it tempting to challenge. Verify it by running the failure path and checking the exception's type.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "read_setting",
+      "ai_code": "def read_setting(settings, key):\n    try:\n        value = settings[key]\n    except KeyError:\n        raise LookupError(f\"missing setting: {key}\") from None\n    return value.strip()",
+      "reference_code": "def read_setting(settings, key):\n    if key not in settings:\n        raise LookupError(\"missing setting: \" + key)\n    return settings[key].strip()",
+      "test_inputs": [
+        "({'mode': ' fast '}, 'mode')",
+        "({}, 'mode')",
+        "({'a': 'x'}, 'a')"
+      ]
+    }
+  }
+]

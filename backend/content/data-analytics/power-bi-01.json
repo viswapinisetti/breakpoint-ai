@@ -1,0 +1,587 @@
+[
+  {
+    "id": "da-power-bi-001",
+    "subject": "data-analytics",
+    "topic": "Power BI",
+    "subtopic": "Default summarisation of a price column",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What number does the card show?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Products table",
+        "columns": [
+          "Product",
+          "Unit Price (Rs)"
+        ],
+        "rows": [
+          [
+            "Pen",
+            100
+          ],
+          [
+            "Notebook",
+            200
+          ],
+          [
+            "Bottle",
+            350
+          ],
+          [
+            "Lamp",
+            700
+          ],
+          [
+            "Chair",
+            1000
+          ]
+        ]
+      },
+      "visual": "A card visual with the Unit Price field dragged onto it (default summarisation left unchanged)."
+    },
+    "ai_claim": "470. A card summarises the column, so it shows the average unit price: 2,350 / 5 = 470.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The card uses the Unit Price field."
+      },
+      {
+        "index": 2,
+        "text": "Cards summarise a numeric column into one value."
+      },
+      {
+        "index": 3,
+        "text": "For prices, the summary is the average."
+      },
+      {
+        "index": 4,
+        "text": "(100 + 200 + 350 + 700 + 1,000) / 5 = 470."
+      }
+    ],
+    "ai_final_answer": "470",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Assuming Power BI picks a sensible aggregation",
+      "explanation": "Power BI's default summarisation for numeric columns is Sum, whatever the column means. The card shows 2,350 - a meaningless 'total price'. Set the column's summarisation to Don't summarise or Average, or better, define an explicit measure such as Average Price = AVERAGE(Products[Unit Price]).",
+      "why_convincing": "An average is what a person would want, so it feels like the default."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The default is Sum, so the card shows 2,350. Use an explicit AVERAGE measure.",
+    "canonical_answer": "2350",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "100 + 200 + 350 + 700 + 1,000 = 2,350",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2350"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Numeric columns default to Sum summarisation in Power BI visuals.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Adding a sixth product would raise the 'price' shown on the card."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the column's default summarisation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the card averages prices."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Power BI sums numeric columns by default."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the field's aggregation in the visual's field well."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the default is Sum, so the card shows 2,350. Use an explicit measure."
+      }
+    ],
+    "repair": "Create `Average Price = AVERAGE(Products[Unit Price])` and use it on the card.",
+    "debrief": "Implicit measures inherit defaults that rarely suit non-additive columns (prices, rates, percentages). Explicit DAX measures make every aggregation deliberate.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 100 + 200 + 350 + 700 + 1000",
+      "flawed_solver": "answer = (100 + 200 + 350 + 700 + 1000) / 5"
+    }
+  },
+  {
+    "id": "da-power-bi-002",
+    "subject": "data-analytics",
+    "topic": "Power BI",
+    "subtopic": "Average of ratios versus ratio of sums",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What overall profit margin, in percent, is the correct figure for these two orders?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Sales table",
+        "columns": [
+          "Order",
+          "Revenue",
+          "Profit",
+          "Margin (calculated column)"
+        ],
+        "rows": [
+          [
+            "A",
+            100,
+            50,
+            "50%"
+          ],
+          [
+            "B",
+            900,
+            90,
+            "10%"
+          ]
+        ]
+      },
+      "measure": "Profit Margin = AVERAGE(Sales[Margin])"
+    },
+    "ai_claim": "30. The measure averages the margins: (50% + 10%) / 2 = 30%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Order A's margin is 50% and order B's is 10%."
+      },
+      {
+        "index": 2,
+        "text": "The measure averages the Margin column."
+      },
+      {
+        "index": 3,
+        "text": "(50 + 10) / 2 = 30."
+      },
+      {
+        "index": 4,
+        "text": "So the overall margin is 30%."
+      }
+    ],
+    "ai_final_answer": "30",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 2,
+      "misconception": "Averaging row-level ratios",
+      "explanation": "The overall margin is total profit over total revenue: 140 / 1,000 = 14%. Averaging the row ratios gives the small order A the same weight as order B, which is nine times larger. In DAX: DIVIDE(SUM(Sales[Profit]), SUM(Sales[Revenue])).",
+      "why_convincing": "Averaging a margin column is easy and looks like it summarises margins."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Overall margin = 140 / 1,000 = 14%. Use DIVIDE(SUM(Profit), SUM(Revenue)).",
+    "canonical_answer": "14",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(50 + 90) / (100 + 900) x 100 = 14",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "14"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Ratios aggregate as the ratio of sums, not the average of ratios.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A tiny order with a 90% margin would push the averaged figure up sharply."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute the margin from the totals."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 gives each order equal weight."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Aggregate the numerator and denominator separately, then divide."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add up profit and revenue first."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the overall margin is 140 / 1,000 = 14%."
+      }
+    ],
+    "repair": "Define `Profit Margin = DIVIDE(SUM(Sales[Profit]), SUM(Sales[Revenue]))`.",
+    "debrief": "Ratios, rates and percentages must be recomputed from their parts at every level of aggregation. Calculated columns holding ratios are a warning sign in any model.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (50 + 90) / (100 + 900) * 100",
+      "flawed_solver": "answer = (50 + 10) / 2"
+    }
+  },
+  {
+    "id": "da-power-bi-003",
+    "subject": "data-analytics",
+    "topic": "Power BI",
+    "subtopic": "CALCULATE replaces the row's filter",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What value does Delhi Sales show on the Pune row?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Sales by city",
+        "columns": [
+          "City",
+          "Sum of Amount"
+        ],
+        "rows": [
+          [
+            "Delhi",
+            4000
+          ],
+          [
+            "Pune",
+            2500
+          ],
+          [
+            "Mumbai",
+            3500
+          ]
+        ]
+      },
+      "measure": "Delhi Sales = CALCULATE(SUM(Sales[Amount]), Sales[City] = \"Delhi\")",
+      "visual": "A table visual with City on rows and the Delhi Sales measure as a column."
+    },
+    "ai_claim": "0. On the Pune row, only Pune's sales are in context, and none of them are Delhi sales, so the measure is 0 (blank).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each row of the table filters Sales to one city."
+      },
+      {
+        "index": 2,
+        "text": "On the Pune row, only Pune's sales are visible."
+      },
+      {
+        "index": 3,
+        "text": "The measure adds the filter City = 'Delhi' on top of that."
+      },
+      {
+        "index": 4,
+        "text": "No sales are both Pune and Delhi, so the value is 0."
+      }
+    ],
+    "ai_final_answer": "0",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Assuming CALCULATE's filter is added to the row filter",
+      "explanation": "A boolean filter in CALCULATE on Sales[City] replaces any existing filter on that column rather than intersecting with it. On the Pune row, the Pune filter is removed and Delhi's is applied, so every row shows Delhi's total, 4,000. To intersect, wrap it in KEEPFILTERS(Sales[City] = \"Delhi\").",
+      "why_convincing": "In SQL, WHERE conditions combine with AND, so layering filters feels natural."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "CALCULATE overrides the City filter, so the Pune row shows 4,000. Use KEEPFILTERS to intersect.",
+    "canonical_answer": "4000",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Delhi's total is 4,000, and it appears on every row.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "CALCULATE filter arguments on a column overwrite existing filters on that column unless wrapped in KEEPFILTERS.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The Mumbai row also shows 4,000."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how CALCULATE combines its filter with the row's filter."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says the Delhi filter is added on top."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "CALCULATE's column filters replace existing filters on the same column."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate the measure on the Mumbai row too."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the filter replaces Pune with Delhi, showing 4,000 on every row. Use KEEPFILTERS."
+      }
+    ],
+    "repair": "Write `CALCULATE(SUM(Sales[Amount]), KEEPFILTERS(Sales[City] = \"Delhi\"))`.",
+    "debrief": "Filter context is the heart of DAX. CALCULATE's default is to overwrite filters on the same column, which is useful for 'share of Delhi' measures and surprising everywhere else.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 4000",
+      "flawed_solver": "answer = 0"
+    }
+  },
+  {
+    "id": "da-power-bi-004",
+    "subject": "data-analytics",
+    "topic": "Power BI",
+    "subtopic": "When the data was last refreshed",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the card show today's sales up to 17:30?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "dataset": "Import mode, scheduled refresh daily at 06:00",
+      "page": "Card: \"Today's sales: Rs 1.2L\"  (viewed at 17:30)"
+    },
+    "ai_claim": "Yes. The card is labelled 'Today's sales', so it shows everything sold today up to now.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The card title is 'Today's sales'."
+      },
+      {
+        "index": 2,
+        "text": "The report is open at 17:30."
+      },
+      {
+        "index": 3,
+        "text": "Power BI reports display current data."
+      },
+      {
+        "index": 4,
+        "text": "So the card includes all sales up to 17:30."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Assuming imported data is live",
+      "explanation": "In Import mode, the report shows the data loaded at the last refresh - 06:00 today. Sales from 06:00 to 17:30 are missing, so the card shows only the early-morning figure. Show the refresh time on the page, or use DirectQuery or more frequent refreshes if near-real-time numbers are needed.",
+      "why_convincing": "The label says 'today', and the page gives no sign of staleness."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the imported data stops at the 06:00 refresh. The card shows sales up to 06:00 only.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The dataset refreshes once a day, at 06:00.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "06:00"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Import-mode reports show data as of the last refresh.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A sale at 10:00 does not appear until tomorrow's refresh."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the dataset's storage mode and refresh schedule."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes reports are live."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Imported datasets are snapshots taken at refresh time."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the refresh time with the viewing time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the card shows data as of 06:00. Display the refresh time or refresh more often."
+      }
+    ],
+    "repair": "Add a 'data as of' timestamp to the page, and choose a refresh strategy that matches the label.",
+    "debrief": "Every dashboard number has an 'as of' time. Showing it prevents people from treating a morning snapshot as live data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-power-bi-005",
+    "subject": "data-analytics",
+    "topic": "Power BI",
+    "subtopic": "SUMX for row-level products",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What does the Revenue measure return for these two orders?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Sales table",
+        "columns": [
+          "Order",
+          "Qty",
+          "Price"
+        ],
+        "rows": [
+          [
+            "A",
+            2,
+            100
+          ],
+          [
+            "B",
+            3,
+            500
+          ]
+        ]
+      },
+      "measure": "Revenue = SUMX(Sales, Sales[Qty] * Sales[Price])"
+    },
+    "ai_claim": "1,700. SUMX multiplies quantity by price on each row and adds the results: 2 x 100 + 3 x 500 = 1,700.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "SUMX iterates over each row of Sales."
+      },
+      {
+        "index": 2,
+        "text": "Row A: 2 x 100 = 200. Row B: 3 x 500 = 1,500."
+      },
+      {
+        "index": 3,
+        "text": "It sums the row results: 1,700."
+      },
+      {
+        "index": 4,
+        "text": "(SUM(Qty) x SUM(Price) would wrongly give 5 x 600 = 3,000.)"
+      }
+    ],
+    "ai_final_answer": "1700",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 1,700. Iterators such as SUMX compute an expression per row before aggregating, which is required when multiplying columns.",
+    "canonical_answer": "1700",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "2 x 100 + 3 x 500 = 1,700",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1700"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "SUM(Qty) x SUM(Price) = 5 x 600 = 3,000, which is wrong.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "3000"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Evaluate the expression row by row."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 computes each row separately."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "SUMX evaluates the expression per row, then sums."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare with SUM(Qty) * SUM(Price)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. SUMX gives 1,700. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Multiplying aggregates is not the same as aggregating products. Iterator functions (SUMX, AVERAGEX) exist for exactly this reason.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 2 * 100 + 3 * 500"
+    }
+  }
+]

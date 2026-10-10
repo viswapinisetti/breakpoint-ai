@@ -1,0 +1,465 @@
+[
+  {
+    "id": "eng-spoken-english-fluency-001",
+    "subject": "english",
+    "topic": "Spoken English & Fluency",
+    "subtopic": "Stative verbs in the continuous",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this natural standard English?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "In an interview: \"I am having two brothers, and I am knowing Python well.\""
+    },
+    "ai_claim": "Yes. The present continuous describes the current situation, so 'I am having' and 'I am knowing' are natural.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The speaker describes their present situation."
+      },
+      {
+        "index": 2,
+        "text": "The present continuous describes present situations."
+      },
+      {
+        "index": 3,
+        "text": "So 'am having' and 'am knowing' fit."
+      },
+      {
+        "index": 4,
+        "text": "The sentence is natural."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Using the continuous with stative verbs",
+      "explanation": "Verbs describing states - have (possession), know, like, belong, understand - are normally not used in the continuous in standard English. Say 'I have two brothers, and I know Python well.' ('Having' is fine for actions: 'I am having lunch.')",
+      "why_convincing": "The continuous tense is often taught as 'what is true now'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not standard: use the simple present for states: 'I have two brothers, and I know Python well.'",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Stative verbs (have for possession, know, believe, own) usually take simple, not continuous, forms.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "I have two brothers, and I know Python well.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'I am having lunch' is correct because it describes an action."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether 'have' and 'know' describe actions or states here."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 applies the continuous to states."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "State verbs normally use simple tenses."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare 'I am having lunch' with 'I am having two brothers'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: stative verbs take the simple present."
+      }
+    ],
+    "repair": "I have two brothers, and I know Python well.",
+    "debrief": "Separate states from actions. States (know, own, like) take the simple present.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-spoken-english-fluency-002",
+    "subject": "english",
+    "topic": "Spoken English & Fluency",
+    "subtopic": "Question tags",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 'isn't it?' the standard question tag here?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "To an international colleague: \"You are joining the call tomorrow, isn't it?\""
+    },
+    "ai_claim": "Yes. 'Isn't it?' is a common, correct question tag that works with any sentence.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Question tags check information."
+      },
+      {
+        "index": 2,
+        "text": "'Isn't it?' is widely used."
+      },
+      {
+        "index": 3,
+        "text": "It can follow any statement."
+      },
+      {
+        "index": 4,
+        "text": "So it is correct here."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Using an invariant tag where standard English matches the subject and verb",
+      "explanation": "In standard English, the tag repeats the auxiliary and subject of the statement, with the opposite polarity: 'You are joining ... , aren't you?' 'Isn't it?' as an all-purpose tag is common in Indian English but sounds incorrect to many international listeners.",
+      "why_convincing": "It is heard so often that it feels universal."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not standard: the tag should match the subject and verb: 'You are joining the call tomorrow, aren't you?'",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Standard question tags use the statement's auxiliary and subject with reversed polarity (are -> aren't you).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "You are joining the call tomorrow, aren't you?",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'It's a holiday tomorrow, isn't it?' is correct because the subject is 'it'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the subject and auxiliary of the statement."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims one tag fits all."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tags mirror the statement's auxiliary and subject."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "What auxiliary and subject does 'You are joining' have?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the tag should be 'aren't you?'"
+      }
+    ],
+    "repair": "You are joining the call tomorrow, aren't you?",
+    "debrief": "Tags mirror the statement: 'She can come, can't she?', 'They didn't call, did they?'",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-spoken-english-fluency-003",
+    "subject": "english",
+    "topic": "Spoken English & Fluency",
+    "subtopic": "Is speed the same as fluency",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is speaking as fast as possible a sound way to show fluency?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Coaching advice: \"To sound fluent in interviews, speak as fast as you can and never slow down. Fast speech shows mastery of English.\""
+    },
+    "ai_claim": "Yes. Fluent speakers talk quickly, so speaking fast shows fluency and mastery.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Fluent speakers speak smoothly."
+      },
+      {
+        "index": 2,
+        "text": "Smooth speech is often quick."
+      },
+      {
+        "index": 3,
+        "text": "So speed signals fluency."
+      },
+      {
+        "index": 4,
+        "text": "Speaking as fast as possible shows mastery."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Equating speed with fluency",
+      "explanation": "Fluency means speaking smoothly and naturally enough to be understood without strain. Very fast speech often reduces clarity, causes mispronunciations and makes listeners, including interviewers, work harder. A moderate pace with clear pronunciation, natural pauses and good structure communicates better.",
+      "why_convincing": "Fluent speakers do rarely hesitate, which gets confused with speed."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: fluency is smooth, clear communication, not maximum speed. Aim for a moderate, clear pace.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An interviewer asks a candidate to repeat three answers because they spoke too fast to follow.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Effective spoken communication prioritises clarity and pace suited to the listener.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Rushed speech is harder to understand."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Define fluency in terms of the listener."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates speed with fluency."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Clarity and pace matter more than speed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a listener who must ask for repetition."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: speed is not fluency. Speak clearly at a moderate pace."
+      }
+    ],
+    "repair": "Speak at a moderate pace, pause at sentence boundaries, and stress key words.",
+    "debrief": "Fluency is judged by how easily the listener follows, not by words per minute.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-spoken-english-fluency-004",
+    "subject": "english",
+    "topic": "Spoken English & Fluency",
+    "subtopic": "Pauses are allowed",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this good advice for sounding fluent?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Coaching advice: \"Never pause while speaking. Any pause shows you are not fluent, so always fill the silence with 'um', 'like' or 'basically'.\""
+    },
+    "ai_claim": "Yes. Pauses show hesitation, so filling every silence keeps speech continuous and fluent.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Pauses break the flow of speech."
+      },
+      {
+        "index": 2,
+        "text": "Broken flow looks like hesitation."
+      },
+      {
+        "index": 3,
+        "text": "Fillers keep the flow continuous."
+      },
+      {
+        "index": 4,
+        "text": "So fillers make speech more fluent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 2,
+      "misconception": "Treating all pauses as hesitation",
+      "explanation": "Short, deliberate pauses at sentence and idea boundaries are natural and help listeners process what was said; skilled speakers use them for emphasis. Frequent fillers ('um', 'like', 'basically') distract and make the speaker sound less confident. Replace fillers with brief silent pauses.",
+      "why_convincing": "Long, searching pauses do signal hesitation, so all pauses get the blame."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: brief pauses aid clarity and emphasis; habitual fillers make speech sound less confident. Pause silently instead.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Planned pauses at phrase boundaries improve comprehension; excessive fillers reduce perceived fluency.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "\"Our main result was a 12% cost saving. (pause) Let me explain how we achieved it.\"",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "12"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A speaker who says 'basically' in every sentence sounds less confident, not more fluent."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Distinguish a deliberate pause from a hesitant one."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats every pause as hesitation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Natural pauses help listeners; fillers distract them."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Listen to a skilled presenter's pauses."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: short pauses are natural. Avoid fillers instead."
+      }
+    ],
+    "repair": "Use short, silent pauses between ideas instead of fillers.",
+    "debrief": "Silence used well is part of fluent speech. Fillers are the habit to reduce.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-spoken-english-fluency-005",
+    "subject": "english",
+    "topic": "Spoken English & Fluency",
+    "subtopic": "Rephrasing when stuck",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this is an effective fluency strategy?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Strategy for interviews: \"If you can't find a word, don't freeze. Say 'Let me put that another way' and explain the idea with simpler words, e.g. 'the tool that tracks changes to our code' instead of a forgotten term.\""
+    },
+    "ai_claim": "Yes. Paraphrasing keeps the conversation moving and shows the speaker understands the concept, even if one word is missing; a smooth recovery phrase sounds natural.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Everyone occasionally forgets a word."
+      },
+      {
+        "index": 2,
+        "text": "Freezing interrupts the conversation."
+      },
+      {
+        "index": 3,
+        "text": "A recovery phrase signals control."
+      },
+      {
+        "index": 4,
+        "text": "Explaining the idea shows understanding."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Circumlocution (describing the idea) is a recognised communication strategy that maintains fluency and demonstrates understanding.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Communication strategies such as paraphrase and circumlocution help speakers maintain fluency.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the listener needs when a word is missing."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 uses a recovery phrase."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Paraphrasing keeps meaning flowing."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try describing 'version control' without the term."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It is an effective strategy. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Fluency is not knowing every word; it is keeping communication going when a word is missing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

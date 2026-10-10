@@ -1,0 +1,183 @@
+[
+  {
+    "id": "apt-time-work-001",
+    "subject": "aptitude",
+    "topic": "Time & Work",
+    "subtopic": "Man-hours with changed shifts",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "12 workers working 8 hours a day finish a job in 20 days. How many days will 16 workers working 6 hours a day take to finish the same job?",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "16 workers working 6 hours a day will also take 20 days.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Total work = 12 workers x 8 hours x 20 days = 1920 worker-hours."
+      },
+      {
+        "index": 2,
+        "text": "The new team supplies 16 x 6 = 96 worker-hours per day."
+      },
+      {
+        "index": 3,
+        "text": "Days needed = 1920 / 96 = 20."
+      },
+      {
+        "index": 4,
+        "text": "It takes the same 20 days, because 16 x 6 = 96 = 12 x 8 worker-hours per day."
+      }
+    ],
+    "ai_final_answer": "20",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Work = 12 x 8 x 20 = 1920 worker-hours. New daily capacity = 16 x 6 = 96 worker-hours, so days = 1920 / 96 = 20.",
+    "canonical_answer": "20",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "12 x 8 x 20 = 1920 and 16 x 6 = 96, so 1920 / 96 = 20 days.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1920",
+          "96",
+          "20"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "An answer that equals a number in the question deserves a check, not an automatic rejection."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Compare the daily worker-hours in step 2 with the original team's."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Work = workers x hours per day x days, and it is fixed for the same job."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute 12 x 8 and 16 x 6 and compare them."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Both teams supply 96 worker-hours a day, so the job takes the same 20 days. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "An answer that repeats a number from the question looks like a lazy copy, which is why this one invites a challenge. Here it is exactly right: more workers on shorter shifts give the same daily effort. Suspicion is useful only when it leads to a check, and the check here takes one multiplication.",
+    "transfer_check": {
+      "question": "10 workers working 9 hours a day finish a job in 24 days. How many days will 12 workers working 10 hours a day take?",
+      "answer": "18",
+      "explanation": "10 x 9 x 24 = 2160 worker-hours; 12 x 10 = 120 per day; 2160 / 120 = 18."
+    },
+    "validation_payload": {
+      "solver": "answer = Fraction(12 * 8 * 20, 16 * 6)"
+    }
+  },
+  {
+    "id": "apt-time-work-002",
+    "subject": "aptitude",
+    "topic": "Time & Work",
+    "subtopic": "Working on alternate days",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A can finish a job in 10 days and B in 12 days. They work on alternate days, A on the first day. After how many days is the job finished?",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "The job is finished after 65/6 days, that is 10 5/6 days.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A does 1/10 of the job per day and B does 1/12."
+      },
+      {
+        "index": 2,
+        "text": "One two-day cycle (A, then B) completes 1/10 + 1/12 = 11/60 of the job."
+      },
+      {
+        "index": 3,
+        "text": "After 5 cycles (10 days), 55/60 is done and 5/60 = 1/12 remains."
+      },
+      {
+        "index": 4,
+        "text": "Day 11 is A's day. A needs (1/12) / (1/10) = 5/6 of a day to finish."
+      },
+      {
+        "index": 5,
+        "text": "The job takes 10 + 5/6 = 65/6 days."
+      }
+    ],
+    "ai_final_answer": "65/6",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Each 2-day cycle does 11/60. After 5 cycles (10 days) 1/12 remains. On day 11, A finishes it in (1/12)/(1/10) = 5/6 day. Total = 10 5/6 = 65/6 days.",
+    "canonical_answer": "65/6",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "After 10 days 1/12 remains; A needs 5/6 of day 11.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "5",
+          "6"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "A shortcut such as dividing by the average rate would ignore who works last."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Check step 3's remainder and whose turn day 11 is."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "With alternate days, simulate cycle by cycle; the final day may be a fraction and belongs to one worker only."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute what remains after 10 days and how long A needs for it."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. After 5 full cycles 1/12 remains, and A finishes it in 5/6 of day 11, for 65/6 days in total. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The shortcut - total work divided by the average daily rate - gives 120/11, which is about 10.91 days, and is wrong because the final partial day is worked by A alone at A's rate. This solution simulates the cycles and treats the last day correctly. When a process alternates, the order of turns matters at the end, and the only reliable method is to follow it step by step.",
+    "transfer_check": {
+      "question": "P can finish a job in 6 days and Q in 12 days. They work on alternate days, P first. In how many days is the job finished?",
+      "answer": "8",
+      "explanation": "Each 2-day cycle does 1/6 + 1/12 = 1/4, so 4 cycles (8 days) complete it exactly."
+    },
+    "validation_payload": {
+      "solver": "done = Fraction(0)\nday = 0\nrates = [Fraction(1, 10), Fraction(1, 12)]\nwhile True:\n    r = rates[day % 2]\n    if done + r >= 1:\n        answer = day + (1 - done) / r\n        break\n    done += r\n    day += 1"
+    }
+  }
+]

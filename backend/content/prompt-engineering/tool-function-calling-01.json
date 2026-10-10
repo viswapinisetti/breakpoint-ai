@@ -1,0 +1,454 @@
+[
+  {
+    "id": "pe-tool-function-calling-001",
+    "subject": "prompt-engineering",
+    "topic": "Tool / Function Calling",
+    "subtopic": "Overlapping tool descriptions",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the model reliably choose the right tool for each order question?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Tools:\n- search_orders(query): \"Search orders.\"\n- find_order(query): \"Find an order.\"\n- lookup_order(order_id): \"Look up order information.\""
+    },
+    "ai_claim": "Yes. All three tools are clearly about orders, so the model will pick an appropriate one each time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every tool relates to orders."
+      },
+      {
+        "index": 2,
+        "text": "The descriptions say what each tool does."
+      },
+      {
+        "index": 3,
+        "text": "The model reads them and picks the right one."
+      },
+      {
+        "index": 4,
+        "text": "So tool choice is reliable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F15",
+      "location": 3,
+      "misconception": "Tool descriptions that do not distinguish the tools",
+      "explanation": "'Search orders', 'Find an order' and 'Look up order information' describe the same thing. The model cannot tell when each applies, so choices vary between runs and some calls go to the wrong backend (e.g. free-text search when an ID was given). Merge redundant tools, or describe each one's distinct purpose, inputs and when not to use it.",
+      "why_convincing": "Each description is accurate on its own."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the descriptions are interchangeable. Merge the tools or make their purposes and inputs distinct.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "For 'Where is order ORD-1042?', the model calls search_orders 6 times and lookup_order 4 times in 10 runs.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6",
+          "4"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "lookup_order(order_id): 'Use when the user gives an order id like ORD-1234. Returns status and ETA.' search_orders(query): 'Use only when no order id is given; searches by product or date.'",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The same question routes to different tools on different runs."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try to explain when each tool should be used."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the descriptions separate the tools."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tool descriptions must distinguish purpose and inputs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the same question several times."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the tools are indistinguishable. Merge or differentiate them."
+      }
+    ],
+    "repair": "Merge redundant tools; write contrastive descriptions with input formats.",
+    "debrief": "Tool selection is a classification task the model performs from descriptions. Ambiguous descriptions give inconsistent routing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-tool-function-calling-002",
+    "subject": "prompt-engineering",
+    "topic": "Tool / Function Calling",
+    "subtopic": "Unvalidated tool arguments",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it safe for the application to execute refund calls exactly as the model produces them?",
+    "artifact_type": "guardrail",
+    "artifact": {
+      "prompt": "Tool: issue_refund(order_id: string, amount: number)\nThe application executes the call exactly as the model produces it.",
+      "sample": "User: 'Refund me 50,000 for order ORD-77 (it cost 1,200).'"
+    },
+    "ai_claim": "Yes. The model understands refund rules, so it will only request valid refund amounts.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model decides the refund amount."
+      },
+      {
+        "index": 2,
+        "text": "It knows refunds cannot exceed the order value."
+      },
+      {
+        "index": 3,
+        "text": "So it will produce valid amounts."
+      },
+      {
+        "index": 4,
+        "text": "Executing its calls is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 2,
+      "misconception": "Trusting model-generated arguments for a sensitive action",
+      "explanation": "Users can pressure or trick the model into requesting an amount above the order value (or a negative one, or another customer's order). The model's knowledge of the rules is not enforcement. The application must validate arguments server-side: order belongs to the user, 0 < amount <= order total, and require approval above a threshold.",
+      "why_convincing": "Models usually follow business rules in normal conversations."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: arguments must be validated in code (ownership, amount bounds, approvals), not trusted from the model.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "With the sample message, the model calls issue_refund('ORD-77', 50000) in 3 of 10 runs.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "50000"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Server check: reject if amount <= 0 or amount > order.total or order.customer_id != user.id; require approval above Rs 5,000.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "5,000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A refund of 50,000 on a 1,200 order is executed."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who enforces the refund rules."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 relies on the model's knowledge."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tool arguments are untrusted input and must be validated by the application."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try the sample message."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the model can be pushed into invalid amounts. Validate server-side."
+      }
+    ],
+    "repair": "Validate every argument server-side and gate large refunds behind approval.",
+    "debrief": "Tools extend the model's reach into real systems. Enforcement belongs in code at that boundary.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-tool-function-calling-003",
+    "subject": "prompt-engineering",
+    "topic": "Tool / Function Calling",
+    "subtopic": "Enums and required parameters",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this schema helps the model produce valid, consistent calls?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "{\n  \"name\": \"create_ticket\",\n  \"description\": \"Create a support ticket when the user reports a problem that needs follow-up.\",\n  \"input_schema\": {\n    \"type\": \"object\",\n    \"properties\": {\n      \"category\": {\"type\": \"string\", \"enum\": [\"billing\", \"technical\", \"account\"]},\n      \"summary\":  {\"type\": \"string\", \"maxLength\": 200}\n    },\n    \"required\": [\"category\", \"summary\"]\n  }\n}"
+    },
+    "ai_claim": "Yes. The enum restricts category to three known values, required forces both fields, and maxLength bounds the summary, so calls are consistent and easy to validate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The description says when to use the tool."
+      },
+      {
+        "index": 2,
+        "text": "The enum limits category to billing, technical or account."
+      },
+      {
+        "index": 3,
+        "text": "required ensures both fields are present."
+      },
+      {
+        "index": 4,
+        "text": "maxLength keeps summaries short; the app can validate all of this."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Precise schemas (enums, required fields, limits) guide generation and make validation straightforward.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Across 50 test conversations, every call has a category from the enum and a summary under 200 characters.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "200"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each constraint in the schema."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes the enum."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Schemas are both guidance for the model and contracts for validation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for anything left unconstrained."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The schema is precise and validatable. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Tool schemas are the most enforceable part of a prompt. Use them to constrain what can be constrained.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-tool-function-calling-004",
+    "subject": "prompt-engineering",
+    "topic": "Tool / Function Calling",
+    "subtopic": "Useful tool error messages",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that informative error results help the model recover?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "When a tool fails, the application returns results like:\n{\"error\": \"order_not_found\", \"message\": \"No order ORD-1942 for this customer. Their recent orders are ORD-1924 and ORD-1880.\"}\ninstead of {\"error\": \"500\"}."
+    },
+    "ai_claim": "Yes. The model reads tool results, so a clear error with a likely correction (a transposed id) lets it ask the user or retry with ORD-1924, while a bare '500' gives it nothing to act on.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Tool results are fed back to the model."
+      },
+      {
+        "index": 2,
+        "text": "A descriptive error explains what went wrong."
+      },
+      {
+        "index": 3,
+        "text": "Including candidates suggests a fix."
+      },
+      {
+        "index": 4,
+        "text": "The model can then retry or ask a targeted question."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Tool outputs are part of the model's context; actionable error messages improve recovery.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "With descriptive errors, the model resolves 17 of 20 mistyped order ids; with '500', it resolves 3.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "17",
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the model can do with each error."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 suggests a fix."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tool results are prompts too."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare recovery with the two error formats."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Actionable errors help the model recover. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Design tool outputs for their reader - the model. Clear errors turn dead ends into recoveries.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-tool-function-calling-005",
+    "subject": "prompt-engineering",
+    "topic": "Tool / Function Calling",
+    "subtopic": "Will the model call the weather tool",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the model call get_weather before answering?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Tools: get_weather(city, date) - \"Returns the forecast for a city and date.\"\nUser: \"Should I carry an umbrella in Pune tomorrow?\"",
+      "unknown": "The system prompt, the model version and whether tool use is forced or optional are not shown."
+    },
+    "ai_claim": "Yes. The question needs a forecast and the tool provides one, so the model will call get_weather('Pune', tomorrow) before answering.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Answering needs tomorrow's forecast for Pune."
+      },
+      {
+        "index": 2,
+        "text": "get_weather provides forecasts."
+      },
+      {
+        "index": 3,
+        "text": "The model sees the tool."
+      },
+      {
+        "index": 4,
+        "text": "So it will call it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The configuration: whether tool use is optional or forced, what the system prompt says, and how the model resolves 'tomorrow' without a current date. With optional tool use and no date in context, a model may answer generically ('carry one during the monsoon') without calling the tool.",
+    "resolving_scenarios": [
+      "Tool choice is 'any' (forced) or the system prompt says to use tools for weather, and today's date is provided: the model calls get_weather('Pune', <date>).",
+      "Tool use is optional and no date is given: the model answers from general knowledge about Pune's monsoon without calling the tool."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on configuration and context not shown. Step 4 assumes the model will always use an available tool.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "With optional tool choice and no date in context, the model replies 'In June-September it often rains in Pune; carrying an umbrella is wise' with no tool call.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Without a current date, 'tomorrow' cannot even be passed to the tool."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the model must use tools here."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes availability means use."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tool use depends on tool_choice, instructions and context (such as today's date)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider optional tool use with no date given."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 assumes tool use. With forced tools and a date, yes; otherwise maybe not. It cannot be decided."
+      }
+    ],
+    "repair": "Provide today's date, instruct when tools must be used, and test tool-call rates.",
+    "debrief": "Whether a model uses a tool is a behaviour to test, not assume. Configuration and context decide it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,492 @@
+[
+  {
+    "id": "dsa-hashing-001",
+    "subject": "dsa",
+    "topic": "Hashing",
+    "subtopic": "Unhashable dictionary keys",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Pairs arrive as two-element lists, such as [[1, 2], [1, 2], [3, 4]]. Does count_pairs return the number of distinct pairs, 2 for this input?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def count_pairs(pairs):\n    counts = {}\n    for p in pairs:\n        counts[p] = counts.get(p, 0) + 1\n    return len(counts)"
+    },
+    "ai_claim": "Yes. Each pair is used as a dictionary key, so duplicates share one key and there are 2 keys.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "counts maps each pair to how many times it appears."
+      },
+      {
+        "index": 2,
+        "text": "[1, 2] appears twice, so both occurrences use the same key."
+      },
+      {
+        "index": 3,
+        "text": "[3, 4] is a second key."
+      },
+      {
+        "index": 4,
+        "text": "len(counts) is 2."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Using a mutable list as a dictionary key",
+      "explanation": "Dictionary keys must be hashable, and lists are mutable, so they are unhashable. counts[[1, 2]] raises TypeError: unhashable type: 'list'. Convert each pair to a tuple first.",
+      "why_convincing": "Lists and tuples look almost identical, and the logic of counting is otherwise sound."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The first assignment raises TypeError because lists cannot be dict keys. Use counts[tuple(p)], giving 2 distinct pairs.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "count_pairs([[1, 2], [1, 2], [3, 4]]) raises TypeError: unhashable type: 'list'.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "counts[[1, 2]] -> hash([1, 2]) -> TypeError",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "{[1, 2]: 1} raises TypeError."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what Python requires of dictionary keys."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 uses a list as a key."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Keys must be hashable; mutable built-ins such as lists are not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try evaluating {[1, 2]: 1}."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: lists are unhashable, so the function raises TypeError. Convert pairs to tuples."
+      }
+    ],
+    "repair": "Use `key = tuple(p)` as the dictionary key.",
+    "debrief": "Hash tables require keys whose hash never changes, which is why mutable containers are excluded. The error only appears at run time, with the first real input. When keying a dictionary by composite values, convert them to tuples or frozensets.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "count_pairs",
+      "ai_code": "def count_pairs(pairs):\n    counts = {}\n    for p in pairs:\n        counts[p] = counts.get(p, 0) + 1\n    return len(counts)",
+      "reference_code": "def count_pairs(pairs):\n    return len({tuple(p) for p in pairs})",
+      "test_inputs": [
+        "([],)",
+        "([[1, 2], [1, 2], [3, 4]],)"
+      ],
+      "counterexample_input": "([[1, 2], [1, 2], [3, 4]],)"
+    }
+  },
+  {
+    "id": "dsa-hashing-002",
+    "subject": "dsa",
+    "topic": "Hashing",
+    "subtopic": "A hash function that ignores order",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do the four words 'listen', 'silent', 'enlist' and 'tinsel' land in four different buckets of a 101-bucket table using this hash function?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def bucket(word, size):\n    return sum(ord(c) for c in word) % size\n\ndef buckets_used(words, size):\n    return len({bucket(w, size) for w in words})"
+    },
+    "ai_claim": "Yes. They are different words, so their hashes differ and they spread across four buckets.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "bucket adds the character codes of a word and takes the result modulo the table size."
+      },
+      {
+        "index": 2,
+        "text": "Each of the four words is a different string."
+      },
+      {
+        "index": 3,
+        "text": "Different strings produce different sums, so they map to different buckets."
+      },
+      {
+        "index": 4,
+        "text": "So the four words use four buckets."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming different strings have different character sums",
+      "explanation": "Summing character codes ignores order, so any rearrangement of the same letters has the same sum. All four words are anagrams, so they share one sum and one bucket: buckets_used returns 1. A good string hash mixes in position, for example h = h * 31 + ord(c).",
+      "why_convincing": "Distinct strings feel like they must hash differently, and for random words this hash does spread them reasonably."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The four anagrams have identical character sums, so all land in the same bucket; buckets_used returns 1 and lookups among them degrade to a linear scan. A positional (polynomial) hash separates them.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "buckets_used(['listen', 'silent', 'enlist', 'tinsel'], 101) returns 1.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "sum(ord(c) for c in 'ab') == sum(ord(c) for c in 'ba')",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'ab' and 'ba' always collide under this hash."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what information the hash function discards."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims different strings give different sums."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Addition is commutative, so the order of the characters does not affect the sum."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the sum for 'ab' and for 'ba'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: anagrams have equal sums, so all four words collide in one bucket. Use a hash that depends on position."
+      }
+    ],
+    "repair": "Use a positional hash: `h = 0; for c in word: h = h * 31 + ord(c)`.",
+    "debrief": "A hash function's quality depends on what it ignores. Summing ignores order, so every permutation collides - and real data (names, codes, anagram puzzles) is full of permutations. Test a hash on structured inputs that differ only in the way the function might overlook.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "buckets_used",
+      "ai_code": "def bucket(word, size):\n    return sum(ord(c) for c in word) % size\n\ndef buckets_used(words, size):\n    return len({bucket(w, size) for w in words})",
+      "reference_code": "def bucket(word, size):\n    h = 0\n    for c in word:\n        h = h * 31 + ord(c)\n    return h % size\n\ndef buckets_used(words, size):\n    return len({bucket(w, size) for w in words})",
+      "test_inputs": [
+        "(['cat', 'dog'], 101)",
+        "(['listen', 'silent', 'enlist', 'tinsel'], 101)"
+      ],
+      "counterexample_input": "(['listen', 'silent', 'enlist', 'tinsel'], 101)"
+    }
+  },
+  {
+    "id": "dsa-hashing-003",
+    "subject": "dsa",
+    "topic": "Hashing",
+    "subtopic": "Order-preserving de-duplication",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does dedupe keep the first occurrence of each item in its original order, and run in O(n) average time?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def dedupe(items):\n    seen = set()\n    out = []\n    for x in items:\n        if x not in seen:\n            seen.add(x)\n            out.append(x)\n    return out"
+    },
+    "ai_claim": "Yes. A set gives O(1) average membership tests, and items are appended in the order they are first seen.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "seen holds the items already output."
+      },
+      {
+        "index": 2,
+        "text": "`x not in seen` is an O(1) average hash lookup."
+      },
+      {
+        "index": 3,
+        "text": "Each item is appended the first time it appears, so order of first occurrence is kept."
+      },
+      {
+        "index": 4,
+        "text": "n items with O(1) work each give O(n) average time."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The set provides O(1) average lookups, and appending on first sight preserves order. Equivalent: list(dict.fromkeys(items)).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "dedupe([3, 1, 3, 2, 1]) returns [3, 1, 2].",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3",
+          "1",
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check both the order and the complexity claims."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 describes how order is preserved."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Set membership is O(1) on average; appending to a list is O(1) amortised."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace dedupe([3, 1, 3, 2, 1])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Order of first occurrence is kept and each item costs O(1) on average. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Pairing a set for fast membership with a list for order is a standard, correct idiom. The claim is checked by one trace for order and one observation about set lookups for complexity. Recognising well-known correct patterns saves review time for the code that is actually wrong.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "dedupe",
+      "ai_code": "def dedupe(items):\n    seen = set()\n    out = []\n    for x in items:\n        if x not in seen:\n            seen.add(x)\n            out.append(x)\n    return out",
+      "reference_code": "def dedupe(items):\n    return list(dict.fromkeys(items))",
+      "test_inputs": [
+        "([3, 1, 3, 2, 1],)",
+        "([],)",
+        "(['a', 'b', 'a'],)"
+      ]
+    }
+  },
+  {
+    "id": "dsa-hashing-004",
+    "subject": "dsa",
+    "topic": "Hashing",
+    "subtopic": "Counting letters for anagrams",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this is_anagram return True exactly when a and b are anagrams, including words with repeated letters?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "from collections import Counter\n\ndef is_anagram(a, b):\n    return Counter(a) == Counter(b)"
+    },
+    "ai_claim": "Yes. Counter records how many times each letter appears, so equal Counters mean the same letters with the same counts.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Counter(a) maps each character to its number of occurrences."
+      },
+      {
+        "index": 2,
+        "text": "Two words are anagrams exactly when every character appears the same number of times in both."
+      },
+      {
+        "index": 3,
+        "text": "Comparing the two Counters checks every character's count."
+      },
+      {
+        "index": 4,
+        "text": "So is_anagram is correct, including for 'aab' and 'abb', which it rejects."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Equal character counts is exactly the anagram condition; Counter comparison checks it in O(n) time.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "is_anagram('aab', 'abb') returns False; is_anagram('listen', 'silent') returns True.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test a pair of words with repeated letters."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states the anagram condition. Check that Counter captures it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Counter keeps multiplicity, unlike a set."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare Counter('aab') with Counter('abb')."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Counter compares letter counts, which is exactly the anagram condition. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Compared with the set-based version, Counter keeps the one piece of information anagrams need: how many of each letter. Approving it means checking the repeated-letter case, which is exactly where the weaker version fails.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "is_anagram",
+      "ai_code": "from collections import Counter\n\ndef is_anagram(a, b):\n    return Counter(a) == Counter(b)",
+      "reference_code": "def is_anagram(a, b):\n    return sorted(a) == sorted(b)",
+      "test_inputs": [
+        "('aab', 'abb')",
+        "('listen', 'silent')",
+        "('', '')"
+      ]
+    }
+  },
+  {
+    "id": "dsa-hashing-005",
+    "subject": "dsa",
+    "topic": "Hashing",
+    "subtopic": "Hash values across runs",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the script print the same number on both runs?",
+    "artifact_type": "algorithm",
+    "artifact": {
+      "language": "python",
+      "program": "print(hash(\"breakpoint\") % 8)",
+      "how_it_runs": "The script is started twice from the command line."
+    },
+    "ai_claim": "Yes. hash() is a deterministic function of the string, so the same input gives the same output every time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "hash() computes a number from the string's characters."
+      },
+      {
+        "index": 2,
+        "text": "The string 'breakpoint' is the same on both runs."
+      },
+      {
+        "index": 3,
+        "text": "hash() uses the same algorithm on every run, with no extra input."
+      },
+      {
+        "index": 4,
+        "text": "So both runs print the same number."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "How the interpreter is launched. By default Python randomises string hashing per process (hash randomisation), so values differ between runs; if PYTHONHASHSEED is set to a fixed value, they are the same. The launch environment is not given.",
+    "resolving_scenarios": [
+      "Default settings: each run uses a random hash seed, so hash('breakpoint') % 8 usually differs between runs.",
+      "PYTHONHASHSEED=0 is set in the environment: hashing is deterministic, and both runs print the same number."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on PYTHONHASHSEED, which is not given. With default hash randomisation the output varies between runs; with a fixed seed it does not. Step 3's 'no extra input' is the unstated assumption.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Running `python -c \"print(hash('a'))\"` twice with default settings prints two different numbers.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Two runs with default settings print different hash values for the same string."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether hash() depends on anything besides the string."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims hash() has no extra input."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Python randomises string hashes per process unless PYTHONHASHSEED fixes the seed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a run with default settings and one with PYTHONHASHSEED=0."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes a fixed seed. By default string hashes are randomised per run, so it depends on the environment. It cannot be decided from what is given."
+      }
+    ],
+    "repair": "State the environment (PYTHONHASHSEED), or avoid depending on hash() values across runs - use hashlib for stable hashes.",
+    "debrief": "Hash randomisation protects dictionaries from deliberate collision attacks, at the price of run-to-run variation. Code that stores or compares hash() values across processes is therefore fragile. When a result depends on configuration you cannot see, say so, and prefer tools whose output is defined independently of it (hashlib).",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

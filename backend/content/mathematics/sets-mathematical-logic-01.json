@@ -1,0 +1,353 @@
+[
+  {
+    "id": "mat-sets-mathematical-logic-001",
+    "subject": "mathematics",
+    "topic": "Sets & Mathematical Logic",
+    "subtopic": "The converse is a different statement",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the claim follow from the given statement?",
+    "artifact_type": "proof",
+    "artifact": {
+      "proof": "Given: If a number is divisible by 4, then it is even.\nClaim: Therefore, if a number is even, it is divisible by 4."
+    },
+    "ai_claim": "Yes. The statement links divisibility by 4 with being even, so an even number is divisible by 4.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The given statement is 'divisible by 4 implies even'."
+      },
+      {
+        "index": 2,
+        "text": "It connects the two properties."
+      },
+      {
+        "index": 3,
+        "text": "So being even implies being divisible by 4."
+      },
+      {
+        "index": 4,
+        "text": "The claim follows."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating a statement as equivalent to its converse",
+      "explanation": "'P implies Q' does not imply 'Q implies P'. 6 is even but not divisible by 4. The statement that does follow is the contrapositive: 'if a number is odd, it is not divisible by 4'.",
+      "why_convincing": "In everyday speech, 'if' is often used to mean 'if and only if'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: that is the converse, which does not follow. Counterexample: 6.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "6 is even but 6 / 4 = 1.5.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "P -> Q is equivalent to not Q -> not P (contrapositive), not to Q -> P (converse).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "6 and 10 are even but not divisible by 4."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look for an even number not divisible by 4."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 reverses the implication."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An implication is equivalent to its contrapositive, not its converse."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test the claim with 6."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the converse does not follow. 6 is a counterexample."
+      }
+    ],
+    "repair": "",
+    "debrief": "Converse errors are among the most common logical mistakes. A single counterexample settles whether the reversed statement holds.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mat-sets-mathematical-logic-002",
+    "subject": "mathematics",
+    "topic": "Sets & Mathematical Logic",
+    "subtopic": "Inclusion-exclusion",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many students study at least one of French and German?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "In a class, 30 students study French, 25 study German, and 10 study both.\nEvery student in the question studies at least one of the two."
+    },
+    "ai_claim": "45. By inclusion-exclusion, |F union G| = |F| + |G| - |F intersect G| = 30 + 25 - 10 = 45.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Adding 30 and 25 counts the 10 students who take both twice."
+      },
+      {
+        "index": 2,
+        "text": "Subtract the overlap once."
+      },
+      {
+        "index": 3,
+        "text": "30 + 25 - 10 = 45."
+      },
+      {
+        "index": 4,
+        "text": "So 45 students study at least one language."
+      }
+    ],
+    "ai_final_answer": "45",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 45. Inclusion-exclusion corrects the double counting of the intersection.",
+    "canonical_answer": "45",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "30 + 25 - 10 = 45",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "45"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who is counted twice when adding 30 and 25."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 removes the double count."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "|A union B| = |A| + |B| - |A intersect B|."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Draw a Venn diagram with 10 in the middle."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. 30 + 25 - 10 = 45. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Inclusion-exclusion is the basic tool for counting overlapping sets. A Venn diagram checks it: 20 French only, 15 German only, 10 both.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 30 + 25 - 10"
+    }
+  },
+  {
+    "id": "mat-sets-mathematical-logic-003",
+    "subject": "mathematics",
+    "topic": "Sets & Mathematical Logic",
+    "subtopic": "De Morgan's law",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the proof correct?",
+    "artifact_type": "proof",
+    "artifact": {
+      "proof": "Claim: NOT (A AND B) is logically equivalent to (NOT A) OR (NOT B).\nProof by truth table:\nA B | A AND B | NOT(A AND B) | NOT A | NOT B | (NOT A) OR (NOT B)\nT T |    T    |      F       |   F   |   F   |         F\nT F |    F    |      T       |   F   |   T   |         T\nF T |    F    |      T       |   T   |   F   |         T\nF F |    F    |      T       |   T   |   T   |         T"
+    },
+    "ai_claim": "Yes. The NOT(A AND B) column and the (NOT A) OR (NOT B) column agree in all four rows, so the two expressions are equivalent.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A truth table lists all four combinations of A and B."
+      },
+      {
+        "index": 2,
+        "text": "Each column is computed correctly from the definitions of AND, OR and NOT."
+      },
+      {
+        "index": 3,
+        "text": "The two final columns are F, T, T, T in every row."
+      },
+      {
+        "index": 4,
+        "text": "Identical columns over all cases prove equivalence."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A truth table covering every combination is a complete proof for propositional equivalence, and the columns match.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Row T T: A AND B = T, so NOT = F; NOT A OR NOT B = F OR F = F.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each row of the table."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 depends on the table covering all cases."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Two propositions are equivalent when they have the same truth value in every case."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute the first row."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The columns agree in all four rows. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "With finitely many cases, an exhaustive truth table is a proof. De Morgan's laws are used constantly to negate conditions in code and in proofs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mat-sets-mathematical-logic-004",
+    "subject": "mathematics",
+    "topic": "Sets & Mathematical Logic",
+    "subtopic": "How big is the overlap",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Did more than 20 students pass both exams?",
+    "artifact_type": "derivation",
+    "artifact": {
+      "working": "A class has 60 students. 40 passed Physics and 35 passed Chemistry.\nEvery student sat both exams."
+    },
+    "ai_claim": "Yes. 40 + 35 = 75, which exceeds 60 by 15, and at least 15 passed both. Most likely many more did, well over 20.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "40 + 35 = 75 passes in total."
+      },
+      {
+        "index": 2,
+        "text": "There are only 60 students, so at least 75 - 60 = 15 passed both."
+      },
+      {
+        "index": 3,
+        "text": "The overlap is therefore large."
+      },
+      {
+        "index": 4,
+        "text": "So more than 20 passed both."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The actual size of the overlap. The data fix only its range: at least 15 (if every student passed at least one exam) and at most 35 (if every Chemistry passer also passed Physics). Whether it exceeds 20 depends on how the passes are distributed, which is not given.",
+    "resolving_scenarios": [
+      "Every student passed at least one exam: the overlap is 40 + 35 - 60 = 15, so not more than 20.",
+      "10 students failed both: the union is 50, so the overlap is 40 + 35 - 50 = 25, more than 20."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The overlap can be anything from 15 to 35. Step 3 turns 'at least 15' into 'more than 20' without justification.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If all 60 passed at least one exam, exactly 15 passed both, not more than 20.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "15"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An overlap of exactly 15 is consistent with the data."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the smallest and largest possible overlap."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 goes beyond the lower bound."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The data fix the overlap only to a range."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the overlap if nobody failed both, and if 10 failed both."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes more than the bound. The overlap could be 15 or 25. It cannot be decided."
+      }
+    ],
+    "repair": "Ask for the number of students who passed both, or who failed both.",
+    "debrief": "Bounds are not values. Inclusion-exclusion with incomplete information gives a range, and the question can only be answered if the whole range falls on one side of the threshold.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

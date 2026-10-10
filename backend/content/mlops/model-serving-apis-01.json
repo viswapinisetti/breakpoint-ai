@@ -1,0 +1,475 @@
+[
+  {
+    "id": "mlo-model-serving-apis-001",
+    "subject": "mlops",
+    "topic": "Model Serving & APIs",
+    "subtopic": "Loading the model per request",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is loading the model inside the handler a negligible cost?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/predict\")\ndef predict(req: Features):\n    model = joblib.load(\"models/churn_v8.joblib\")   # 450 MB\n    return {\"p\": float(model.predict_proba([req.as_row()])[0, 1])}\n# AI: \"Loading per request guarantees we always use the latest file, at negligible cost.\""
+    },
+    "ai_claim": "Yes. Loading from local disk is fast, and it ensures each request uses the model file, so the overhead is negligible.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model file is on local disk."
+      },
+      {
+        "index": 2,
+        "text": "Disk reads are fast."
+      },
+      {
+        "index": 3,
+        "text": "Loading per request keeps the model current."
+      },
+      {
+        "index": 4,
+        "text": "So the cost is negligible."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 2,
+      "misconception": "Doing expensive initialisation on every request",
+      "explanation": "Deserialising a 450 MB model takes seconds and allocates hundreds of megabytes each time. Every request pays that cost, latency jumps from milliseconds to seconds, and concurrent requests multiply memory use until the service runs out. Load the model once at startup (and reload deliberately on deployment).",
+      "why_convincing": "A single load in a notebook seems quick enough."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: each request deserialises 450 MB. Load once at startup.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "p50 latency 2.4 s with per-request loading vs 18 ms with a model loaded at startup",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2.4",
+          "18"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Initialise expensive resources once per process, not per request.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Ten concurrent requests load ten copies of the model."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Time a single request."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes loading is cheap."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Expensive setup belongs at startup."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Measure load time for a 450 MB file."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: loading takes seconds. Load at startup."
+      }
+    ],
+    "repair": "Load the model at application startup (lifespan hook) and reuse it.",
+    "debrief": "Serving latency budgets are milliseconds. Anything that takes seconds must happen before requests arrive.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-serving-apis-002",
+    "subject": "mlops",
+    "topic": "Model Serving & APIs",
+    "subtopic": "Missing features silently filled",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are predictions unaffected by the client's renamed field?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "language": "python",
+      "code": "def to_vector(payload: dict) -> list[float]:\n    return [float(payload.get(f, 0)) for f in FEATURES]   # FEATURES has 42 names\n\n# A client team renamed 'monthly_spend' to 'monthlySpend' in their request.\n# AI: \"Defaulting to 0 keeps the API robust; predictions are unaffected.\""
+    },
+    "ai_claim": "Yes. Missing features default to 0, so the request still works, and one feature out of 42 makes little difference.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The client sends monthlySpend instead of monthly_spend."
+      },
+      {
+        "index": 2,
+        "text": "monthly_spend is missing, so it defaults to 0."
+      },
+      {
+        "index": 3,
+        "text": "The request succeeds."
+      },
+      {
+        "index": 4,
+        "text": "One feature of 42 barely affects predictions."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 2,
+      "misconception": "Silently substituting defaults for missing inputs",
+      "explanation": "monthly_spend is likely among the most important features, and 0 is an extreme, meaningful value (no spending), not a neutral one. Every request from that client is now scored as a zero-spend customer, and no error ever appears. Validate requests against the model's input schema, reject unknown or missing required fields, and monitor feature distributions at serving time.",
+      "why_convincing": "Robustness to missing fields sounds like a virtue."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the renamed field makes every request look like zero spending, silently. Validate inputs and reject missing required features.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "client payload has monthlySpend=5400 -> monthly_spend missing -> feature value 0 -> churn probability 0.81 instead of 0.12",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.81"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Serving should validate inputs against the training schema and fail loudly on mismatch.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "High-spending customers are flagged as likely to churn."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 0 means for monthly spend."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats 0 as harmless."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Silent defaults turn schema errors into wrong predictions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Score a request with and without the field."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: missing becomes 'zero spend'. Validate inputs."
+      }
+    ],
+    "repair": "Validate payloads (e.g. Pydantic with required fields, extra='forbid') and monitor input distributions.",
+    "debrief": "Robust APIs fail clearly on bad input. Silent defaults hide integration bugs in the model's outputs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-serving-apis-003",
+    "subject": "mlops",
+    "topic": "Model Serving & APIs",
+    "subtopic": "Batch size 1 on a GPU",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the service absorb more traffic without changes?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "An image classifier is served on one GPU, processing each request individually as it arrives (batch size 1). Traffic: 600 requests/s at peak; GPU utilisation 18%; p99 latency 900 ms with a growing queue.\nAI: \"The GPU is underused, so it can easily absorb more traffic as is.\""
+    },
+    "ai_claim": "Yes. GPU utilisation is only 18%, so there is lots of spare capacity for more requests.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The GPU is 18% utilised."
+      },
+      {
+        "index": 2,
+        "text": "82% of its capacity is unused."
+      },
+      {
+        "index": 3,
+        "text": "More requests can use that capacity."
+      },
+      {
+        "index": 4,
+        "text": "So more traffic can be absorbed as is."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 1,
+      "misconception": "Processing one request at a time on hardware built for batches",
+      "explanation": "Low utilisation here is a symptom, not spare capacity: with batch size 1, each request pays fixed overheads (kernel launches, transfers), the GPU sits mostly idle between tiny jobs, and requests queue up - p99 is already 900 ms. More traffic makes the queue longer. Use dynamic batching (collect requests for a few milliseconds and run them together), which raises throughput and usually cuts latency under load.",
+      "why_convincing": "18% looks like plenty of headroom."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the bottleneck is per-request overhead, not GPU capacity. Add dynamic batching.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Queue is growing and p99 is 900 ms while the GPU is 18% utilised.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "900",
+          "18"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "GPU throughput depends on batching; dynamic batching trades a few milliseconds of wait for much higher throughput.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "At 700 requests/s the queue grows without bound."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask why latency is high while the GPU is idle."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 reads low utilisation as spare capacity."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "GPUs are efficient only with batched work."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider the growing queue."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: batch size 1 is the bottleneck. Use dynamic batching."
+      }
+    ],
+    "repair": "Enable dynamic batching (e.g. Triton or TorchServe batching with a small max delay).",
+    "debrief": "Utilisation metrics must be read with latency and queue length. Underused hardware can still be the bottleneck.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-serving-apis-004",
+    "subject": "mlops",
+    "topic": "Model Serving & APIs",
+    "subtopic": "An unauthenticated model endpoint",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is open access harmless because the endpoint only returns scores?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "The credit-scoring model is exposed at https://api.acme.example/score with no authentication, returning full probability scores.\nAI: \"It only returns scores, not customer data, so open access is harmless.\""
+    },
+    "ai_claim": "Yes. The endpoint exposes no customer records, only model scores, so there is nothing sensitive to protect.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The endpoint returns only scores."
+      },
+      {
+        "index": 2,
+        "text": "No customer records are exposed."
+      },
+      {
+        "index": 3,
+        "text": "Scores are not sensitive."
+      },
+      {
+        "index": 4,
+        "text": "So open access is harmless."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Treating a model endpoint as harmless public data",
+      "explanation": "Unrestricted querying with detailed probabilities lets anyone probe the model: learn which inputs lower their risk score (gaming the lending decision), extract a copy of the model, and run up compute costs. Require authentication, rate-limit per client, return only what callers need (a decision band rather than raw probabilities) and log usage.",
+      "why_convincing": "No personal data is returned, so it feels public."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: open, detailed scoring enables gaming, model extraction and cost abuse. Authenticate, rate-limit and minimise outputs.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An applicant scripts 10,000 queries varying income and loan amount to find inputs just above the approval threshold.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10,000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Model APIs need authentication, rate limits and output minimisation.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A competitor reconstructs the model from its outputs."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what someone could learn from unlimited queries."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes scores are not sensitive."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models themselves are assets that can be extracted or gamed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine probing the model with varied inputs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: open scoring enables gaming and extraction."
+      }
+    ],
+    "repair": "Add authentication, per-client rate limits, output minimisation and usage monitoring.",
+    "debrief": "A model endpoint exposes the model's decision boundary. Protect it like the asset it is.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-serving-apis-005",
+    "subject": "mlops",
+    "topic": "Model Serving & APIs",
+    "subtopic": "Shadow deployment",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that shadow mode lets the team test v4 on real traffic without affecting customers?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "The new fraud model v4 runs in shadow mode: every production request is also sent to v4, whose predictions are logged but never used for decisions. v3 continues to make all decisions.\nAfter two weeks, the team compares v3 and v4 on the same requests (and on labels as they arrive), plus v4's latency and error rate."
+    },
+    "ai_claim": "Yes. v4 sees exactly the production inputs, but its outputs are only logged, so customers are unaffected while the team measures its predictions, latency and errors under real conditions.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "v4 receives a copy of every production request."
+      },
+      {
+        "index": 2,
+        "text": "Its predictions are logged, not acted on."
+      },
+      {
+        "index": 3,
+        "text": "v3 still makes every decision."
+      },
+      {
+        "index": 4,
+        "text": "So v4 is tested on real traffic with no customer impact."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Shadow deployment validates a model on real inputs and load before it affects decisions (it cannot measure effects of v4's decisions, which need an A/B test).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "request -> v3 decision returned; copy -> v4 prediction logged -> offline comparison",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whose predictions reach customers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 confirms v3 still decides."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Shadow mode tests on live inputs without live consequences."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace one request through both models."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Shadow mode is risk-free for customers. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Shadow, canary and A/B deployments form a ladder: observe, then expose a little, then compare outcomes.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

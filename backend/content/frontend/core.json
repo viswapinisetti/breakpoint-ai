@@ -1,0 +1,135 @@
+[
+  {
+    "id": "fe-a11y-001",
+    "subject": "frontend",
+    "topic": "Testing, Accessibility & Performance",
+    "subtopic": "Accessible names for form fields",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this search field accessible to screen-reader users?",
+    "artifact_type": "markup",
+    "artifact": {
+      "language": "html",
+      "markup": "<div class=\"search\">\n  <span class=\"label\">Search</span>\n  <input type=\"text\" class=\"search-input\" placeholder=\"Search products\">\n  <button><img src=\"/icons/search.svg\"></button>\n</div>"
+    },
+    "ai_claim": "Yes — the field is labelled \"Search\" and the placeholder describes it further, so its purpose is announced.",
+    "ai_solution": [
+      {"index": 1, "text": "A visible \"Search\" text sits immediately before the input, so sighted users can see what it is for."},
+      {"index": 2, "text": "The placeholder \"Search products\" gives additional description of the expected input."},
+      {"index": 3, "text": "Between the visible text and the placeholder, the field's purpose is conveyed, so screen-reader users are served."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating visual proximity and placeholder text as an accessible name",
+      "explanation": "Nothing programmatically associates the span with the input — there is no `<label for>`, no `aria-label`, no `aria-labelledby`. Proximity is a visual relationship the accessibility tree does not see. Placeholder is not an accessible name: it disappears on input and is announced inconsistently. The icon button has no accessible name at all.",
+      "why_convincing": "The markup looks labelled, and it genuinely is labelled *visually*. Steps 1 and 2 are both accurate descriptions of what is on screen; the leap is that seeing a label and exposing one are the same thing."
+    },
+    "canonical_solution": "Not accessible. The input has no programmatic name: replace the span with `<label for=\"q\">Search</label>` and give the input `id=\"q\"`, or add `aria-label=\"Search products\"`. Placeholder text does not substitute for a label. The icon button also needs a name — `<button aria-label=\"Search\">` — or a screen reader announces only \"button\".",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "rule", "summary": "An accessible name requires a programmatic association, not proximity.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "rewrite", "summary": "Use label/for with a matching id, and aria-label on the icon button.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["A screen reader tabbing to this input announces \"edit text, blank\" — the span is a separate, unassociated element."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what the accessibility tree can see, as opposed to what the page looks like."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 describe the visual result. Step 3 concludes something about assistive technology."},
+      {"level": 3, "kind": "concept", "text": "An accessible name comes from label/for, aria-label or aria-labelledby — never from position on the page."},
+      {"level": 4, "kind": "strong", "text": "List every attribute on the input that could supply a name. Then do the same for the button."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 mistakes visual labelling for programmatic labelling. There is no label/for, aria-label or aria-labelledby, so the input has no accessible name — and the icon button has none either."}
+    ],
+    "repair": "Use `<label for=\"q\">Search</label>` with `<input id=\"q\" type=\"text\">`, and give the icon button `aria-label=\"Search\"`. Keep the placeholder as a hint only, not as the name.",
+    "debrief": "Accessibility defects survive review because the page looks right — the label is there, you can see it. The accessibility tree is a separate structure built from markup semantics, and visual proximity contributes nothing to it. When reviewing, ask what a screen reader would announce, element by element, rather than whether the layout communicates the purpose.",
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-state-002",
+    "subject": "frontend",
+    "topic": "React",
+    "subtopic": "Stale state in closures",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this counter increment once per second?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "function Counter() {\n  const [count, setCount] = useState(0)\n\n  useEffect(() => {\n    const id = setInterval(() => {\n      setCount(count + 1)\n    }, 1000)\n    return () => clearInterval(id)\n  }, [])\n\n  return <span>{count}</span>\n}"
+    },
+    "ai_claim": "Yes — the interval fires every second and calls setCount, so the displayed value increases each second.",
+    "ai_solution": [
+      {"index": 1, "text": "The effect runs once on mount because its dependency array is empty."},
+      {"index": 2, "text": "setInterval schedules the callback every 1000 ms, and the cleanup clears it on unmount, so there is no leak."},
+      {"index": 3, "text": "Each tick calls setCount(count + 1), which schedules a state update and a re-render."},
+      {"index": 4, "text": "The component therefore displays an incrementing count."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Assuming a closure sees the current state rather than the value captured when it was created",
+      "explanation": "The effect runs once, so the interval callback closes over `count` from the first render, where it is 0. Every tick computes 0 + 1 = 1, and the display sticks at 1. The fix is the functional update `setCount(c => c + 1)`, which reads the latest value instead of the captured one.",
+      "why_convincing": "Steps 1 and 2 are correct, and the empty dependency array is the right choice for a mount-once interval. The bug is invisible in the code's shape: `setCount(count + 1)` reads exactly like the intent, and the counter does visibly change once, which looks like it is working."
+    },
+    "canonical_solution": "No. The empty dependency array means the effect and its closure are created once, capturing count = 0. Every tick therefore calls setCount(0 + 1), so the display goes 0 → 1 and stays at 1. Use the functional form `setCount(c => c + 1)`, which does not depend on the captured value.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "test_case", "summary": "Mount the counter and wait three seconds: it shows 1, not 3, because every tick computes 0 + 1 from the count = 0 captured on mount.", "must_reference_step": 3, "must_contain_values": ["0"]},
+      {"type": "rewrite", "summary": "Use the functional updater setCount(c => c + 1).", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["After five seconds the display shows 1, not 5: every tick evaluates 0 + 1."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask which render's variables the interval callback can see."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are right. Step 3 assumes something about the value of `count` inside the callback."},
+      {"level": 3, "kind": "concept", "text": "A closure captures the values in scope when it is created, not the latest ones."},
+      {"level": 4, "kind": "strong", "text": "The effect runs once. Work out what `count` equals inside the callback on the third tick."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 assumes the callback sees the current count. It sees 0, captured at mount, so every tick sets 1. Use `setCount(c => c + 1)`."}
+    ],
+    "repair": "Replace `setCount(count + 1)` with `setCount(c => c + 1)`. The functional updater receives the latest state, so the captured value no longer matters.",
+    "debrief": "The empty dependency array is doing two jobs here: it correctly stops the interval being recreated, and it incidentally freezes every variable the callback reads. Those two effects are hard to hold in mind at once. Whenever an effect runs once but its callback runs many times, list what that callback reads from the enclosing scope and ask which render it came from.",
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-css-003",
+    "subject": "frontend",
+    "topic": "CSS & Responsive Design",
+    "subtopic": "Specificity and the cascade",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this explanation of which rule wins correct?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": "/* rule A, declared first */\n#sidebar .item { color: blue; }\n\n/* rule B, declared second */\n.sidebar-nav .item.active { color: red; }\n\n/* the element */\n<div id=\"sidebar\" class=\"sidebar-nav\">\n  <a class=\"item active\">Link</a>\n</div>"
+    },
+    "ai_claim": "Rule A wins and the link is blue, because its ID selector outweighs rule B's classes regardless of source order.",
+    "ai_solution": [
+      {"index": 1, "text": "Specificity is compared as (ids, classes, elements), highest component first."},
+      {"index": 2, "text": "Rule A is #sidebar .item: one id and one class, giving (1, 1, 0)."},
+      {"index": 3, "text": "Rule B is .sidebar-nav .item.active: no ids and three classes, giving (0, 3, 0)."},
+      {"index": 4, "text": "The id component is compared first, and 1 beats 0, so rule A wins outright. Source order is irrelevant when specificity differs. The link is blue."}
+    ],
+    "ai_final_answer": "blue",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. Specificity is compared component-wise from the left: (1,1,0) versus (0,3,0). The id component decides it immediately — one id outranks any number of classes — so rule A applies and the text is blue. Source order only breaks ties between rules of equal specificity, which is not the case here.",
+    "canonical_answer": "blue",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Count the selector components in each rule before deciding."},
+      {"level": 2, "kind": "direction", "text": "Check the tuples in steps 2 and 3, then the comparison rule in step 4."},
+      {"level": 3, "kind": "concept", "text": "Specificity compares components left to right; source order only breaks exact ties."},
+      {"level": 4, "kind": "strong", "text": "Compare (1,1,0) with (0,3,0) starting from the leftmost component."},
+      {"level": 5, "kind": "reveal", "text": "This explanation is correct. One id outranks any number of classes, so rule A wins despite being declared first, and the link is blue. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "\"Later rules win\" is a real CSS rule and a common source of false alarms — it applies only when specificity ties. The comparison here is component-wise and left-to-right, so a single id settles it before the class counts are even reached. Being able to compute the tuple and apply the comparison in the right order is what separates confirming this from guessing at it.",
+    "validation_payload": {}
+  }
+]

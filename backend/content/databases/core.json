@@ -1,0 +1,252 @@
+[
+  {
+    "id": "db-join-001",
+    "subject": "databases",
+    "topic": "Joins, Aggregations & Subqueries",
+    "subtopic": "Outer joins and filtering",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: list every customer with a count of their completed orders, including customers who have never placed one. Does this query satisfy it?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "customers(id, name)\norders(id, customer_id, status, amount)",
+      "query": "SELECT c.name, COUNT(o.id) AS completed_orders\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.status = 'completed'\nGROUP BY c.name;"
+    },
+    "ai_claim": "The LEFT JOIN preserves customers with no orders, so every customer appears in the result.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A LEFT JOIN keeps every row from `customers`, matching orders where they exist."
+      },
+      {
+        "index": 2,
+        "text": "Customers with no orders still appear, with NULL in the order columns."
+      },
+      {
+        "index": 3,
+        "text": "The WHERE clause then restricts the result to completed orders, which is what the requirement asks for."
+      },
+      {
+        "index": 4,
+        "text": "COUNT(o.id) ignores NULLs, so a customer with no orders correctly counts 0. Every customer appears."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Filtering the right-hand table in WHERE after an outer join",
+      "explanation": "For a customer with no orders, `o.status` is NULL, and `NULL = 'completed'` evaluates to NULL, not TRUE. WHERE drops those rows, silently turning the LEFT JOIN into an INNER JOIN. The condition must move into the ON clause: `ON o.customer_id = c.id AND o.status = 'completed'`.",
+      "why_convincing": "Steps 1, 2 and 4 are each individually correct, and the query reads in the order the requirement is written. The join really does preserve the rows - the WHERE clause removes them one line later, which is easy to miss."
+    },
+    "canonical_solution": "The WHERE clause on the outer table's column nullifies the LEFT JOIN. Move the predicate into the join condition:\n\nSELECT c.name, COUNT(o.id) AS completed_orders\nFROM customers c\nLEFT JOIN orders o\n  ON o.customer_id = c.id AND o.status = 'completed'\nGROUP BY c.name;\n\nNow non-matching rows keep their NULLs and survive, so customers with no completed orders appear with a count of 0.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A customer with zero orders disappears from the result.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Move the status predicate into the ON clause.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A customer with no orders at all has o.status = NULL. `NULL = 'completed'` is NULL, not TRUE, so WHERE discards the row and the customer vanishes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Trace one specific customer who has never placed an order through every clause in turn."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 are correct. Look at what Step 3 does to the rows they preserved."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A WHERE predicate on the right-hand table of an outer join is applied after the join, and NULL comparisons are never TRUE."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate `NULL = 'completed'` and decide whether that row survives WHERE."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 destroys the outer join. For a customer with no orders, o.status is NULL, `NULL = 'completed'` is NULL, and WHERE drops the row - so the LEFT JOIN silently behaves as an INNER JOIN. Move the predicate into ON."
+      }
+    ],
+    "repair": "Move the filter into the join condition: `LEFT JOIN orders o ON o.customer_id = c.id AND o.status = 'completed'`, leaving no WHERE clause.",
+    "debrief": "An outer join and a WHERE clause on the outer table pull in opposite directions: the join preserves unmatched rows with NULLs, and the WHERE then evaluates a comparison against NULL, which is never TRUE. The result is an INNER JOIN wearing a LEFT JOIN's clothes - and it fails silently, returning plausible rows with no error. Whenever you filter a table you outer-joined, ask whether the predicate belongs in ON or WHERE. The rule: conditions on the preserved side go in WHERE; conditions on the optional side go in ON.",
+    "validation_payload": {},
+    "truth_state": "flawed"
+  },
+  {
+    "id": "db-idx-002",
+    "subject": "databases",
+    "topic": "Indexing & Query Optimization",
+    "subtopic": "Composite index column order",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A table has the composite index `INDEX(last_name, first_name)`. Will the query `SELECT * FROM people WHERE first_name = 'Asha'` use that index efficiently?",
+    "artifact_type": "query_plan",
+    "artifact": {
+      "index": "INDEX idx_name ON people (last_name, first_name)",
+      "query": "SELECT * FROM people WHERE first_name = 'Asha';"
+    },
+    "ai_claim": "Yes - `first_name` is part of the composite index, so the index covers this lookup.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The index `idx_name` contains both `last_name` and `first_name`."
+      },
+      {
+        "index": 2,
+        "text": "The query filters on `first_name`, which is one of the indexed columns."
+      },
+      {
+        "index": 3,
+        "text": "Because the column appears in the index, the database can seek directly to matching entries rather than scanning the table."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Treating a composite index as usable by any of its columns independently",
+      "explanation": "A composite index is sorted by its leading column first. Entries are ordered by `last_name`, and only within an equal `last_name` are they ordered by `first_name`. A predicate on `first_name` alone cannot seek, because matching entries are scattered throughout the index. This is the leftmost-prefix rule.",
+      "why_convincing": "Containment feels sufficient - the column really is in the index. The distinction between *containing* a column and being *ordered* by it is invisible unless you picture the index as a sorted structure."
+    },
+    "canonical_solution": "No. A composite index can only be seeked by a leftmost prefix of its columns: (last_name) or (last_name, first_name). Filtering on `first_name` alone gives no usable prefix, so the engine falls back to a full table scan or at best a full index scan. To serve this query, add `INDEX(first_name)`.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "EXPLAIN shows a full scan rather than an index seek: the index is ordered by last_name first (the leftmost-prefix rule).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Entries for a given first_name are scattered across the index order.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Sorted by (last_name, first_name), the entries (Kumar, Asha) and (Verma, Asha) sit far apart. There is no contiguous range holding every 'Asha', so no seek is possible."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what a composite index is actually sorted by."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 are true. Step 3 draws a conclusion from them - check whether it follows."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An index is an ordered structure. A seek needs the target rows to occupy one contiguous range."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write out a few index entries in sorted order and locate every row with first_name = 'Asha'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes containment implies seekability. The index is ordered by last_name first, so rows with first_name = 'Asha' are scattered - no contiguous range, no seek. This is the leftmost-prefix rule."
+      }
+    ],
+    "repair": "Step 3 should conclude that the index cannot be seeked, because `first_name` is not a leftmost prefix. Add a separate `INDEX(first_name)` to serve this query.",
+    "debrief": "An index is not a set of columns - it is an ordering. A seek works only when the rows you want form one contiguous range in that ordering, which requires constraining the leading columns first. This is why (last_name, first_name) and (first_name, last_name) are different indexes with different capabilities, despite containing the same columns. When someone says a column 'is indexed', ask where it sits in the ordering.",
+    "validation_payload": {},
+    "truth_state": "flawed"
+  },
+  {
+    "id": "db-tx-003",
+    "subject": "databases",
+    "topic": "Transactions & ACID",
+    "subtopic": "Isolation levels",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this transaction correctly prevent two concurrent bookings from overselling the last seat?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "seats(id, flight_id, status)",
+      "query": "BEGIN;\n\nSELECT id FROM seats\nWHERE flight_id = 42 AND status = 'free'\nLIMIT 1\nFOR UPDATE;\n\n-- application books the returned seat id\nUPDATE seats SET status = 'booked' WHERE id = :seat_id;\n\nCOMMIT;"
+    },
+    "ai_claim": "SELECT ... FOR UPDATE locks the chosen row, so two concurrent transactions cannot book the same seat.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The SELECT runs inside an explicit transaction, so the read and the write are atomic together."
+      },
+      {
+        "index": 2,
+        "text": "FOR UPDATE takes a row-level exclusive lock on the row the SELECT returns."
+      },
+      {
+        "index": 3,
+        "text": "A second transaction running the same statement blocks on that lock until the first commits."
+      },
+      {
+        "index": 4,
+        "text": "When it resumes, the row it would have chosen is no longer 'free', so it selects a different seat or none. No double booking occurs."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "canonical_solution": "Correct. FOR UPDATE takes an exclusive row lock held until COMMIT, and the second transaction blocks on it rather than reading stale data. On resuming, its predicate is re-evaluated against the committed state, so the now-booked seat no longer matches status = 'free'. The pattern is sound. (A plain SELECT without FOR UPDATE would indeed allow both transactions to read the same free seat - which is exactly the trap this query avoids.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what FOR UPDATE actually locks, and for how long."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims the second transaction blocks. Verify that it does."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "FOR UPDATE takes an exclusive row lock held until the transaction commits or rolls back."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace two concurrent transactions step by step and see where the second one waits."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. FOR UPDATE holds an exclusive row lock until COMMIT, the second transaction blocks, and on resuming it re-evaluates its predicate against committed state. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "This query is correct, and the reason is worth internalising: the danger in read-then-write logic is that the read result goes stale before the write lands. FOR UPDATE closes that window by holding the lock for the whole transaction. Notice that the same query without FOR UPDATE would be a genuine oversell bug - the single clause separating correct from broken is exactly what a reviewer must look for. Approving sound concurrency control is as valuable as spotting a race.",
+    "validation_payload": {},
+    "truth_state": "valid"
+  }
+]

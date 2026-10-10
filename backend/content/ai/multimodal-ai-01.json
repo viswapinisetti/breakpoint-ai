@@ -1,0 +1,466 @@
+[
+  {
+    "id": "ai-multimodal-ai-001",
+    "subject": "ai",
+    "topic": "Multimodal AI",
+    "subtopic": "Reading numbers off a chart",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the exact figure 47.3 lakh be trusted?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "A bar chart image shows quarterly revenue with bars but no data labels; the y-axis has gridlines every 20 lakh.\nVision-language model: \"Q3 revenue was exactly Rs 47.3 lakh.\""
+    },
+    "ai_claim": "Yes. The model read the chart carefully and reported a precise value, so Q3 revenue was 47.3 lakh.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model analysed the chart image."
+      },
+      {
+        "index": 2,
+        "text": "It reported 47.3 lakh for Q3."
+      },
+      {
+        "index": 3,
+        "text": "Vision models read charts accurately."
+      },
+      {
+        "index": 4,
+        "text": "So the figure is exact."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F14",
+      "location": 3,
+      "misconception": "Accepting precision the image cannot provide",
+      "explanation": "The chart has no data labels and gridlines only every 20 lakh, so the value can at best be estimated as 'between 40 and 60 lakh'. A figure to one decimal place is invented precision. Ask for the underlying data, or have the model report ranges and its uncertainty.",
+      "why_convincing": "The number sounds precisely measured."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the chart cannot support that precision. Estimate a range (roughly 40-60 lakh) or obtain the data.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Gridlines are every 20 lakh and bars have no labels.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "20"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A reading cannot be more precise than the source image allows.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Asked twice, the model gives 47.3 and then 45.8."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what precision the chart allows."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes accurate chart reading."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Without labels, values can only be estimated to the gridline resolution."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the gridline spacing."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the precision is invented."
+      }
+    ],
+    "repair": "Request the source data, or ask the model for a range with uncertainty.",
+    "debrief": "Multimodal models can describe images well while inventing details the image does not contain.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-multimodal-ai-002",
+    "subject": "ai",
+    "topic": "Multimodal AI",
+    "subtopic": "Counting many small objects",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the model's count reliable enough to drive automatic reordering?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "A photo of a warehouse shelf with about 140 small, overlapping boxes.\nVision-language model: \"There are 118 boxes.\"\nInventory plan: use the model's count to reorder stock automatically."
+    },
+    "ai_claim": "Yes. Vision-language models can see every object in an image, so the count of 118 is reliable.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model sees the whole image."
+      },
+      {
+        "index": 2,
+        "text": "Every box is visible to it."
+      },
+      {
+        "index": 3,
+        "text": "So it counts them accurately."
+      },
+      {
+        "index": 4,
+        "text": "118 can be used for reordering."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming general vision models count precisely",
+      "explanation": "General vision-language models are weak at exact counting of many small, overlapping objects; they tend to estimate. With about 140 boxes, the reported 118 is far off. For inventory, use a detector trained on the boxes (count detections), barcode or RFID scans, and validate counts against known totals.",
+      "why_convincing": "The model describes images fluently, which suggests fine perception."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: exact counts of many overlapping objects are unreliable. Use a trained detector or scanning.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "A manual count gives about 140 boxes; the model says 118.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "140",
+          "118"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The count is off by more than 20 boxes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the model's count with a manual count."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes every object is perceived and counted."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Precise counting of many small objects is a weakness of general VLMs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count a section manually."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the count is unreliable. Use a detector or scanning."
+      }
+    ],
+    "repair": "Use a box detector with per-object counting, or barcode/RFID scanning.",
+    "debrief": "Know the specific weaknesses of general models - counting, small text, spatial relations - before automating decisions on them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-multimodal-ai-003",
+    "subject": "ai",
+    "topic": "Multimodal AI",
+    "subtopic": "Evaluating captions on ten images",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the 10-image check show the model is ready for the whole catalogue?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "A captioning model for product photos was checked on 10 hand-picked images; all captions looked good.\nPlan: generate captions for 200,000 catalogue images automatically."
+    },
+    "ai_claim": "Yes. All 10 captions were good, so the model works reliably and can caption the catalogue.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "10 images were checked."
+      },
+      {
+        "index": 2,
+        "text": "All 10 captions were good."
+      },
+      {
+        "index": 3,
+        "text": "A perfect score shows reliability."
+      },
+      {
+        "index": 4,
+        "text": "So it is ready for 200,000 images."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Generalising from a tiny, hand-picked sample",
+      "explanation": "Ten hand-picked images are neither large nor representative. Even if 5% of captions were wrong (10,000 across the catalogue), a random sample of 10 would show no errors about 60% of the time (0.95^10 = 0.60), and hand-picking makes it worse. Evaluate on a random, stratified sample of a few hundred images across categories, with clear criteria.",
+      "why_convincing": "10 out of 10 sounds like a perfect record."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 10 hand-picked images cannot establish reliability. Evaluate a larger random sample across categories.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "With a 5% error rate, 0.95^10 = 0.60: a clean 10-image check is likely even with 10,000 bad captions.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.60"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Hand-picked examples tend to be clear, typical photos, not edge cases.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Many catalogue images are unusual angles or multi-item photos not in the sample."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the 10 images were chosen."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats a perfect small sample as proof."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Evaluation needs representative, adequately sized samples."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the chance of seeing no errors in 10 at a 5% error rate."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 10 hand-picked images prove little."
+      }
+    ],
+    "repair": "Evaluate a random, stratified sample (e.g. 400 images) with a rubric before rollout.",
+    "debrief": "Small, hand-picked evaluations are demos, not evidence. Size and sampling decide what an evaluation can show.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-multimodal-ai-004",
+    "subject": "ai",
+    "topic": "Multimodal AI",
+    "subtopic": "Speech recognition across audio conditions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the team report about 5% WER for the call-centre transcripts?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "A speech-to-text model has 5% word error rate (WER) on studio-recorded English podcasts.\nPlan: transcribe call-centre calls (phone-quality audio, background noise, Hindi-English code-switching) and report 'about 5% WER'."
+    },
+    "ai_claim": "Yes. The model's WER is 5%, so call-centre transcripts will have about 5% errors.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "WER on the benchmark is 5%."
+      },
+      {
+        "index": 2,
+        "text": "WER measures the model's accuracy."
+      },
+      {
+        "index": 3,
+        "text": "The model is the same for call-centre audio."
+      },
+      {
+        "index": 4,
+        "text": "So WER will be about 5%."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Extending a benchmark result to different conditions",
+      "explanation": "WER depends heavily on audio quality, noise, accents and language mixing. Studio podcasts are close to ideal; narrowband phone audio with background noise and code-switching is much harder, and WER can be several times higher. Measure WER on a transcribed sample of real calls.",
+      "why_convincing": "It is the same model, so the same accuracy feels natural."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the benchmark conditions differ greatly. Measure WER on real call-centre audio.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "On 50 manually transcribed calls, WER is 22%.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "22"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Code-switched phrases such as 'mera order cancel karo' are often mis-transcribed.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Phone audio with noise produces far more errors."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the benchmark audio with call-centre audio."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 transfers the benchmark result."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Error rates depend on input conditions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Transcribe a sample of calls manually."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: conditions differ. Measure WER on real calls."
+      }
+    ],
+    "repair": "Hand-transcribe a sample of calls to measure WER, and adapt the model if needed.",
+    "debrief": "Benchmark numbers describe benchmark conditions. Deployment claims need deployment data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-multimodal-ai-005",
+    "subject": "ai",
+    "topic": "Multimodal AI",
+    "subtopic": "Scanned PDFs",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's advice correct?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "Contracts arrive as scanned PDFs (page images, no text layer).\nPipeline A: extract text with a PDF text extractor, then send it to a text-only LLM.\nAI: \"Pipeline A will return empty text for these files. Use OCR first, or send the page images to a vision-capable model.\""
+    },
+    "ai_claim": "Yes. A text extractor reads the PDF's text layer; scanned pages are only images, so there is no text to extract. OCR or a vision-capable model is needed to read them.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Scanned PDFs contain images of pages."
+      },
+      {
+        "index": 2,
+        "text": "They have no embedded text layer."
+      },
+      {
+        "index": 3,
+        "text": "Text extractors read only the text layer, so they return nothing."
+      },
+      {
+        "index": 4,
+        "text": "OCR or a vision model can read the page images."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Detect whether a PDF has a text layer and route scanned documents through OCR or a vision-capable model.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Running the text extractor on a scanned contract returns an empty string.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what a scanned PDF contains."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains why extraction fails."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Text extraction needs a text layer; images need OCR."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the extractor on a scanned file."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. OCR or a vision model is needed. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Document pipelines must handle both born-digital and scanned inputs. Checking for a text layer is the first routing step.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

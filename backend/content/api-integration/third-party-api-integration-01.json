@@ -1,0 +1,490 @@
+[
+  {
+    "id": "api-third-party-api-integration-001",
+    "subject": "api-integration",
+    "topic": "Third-Party API Integration",
+    "subtopic": "Values the integration has never seen",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does status_label work for every payment the provider can return?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "LABELS = {\"pending\": \"Awaiting payment\", \"paid\": \"Paid\", \"refunded\": \"Refunded\"}\n\ndef status_label(payment):\n    return LABELS[payment[\"status\"]]\n\n# Provider docs list statuses: pending, paid, refunded, partially_refunded, disputed."
+    },
+    "ai_claim": "Yes. LABELS covers the payment statuses, so every payment gets a label.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Payments are pending, paid or refunded."
+      },
+      {
+        "index": 2,
+        "text": "LABELS has an entry for each."
+      },
+      {
+        "index": 3,
+        "text": "Every status maps to a label."
+      },
+      {
+        "index": 4,
+        "text": "So status_label works for every payment."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 1,
+      "misconception": "Handling only the common values of an enum",
+      "explanation": "The documentation lists five statuses, and LABELS covers three. A partially_refunded or disputed payment raises KeyError and breaks the page. Providers also add statuses over time. Cover all documented values and add a fallback for unknown ones: LABELS.get(status, status.replace('_', ' ').title()).",
+      "why_convincing": "The three common statuses cover nearly all test payments."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: partially_refunded and disputed raise KeyError. Add them, and use a default for unknown statuses.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The docs list 5 statuses; LABELS has 3.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "5",
+          "3"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "status_label({'status': 'disputed'}) raises KeyError.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A disputed payment crashes the order page."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare LABELS with the documented list of statuses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 lists only three statuses."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Handle every documented enum value, plus a fallback for new ones."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call status_label with 'disputed'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: the provider has 5 statuses. Add them and a default."
+      }
+    ],
+    "repair": "Add the missing statuses and use `LABELS.get(status, fallback)`.",
+    "debrief": "Enums from third parties are open-ended in practice. Code defensively against values you have not seen: log them and fall back instead of crashing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-third-party-api-integration-002",
+    "subject": "api-integration",
+    "topic": "Third-Party API Integration",
+    "subtopic": "Unpinned SDK versions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the payment integration keep working across deploys as long as our own code does not change?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "# requirements.txt\nfastapi==0.115.0\npayments-sdk          # no version pin\n\n# Every deploy runs: pip install -r requirements.txt"
+    },
+    "ai_claim": "Yes. The SDK is maintained by the provider and kept compatible, so installing the latest version on each deploy keeps things working.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each deploy installs the newest payments-sdk."
+      },
+      {
+        "index": 2,
+        "text": "The provider maintains the SDK."
+      },
+      {
+        "index": 3,
+        "text": "New versions stay compatible with existing code."
+      },
+      {
+        "index": 4,
+        "text": "So the integration keeps working."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on whatever version is newest at deploy time",
+      "explanation": "An unpinned dependency means each deploy can pick up a new major version with breaking changes - renamed methods, new required arguments, a different default API version - even though nothing in your repository changed. Pin versions (payments-sdk==4.2.1, or at least <5) with a lock file, and upgrade deliberately with tests.",
+      "why_convincing": "Minor updates usually are compatible, so it often works for months."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a new major SDK version can break the integration on the next deploy. Pin versions and upgrade deliberately.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Monday deploy installs 4.2.1 -> provider releases 5.0.0 -> Tuesday deploy installs 5.0.0 -> charge() signature changed -> errors",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Semantic versioning allows breaking changes in a new major version.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A deploy with no code changes breaks payments."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what version the next deploy will install."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every new version is compatible."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Unpinned dependencies make builds depend on the release date."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a new major version published between two deploys."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: major versions can break compatibility. Pin the version."
+      }
+    ],
+    "repair": "Pin `payments-sdk==4.2.1` (with a lock file) and upgrade on purpose.",
+    "debrief": "Reproducible builds need pinned dependencies. The same commit should produce the same program, whatever day it is deployed.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-third-party-api-integration-003",
+    "subject": "api-integration",
+    "topic": "Third-Party API Integration",
+    "subtopic": "Amounts in minor units",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this charge the customer Rs 499?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "language": "python",
+      "code": "# Provider docs: \"amount: integer, in the smallest currency unit (e.g. paise for INR).\"\ncharge = payments.charges.create(amount=499, currency=\"inr\", source=token)\n# Intended: charge the customer Rs 499."
+    },
+    "ai_claim": "Yes. The amount is 499 and the currency is INR, so the customer is charged Rs 499.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The product costs Rs 499."
+      },
+      {
+        "index": 2,
+        "text": "The code sends amount=499."
+      },
+      {
+        "index": 3,
+        "text": "The currency is INR."
+      },
+      {
+        "index": 4,
+        "text": "So Rs 499 is charged."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Ignoring the API's unit for amounts",
+      "explanation": "The API expects the smallest currency unit, paise for INR. amount=499 means 499 paise, which is Rs 4.99. Rs 499 is 49,900 paise. Convert explicitly: amount=int(Decimal('499') * 100).",
+      "why_convincing": "Most code works in rupees, and the number matches the price."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 499 paise is Rs 4.99. Send amount=49900.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Rs 499 = 49,900 paise; amount=499 is Rs 4.99.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "49900",
+          "4.99"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "The charge appears in the provider's dashboard as Rs 4.99.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4.99"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The customer is charged Rs 4.99."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the documented unit of amount."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 sends the rupee value."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Many payment APIs use integer minor units (paise, cents)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Convert Rs 499 to paise."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: amount is in paise, so 499 is Rs 4.99. Send 49900."
+      }
+    ],
+    "repair": "Send `amount=49900` (convert with Decimal and multiply by 100).",
+    "debrief": "Money APIs use minor units to avoid floating-point errors, which shifts the risk to unit conversion. Convert in one tested helper, and remember that some currencies have no minor unit or three decimal places.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-third-party-api-integration-004",
+    "subject": "api-integration",
+    "topic": "Third-Party API Integration",
+    "subtopic": "Fetching user-supplied URLs on the server",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this endpoint safe, since it only downloads an image from a URL the user chooses?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/profile/avatar-from-url\")\ndef avatar_from_url(url: str, user=Depends(current_user)):\n    image = httpx.get(url, timeout=5).content\n    storage.put(f\"avatars/{user.id}.png\", image)\n\n# The server runs in a cloud VPC with internal services and a metadata endpoint at 169.254.169.254."
+    },
+    "ai_claim": "Yes. It only reads a URL and stores the result as the user's own avatar, which cannot affect anything else.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The user supplies an image URL."
+      },
+      {
+        "index": 2,
+        "text": "The server downloads it."
+      },
+      {
+        "index": 3,
+        "text": "The bytes are saved as the user's avatar."
+      },
+      {
+        "index": 4,
+        "text": "Nothing else is affected, so it is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 2,
+      "misconception": "Letting users choose what the server requests",
+      "explanation": "The request is made from inside the VPC, with the server's network access. A user can submit http://169.254.169.254/latest/meta-data/iam/security-credentials/ or an internal admin URL, and the response is saved where they can read it back as their 'avatar'. This is server-side request forgery (SSRF). Allow only http(s), resolve the host and block private and link-local ranges, disable redirects (or re-check them), and verify the content is an image.",
+      "why_convincing": "For ordinary image URLs the feature works exactly as intended."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the server can be made to fetch internal URLs, including cloud credentials, and return them to the user. Validate and restrict destinations.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "url = http://169.254.169.254/latest/meta-data/ stores the cloud metadata as the avatar.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "169.254.169.254"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "user URL -> server fetch from inside the VPC -> internal response -> saved -> user downloads avatar",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An internal admin page is fetched and exposed as an image file."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the server can reach that the user cannot."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats the download as harmless."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Server-side fetches of user-chosen URLs are SSRF risks."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Submit the cloud metadata address as the URL."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the server fetches internal resources for the user. Restrict destinations and validate content."
+      }
+    ],
+    "repair": "Allow-list schemes, resolve and block private/link-local IPs, re-check redirects, limit size and verify the image type.",
+    "debrief": "Any feature where the server fetches a URL for a user lends the user the server's network position. Treat such URLs as hostile until validated.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-third-party-api-integration-005",
+    "subject": "api-integration",
+    "topic": "Third-Party API Integration",
+    "subtopic": "Idempotency keys on retries",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that if the first attempt charges the card but the response is lost, the retry does not charge the customer again?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "key = f\"order-{order.id}-charge\"\nfor attempt in range(3):\n    try:\n        charge = payments.charges.create(\n            amount=order.amount_paise, currency=\"inr\", source=token,\n            idempotency_key=key,\n        )\n        break\n    except payments.NetworkError:\n        time.sleep(2 ** attempt)\n\n# Provider docs: requests with the same idempotency key within 24 hours return the original result."
+    },
+    "ai_claim": "Yes. Every attempt sends the same idempotency key, so the provider recognises the retry and returns the original charge instead of creating a second one.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The key is derived from the order id, so it is identical on every attempt."
+      },
+      {
+        "index": 2,
+        "text": "The first attempt succeeds at the provider, but the response is lost and NetworkError is raised."
+      },
+      {
+        "index": 3,
+        "text": "The retry sends the same key within 24 hours."
+      },
+      {
+        "index": 4,
+        "text": "The provider returns the original charge, so the customer is charged once."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Idempotency keys make POST retries safe: the provider stores the result for a key and replays it. Deriving the key from the order makes it stable across retries (and even across process restarts).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "attempt 1: charge created, response lost -> attempt 2: same key -> provider returns charge ch_1 -> one charge",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The provider replays results for a repeated key within 24 hours.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "24"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the key changes between attempts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 derives the key from the order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Providers deduplicate requests that share an idempotency key."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace a lost response followed by a retry."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The stable key makes the retry return the original charge. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Network errors leave you unsure whether a request succeeded. Idempotency keys resolve the doubt: retrying is safe because the provider remembers what the key already did. The key must be stable, never random per attempt.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

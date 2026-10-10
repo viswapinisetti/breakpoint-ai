@@ -1,0 +1,143 @@
+[
+  {
+    "id": "mat-div0-001",
+    "subject": "mathematics",
+    "topic": "Algebra & Functions",
+    "subtopic": "Invalid algebraic transformation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this proof that 1 = 2. Where, if anywhere, does it fail?",
+    "artifact_type": "proof",
+    "artifact": {
+      "proof": "Let a = b, with a nonzero.\n1.  a = b\n2.  a² = ab              (multiply both sides by a)\n3.  a² − b² = ab − b²     (subtract b² from both sides)\n4.  (a + b)(a − b) = b(a − b)\n5.  a + b = b             (divide both sides by (a − b))\n6.  2b = b                (since a = b)\n7.  2 = 1                 (divide both sides by b)"
+    },
+    "ai_claim": "Every step applies a valid algebraic operation to both sides, so the derivation is sound.",
+    "ai_solution": [
+      {"index": 1, "text": "Steps 2 and 3 multiply and subtract on both sides, which preserves equality."},
+      {"index": 2, "text": "Step 4 factorises both sides correctly: a² − b² = (a+b)(a−b) and ab − b² = b(a−b)."},
+      {"index": 3, "text": "Step 5 divides both sides by the common factor (a − b), which is a standard cancellation."},
+      {"index": 4, "text": "Steps 6 and 7 substitute a = b and divide by b, which is nonzero. Every operation is valid, so the derivation is sound."}
+    ],
+    "ai_final_answer": "sound",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Cancelling a common factor without checking it is nonzero",
+      "explanation": "The premise is a = b, so (a − b) = 0. Step 5 divides both sides by zero, which is undefined. Division by a factor is only valid when that factor is nonzero, and here the premise guarantees it is zero.",
+      "why_convincing": "Steps 1, 2 and 4 are all genuinely valid, and the factorisation in step 4 is correct. Cancelling a common factor is such a routine move that the excluded value goes unchecked — and the offending quantity is written as (a − b) rather than as 0, so it does not look like zero."
+    },
+    "canonical_solution": "The derivation fails at step 5. From a = b it follows that a − b = 0, so dividing both sides by (a − b) is division by zero and is undefined. Every earlier step is valid; the conclusion 2 = 1 is false precisely because this one operation is not permitted. The rule: before cancelling a factor, state that it is nonzero.",
+    "canonical_answer": "fails at step 5",
+    "valid_evidence": [
+      {"type": "rule", "summary": "Division by a factor requires that factor to be nonzero.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "calculation", "summary": "Substitute a = b to show a − b = 0.", "must_reference_step": 3, "must_contain_values": ["0"]}
+    ],
+    "counterexamples": ["Take a = b = 3. Step 4 reads (6)(0) = 3(0), which is 0 = 0 — true but uninformative. Dividing by that 0 to obtain 6 = 3 is the illegal move."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "For each operation, ask what would have to be true for it to be permitted."},
+      {"level": 2, "kind": "direction", "text": "The first four steps are valid. Look at the operation performed in step 5."},
+      {"level": 3, "kind": "concept", "text": "Cancelling a common factor is division, and division requires the divisor to be nonzero."},
+      {"level": 4, "kind": "strong", "text": "Use the premise a = b to evaluate the quantity being divided by."},
+      {"level": 5, "kind": "reveal", "text": "Step 5 divides by (a − b). The premise a = b makes that quantity exactly zero, so the operation is undefined. Everything before it is valid."}
+    ],
+    "repair": "Step 5 is not permitted. Since a = b, the factor (a − b) is zero and cannot be cancelled. The derivation stops at step 4, which reduces to the true but useless statement 0 = 0.",
+    "debrief": "Almost every false algebraic proof hides its error in a cancellation. The operation looks symbolic and routine, and the excluded value is written as an expression rather than as the number zero. The habit: whenever a factor is cancelled, evaluate that factor under the premises before accepting the step. If the premises force it to zero, the step is where the proof dies — and every valid step before it is exactly what makes the result convincing.",
+    "validation_payload": {}
+  },
+  {
+    "id": "mat-ind-002",
+    "subject": "mathematics",
+    "topic": "Sets & Mathematical Logic",
+    "subtopic": "Induction base case",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this inductive proof that every set of horses contains only horses of one colour. Is the argument valid?",
+    "artifact_type": "proof",
+    "artifact": {
+      "proof": "Claim: in any set of n horses, all horses have the same colour.\n\nBase case (n = 1): a set of one horse trivially has one colour. True.\n\nInductive step: assume the claim holds for n = k. Take a set of k+1 horses.\nRemove the last horse: the remaining k horses are all one colour.\nRemove instead the first horse: those k horses are also all one colour.\nThe two subsets overlap, so all k+1 horses share that colour.\n\nBy induction the claim holds for all n."
+    },
+    "ai_claim": "The induction is correctly structured: the base case holds and the inductive step derives n = k+1 from n = k, so the conclusion follows.",
+    "ai_solution": [
+      {"index": 1, "text": "The base case n = 1 is verified: a single horse has a single colour."},
+      {"index": 2, "text": "The inductive hypothesis is applied to two different subsets of size k, which is legitimate since each has exactly k elements."},
+      {"index": 3, "text": "The two subsets overlap, so their colours must agree, extending the property to all k+1 horses."},
+      {"index": 4, "text": "Base case plus inductive step gives the result for all n by the principle of induction."}
+    ],
+    "ai_final_answer": "valid",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming two subsets overlap without checking the smallest case",
+      "explanation": "The overlap argument requires the two size-k subsets to share at least one horse. For k+1 = 2 the subsets are {first} and {second}, which are disjoint — the overlap is empty and the colours cannot be linked. The step from n=1 to n=2 therefore fails, and the whole chain collapses.",
+      "why_convincing": "The overlap argument is genuinely valid for every k+1 ≥ 3, so the reasoning works for all the cases anyone pictures. The failure is at the very first application, where the sets are smallest and the picture is least vivid."
+    },
+    "canonical_solution": "Not valid. The inductive step is sound only when the two size-k subsets intersect, which requires k+1 ≥ 3. At k+1 = 2 the subsets {horse 1} and {horse 2} are disjoint, so nothing forces their colours to agree. The induction has no valid link from n=1 to n=2, and a chain that breaks at its first link proves nothing beyond the base case.",
+    "canonical_answer": "not valid",
+    "valid_evidence": [
+      {"type": "counterexample", "summary": "At k+1 = 2 the two subsets are disjoint.", "must_reference_step": 3, "must_contain_values": ["2"]},
+      {"type": "rule", "summary": "The inductive step must hold for every k, including the smallest.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["For two horses, the subsets are {A} and {B}. They share no element, so the argument gives no reason for A and B to match."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "An inductive step must hold for every k, not merely for typical k."},
+      {"level": 2, "kind": "direction", "text": "Step 3 relies on the two subsets overlapping. Ask when that is true."},
+      {"level": 3, "kind": "concept", "text": "Two subsets of size k drawn from k+1 elements overlap only when k+1 ≥ 3."},
+      {"level": 4, "kind": "strong", "text": "Write out the two subsets explicitly for a set of exactly two horses."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 assumes an overlap that does not exist at k+1 = 2, where the subsets are {first} and {second}. The link from n=1 to n=2 is missing, so the induction never gets started."}
+    ],
+    "repair": "The inductive step must be stated with its condition: it is valid only for k+1 ≥ 3. Since the base case is n = 1 and the step cannot reach n = 2, the induction fails and the claim is false.",
+    "debrief": "An inductive step that works for typical k can still fail at the boundary, and induction has no tolerance for that — one broken link and nothing after it is proved. When checking induction, apply the step to the very smallest k it must cover rather than to a comfortable middling one. The vividness of the general argument is exactly what hides the edge case.",
+    "validation_payload": {}
+  },
+  {
+    "id": "mat-prob-003",
+    "subject": "mathematics",
+    "topic": "Probability",
+    "subtopic": "Conditional probability",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A test for a condition is 99% accurate in both directions. The condition affects 1 in 1,000 people. Someone tests positive. Is the following reasoning about their probability of having the condition correct?",
+    "artifact_type": "numeric_solution",
+    "ai_claim": "The probability is about 9%, not 99% — the base rate dominates.",
+    "ai_solution": [
+      {"index": 1, "text": "Take 100,000 people. About 100 have the condition and 99,900 do not."},
+      {"index": 2, "text": "Of the 100 with the condition, 99% test positive: 99 true positives."},
+      {"index": 3, "text": "Of the 99,900 without it, 1% test positive: 999 false positives."},
+      {"index": 4, "text": "Total positives = 99 + 999 = 1,098, of which 99 genuinely have the condition."},
+      {"index": 5, "text": "So the probability is 99/1098 ≈ 9%. The test's accuracy does not give the answer, because false positives are drawn from a far larger group."}
+    ],
+    "ai_final_answer": "9",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "canonical_solution": "Correct. This is Bayes' theorem worked as natural frequencies. P(condition | positive) = 99 / (99 + 999) = 99/1098 ≈ 0.09. The arithmetic is right and so is the interpretation: with a rare condition, the false positives drawn from the large healthy population outnumber the true positives even when the test is highly accurate.",
+    "canonical_answer": "9",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "99 true positives out of 99 + 999 = 1098 positives: 99/1098 is about 0.09, so 9%.",
+        "must_reference_step": 5,
+        "must_contain_values": [
+          "99",
+          "1098"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Check both the arithmetic and the interpretation placed on it."},
+      {"level": 2, "kind": "direction", "text": "Recompute the counts in steps 2 and 3 from the stated rates."},
+      {"level": 3, "kind": "concept", "text": "The quantity asked for is P(condition | positive), not the test's accuracy."},
+      {"level": 4, "kind": "strong", "text": "Verify 99/1098 and compare it against the claimed 9%."},
+      {"level": 5, "kind": "reveal", "text": "This reasoning is correct. 100 affected of 100,000, 99 true positives, 999 false positives, 99/1098 ≈ 9%. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "This is the base-rate problem worked correctly, and it is worth being able to confirm rather than only to spot when it is botched. The natural-frequency presentation is what makes it checkable: counts of people rather than nested conditional probabilities. When you meet a claim about test accuracy, the question to ask is which conditional is being reported — P(positive | condition) and P(condition | positive) are different numbers, and only the second answers the patient's question.",
+    "validation_payload": {
+      "solver": "population = 100000\naffected = population // 1000\ntrue_pos = Fraction(99, 100) * affected\nfalse_pos = Fraction(1, 100) * (population - affected)\nanswer = round(100 * true_pos / (true_pos + false_pos))\n"
+    }
+  }
+]

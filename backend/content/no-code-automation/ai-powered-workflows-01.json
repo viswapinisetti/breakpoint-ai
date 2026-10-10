@@ -1,0 +1,361 @@
+[
+  {
+    "id": "nc-ai-powered-workflows-001",
+    "subject": "no-code-automation",
+    "topic": "AI-Powered Workflows",
+    "subtopic": "An AI summary that invents details",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the ticket's order number be trusted?",
+    "artifact_type": "automation_run",
+    "artifact": {
+      "workflow": "Workflow: new support email -> AI step 'Summarise the issue and extract the order number' -> create ticket with the summary and order number.\nEmail: \"My blender stopped working after a week. Please help.\" (no order number)\nAI step output: \"Summary: blender failed after 1 week. Order number: ORD-58213.\""
+    },
+    "ai_claim": "Yes. The AI step extracted the order number while summarising the email, so ORD-58213 is the customer's order.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The AI step reads the email."
+      },
+      {
+        "index": 2,
+        "text": "It summarises the issue."
+      },
+      {
+        "index": 3,
+        "text": "It extracts the order number."
+      },
+      {
+        "index": 4,
+        "text": "So ORD-58213 is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F14",
+      "location": 3,
+      "misconception": "Trusting AI extraction without checking the source",
+      "explanation": "The email contains no order number; the model produced a plausible-looking one because the prompt asked for it. The ticket now points to someone else's order (or none). Instruct the model to return null when a value is absent, validate extracted values against the source text and the order system, and look up orders by the customer's email instead.",
+      "why_convincing": "The output is well formatted and confident."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the email has no order number, so ORD-58213 is invented. Require null for missing values and verify against the order system.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "email text contains no 'ORD-' string; output contains 'ORD-58213'",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "AI-extracted values must be validated against the source and systems of record.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The ticket links to an unrelated customer's order."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Search the email for an order number."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the value exists in the email."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models may invent values when asked to extract missing fields."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the output with the source text."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the order number is fabricated."
+      }
+    ],
+    "repair": "Allow null outputs, check that extracted values appear in the source, and verify with the order system.",
+    "debrief": "Extraction prompts invite invention when data are missing. Give the model a way to say 'not present', and check.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-ai-powered-workflows-002",
+    "subject": "no-code-automation",
+    "topic": "AI-Powered Workflows",
+    "subtopic": "AI labels that don't match the router",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is every ticket routed to the right team?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "AI step prompt: \"Classify this ticket as billing, technical or account.\"\nRouter filters: category equals 'billing' / 'technical' / 'account' (exact text match). No fallback route.\nSample AI outputs: 'Billing', 'Technical issue', 'account.'\nAI: \"Every ticket is routed to the right team.\""
+    },
+    "ai_claim": "Yes. The AI classifies every ticket into one of the three categories, and the router sends each category to its team.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The AI assigns one of three categories."
+      },
+      {
+        "index": 2,
+        "text": "The router has a route for each."
+      },
+      {
+        "index": 3,
+        "text": "Each ticket matches a route."
+      },
+      {
+        "index": 4,
+        "text": "So every ticket is routed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Matching free-form AI output against exact labels",
+      "explanation": "The model's outputs vary in case, wording and punctuation ('Billing', 'Technical issue', 'account.'), none of which exactly equals the router's labels. With no fallback, those tickets match no route and are silently dropped. Constrain the output (structured output or a fixed list, 'respond with exactly one lowercase word'), normalise it, and add a fallback route.",
+      "why_convincing": "The model's classifications are semantically correct."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: output variants fail the exact matches and there is no fallback. Constrain and normalise outputs and add a fallback.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Of 100 tickets, 37 matched no route and were dropped.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "37"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "AI outputs used for routing must be constrained and validated, with a default path.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'Technical issue' tickets never reach the tech team."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the AI's actual outputs with the router's labels."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes exact matches."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Free-text model output needs constraining before exact comparisons."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for a fallback route."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: variants fail the filters. Constrain outputs and add a fallback."
+      }
+    ],
+    "repair": "Use structured output with an enum, lowercase/trim the value, and add a fallback route.",
+    "debrief": "When AI output drives control flow, treat it like user input: constrain, validate, and handle the unexpected.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-ai-powered-workflows-003",
+    "subject": "no-code-automation",
+    "topic": "AI-Powered Workflows",
+    "subtopic": "Constrained AI output with a fallback",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this design routes reliably and sends uncertain cases to people?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "AI step uses structured output with schema {\"category\": enum[billing, technical, account, other], \"confidence\": number}.\nRouter: billing/technical/account routes; 'other' or confidence < 0.7 -> human triage queue."
+    },
+    "ai_claim": "Yes. The enum guarantees one of four exact values, so exact routing works; 'other' and low-confidence results go to humans instead of being guessed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The schema limits category to four exact values."
+      },
+      {
+        "index": 2,
+        "text": "Exact router filters therefore match."
+      },
+      {
+        "index": 3,
+        "text": "Unclear tickets can be labelled 'other'."
+      },
+      {
+        "index": 4,
+        "text": "Low confidence also routes to human triage."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Schema-constrained outputs plus an explicit escape category and human fallback make AI routing dependable. (Self-reported confidence should be calibrated over time.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "A ticket about a partnership enquiry is labelled 'other' and lands in human triage.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what values the AI can output."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 gives the model an escape hatch."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Constrained outputs and human fallback make AI steps safe to automate."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send an unusual ticket."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Routing is reliable with a human fallback. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Good AI workflows let the model say 'not sure' and route that to a person.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-ai-powered-workflows-004",
+    "subject": "no-code-automation",
+    "topic": "AI-Powered Workflows",
+    "subtopic": "Extracting totals from every vendor's PDF",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the AI step correctly extract totals from all vendors' invoices?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Workflow: invoice email -> send attached PDF text to an AI step 'Extract total amount' -> write to accounting.\nTested successfully on invoices from 5 vendors. 140 vendors send invoices; how their PDFs are produced (digital vs scanned, languages, layouts) is not known."
+    },
+    "ai_claim": "Yes. It worked for the 5 tested vendors, and invoices all show a total, so it will work for every vendor.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The workflow was tested on 5 vendors."
+      },
+      {
+        "index": 2,
+        "text": "It extracted totals correctly."
+      },
+      {
+        "index": 3,
+        "text": "Every invoice has a total."
+      },
+      {
+        "index": 4,
+        "text": "So it works for all vendors."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "What the other 135 vendors' PDFs are like. Scanned PDFs have no text layer (the AI step would receive empty text unless OCR is used), some invoices show several totals (subtotal, tax, total, amount due) or use other languages and currencies. The 5 tested vendors may not represent them.",
+    "resolving_scenarios": [
+      "All vendors send digital PDFs with a single clearly labelled 'Total': extraction works broadly.",
+      "Many vendors send scanned PDFs or multi-currency invoices with subtotal and 'amount due' lines: extraction fails or picks the wrong figure for a large share."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It cannot be decided from 5 vendors. Step 4 generalises without knowing the other vendors' formats.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A scanned PDF has no text layer, so the AI step receives an empty string.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Scanned invoices produce empty or invented totals."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how representative the 5 test vendors are."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 generalises from a small sample."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Document formats vary: scanned, multilingual, multiple totals."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a scanned invoice."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is unsupported. It may work broadly or fail for many vendors. It cannot be decided."
+      }
+    ],
+    "repair": "Sample invoices across vendors, add OCR for scanned files, validate totals (e.g. sum of lines) and route failures to review.",
+    "debrief": "AI extraction must be evaluated on the real variety of documents, with validation and human review for exceptions.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

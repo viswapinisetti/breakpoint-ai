@@ -1,0 +1,468 @@
+[
+  {
+    "id": "db-data-modeling-er-diagrams-001",
+    "subject": "databases",
+    "topic": "Data Modeling & ER Diagrams",
+    "subtopic": "Many-to-many with a single foreign key",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: a student can take many courses, and a course can have many students. Does this schema model that relationship?",
+    "artifact_type": "schema",
+    "artifact": {
+      "schema": "CREATE TABLE students (\n  id INT PRIMARY KEY,\n  name VARCHAR(100)\n);\nCREATE TABLE courses (\n  id INT PRIMARY KEY,\n  title VARCHAR(100),\n  student_id INT REFERENCES students(id)\n);"
+    },
+    "ai_claim": "Yes. The foreign key links courses to students, so each student can be connected to many courses and each course to its students.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "courses.student_id references students.id."
+      },
+      {
+        "index": 2,
+        "text": "Many course rows can point to the same student, so a student can take many courses."
+      },
+      {
+        "index": 3,
+        "text": "A course is linked to its students through student_id."
+      },
+      {
+        "index": 4,
+        "text": "So the schema supports many-to-many enrolment."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Modelling many-to-many with one foreign key",
+      "explanation": "Each course row holds a single student_id, so a course can reference only one student. Enrolling a second student would require a duplicate course row with the same title, repeating course data and breaking the course's identity. A many-to-many relationship needs a junction table, enrollments(student_id, course_id).",
+      "why_convincing": "Step 2 is correct - the schema does model one-to-many - and it is easy to assume the reverse direction works the same way."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The schema models one-to-many (one student per course). Many-to-many needs a separate enrollments(student_id, course_id) table with a composite primary key.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "To enrol Asha and Ben in course 10, you would need two rows with id 10, which the primary key forbids.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "CREATE TABLE enrollments (student_id INT REFERENCES students(id), course_id INT REFERENCES courses(id), PRIMARY KEY (student_id, course_id));",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A second student cannot be enrolled in the same course without duplicating the course row."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try enrolling two students in the same course."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims a course can link to many students."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A single foreign-key column holds one value per row."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count how many student_id values one course row can store."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: each course row holds one student_id. Use a junction table for many-to-many."
+      }
+    ],
+    "repair": "Remove courses.student_id and add enrollments(student_id, course_id) with a composite primary key.",
+    "debrief": "A foreign key column expresses 'many of these belong to one of those'. Many-to-many needs a third table in which each row is one pairing. Test a model by adding the second instance of each side of the relationship.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-data-modeling-er-diagrams-002",
+    "subject": "databases",
+    "topic": "Data Modeling & ER Diagrams",
+    "subtopic": "Storing a derived value that changes",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the monthly report correctly list every member who is 60 or older on the day it runs?",
+    "artifact_type": "schema",
+    "artifact": {
+      "schema": "CREATE TABLE members (\n  id INT PRIMARY KEY,\n  name VARCHAR(100),\n  age INT          -- captured at sign-up\n);",
+      "query": "-- Monthly report: members eligible for the senior plan\nSELECT name FROM members WHERE age >= 60;"
+    },
+    "ai_claim": "Yes. Age is stored for each member, so filtering on age >= 60 finds everyone eligible.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each member's age is recorded in the age column."
+      },
+      {
+        "index": 2,
+        "text": "The report filters for age >= 60."
+      },
+      {
+        "index": 3,
+        "text": "The stored age is the member's age."
+      },
+      {
+        "index": 4,
+        "text": "So every member aged 60 or older is listed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming a time-dependent value stays true",
+      "explanation": "The age is captured at sign-up and never changes, but real ages increase every year. A member who joined at 58 three years ago is 61 now but still stored as 58, so they are missing from the report. Store the date of birth and compute age when the query runs.",
+      "why_convincing": "The column is called age, and at the moment of insertion it is correct."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Stored age goes stale. Store date_of_birth and compute age at query time, for example WHERE date_of_birth <= CURRENT_DATE - INTERVAL '60 years'.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A member who joined at 58 three years ago is 61 now but is stored as 58 and is excluded.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "58",
+          "61"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Store date_of_birth; filter WHERE date_of_birth <= CURRENT_DATE - INTERVAL '60 years'.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "60"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Anyone who crossed 60 after signing up is missing."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the stored value can change without anyone updating it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats the stored age as the member's current age."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Values that depend on time should be derived from stable facts, like a birth date."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a member who signed up at 58, three years ago."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: stored age goes stale. Store date_of_birth and compute age when the report runs."
+      }
+    ],
+    "repair": "Replace age with date_of_birth and calculate age in the query.",
+    "debrief": "Model stable facts, and derive facts that change with time. Age, 'days overdue' and 'account tier based on tenure' all go stale if stored. The check: would this value still be true a year from now with no update?",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-data-modeling-er-diagrams-003",
+    "subject": "databases",
+    "topic": "Data Modeling & ER Diagrams",
+    "subtopic": "Self-referencing relationships",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: list each employee with their manager's name. Is it true that this schema cannot support that query, and a separate managers table is needed?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "CREATE TABLE employees (\n  id INT PRIMARY KEY,\n  name VARCHAR(100),\n  manager_id INT REFERENCES employees(id)\n);"
+    },
+    "ai_claim": "Yes. The manager's name is in the same table as the employee, and a table cannot be joined to itself, so a separate managers table is required.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "manager_id refers to another row in employees."
+      },
+      {
+        "index": 2,
+        "text": "The manager's name is stored in that other row."
+      },
+      {
+        "index": 3,
+        "text": "A join combines two different tables, so employees cannot be joined with employees."
+      },
+      {
+        "index": 4,
+        "text": "So a separate managers table is needed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Believing a table cannot be joined to itself",
+      "explanation": "A self-join is standard SQL: alias the table twice and join on the relationship. SELECT e.name, m.name AS manager FROM employees e LEFT JOIN employees m ON m.id = e.manager_id returns each employee with their manager's name (NULL for the top of the hierarchy). A separate managers table would duplicate people who are also employees.",
+      "why_convincing": "Joins are usually taught with two different tables, so joining a table to itself sounds impossible."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The schema supports it with a self-join using two aliases. Splitting managers into another table would duplicate data, since managers are employees.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "SELECT e.name, m.name AS manager FROM employees e LEFT JOIN employees m ON m.id = e.manager_id;",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A self-join with aliases e and m returns each employee's manager."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether SQL allows the same table to appear twice in a query."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a limit on joins."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Table aliases let a query treat one table as two separate inputs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write the query with employees e and employees m."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: a self-join works. Join employees e to employees m on m.id = e.manager_id."
+      }
+    ],
+    "repair": "Use a self-join with aliases; keep the single employees table.",
+    "debrief": "Hierarchies - managers, category trees, replies to comments - are modelled with a self-referencing foreign key and queried with self-joins (or recursive CTEs for many levels). A model claim that invents a table to avoid a self-join usually introduces duplication.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-data-modeling-er-diagrams-004",
+    "subject": "databases",
+    "topic": "Data Modeling & ER Diagrams",
+    "subtopic": "Optional versus mandatory participation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this schema support the workflow described?",
+    "artifact_type": "schema",
+    "artifact": {
+      "schema": "CREATE TABLE deliveries (\n  id INT PRIMARY KEY,\n  address TEXT NOT NULL,\n  courier_id INT NOT NULL REFERENCES couriers(id)\n);",
+      "query": "-- Workflow: a delivery is created when the customer orders;\n-- a courier is assigned later by the dispatcher."
+    },
+    "ai_claim": "Yes. Every delivery eventually has a courier, so courier_id is NOT NULL, and the dispatcher fills it in when assigning.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each delivery must be carried by a courier."
+      },
+      {
+        "index": 2,
+        "text": "So courier_id is mandatory and declared NOT NULL."
+      },
+      {
+        "index": 3,
+        "text": "The delivery row is inserted when the customer orders."
+      },
+      {
+        "index": 4,
+        "text": "The dispatcher assigns the courier by updating courier_id later."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Encoding 'eventually required' as NOT NULL",
+      "explanation": "NOT NULL applies from the moment the row is inserted. At order time no courier is known, so the INSERT in step 3 fails - or the application invents a placeholder courier, which corrupts the data. The relationship is optional at creation, so courier_id must be nullable (optionally with a status column or a check that requires a courier once the status is 'dispatched').",
+      "why_convincing": "The business rule 'every delivery has a courier' is true, just not at every moment in the row's life."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The INSERT at order time fails because courier_id is NOT NULL and unknown. Make courier_id nullable and enforce 'courier required once dispatched' with a CHECK on a status column.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "INSERT INTO deliveries (id, address) VALUES (1, '12 MG Road') fails: courier_id violates NOT NULL.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "courier_id INT NULL REFERENCES couriers(id), status TEXT, CHECK (status <> 'dispatched' OR courier_id IS NOT NULL)",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A delivery cannot be created before a courier is chosen."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Walk through the workflow in order and check each step against the constraints."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 turns the business rule into a constraint. Check when that constraint applies."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "NOT NULL must hold at insert time, not 'eventually'."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try inserting a delivery at order time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: NOT NULL makes the order-time insert fail. Make courier_id nullable and use a status-based CHECK."
+      }
+    ],
+    "repair": "Make courier_id nullable; add CHECK (status <> 'dispatched' OR courier_id IS NOT NULL).",
+    "debrief": "Participation constraints in ER models (mandatory versus optional) must match the whole lifecycle of a row, not just its final state. When a value arrives later, model it as optional and enforce the rule at the stage where it becomes required.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-data-modeling-er-diagrams-005",
+    "subject": "databases",
+    "topic": "Data Modeling & ER Diagrams",
+    "subtopic": "Junction tables with attributes",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Requirement: students take many courses, courses have many students, each enrolment has its own grade, and a student cannot enrol in the same course twice. Does this table meet all four requirements?",
+    "artifact_type": "schema",
+    "artifact": {
+      "schema": "CREATE TABLE enrollments (\n  student_id INT REFERENCES students(id),\n  course_id  INT REFERENCES courses(id),\n  grade      CHAR(2),\n  PRIMARY KEY (student_id, course_id)\n);"
+    },
+    "ai_claim": "Yes. Each row is one student-course pairing with its own grade, and the composite primary key blocks duplicate enrolments.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A student can appear in many rows, one per course."
+      },
+      {
+        "index": 2,
+        "text": "A course can appear in many rows, one per student."
+      },
+      {
+        "index": 3,
+        "text": "grade belongs to the pairing, so it lives in this table, not in students or courses."
+      },
+      {
+        "index": 4,
+        "text": "PRIMARY KEY (student_id, course_id) rejects a second row for the same pair."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The junction table represents the many-to-many relationship, stores the attribute of the relationship itself (grade), and the composite key enforces one enrolment per pair.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "INSERT (1, 10, 'A'), (1, 11, 'B'), (2, 10, 'C') succeed; a second (1, 10) row violates the primary key",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each of the four requirements separately."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 places grade in the junction table. Is that where it belongs?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An attribute that describes a relationship belongs with the relationship, not either entity."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try inserting the same student-course pair twice."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The junction table models many-to-many, grade belongs to the pairing, and the composite key blocks duplicates. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Relationship attributes - grade, quantity, role, joined_at - belong on the junction row. The composite primary key both identifies the pairing and enforces uniqueness. This is the correct shape for the many-to-many requirement the earlier single-foreign-key design missed.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

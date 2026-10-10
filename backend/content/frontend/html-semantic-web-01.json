@@ -1,0 +1,451 @@
+[
+  {
+    "id": "fe-html-semantic-web-001",
+    "subject": "frontend",
+    "topic": "HTML & Semantic Web",
+    "subtopic": "Heading levels are structure",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is choosing <h4> for these month headings fine for accessibility, since heading level only changes the font size?",
+    "artifact_type": "markup",
+    "artifact": {
+      "language": "html",
+      "markup": "<h1>Order history</h1>\n<h4>March 2026</h4>   <!-- h4 chosen because its default size looks right -->\n<ul>...</ul>\n<h4>February 2026</h4>\n<ul>...</ul>"
+    },
+    "ai_claim": "Yes. Heading levels are presentational: h4 is simply a smaller heading, and screen readers treat every heading the same.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "h1 to h6 differ in default size."
+      },
+      {
+        "index": 2,
+        "text": "The month headings should look smaller than the page title."
+      },
+      {
+        "index": 3,
+        "text": "Screen readers announce all headings the same way, regardless of level."
+      },
+      {
+        "index": 4,
+        "text": "So using h4 for its size is fine."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating heading levels as font sizes",
+      "explanation": "Heading levels define the document outline. Screen readers announce the level ('heading level 4') and let users jump between headings by level. Jumping from h1 to h4 implies two missing sections and breaks level-based navigation. Use h2 for the month sections and set the size with CSS.",
+      "why_convincing": "Headings are often introduced visually, and the page looks exactly as intended."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not fine: heading levels communicate structure. Use <h2> for sections under the <h1>, and style its size in CSS.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "WCAG 1.3.1 (Info and Relationships): structure conveyed visually must be available programmatically; heading levels should not skip.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "<h2 class=\"month\">March 2026</h2> with .month { font-size: 1rem; }",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A screen reader's list of headings shows 'level 1' and then 'level 4', with no level 2 or 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about how a screen reader user moves through a page."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims screen readers ignore heading levels."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Heading levels form an outline; assistive technology exposes and navigates by level."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List the headings as a screen reader would announce them."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: levels are announced and used for navigation. Use h2 and style it with CSS."
+      }
+    ],
+    "repair": "Use <h2> for the month headings and control their size with CSS.",
+    "debrief": "HTML elements carry meaning; CSS carries appearance. Choosing an element for its default look ties structure to styling and misleads assistive technology. Pick the element for what it is, then style it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-html-semantic-web-002",
+    "subject": "frontend",
+    "topic": "HTML & Semantic Web",
+    "subtopic": "A div is not a button",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can every user - including someone using only a keyboard - activate this Save control?",
+    "artifact_type": "markup",
+    "artifact": {
+      "language": "html",
+      "markup": "<div class=\"btn\" onclick=\"save()\">Save</div>"
+    },
+    "ai_claim": "Yes. The div has a click handler and is styled as a button, so clicking it runs save() for everyone.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "onclick runs save() when the element is clicked."
+      },
+      {
+        "index": 2,
+        "text": "The .btn class makes it look like a button."
+      },
+      {
+        "index": 3,
+        "text": "Keyboard users can press Enter on it just like a button."
+      },
+      {
+        "index": 4,
+        "text": "So everyone can save."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Forgetting keyboard and assistive-technology users",
+      "explanation": "A div is not focusable, so Tab never reaches it, and Enter or Space do nothing even if it were focused. It has no button role either, so screen readers do not announce it as a control. A <button> provides focus, keyboard activation and the role for free.",
+      "why_convincing": "Mouse testing works perfectly, and the control looks like a button."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: keyboard users cannot reach or activate it, and screen readers do not identify it. Use <button type=\"button\" onclick=\"save()\">Save</button>.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Press Tab repeatedly: focus skips the Save div entirely.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "<button type=\"button\" class=\"btn\" onclick=\"save()\">Save</button>",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Tabbing through the page never focuses Save."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try using the page without a mouse."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes keyboard behaviour that a div does not have."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Native buttons are focusable and activate on Enter and Space; divs are neither."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Tab to the control and press Enter."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: a div is not focusable or keyboard-activatable. Use a <button>."
+      }
+    ],
+    "repair": "Replace the div with a <button type=\"button\">.",
+    "debrief": "Native elements come with behaviour - focus, keyboard activation, roles - that custom elements must rebuild by hand, and usually do not. Test interactive controls with Tab, Enter and Space as well as the mouse.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-html-semantic-web-003",
+    "subject": "frontend",
+    "topic": "HTML & Semantic Web",
+    "subtopic": "Buttons inside forms submit by default",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does clicking 'Show password' submit the form?",
+    "artifact_type": "markup",
+    "artifact": {
+      "language": "html",
+      "markup": "<form action=\"/login\" method=\"post\">\n  <input type=\"password\" id=\"pw\" name=\"password\">\n  <button onclick=\"togglePassword()\">Show password</button>\n  <button type=\"submit\">Log in</button>\n</form>"
+    },
+    "ai_claim": "Yes. A <button> inside a form defaults to type=\"submit\", so clicking it runs togglePassword() and then submits the form.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The Show password button has no type attribute."
+      },
+      {
+        "index": 2,
+        "text": "A button's default type is submit."
+      },
+      {
+        "index": 3,
+        "text": "Clicking it runs the onclick handler, then triggers the form's submission."
+      },
+      {
+        "index": 4,
+        "text": "So the form submits; type=\"button\" is needed to prevent it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The missing type makes it a submit button. Add type=\"button\" so it only toggles the password.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "HTML: the missing value default of a button's type attribute is the Submit Button state.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Clicking Show password with the network panel open shows a POST to /login.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the button's type attribute."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states the default type."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The default type of <button> is submit."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Click the button and watch the network panel."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Without a type, the button submits the form. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Every <button> inside a form is a submit button unless it says otherwise. Adding type=\"button\" to non-submitting buttons is a habit worth forming, because the default causes surprising submissions.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-html-semantic-web-004",
+    "subject": "frontend",
+    "topic": "HTML & Semantic Web",
+    "subtopic": "Empty alt text for decorative images",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is alt=\"\" correct here, given that the image is a purely decorative divider?",
+    "artifact_type": "markup",
+    "artifact": {
+      "language": "html",
+      "markup": "<h2>Delivery details</h2>\n<img src=\"/img/divider-flourish.svg\" alt=\"\">\n<p>Orders ship within two days.</p>"
+    },
+    "ai_claim": "Yes. An empty alt marks the image as decorative, so screen readers skip it. Leaving alt off entirely could make some read out the file name.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The divider adds no information to the content."
+      },
+      {
+        "index": 2,
+        "text": "alt=\"\" tells assistive technology the image is decorative."
+      },
+      {
+        "index": 3,
+        "text": "Screen readers skip images with empty alt."
+      },
+      {
+        "index": 4,
+        "text": "Without any alt attribute, some screen readers announce the file name, 'divider-flourish.svg'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Decorative images should have an empty alt attribute (not a missing one), so assistive technology ignores them.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "WCAG 1.1.1: decorative images must be implemented so assistive technology can ignore them, e.g. alt=\"\".",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what a screen reader user would gain from hearing about this image."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 contrasts empty alt with missing alt."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Empty alt means 'decorative'; a missing alt leaves the screen reader guessing."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the three options: descriptive alt, empty alt, no alt."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Empty alt is the right choice for a decorative image. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Alt text depends on purpose: informative images need a description, functional images need the action, decorative images need alt=\"\". The claim identifies the purpose correctly and chooses accordingly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-html-semantic-web-005",
+    "subject": "frontend",
+    "topic": "HTML & Semantic Web",
+    "subtopic": "When lazy images load",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will hero.jpg be downloaded during the initial page load?",
+    "artifact_type": "markup",
+    "artifact": {
+      "language": "html",
+      "markup": "<img src=\"/img/hero.jpg\" alt=\"Team at work\" loading=\"lazy\" width=\"1200\" height=\"600\">"
+    },
+    "ai_claim": "No. loading=\"lazy\" defers the download until the user scrolls, so it is not fetched on initial load.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "loading=\"lazy\" tells the browser to defer offscreen images."
+      },
+      {
+        "index": 2,
+        "text": "The browser waits until the image approaches the viewport."
+      },
+      {
+        "index": 3,
+        "text": "The image is not visible when the page first loads."
+      },
+      {
+        "index": 4,
+        "text": "So it is not downloaded during the initial load."
+      }
+    ],
+    "ai_final_answer": "no",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Where the image sits in the page layout. Lazy loading defers only images that are outside (or far from) the initial viewport; an image within or near it loads immediately. The surrounding page is not shown.",
+    "resolving_scenarios": [
+      "The image is at the top of the page (a hero banner): it is in the initial viewport and loads immediately.",
+      "The image is far down a long page: the browser defers it until the user scrolls near it."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the image's position, which is not given. Step 3 assumes it is offscreen - a name like 'hero' even suggests it is at the top, where lazy loading changes nothing (and hurts LCP).",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Placed at the top of the page, the image is in the viewport and is fetched immediately despite loading=\"lazy\".",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A hero image at the top of the page loads immediately."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what loading=\"lazy\" actually defers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes where the image is placed."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Lazy loading depends on the image's distance from the viewport."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider the image at the top of the page and at the bottom."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes the image is offscreen. At the top it loads immediately; far down it is deferred. It cannot be decided."
+      }
+    ],
+    "repair": "State where the image is placed; do not lazy-load images in the initial viewport.",
+    "debrief": "loading=\"lazy\" is a hint whose effect depends on layout. The same markup behaves differently depending on where it appears, so questions about it need the page context.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

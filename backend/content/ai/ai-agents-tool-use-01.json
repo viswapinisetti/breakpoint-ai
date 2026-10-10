@@ -1,0 +1,455 @@
+[
+  {
+    "id": "ai-ai-agents-tool-use-001",
+    "subject": "ai",
+    "topic": "AI Agents & Tool Use",
+    "subtopic": "An agent loop with no limit",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this loop safe to run unattended?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "explanation": "while True:\n    action = llm.decide(history)\n    if action.type == \"final_answer\":\n        break\n    history.append(run_tool(action))\n# Tools include a paid web-search API."
+    },
+    "ai_claim": "Yes. The model will eventually produce a final answer, which ends the loop, so it is safe to run unattended.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The loop runs until the model gives a final answer."
+      },
+      {
+        "index": 2,
+        "text": "Models are designed to reach an answer."
+      },
+      {
+        "index": 3,
+        "text": "So the loop always ends."
+      },
+      {
+        "index": 4,
+        "text": "It is safe unattended."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Running an agent loop without a stopping bound",
+      "explanation": "Nothing guarantees termination: a model can repeat the same failing search, alternate between tools, or never be confident enough to answer. Each iteration calls a paid API, so a stuck loop burns money and time. Add a maximum number of steps, a budget, repeated-action detection and a timeout, then return a partial result or escalate.",
+      "why_convincing": "In demos the agent usually finishes in a few steps."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: termination is not guaranteed. Add step, cost and time limits plus loop detection.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "The agent repeats the same failing search query 400 times overnight.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "400"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Autonomous loops need explicit iteration, budget and time limits.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A stuck agent runs up a large API bill."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what stops the loop if the model never answers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the model always finishes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Agent loops need external limits."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a tool that keeps failing."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: nothing bounds the loop. Add limits."
+      }
+    ],
+    "repair": "Add max_steps, a cost budget, a timeout and repeated-action detection.",
+    "debrief": "Every autonomous loop needs a way to stop that does not depend on the model's judgment.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-ai-agents-tool-use-002",
+    "subject": "ai",
+    "topic": "AI Agents & Tool Use",
+    "subtopic": "Claiming an action that failed",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Did the agent complete the task it reported?",
+    "artifact_type": "retrieval_trace",
+    "artifact": {
+      "trace": [
+        "Tool call: send_email(to='client@acme.example', subject='Invoice 2231')",
+        "Tool result: {'status': 'error', 'code': 550, 'message': 'mailbox unavailable'}",
+        "Agent to user: \"Done! I've emailed the invoice to your client.\""
+      ]
+    },
+    "ai_claim": "Yes. The agent called the send_email tool with the right address and subject, so the email was sent.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The agent called send_email."
+      },
+      {
+        "index": 2,
+        "text": "It used the client's address and the invoice subject."
+      },
+      {
+        "index": 3,
+        "text": "Calling the tool sends the email."
+      },
+      {
+        "index": 4,
+        "text": "So the email was sent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F14",
+      "location": 3,
+      "misconception": "Reporting success without checking the tool result",
+      "explanation": "The tool returned an error (550, mailbox unavailable): no email was sent. The agent reported success anyway - a hallucinated completion. Agents must read and act on tool results, report failures honestly and retry or escalate; the application should also verify side effects.",
+      "why_convincing": "The call itself looks correct, and success is the usual outcome."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the tool returned error 550. The agent's success message is false.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The tool result is status 'error', code 550.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "550"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "The agent says the email was sent; the tool says it was not.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The client never receives the invoice."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the tool's result."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes calling a tool means it succeeded."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tool results must be checked before reporting outcomes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the agent's message with the result."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the tool failed, so the report is false."
+      }
+    ],
+    "repair": "Require the agent to report tool errors and have the app confirm side effects.",
+    "debrief": "Agents act through tools, so truthfulness includes accurately reporting what the tools did.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-ai-agents-tool-use-003",
+    "subject": "ai",
+    "topic": "AI Agents & Tool Use",
+    "subtopic": "Approval before irreversible actions",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this design limits the damage a mistaken or manipulated agent can do?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "explanation": "Agent tools: search_orders (read), draft_refund (creates a draft), issue_refund (moves money).\nPolicy: issue_refund requires a human to approve the draft in the dashboard; the agent cannot call it directly."
+    },
+    "ai_claim": "Yes. The agent can read orders and prepare refunds, but money moves only after a human approves. A wrong or injected instruction can at worst create a draft that a person reviews.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Read-only and draft tools cannot move money."
+      },
+      {
+        "index": 2,
+        "text": "The irreversible action, issue_refund, is gated by human approval."
+      },
+      {
+        "index": 3,
+        "text": "So an agent error produces at most a wrong draft."
+      },
+      {
+        "index": 4,
+        "text": "A person catches it before money moves."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Separating reversible from irreversible actions and gating the latter with human approval is a standard safety pattern for agents.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Least privilege and human-in-the-loop for irreversible actions limit agent risk.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the agent can do on its own."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 identifies the irreversible action."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Gate irreversible actions behind human approval."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a prompt-injected refund request."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The design bounds the damage. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Design agent permissions by blast radius: automate what is reversible, gate what is not.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-ai-agents-tool-use-004",
+    "subject": "ai",
+    "topic": "AI Agents & Tool Use",
+    "subtopic": "Tool descriptions that guide selection",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that these descriptions help the model pick the right tool?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "explanation": "Tool definitions:\n- get_order_status(order_id): \"Use when the user asks where an order is or when it will arrive. Requires an order id like ORD-12345.\"\n- search_help_articles(query): \"Use for general questions about policies (returns, warranty, shipping costs). Do not use for a specific order.\""
+    },
+    "ai_claim": "Yes. Each description says when to use the tool, what input it needs and when not to use it, so the model can distinguish order-specific questions from policy questions.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model chooses tools from their descriptions."
+      },
+      {
+        "index": 2,
+        "text": "Each description states when to use the tool."
+      },
+      {
+        "index": 3,
+        "text": "Input formats (ORD-12345) and exclusions are explicit."
+      },
+      {
+        "index": 4,
+        "text": "So the model can route questions correctly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Clear, contrastive tool descriptions - when to use, when not to, and required inputs - are among the most effective ways to improve tool selection.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "'Where is ORD-55120?' fits get_order_status; 'What is your return window?' fits search_help_articles.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the model decides which tool to call."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 mentions input formats and exclusions."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tool descriptions are prompts that steer tool selection."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Route two example questions."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The descriptions make routing clear. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Tool descriptions are part of the prompt. Write them like instructions to a new colleague.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-ai-agents-tool-use-005",
+    "subject": "ai",
+    "topic": "AI Agents & Tool Use",
+    "subtopic": "Did the agent book the right flight",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Did the agent book the flight on the date the user meant?",
+    "artifact_type": "retrieval_trace",
+    "artifact": {
+      "trace": [
+        "User (in India): \"Book me the cheapest flight to Pune on 03/04.\"",
+        "Tool call: search_flights(dest='PNQ', date='2026-03-04')",
+        "Tool call: book_flight(flight_id='AI-851', date='2026-03-04')"
+      ],
+      "note": "The user's intended date format is not recorded."
+    },
+    "ai_claim": "Yes. The user asked for 03/04 and the agent booked 2026-03-04, which matches the date given.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The user asked for 03/04."
+      },
+      {
+        "index": 2,
+        "text": "The agent converted it to 2026-03-04."
+      },
+      {
+        "index": 3,
+        "text": "That matches the user's date."
+      },
+      {
+        "index": 4,
+        "text": "So the booking is on the intended date."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Which date format the user meant. '03/04' is 3 April in the day-first convention common in India and 4 March in the month-first convention. The agent chose month-first without asking, and the user's intent is not recorded.",
+    "resolving_scenarios": [
+      "The user meant 4 March (month-first): the booking is correct.",
+      "The user meant 3 April (day-first, common in India): the flight is booked a month early."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The intended date cannot be determined from '03/04'. Step 2 assumes a format; the agent should have confirmed.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Under the day-first convention used in India, 03/04 is 3 April, not 4 March.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "03/04"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A day-first reading makes the booking a month early."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read '03/04' in both date conventions."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 picks one convention."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Ambiguous inputs to irreversible actions need confirmation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider where the user is."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes a format. Month-first, it is right; day-first, it is wrong. It cannot be decided."
+      }
+    ],
+    "repair": "Have the agent confirm ambiguous dates ('4 March or 3 April?') before booking.",
+    "debrief": "Agents must recognise ambiguity, especially before irreversible actions. Asking once is cheaper than rebooking.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

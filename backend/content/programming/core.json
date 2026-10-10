@@ -1,0 +1,283 @@
+[
+  {
+    "id": "prg-max-001",
+    "subject": "programming",
+    "topic": "Conditions & Loops",
+    "subtopic": "Loop initialisation",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this function. Does it correctly return the largest value for every non-empty list of integers?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def find_max(numbers):\n    maximum = 0\n    for number in numbers:\n        if number > maximum:\n            maximum = number\n    return maximum"
+    },
+    "ai_claim": "This function correctly returns the maximum for every non-empty list of integers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The variable `maximum` is initialised to 0 as a starting point."
+      },
+      {
+        "index": 2,
+        "text": "The loop visits every element exactly once, so nothing is skipped."
+      },
+      {
+        "index": 3,
+        "text": "Any element larger than the current maximum replaces it, so `maximum` always holds the largest value seen so far."
+      },
+      {
+        "index": 4,
+        "text": "Since 0 is smaller than any value that could be the answer, the initial value is safe. The function is correct for every non-empty integer list."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "failure": {
+      "category": "F04",
+      "location": 4,
+      "misconception": "Assuming the initial accumulator value is smaller than every possible input",
+      "explanation": "Initialising to 0 assumes the answer is positive. For a list of all-negative integers such as [-5, -10, -2], no element ever exceeds 0, so the function returns 0 - a value that is not even in the list. Initialise to numbers[0] instead.",
+      "why_convincing": "Steps 1 to 3 are genuinely correct, and 0 feels like a neutral starting point. Every mental test case people reach for first contains a positive number, so the bug never surfaces."
+    },
+    "canonical_solution": "The function is incorrect for all-negative input. `find_max([-5, -10, -2])` returns 0, but the true maximum is -2, and 0 is not even a member of the list. The accumulator must start from an actual element: `maximum = numbers[0]`.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An all-negative list where the function returns 0.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "find_max([-5, -10, -2]) returns 0, expected -2.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "-2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "find_max([-5, -10, -2]) returns 0, but the maximum is -2 and 0 is not in the list."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the starting value of the accumulator is safe for every possible input."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 makes a claim about the initial value. Test that claim."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An accumulator seeded with a constant assumes something about the range of the data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the function mentally on a list where every element is negative."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 assumes the answer is positive. On [-5, -10, -2] nothing exceeds 0, so the function returns 0 - not even an element of the list. Initialise with numbers[0]."
+      }
+    ],
+    "repair": "Replace `maximum = 0` with `maximum = numbers[0]` so the accumulator starts from a real element of the list.",
+    "debrief": "An accumulator initialised to a constant smuggles in an assumption about the data's range. Zero looks neutral, but it is a claim that the answer is non-negative. Whenever you see a loop seeded with a literal, ask what input would make that literal wrong - here, any list where every element is below it.",
+    "validation_payload": {
+      "entry_point": "find_max",
+      "ai_code": "def find_max(numbers):\n    maximum = 0\n    for number in numbers:\n        if number > maximum:\n            maximum = number\n    return maximum",
+      "reference_code": "def find_max(numbers):\n    maximum = numbers[0]\n    for number in numbers:\n        if number > maximum:\n            maximum = number\n    return maximum",
+      "test_inputs": [
+        "([3, 7, 2],)",
+        "([10],)",
+        "([-5, -10, -2],)",
+        "([-1],)",
+        "([0, -4],)",
+        "([5, -3, 9],)"
+      ],
+      "counterexample_input": "([-5, -10, -2],)"
+    },
+    "truth_state": "flawed"
+  },
+  {
+    "id": "prg-mut-002",
+    "subject": "programming",
+    "topic": "Functions",
+    "subtopic": "Mutable default arguments",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this function. Does each call with no explicit list return a list containing only the new item?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def add_item(item, basket=[]):\n    basket.append(item)\n    return basket"
+    },
+    "ai_claim": "Each call without an explicit basket starts from a fresh empty list, so it returns a single-item list every time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The parameter `basket` has a default value of `[]`, an empty list."
+      },
+      {
+        "index": 2,
+        "text": "When the caller omits `basket`, Python supplies that default, so the function begins with an empty list on each such call."
+      },
+      {
+        "index": 3,
+        "text": "The item is appended to that empty list and returned, giving a list of length 1 every time."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Believing a default argument is re-evaluated on every call",
+      "explanation": "Default arguments are evaluated once, when the function is defined, not on each call. All calls that omit `basket` share the same list object, so it accumulates: add_item('a') returns ['a'], then add_item('b') returns ['a', 'b'].",
+      "why_convincing": "The code reads exactly like the intent, and the first call behaves as expected. The bug only appears on the second call, which a quick test often never makes."
+    },
+    "canonical_solution": "Default arguments are evaluated once at definition time. The same list object is reused across calls, so results accumulate: ['a'], then ['a','b'], then ['a','b','c']. The idiom is `basket=None` with `if basket is None: basket = []` inside.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Two successive calls show accumulation.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "Trace two calls without basket: both bind the same list object, created once when def ran, so the second call returns ['a', 'b'].",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "add_item('a') returns ['a']; calling add_item('b') immediately after returns ['a', 'b'], not ['b']."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask when the default value is actually created."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 claims something happens on each call. Verify that it does."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In Python, default argument expressions are evaluated once, at function definition."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call the function twice in a row without passing a basket and compare the two results."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the default list is created once at definition, and every call that omits `basket` shares it. The second call returns ['a', 'b']. Use `basket=None` and build a new list inside."
+      }
+    ],
+    "repair": "Use `def add_item(item, basket=None):` and inside the body `if basket is None: basket = []` so a new list is created on each call.",
+    "debrief": "This failure is about *when* code runs, not what it says. The definition line executes once; the body executes many times. Any mutable value written as a default - list, dict, set - is created once and shared forever. When reasoning about a function, separate definition-time from call-time and ask which one each expression belongs to.",
+    "validation_payload": {
+      "entry_point": "call_twice",
+      "ai_code": "def add_item(item, basket=[]):\n    basket.append(item)\n    return basket\n\ndef call_twice(a, b):\n    add_item(a)\n    return add_item(b)",
+      "reference_code": "def add_item(item, basket=None):\n    if basket is None:\n        basket = []\n    basket.append(item)\n    return basket\n\ndef call_twice(a, b):\n    add_item(a)\n    return add_item(b)",
+      "test_inputs": [
+        "('a', 'b')"
+      ],
+      "counterexample_input": "('a', 'b')"
+    },
+    "truth_state": "flawed"
+  },
+  {
+    "id": "prg-swap-003",
+    "subject": "programming",
+    "topic": "Programming Fundamentals",
+    "subtopic": "Tuple assignment",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this function. Does it correctly swap the two values?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def swap(a, b):\n    a, b = b, a\n    return a, b"
+    },
+    "ai_claim": "The right-hand side is fully evaluated before assignment, so this correctly returns the swapped pair.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Python evaluates the entire right-hand side `b, a` first, building a tuple of the original values."
+      },
+      {
+        "index": 2,
+        "text": "That tuple is then unpacked into the targets on the left, so no value is overwritten before it is read."
+      },
+      {
+        "index": 3,
+        "text": "The function returns the pair in swapped order. swap(1, 2) returns (2, 1)."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "canonical_solution": "Correct. Python builds the tuple (b, a) from the current values before performing any assignment, so simultaneous swap works. swap(1, 2) returns (2, 1). Note the function returns the swap rather than mutating the caller's variables, which is the only real limitation - and the question asks only whether it swaps the two values.",
+    "canonical_answer": "yes",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the order in which Python evaluates and assigns."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 claims the right-hand side is fully evaluated first. Verify that."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In Python, tuple assignment builds the right-hand tuple before binding any target."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace swap(1, 2) value by value and compare with the claim."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The right-hand side really is evaluated first, so the swap is simultaneous and swap(1, 2) returns (2, 1). The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "This one is correct, and it is worth knowing why: tuple assignment in Python is simultaneous, because the right-hand side is fully evaluated into a tuple before any name is rebound. In a language with sequential assignment the same line would destroy one value. Approving valid code confidently - and being able to say why it holds - is as much a verification skill as finding bugs.",
+    "validation_payload": {
+      "entry_point": "swap",
+      "ai_code": "def swap(a, b):\n    a, b = b, a\n    return a, b",
+      "reference_code": "def swap(a, b):\n    return b, a",
+      "test_inputs": [
+        "(1, 2)",
+        "(0, 0)",
+        "(-3, 7)",
+        "('x', 'y')"
+      ]
+    },
+    "truth_state": "valid"
+  }
+]

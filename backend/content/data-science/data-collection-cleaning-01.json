@@ -1,0 +1,457 @@
+[
+  {
+    "id": "ds-data-collection-cleaning-001",
+    "subject": "data-science",
+    "topic": "Data Collection & Cleaning",
+    "subtopic": "Day-first dates",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the first delivery date parsed as 3 April 2026?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "# delivery_log.csv comes from the Pune warehouse; dates are written dd/mm/yyyy\ndf[\"delivered\"] = pd.to_datetime(df[\"delivered\"])\nprint(df.loc[0, \"delivered\"])    # raw value: '03/04/2026'"
+    },
+    "ai_claim": "Yes. pd.to_datetime reads '03/04/2026' as the 3rd of April 2026.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The raw value is '03/04/2026'."
+      },
+      {
+        "index": 2,
+        "text": "The warehouse writes day first."
+      },
+      {
+        "index": 3,
+        "text": "pd.to_datetime reads the day first."
+      },
+      {
+        "index": 4,
+        "text": "So the date is 3 April 2026."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Assuming the parser knows the local date format",
+      "explanation": "pd.to_datetime defaults to month-first for ambiguous slash dates, so '03/04/2026' becomes 4 March 2026. Dates with a day above 12 ('25/04/2026') parse correctly or raise an error depending on settings, so the column can end up silently mixed. Pass the format: pd.to_datetime(df['delivered'], format='%d/%m/%Y') (or dayfirst=True).",
+      "why_convincing": "Unambiguous dates in the file do parse correctly, which hides the problem."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: it is parsed month-first as 4 March 2026. Specify format='%d/%m/%Y'.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "pd.to_datetime('03/04/2026') returns Timestamp('2026-03-04').",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Delivery durations computed from these dates come out negative or a month off.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "3 April is stored as 4 March."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check pandas' default for ambiguous dates."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes day-first parsing."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Ambiguous dd/mm vs mm/dd values need an explicit format."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Parse '03/04/2026' on its own."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: pandas parses month-first. Pass format='%d/%m/%Y'."
+      }
+    ],
+    "repair": "Use `pd.to_datetime(df[\"delivered\"], format=\"%d/%m/%Y\")`.",
+    "debrief": "Date parsing is where local conventions meet library defaults. Always pass an explicit format for dates in files, and prefer ISO 8601 (yyyy-mm-dd) when you control the source.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-data-collection-cleaning-002",
+    "subject": "data-science",
+    "topic": "Data Collection & Cleaning",
+    "subtopic": "dropna removes more than expected",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does dropna() remove only a small number of incomplete rows, keeping most of the 10,000 customers?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "# customers: 10,000 rows. middle_name is empty for 6,000; every other column is complete.\nclean = df.dropna()\nprint(len(clean))"
+    },
+    "ai_claim": "Yes. dropna removes the few rows with missing core data, so most customers are kept.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "dropna removes rows with missing values."
+      },
+      {
+        "index": 2,
+        "text": "Only a few customers have incomplete core information."
+      },
+      {
+        "index": 3,
+        "text": "So only a few rows are removed."
+      },
+      {
+        "index": 4,
+        "text": "Most of the 10,000 customers remain."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Dropping rows on missing values in any column",
+      "explanation": "dropna() with no arguments drops a row if any column is missing. middle_name, an optional field, is empty for 6,000 customers, so 6,000 rows are dropped and only 4,000 remain - a biased subset of people who have middle names. Drop on the columns that matter: df.dropna(subset=['email', 'city']), and leave optional fields missing.",
+      "why_convincing": "The rows being dropped do have 'missing data', so the operation looks like cleaning."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: it drops every row missing middle_name, leaving 4,000. Use dropna(subset=[required columns]).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "10,000 - 6,000 = 4,000 rows remain.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4,000"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "df.isna().sum() shows 6,000 missing only in middle_name.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "6,000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "60% of customers vanish from the analysis."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which columns have missing values."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes only core fields are missing."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "dropna() without subset drops a row if any column is missing."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run df.isna().sum() first."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the optional middle_name column is empty for 6,000 rows, so 6,000 are dropped."
+      }
+    ],
+    "repair": "Use `df.dropna(subset=[\"email\", \"city\"])`.",
+    "debrief": "Profile missingness per column before dropping anything. Blanket dropna removes rows for reasons unrelated to the analysis and biases what is left.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-data-collection-cleaning-003",
+    "subject": "data-science",
+    "topic": "Data Collection & Cleaning",
+    "subtopic": "Deduplicating on normalised emails",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that these three raw emails are treated as one customer and only the first row is kept?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "df[\"email_key\"] = df[\"email\"].str.strip().str.lower()\ndeduped = df.drop_duplicates(subset=\"email_key\", keep=\"first\")\n# raw emails include 'Asha@Example.com', 'asha@example.com ' and 'asha@example.com'"
+    },
+    "ai_claim": "Yes. Stripping whitespace and lower-casing turns all three into 'asha@example.com', so drop_duplicates on the key keeps only the first row.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "str.strip() removes the trailing space."
+      },
+      {
+        "index": 2,
+        "text": "str.lower() lowercases the whole address."
+      },
+      {
+        "index": 3,
+        "text": "All three become 'asha@example.com'."
+      },
+      {
+        "index": 4,
+        "text": "drop_duplicates keeps the first row with that key."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Normalising the key before deduplicating catches case and whitespace variants. (Treating the local part as case-insensitive is standard practice for providers, though the RFC technically allows case-sensitive local parts.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The three rows produce one email_key value; deduped keeps 1 of the 3.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "1",
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Apply each string operation to the three emails."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on both normalisations."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Deduplicate on a normalised key, not on raw text."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write out the email_key values."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. All three normalise to one key, and one row is kept. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Duplicates hide behind trivial differences. Define a normalised matching key first, then deduplicate on it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-data-collection-cleaning-004",
+    "subject": "data-science",
+    "topic": "Data Collection & Cleaning",
+    "subtopic": "Parsing currency strings",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this converts the prices to numbers correctly, giving a sum of 14,650.25 for these three values?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "# price column values look like '1,200.50', '999.00', '12,450.75'\ndf[\"price\"] = df[\"price\"].str.replace(\",\", \"\", regex=False).astype(float)\nprint(df[\"price\"].sum())"
+    },
+    "ai_claim": "Yes. Removing the thousands separators leaves '1200.50', '999.00' and '12450.75', which convert to floats and sum to 14,650.25.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "str.replace removes every comma."
+      },
+      {
+        "index": 2,
+        "text": "The strings become '1200.50', '999.00' and '12450.75'."
+      },
+      {
+        "index": 3,
+        "text": "astype(float) converts them to numbers."
+      },
+      {
+        "index": 4,
+        "text": "1,200.50 + 999.00 + 12,450.75 = 14,650.25."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Removing the separator before converting avoids ValueError on '1,200.50'. (For money, Decimal is safer than float for further arithmetic.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "1200.50 + 999.00 + 12450.75 = 14650.25",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "14650.25"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether float() can parse '1,200.50'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 prepares the strings for conversion."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Thousands separators must be removed before numeric conversion."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add the three values."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The prices convert and sum to 14,650.25. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cleaning formatted numbers means undoing the formatting: separators, currency symbols, spaces. Doing it explicitly (rather than with errors='coerce') keeps bad values visible.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-data-collection-cleaning-005",
+    "subject": "data-science",
+    "topic": "Data Collection & Cleaning",
+    "subtopic": "A drop after a sensor change",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Did the warehouse actually get about 2.7 degrees cooler from June?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "# Warehouse temperature log, hourly, Jan-Oct\n# Average: Jan-May 26.1 C, Jun-Oct 23.4 C\n# Maintenance note: 'Sensor replaced on 2 June' (no calibration details recorded)"
+    },
+    "ai_claim": "Yes. The log shows the average fell from 26.1 C to 23.4 C, so the warehouse became about 2.7 degrees cooler.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "January to May averaged 26.1 C."
+      },
+      {
+        "index": 2,
+        "text": "June to October averaged 23.4 C."
+      },
+      {
+        "index": 3,
+        "text": "The difference is 2.7 C."
+      },
+      {
+        "index": 4,
+        "text": "So the warehouse became 2.7 degrees cooler."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether the new sensor reads the same as the old one. The drop coincides with the sensor replacement, and no calibration or overlap measurements are recorded. It could be a real change, a calibration offset, or partly seasonal (monsoon months).",
+    "resolving_scenarios": [
+      "The new sensor was calibrated against the old one (or a reference) and agreed: the warehouse really is cooler.",
+      "The new sensor reads 2.5 C lower than the old one for the same conditions: almost all of the drop is a measurement artefact."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The change is confounded with a change of instrument, and the calibration is unknown. Step 4 assumes the two sensors are comparable.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A 2.5 C calibration offset between sensors would explain almost all of the 2.7 C drop.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "2.5",
+          "2.7"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A sensor with a different offset produces the same log with no real temperature change."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at what else happened in June."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes the measurements are comparable across the change."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A change of instrument can shift a series without any change in reality."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a new sensor that reads 2.5 C lower."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 assumes comparable sensors. If calibrated, the drop is real; if offset, it is an artefact. It cannot be decided."
+      }
+    ],
+    "repair": "Check calibration records, or run the old and new sensors side by side, before interpreting the drop.",
+    "debrief": "Changes in how data is collected - new instruments, forms, definitions - create breaks in series that look like real changes. Record them and check for them before interpreting a shift.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

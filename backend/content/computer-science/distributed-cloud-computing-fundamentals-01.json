@@ -1,0 +1,447 @@
+[
+  {
+    "id": "cs-distributed-cloud-computing-fundamentals-001",
+    "subject": "computer-science",
+    "topic": "Distributed & Cloud Computing Fundamentals",
+    "subtopic": "Horizontal versus vertical scaling",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The team upgrades their single database server from 16 GB to 64 GB of RAM. Is this horizontal scaling?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. Adding capacity to handle more load is horizontal scaling.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Scaling means adding capacity to handle more load."
+      },
+      {
+        "index": 2,
+        "text": "The server now has four times the memory."
+      },
+      {
+        "index": 3,
+        "text": "Increasing the capacity of the system is horizontal scaling."
+      },
+      {
+        "index": 4,
+        "text": "So upgrading the RAM is horizontal scaling."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Mixing up the two directions of scaling",
+      "explanation": "Making one machine bigger (more RAM, CPU or disk) is vertical scaling (scaling up). Horizontal scaling (scaling out) adds more machines and spreads the load across them.",
+      "why_convincing": "Both add capacity, and the terms are spatial metaphors that are easy to swap."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. A bigger single server is vertical scaling. Horizontal scaling would add more servers, for example read replicas or shards.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Vertical: a bigger machine. Horizontal: more machines.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Adding two more database servers behind a load balancer is horizontal scaling.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Adding a second and third server is horizontal; enlarging the one server is vertical."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the number of machines changed."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 defines horizontal scaling. Check the definition."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Vertical scaling enlarges one machine; horizontal scaling adds machines."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the servers before and after."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: enlarging one server is vertical scaling; horizontal scaling adds servers."
+      }
+    ],
+    "repair": "Replace step 3: upgrading one machine is vertical scaling.",
+    "debrief": "The two kinds of scaling have very different properties: vertical is simple but capped by the largest machine and leaves a single point of failure; horizontal is unbounded but needs the software to distribute work. Using the right term signals which trade-offs are being made.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-distributed-cloud-computing-fundamentals-002",
+    "subject": "computer-science",
+    "topic": "Distributed & Cloud Computing Fundamentals",
+    "subtopic": "The CAP theorem during a partition",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "During the partition, can the database guarantee both that every request gets a non-error response and that every read returns the most recent write?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "setup": "A database replicates across two data centres. The network link between them fails for 10 minutes."
+    },
+    "ai_claim": "Yes. With careful replication both data centres keep serving requests, and replication keeps them consistent.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each data centre has a full copy of the data."
+      },
+      {
+        "index": 2,
+        "text": "Both keep accepting reads and writes during the outage, so the system stays available."
+      },
+      {
+        "index": 3,
+        "text": "Replication keeps the two copies identical."
+      },
+      {
+        "index": 4,
+        "text": "So the system is both available and consistent during the partition."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Believing replication works across a broken link",
+      "explanation": "Replication needs the link that just failed. If both sides keep accepting writes, a write in one data centre cannot reach the other, so a read there returns stale data (not consistent). To stay consistent, one side must refuse requests until the link heals (not available). The CAP theorem says a partitioned system must choose.",
+      "why_convincing": "In normal operation replication really does keep copies identical, so step 3 describes the everyday case."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. During a network partition a distributed system must give up either availability (refuse some requests) or consistency (serve possibly stale data). It cannot guarantee both.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Write x=5 in data centre A during the outage; a read of x in B still returns the old value.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "CAP: under a partition, choose consistency or availability.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A write accepted in data centre A cannot reach data centre B while the link is down."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what replication needs in order to work."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes replication continues during the outage."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Under a network partition, updates cannot cross between the sides."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write a value in one data centre and read it in the other during the outage."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: replication cannot cross a failed link, so the system must choose consistency or availability."
+      }
+    ],
+    "repair": "Replace steps 3-4: during the partition, the system must either refuse requests on one side (consistency) or serve possibly stale reads (availability).",
+    "debrief": "Distributed systems must decide in advance what to sacrifice when the network fails, because it will fail. Banking systems usually prefer consistency; shopping carts and social feeds often prefer availability. Ask of any replicated system: what happens to reads and writes when the replicas cannot talk?",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-distributed-cloud-computing-fundamentals-003",
+    "subject": "computer-science",
+    "topic": "Distributed & Cloud Computing Fundamentals",
+    "subtopic": "Availability with redundancy",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A service runs on two independent servers, each available 99% of the time, and it is up if at least one server is up. What is the service's availability?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "The service is available 99.99% of the time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each server is down 1% of the time, with probability 0.01."
+      },
+      {
+        "index": 2,
+        "text": "The servers fail independently."
+      },
+      {
+        "index": 3,
+        "text": "The service is down only when both are down: 0.01 x 0.01 = 0.0001."
+      },
+      {
+        "index": 4,
+        "text": "Availability = 1 - 0.0001 = 99.99%."
+      }
+    ],
+    "ai_final_answer": "99.99%",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct, given independence: P(both down) = 0.01^2 = 0.0001, so availability is 99.99%. (Correlated failures - a shared power supply or bad deployment - would reduce this.)",
+    "canonical_answer": "99.99%",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "P(down) = 0.01 x 0.01 = 0.0001; availability = 99.99%",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.0001",
+          "99.99"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what 'at least one up' means for the probability of failure."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 multiplies probabilities. Check that independence justifies it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "For independent events, P(both) = P(A) x P(B)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the probability that both servers are down at once."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. With independent failures, both are down only 0.01% of the time, giving 99.99%. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Redundancy multiplies failure probabilities, which is why two ordinary servers can outperform one excellent one. The calculation depends entirely on independence, and real systems often share hidden failure causes. When approving an availability figure, check the independence assumption behind it.",
+    "transfer_check": {
+      "question": "Three independent servers each have 90% availability; the service is up if at least one is up. What is its availability in percent?",
+      "answer": "99.9",
+      "explanation": "P(all down) = 0.1^3 = 0.001, so availability = 99.9%."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-distributed-cloud-computing-fundamentals-004",
+    "subject": "computer-science",
+    "topic": "Distributed & Cloud Computing Fundamentals",
+    "subtopic": "Stateless servers behind a load balancer",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can any of the 4 app servers correctly handle any request from a logged-in user?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "setup": "A load balancer sends each request to any of 4 app servers. Session data is stored in a shared Redis instance, not in server memory."
+    },
+    "ai_claim": "Yes. The servers keep no session state of their own, so whichever server gets the request loads the session from Redis.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The load balancer may send consecutive requests from one user to different servers."
+      },
+      {
+        "index": 2,
+        "text": "Session data lives in the shared Redis, not in any one server's memory."
+      },
+      {
+        "index": 3,
+        "text": "Each server reads the session from Redis using the session id in the request."
+      },
+      {
+        "index": 4,
+        "text": "So any server can handle any request correctly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Because session state is external and shared, the app servers are stateless and interchangeable; the load balancer needs no sticky sessions. (Redis itself then needs to be made highly available.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "request 1 -> server A (reads session from Redis); request 2 -> server C (reads the same session)",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where a request's user state comes from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 is the key design choice. Check its effect."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Stateless servers keep no per-user data in memory, so they are interchangeable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send two requests from the same user to different servers."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. With sessions in shared Redis, any server can serve any request. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Moving state out of the application servers is what makes horizontal scaling simple: servers can be added, removed or restarted freely. The trade-off is that the shared store becomes critical, so it needs its own redundancy. Recognising where state lives is the core skill in reviewing distributed designs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-distributed-cloud-computing-fundamentals-005",
+    "subject": "computer-science",
+    "topic": "Distributed & Cloud Computing Fundamentals",
+    "subtopic": "Cloud versus own servers on cost",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will moving to the cloud reduce this company's monthly cost?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "proposal": "Move the company's application from its own rented rack to a public cloud provider to reduce monthly cost."
+    },
+    "ai_claim": "Yes. The cloud charges only for what you use, so the monthly bill will be lower than running your own servers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Cloud providers charge per use instead of requiring upfront hardware."
+      },
+      {
+        "index": 2,
+        "text": "The company then pays only for the capacity it actually uses."
+      },
+      {
+        "index": 3,
+        "text": "The application's traffic rises and falls sharply during the day, so a lot of owned capacity sits idle."
+      },
+      {
+        "index": 4,
+        "text": "So moving to the cloud will reduce the monthly cost."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The application's load pattern and current costs. Pay-per-use saves money when load is spiky and owned capacity sits idle; for steady, round-the-clock load, renting equivalent cloud capacity often costs more than owned or rented hardware.",
+    "resolving_scenarios": [
+      "Traffic spikes for a few hours a day and is near zero otherwise: autoscaling means paying for peak capacity only during peaks, so the cloud is cheaper.",
+      "Traffic is steady at high utilisation 24/7: the equivalent always-on cloud instances plus data-transfer charges can cost more than the current rack."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the load pattern and current costs, neither of which is given. Step 3 invents a spiky load. Spiky workloads usually save money in the cloud; steady, fully utilised workloads often do not.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A server running at high utilisation 24/7 gains nothing from pay-per-use.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "24"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A database at steady 80% utilisation all day pays for full cloud capacity all day."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where step 3's description of the traffic comes from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a usage pattern. Is it in the question?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Pay-per-use helps when owned capacity would otherwise sit idle."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare a spiky workload with a steady 24/7 one."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 invents the load pattern. Spiky load favours the cloud; steady load may not. It cannot be decided from what is given."
+      }
+    ],
+    "repair": "Measure the current utilisation pattern and costs before deciding.",
+    "debrief": "Cost claims about the cloud depend on utilisation, and 'pay only for what you use' is a saving only if you would otherwise pay for what you do not use. The reasoning supplied a convenient traffic pattern that the question never gave. Ask for the numbers - load profile and current bill - before judging a cost migration.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

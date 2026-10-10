@@ -1,0 +1,373 @@
+[
+  {
+    "id": "eng-reading-comprehension-001",
+    "subject": "english",
+    "topic": "Reading Comprehension",
+    "subtopic": "Sequence is not cause",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the passage show that Ms Kapoor caused the rise in sales?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "\"Ms Kapoor joined as the northern region's manager in March. Sales in the region rose 18% between April and June. During the same quarter, a competitor closed three stores in the region.\""
+    },
+    "ai_claim": "Yes. Sales rose after she joined, so the passage shows she caused the increase.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Ms Kapoor joined in March."
+      },
+      {
+        "index": 2,
+        "text": "Sales rose from April to June."
+      },
+      {
+        "index": 3,
+        "text": "The rise followed her arrival."
+      },
+      {
+        "index": 4,
+        "text": "So she caused it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Inferring cause from sequence",
+      "explanation": "The passage states only that sales rose after she joined. It also mentions a competitor closing three stores in the same quarter - another possible cause. The text does not attribute the rise to either. A supported answer is: 'Sales rose after she joined; the passage does not say why.'",
+      "why_convincing": "A rise right after a new manager arrives invites the causal story."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the passage reports timing, not cause, and even mentions another possible cause (competitor closures).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "The passage names another event - three competitor stores closing - that could explain the rise.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "In comprehension, only conclusions the text supports should be drawn; sequence does not establish cause.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The competitor's closures alone could explain the rise."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look for other events in the passage."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 turns 'after' into 'because'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Following in time does not mean caused by."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Reread the last sentence."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the passage does not state a cause."
+      }
+    ],
+    "repair": "Answer: 'Sales rose after she joined, but the passage does not say what caused the increase.'",
+    "debrief": "Comprehension questions test what the text supports. Watch for 'after' being read as 'because'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-reading-comprehension-002",
+    "subject": "english",
+    "topic": "Reading Comprehension",
+    "subtopic": "'Not all' is not 'none'",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the passage say that no employees opted for the new health plan?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "\"Not all employees opted for the new health plan; those who did received their cards in May.\""
+    },
+    "ai_claim": "Yes. 'Not all employees opted' means the employees did not opt for the plan, so none of them chose it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The passage says 'not all employees opted'."
+      },
+      {
+        "index": 2,
+        "text": "'Not ... opted' is a negative statement."
+      },
+      {
+        "index": 3,
+        "text": "So the employees did not opt."
+      },
+      {
+        "index": 4,
+        "text": "No employees chose the plan."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Reading 'not all' as 'none'",
+      "explanation": "'Not all' means 'some did not' - it implies that some did. The second clause confirms it: 'those who did received their cards in May'. Reading it as 'none' contradicts the passage itself.",
+      "why_convincing": "The sentence starts with a negative, which pulls towards 'no one'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 'not all' means some did and some did not; the passage mentions those who did.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "'Those who did received their cards' shows that some employees opted in.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "'Not all X' means 'at least some X do not', not 'no X'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If none had opted, there would be no 'those who did'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Reread the second half of the sentence."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 changes 'not all' into 'none'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "'Not all' means 'some but not every one'."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Who received cards in May?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: some employees did opt in."
+      }
+    ],
+    "repair": "Answer: 'Some employees opted for the plan; others did not.'",
+    "debrief": "Quantifiers - all, some, not all, none, most - are frequent traps in comprehension and in reports.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-reading-comprehension-003",
+    "subject": "english",
+    "topic": "Reading Comprehension",
+    "subtopic": "Identifying the main idea",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's statement of the main idea accurate?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "\"Remote work has cut commuting time for many employees. Several firms also report lower office costs. However, managers note that new hires take longer to learn informal team practices when everyone works remotely, and some companies now require two office days a week for new staff.\"",
+      "question_detail": "AI's main idea: 'Remote work brings clear benefits, but it can slow how new employees learn team practices, leading some firms to ask new staff into the office.'"
+    },
+    "ai_claim": "Yes. It captures the benefits in the first two sentences, the 'however' drawback about new hires, and the firms' response - the passage's overall point.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Sentences 1-2 give benefits: less commuting, lower costs."
+      },
+      {
+        "index": 2,
+        "text": "'However' introduces the main concern: slower learning for new hires."
+      },
+      {
+        "index": 3,
+        "text": "The last clause gives the response: office days for new staff."
+      },
+      {
+        "index": 4,
+        "text": "The summary covers all three without adding claims."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A good main-idea statement reflects the contrast signalled by 'however' and adds nothing the passage does not say.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Main-idea statements should capture the passage's overall structure (benefit - however - drawback - response) without adding claims.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look for signal words like 'however'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 identifies the contrast."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A main idea summarises the whole passage, not one detail."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the summary for added information."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. It captures the passage accurately. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Contrast words such as 'however' often mark where the author's key point lies.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-reading-comprehension-004",
+    "subject": "english",
+    "topic": "Reading Comprehension",
+    "subtopic": "Ignoring a qualifier",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the passage support the statement 'The app reduced delivery delays at all branches'?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "\"In the pilot phase, the route-planning app reduced delivery delays at most of the twelve branches that tested it.\""
+    },
+    "ai_claim": "Yes. The passage says the app reduced delivery delays at the branches, so it reduced delays at all branches.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The app was tested at twelve branches."
+      },
+      {
+        "index": 2,
+        "text": "Delays were reduced at the branches."
+      },
+      {
+        "index": 3,
+        "text": "So the app reduces delays."
+      },
+      {
+        "index": 4,
+        "text": "It reduced delays at all branches."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 2,
+      "misconception": "Dropping the qualifiers 'most' and 'pilot phase'",
+      "explanation": "The passage says 'most of the twelve branches that tested it', 'in the pilot phase'. So not all twelve saw reductions, and branches outside the pilot were not tested at all. 'All branches' overstates the passage on both counts.",
+      "why_convincing": "The headline finding - fewer delays - is correct."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the passage says 'most' of the twelve pilot branches, not all branches.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "'Most of the twelve' means some of the twelve did not see reduced delays.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "twelve"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Qualifiers (most, some, in the pilot) limit what a statement supports.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Branches outside the pilot were never tested."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the words that limit the claim."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 drops 'most'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Qualifiers narrow the scope of a statement."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Reread 'at most of the twelve branches that tested it'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: 'most' of the pilot branches is not 'all branches'."
+      }
+    ],
+    "repair": "Accurate: 'In the pilot, the app reduced delays at most of the twelve branches that tested it.'",
+    "debrief": "Qualifiers carry the precision of a claim. Summaries that drop them turn findings into overstatements.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

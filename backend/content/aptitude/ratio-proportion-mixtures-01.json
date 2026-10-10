@@ -1,0 +1,214 @@
+[
+  {
+    "id": "apt-ratio-proportion-mixtures-001",
+    "subject": "aptitude",
+    "topic": "Ratio, Proportion & Mixtures",
+    "subtopic": "Combining two ratios",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A:B = 2:3 and B:C = 4:5. If C = 45, what is A?",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "A is 18.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The ratios given are A:B = 2:3 and B:C = 4:5."
+      },
+      {
+        "index": 2,
+        "text": "Combining them gives A:B:C = 2:3:5."
+      },
+      {
+        "index": 3,
+        "text": "C corresponds to 5 parts and equals 45, so one part is 9."
+      },
+      {
+        "index": 4,
+        "text": "A is 2 parts, so A = 18."
+      }
+    ],
+    "ai_final_answer": "18",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Chaining two ratios without making the shared term equal",
+      "explanation": "B is 3 parts in the first ratio but 4 parts in the second, so the parts are different sizes. Make B equal: 2:3 = 8:12 and 4:5 = 12:15, so A:B:C = 8:12:15. With C = 45, one part is 3 and A = 24.",
+      "why_convincing": "Writing 2:3:5 looks like simply reading the two ratios in order, and every step after it is correct arithmetic. The mismatch in B's value (3 against 4) is never looked at because B is not asked for."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Scale so B matches: A:B = 8:12 and B:C = 12:15, giving A:B:C = 8:12:15. C = 15 parts = 45, so one part = 3 and A = 8 x 3 = 24.",
+    "canonical_answer": "24",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "With A:B:C = 8:12:15, one part is 45/15 = 3 and A = 24.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "24"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "Under 2:3:5, B:C would be 3:5, not the given 4:5.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3",
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Using the AI's 2:3:5 with C = 45 gives B = 27, and then B:C = 27:45 = 3:5, not 4:5."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check that the combined ratio still agrees with both original ratios."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Look at how step 2 joins the two ratios together."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Two ratios can only be chained when the shared term has the same number of parts in both."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rescale 2:3 and 4:5 so that B has the same value in each, then recompute A."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: B is 3 parts in one ratio and 4 in the other. Rescaled, A:B:C = 8:12:15, so one part is 3 and A = 24."
+      }
+    ],
+    "repair": "Replace step 2 with A:B:C = 8:12:15 (B made equal at 12). Then one part = 45/15 = 3 and A = 24.",
+    "debrief": "A ratio is a relationship, not a list of numbers, and two ratios can only be joined through a term that means the same thing in both. The fastest check is to take the combined ratio and read the original ratios back out of it: 2:3:5 gives B:C = 3:5, not 4:5. Any time you merge information, verify that the merged version still reproduces each source.",
+    "transfer_check": {
+      "question": "P:Q = 3:4 and Q:R = 6:7. If R = 56, what is P?",
+      "answer": "36",
+      "explanation": "P:Q:R = 9:12:14, so one part is 4 and P = 36."
+    },
+    "validation_payload": {
+      "solver": "a, b = Fraction(2), Fraction(3)\nc = b * Fraction(5, 4)\nanswer = 45 * a / c",
+      "flawed_solver": "parts = (2, 3, 5)\nanswer = Fraction(45, parts[2]) * parts[0]"
+    }
+  },
+  {
+    "id": "apt-ratio-proportion-mixtures-002",
+    "subject": "aptitude",
+    "topic": "Ratio, Proportion & Mixtures",
+    "subtopic": "Mixing two solutions by volume",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Vessel A contains milk and water in the ratio 3:1. Vessel B contains milk and water in the ratio 5:3. They are mixed in the ratio 2:3 by volume (2 litres of A for every 3 litres of B). What fraction of the mixture is milk?",
+    "artifact_type": "numeric_solution",
+    "artifact": {},
+    "ai_claim": "Milk makes up 21/32 of the mixture.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Vessel A is milk:water = 3:1 and vessel B is 5:3."
+      },
+      {
+        "index": 2,
+        "text": "To mix 2 parts of A with 3 parts of B, scale each ratio by its share: 2 x (3:1) = 6:2 and 3 x (5:3) = 15:9."
+      },
+      {
+        "index": 3,
+        "text": "Adding the scaled ratios gives milk:water = 21:11."
+      },
+      {
+        "index": 4,
+        "text": "So milk is 21/32 of the mixture."
+      }
+    ],
+    "ai_final_answer": "21/32",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Scaling ratio terms as if they were volumes",
+      "explanation": "The volumes are mixed 2:3, but the ratios have different totals: 3:1 has 4 parts and 5:3 has 8. Scaling the terms treats one 'part' of A as the same volume as one 'part' of B. Use fractions instead: milk is 3/4 of A and 5/8 of B, so milk = (2 x 3/4 + 3 x 5/8) / 5 = (3/2 + 15/8) / 5 = 27/40.",
+      "why_convincing": "Multiplying a ratio by its mixing weight is a real technique, and the numbers add up neatly to 21:11. The hidden problem is that 3:1 and 5:3 are expressed in parts of different sizes, which nothing on the page points out."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Convert each vessel to a fraction of milk: A is 3/4 milk, B is 5/8 milk. In 5 litres of mixture (2 of A, 3 of B), milk = 2 x 3/4 + 3 x 5/8 = 3/2 + 15/8 = 27/8 litres. Milk fraction = (27/8) / 5 = 27/40.",
+    "canonical_answer": "27/40",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Milk = 2 x 3/4 + 3 x 5/8 = 27/8 litres in 5 litres, i.e. 27/40.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "27",
+          "40"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "The scaled ratios give A 6 + 2 = 8 parts and B 15 + 9 = 24 parts, a 1:3 volume split, not the stated 2:3.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "8",
+          "24"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Step 2's scaled ratios put 8 parts of A against 24 parts of B - a 1:3 mix by volume, not the 2:3 the question states.",
+      "1 litre of a 1:1 solution mixed with 1 litre of a 7:1 solution is (1/2 + 7/8) / 2 = 11/16 milk, but adding terms gives 8:2, i.e. 4/5."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what one 'part' means in each vessel's ratio."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 multiplies the ratio terms by the mixing proportion. Check that this is legitimate."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Ratio terms only add like volumes when every ratio is written over the same total."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rewrite each vessel as a fraction of milk per litre, then mix 2 litres of A with 3 litres of B."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: 3:1 is in quarters and 5:3 is in eighths, so their parts are different volumes. Milk = (2 x 3/4 + 3 x 5/8) / 5 = 27/40, not 21/32."
+      }
+    ],
+    "repair": "Replace steps 2-4: milk per litre is 3/4 in A and 5/8 in B, so the mixture's milk fraction is (2 x 3/4 + 3 x 5/8) / 5 = 27/40.",
+    "debrief": "Ratios are compact, but they hide their denominators. Two ratios can only be combined term by term when they describe the same total, and 3:1 (four parts) and 5:3 (eight parts) do not. Converting every ratio to a fraction of the whole removes the ambiguity. When quantities from different sources are combined, make sure they are measured in the same unit first.",
+    "transfer_check": {
+      "question": "Vessel X is milk:water 1:1 and vessel Y is 3:1. They are mixed 1:1 by volume. What fraction of the mixture is milk?",
+      "answer": "5/8",
+      "explanation": "Milk fractions are 1/2 and 3/4; their average is 5/8."
+    },
+    "validation_payload": {
+      "solver": "answer = (2 * Fraction(3, 4) + 3 * Fraction(5, 8)) / 5",
+      "flawed_solver": "milk = 2 * 3 + 3 * 5\nwater = 2 * 1 + 3 * 3\nanswer = Fraction(milk, milk + water)"
+    }
+  }
+]

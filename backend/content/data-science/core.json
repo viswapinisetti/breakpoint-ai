@@ -1,0 +1,265 @@
+[
+  {
+    "id": "ds-imb-001",
+    "subject": "data-science",
+    "topic": "Model Evaluation",
+    "subtopic": "Class imbalance and evaluation",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A fraud-detection model is evaluated on the dataset below. Is the conclusion that it is production ready justified?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "caption": "Held-out evaluation set",
+      "columns": "Class,Transactions,Share",
+      "rows": "Legitimate,99000,99.0%|Fraudulent,1000,1.0%",
+      "reported_metric": "Overall accuracy: 99.0%"
+    },
+    "ai_claim": "The model achieves 99% accuracy, which exceeds our 95% bar, so it is ready for production.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model was evaluated on a held-out set of 100,000 transactions it had not seen during training."
+      },
+      {
+        "index": 2,
+        "text": "It classified 99% of them correctly, giving an accuracy of 99.0%."
+      },
+      {
+        "index": 3,
+        "text": "The deployment bar for this system is 95% accuracy."
+      },
+      {
+        "index": 4,
+        "text": "99% comfortably exceeds 95%, so the model is production ready."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "failure": {
+      "category": "F13",
+      "location": 4,
+      "misconception": "Using accuracy as the decision metric on a severely imbalanced dataset",
+      "explanation": "99% of the data is legitimate, so a model that labels every transaction 'legitimate' - detecting no fraud whatsoever - also scores 99% accuracy. The reported figure is consistent with a model of zero business value. The decision needs recall and precision on the fraud class, which the evaluation never reports.",
+      "why_convincing": "The methodology is otherwise sound: a genuine held-out set, no leakage, a pre-agreed threshold, and honest arithmetic. The number is real. Only the choice of metric is wrong, and accuracy is the default people reach for."
+    },
+    "canonical_solution": "Not justified. With a 99:1 class split, the majority-class baseline already achieves 99% accuracy while catching zero fraud. Accuracy cannot distinguish that degenerate model from a useful one. The decision requires class-specific metrics - recall on the fraud class (what share of fraud is caught), precision (what share of alerts are real), and a PR-AUC or confusion matrix. None were reported.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A constant 'legitimate' predictor scores the same 99%.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "99"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "Majority-class baseline accuracy equals 99000/100000.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "99000",
+          "99"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A model with the single rule `return 'legitimate'` scores 99000/100000 = 99.0% accuracy and detects no fraud at all."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the chosen metric can distinguish a good model from a useless one on this data."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 to 3 are all correct. Examine what Step 4 concludes from them."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "On imbalanced data, accuracy is dominated by the majority class and can hide total failure on the minority class."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the accuracy of a model that always predicts the majority class on this exact dataset."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 treats accuracy as decisive. A constant 'legitimate' predictor also scores 99% while catching zero fraud, so the metric cannot support the conclusion. Report recall and precision on the fraud class instead."
+      }
+    ],
+    "repair": "Step 4 should compare against the majority-class baseline of 99% and note that accuracy is uninformative here. Evaluate with recall and precision on the fraud class, and decide against a business threshold for fraud caught versus false alerts.",
+    "debrief": "The most dangerous evaluation failures involve entirely real numbers. Nothing here was miscalculated - the held-out set was clean and the arithmetic correct. The failure was choosing a metric that cannot separate success from a degenerate baseline. Before trusting any metric, compute what a trivial model would score on the same data. If the trivial baseline is close to the reported result, the metric is telling you about the data, not the model.",
+    "validation_payload": {},
+    "truth_state": "flawed"
+  },
+  {
+    "id": "ds-leak-002",
+    "subject": "data-science",
+    "topic": "Feature Engineering",
+    "subtopic": "Data leakage in scaling",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Review this preprocessing pipeline. Is the reported test accuracy a trustworthy estimate of production performance?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "scaler = StandardScaler()\nX_scaled = scaler.fit_transform(X)\n\nX_train, X_test, y_train, y_test = train_test_split(\n    X_scaled, y, test_size=0.2, random_state=42\n)\n\nmodel.fit(X_train, y_train)\nprint(model.score(X_test, y_test))"
+    },
+    "ai_claim": "The split is random and the model never trains on test rows, so the reported test accuracy is an unbiased estimate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Features are standardised so that all columns are on a comparable scale, which the model requires."
+      },
+      {
+        "index": 2,
+        "text": "The data is then split into train and test sets with a fixed random seed for reproducibility."
+      },
+      {
+        "index": 3,
+        "text": "`model.fit` is called only on X_train, so no test row ever appears in training."
+      },
+      {
+        "index": 4,
+        "text": "The test set is therefore untouched by training, and the reported score is an unbiased estimate of production performance."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "failure": {
+      "category": "F12",
+      "location": 1,
+      "misconception": "Believing leakage only occurs when test rows are used for fitting the model",
+      "explanation": "`scaler.fit_transform(X)` is computed over the whole dataset before the split, so the mean and standard deviation encode information from the test rows. Every training row is scaled using statistics that depend on the test set. The model never sees a test label, but it does see test-derived statistics, which inflates the score. The scaler must be fit on X_train only, then applied to X_test.",
+      "why_convincing": "Step 3 is true and is the check most reviewers perform - the model genuinely never trains on test rows. The leak happened one line earlier, before the split existed, so it looks like innocent preparation rather than part of training."
+    },
+    "canonical_solution": "Not trustworthy. Scaling before splitting leaks test-set statistics into training. Correct order:\n\nX_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)\nscaler = StandardScaler()\nX_train = scaler.fit_transform(X_train)\nX_test = scaler.transform(X_test)\n\nFit on train, transform test. In production, wrap this in a Pipeline so the ordering cannot be got wrong.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "scaler.fit_transform(X) runs on every row before the split, so its mean and standard deviation include the test rows.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Split first, fit the scaler on X_train only and re-score: that test score is the honest estimate.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If one test row is an extreme outlier, it shifts the mean and standard deviation used to scale every training row - information from the test set has entered training."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the order of operations, not just which rows `fit` was called on."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 2 to 4 are about the split. Look at what happens before it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Any statistic computed over the full dataset carries test-set information into training."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask which rows contributed to the mean and standard deviation used to scale the training data."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 fits the scaler on all of X, before the split. The mean and standard deviation encode the test rows, so training data is scaled using test-derived statistics. Split first, then fit the scaler on X_train only."
+      }
+    ],
+    "repair": "Move the split above the scaling: fit the scaler on X_train with `fit_transform`, and apply it to X_test with `transform` only. Better still, wrap both steps in a scikit-learn Pipeline so cross-validation cannot leak either.",
+    "debrief": "Leakage is about information flow, not about which array was passed to `fit`. Any quantity computed across the full dataset - a scaler's mean, an imputation value, a feature selected by correlation with the target, a vocabulary - carries test information into training and inflates your estimate. The reliable habit is to split first and treat the test set as though it does not exist until the moment you score. A Pipeline enforces that structurally, which is why it is worth the extra line.",
+    "validation_payload": {},
+    "truth_state": "flawed"
+  },
+  {
+    "id": "ds-ab-003",
+    "subject": "data-science",
+    "topic": "Statistics & Probability",
+    "subtopic": "Reading a non-significant result",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "An A/B test on a checkout redesign returns the result below. Is the analyst's conclusion sound?",
+    "artifact_type": "experiment_design",
+    "artifact": {
+      "caption": "Checkout redesign, 14-day test",
+      "columns": "Variant,Users,Conversions,Rate",
+      "rows": "Control,40000,3200,8.00%|Treatment,40000,3280,8.20%",
+      "reported": "Lift +0.20pp (+2.5% relative), p = 0.31, 95% CI [-0.19pp, +0.59pp]"
+    },
+    "ai_claim": "The result is not statistically significant, so we cannot conclude the redesign improves conversion. We should not ship it on the strength of this test.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The observed lift is +0.20 percentage points, a relative improvement of about 2.5%."
+      },
+      {
+        "index": 2,
+        "text": "The p-value is 0.31, well above the conventional 0.05 threshold, so we fail to reject the null hypothesis."
+      },
+      {
+        "index": 3,
+        "text": "The 95% confidence interval spans -0.19pp to +0.59pp, and includes zero - the data is compatible with the redesign being slightly harmful, neutral, or moderately helpful."
+      },
+      {
+        "index": 4,
+        "text": "We therefore cannot conclude the redesign improves conversion, and should not ship on the strength of this test alone."
+      }
+    ],
+    "ai_final_answer": "sound",
+    "simulated_confidence": 92,
+    "canonical_solution": "Sound. The reasoning is correct and, importantly, avoids two common errors: it does not claim the redesign has no effect (absence of evidence is not evidence of absence), and it does not treat the point estimate as meaningful despite non-significance. Reporting the confidence interval and noting that it contains zero while spanning both harmful and helpful values is exactly right. The conclusion is appropriately limited to what the data supports.",
+    "canonical_answer": "sound",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the conclusion claims more, or less, than the statistics support."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 is the conclusion. Compare it carefully against Steps 2 and 3."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Failing to reject the null is not the same as proving no effect - watch for a solution that confuses the two."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask whether the analyst claimed the redesign has no effect, or only that this test cannot show one."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This analysis is correct. It says we cannot conclude an improvement - not that there is no effect - and it reports the interval honestly. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "This one is right, and the discipline is in what it refuses to say. A weaker analysis would have claimed 'the redesign makes no difference' (treating absence of evidence as evidence of absence) or shipped on the +2.5% point estimate while ignoring the p-value. Reporting the interval - which spans both harm and benefit - communicates the real state of knowledge: this test was underpowered for an effect of this size. The correct next step is a power calculation, not a verdict.",
+    "validation_payload": {},
+    "truth_state": "valid"
+  }
+]

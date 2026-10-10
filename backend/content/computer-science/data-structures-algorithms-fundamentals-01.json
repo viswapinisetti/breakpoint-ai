@@ -1,0 +1,442 @@
+[
+  {
+    "id": "cs-data-structures-algorithms-fundamentals-001",
+    "subject": "computer-science",
+    "topic": "Data Structures & Algorithms Fundamentals",
+    "subtopic": "Index access in a linked list",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is reading the 5,000th element of a singly linked list an O(1) operation, as it is for an array?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. Both are lists of elements, so reading any position takes constant time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Arrays and linked lists both store a sequence of elements."
+      },
+      {
+        "index": 2,
+        "text": "In an array, element i is found directly from its index, in O(1)."
+      },
+      {
+        "index": 3,
+        "text": "A linked list also knows the position of each element, so element i is found directly."
+      },
+      {
+        "index": 4,
+        "text": "Reading the 5,000th element is O(1) in both."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Assuming linked lists support random access",
+      "explanation": "A singly linked list stores only a pointer to the head; each node knows only its successor. Reaching element i means following i links from the head, which is O(n). Arrays are O(1) because elements sit at computable addresses: base + i x size.",
+      "why_convincing": "Both structures are 'lists' with positions, and many language APIs let you write list[i] for either, hiding the cost."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Reading element i of a singly linked list requires walking i nodes from the head: O(n). Arrays give O(1) access because the address is computed from the index.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Linked lists support sequential access only; indexing requires traversal from the head.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "Reading element 5,000 follows 4,999 next pointers from the head.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4999"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "To reach the last node of a 1,000,000-node list, every earlier node must be visited."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how each structure finds an element's location in memory."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 gives the linked list the same ability as the array."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An array computes an element's address from its index; a linked list only knows each node's next node."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the pointer hops needed to reach node 5,000."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: a linked list must be traversed from the head, so index access is O(n)."
+      }
+    ],
+    "repair": "Replace step 3: a linked list must follow next pointers from the head, so reading element i is O(n).",
+    "debrief": "Data structures differ in which operations are cheap, and that is the whole reason to choose one over another. Arrays win on random access; linked lists win on insertion when you already hold a node. Always ask how a structure physically locates an element before assuming a cost.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-data-structures-algorithms-fundamentals-002",
+    "subject": "computer-science",
+    "topic": "Data Structures & Algorithms Fundamentals",
+    "subtopic": "Preconditions of binary search",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can binary search reliably find whether 19 is in this list, in O(log n) time?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "data": "[42, 7, 19, 88, 3, 56, 21]",
+      "task": "Find whether 19 is present using binary search."
+    },
+    "ai_claim": "Yes. Binary search halves the search range each step, so it finds 19 in O(log n).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Binary search compares the target with the middle element."
+      },
+      {
+        "index": 2,
+        "text": "It then discards the half that cannot contain the target."
+      },
+      {
+        "index": 3,
+        "text": "This works on any list, since each comparison tells us which half to keep."
+      },
+      {
+        "index": 4,
+        "text": "So it reliably finds 19 in O(log n) time."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Ignoring binary search's sortedness precondition",
+      "explanation": "Discarding half the list is only valid if the list is sorted, so that 'target is smaller than the middle' implies 'target is to the left'. This list is unsorted: the middle element is 88, 19 < 88, so the search keeps [42, 7, 19] - by luck it contains 19 here, but for 56 it would discard the right half and wrongly report 'not found'. Sort first (O(n log n)) or scan linearly (O(n)).",
+      "why_convincing": "The halving idea is so memorable that its precondition fades, and on some inputs the search even succeeds by accident."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. Binary search requires sorted data; on an unsorted list it can miss elements that are present. Here, searching for 56 would compare with 88, go left, and fail. Use a linear scan, or sort first.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Searching this list for 56: middle is 88, 56 < 88, so the right half (with 56) is discarded.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "56",
+          "88"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Binary search is correct only on sorted input.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Binary search for 56 in [42, 7, 19, 88, 3, 56, 21] reports 'not found'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the conditions binary search needs to be correct."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says binary search works on any list."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Discarding a half is safe only if the order of elements tells you where the target must be."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run binary search on this list for the value 56."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: binary search needs sorted data. On this list, searching for 56 discards the half containing it."
+      }
+    ],
+    "repair": "Replace step 3: binary search requires sorted input; sort the list first or use a linear scan.",
+    "debrief": "Efficient algorithms usually buy their speed with a precondition, and forgetting it produces answers that are fast and wrong. The dangerous part is that the search sometimes succeeds by luck, so one test proves nothing. Before applying an algorithm, check its input requirements - here, sortedness.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-data-structures-algorithms-fundamentals-003",
+    "subject": "computer-science",
+    "topic": "Data Structures & Algorithms Fundamentals",
+    "subtopic": "Stacks for undo",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A text editor needs an undo feature that reverses the most recent action first. Is a stack the right data structure for the history of actions?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. Undo reverses the most recent action first, which is exactly last-in, first-out: a stack.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each action is pushed onto the history as it happens."
+      },
+      {
+        "index": 2,
+        "text": "Undo must reverse the most recent action first."
+      },
+      {
+        "index": 3,
+        "text": "A stack is last-in, first-out: pop returns the most recently pushed item."
+      },
+      {
+        "index": 4,
+        "text": "So a stack fits undo exactly, with O(1) push and pop."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Undo order is LIFO, which a stack provides with O(1) push and pop. (Editors typically use a second stack for redo.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "type A, type B, type C -> undo pops C, then B, then A",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the order undo needs with the order each structure returns items."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states the stack's ordering. Check it against step 2."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A stack is LIFO; a queue is FIFO."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Push three actions and pop them; compare with the undo order."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Undo needs last-in, first-out, which is exactly a stack. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Choosing a data structure starts with the access order the problem demands. Undo is last-in, first-out, so a stack fits naturally, and a second stack handles redo. When approving a design choice, check that the structure's defining order matches the requirement - here it does exactly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-data-structures-algorithms-fundamentals-004",
+    "subject": "computer-science",
+    "topic": "Data Structures & Algorithms Fundamentals",
+    "subtopic": "Hash table lookup cost",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it accurate to say that looking up a key in a well-implemented hash table takes O(1) time on average, but can take O(n) in the worst case?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. With a good hash function and resizing, lookups average O(1); if many keys collide into one bucket, a lookup can degrade to O(n).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A hash function maps each key to a bucket in O(1)."
+      },
+      {
+        "index": 2,
+        "text": "With a good hash function and a bounded load factor, buckets hold few keys on average, so lookups average O(1)."
+      },
+      {
+        "index": 3,
+        "text": "If many keys collide into the same bucket, a lookup must search through them all."
+      },
+      {
+        "index": 4,
+        "text": "In the worst case that is O(n)."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Average-case O(1) relies on a good hash function and resizing to keep the load factor bounded; worst-case O(n) occurs when collisions concentrate keys in one bucket (for example, with a poor or attacked hash function).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If every key hashes to bucket 0, a lookup scans all n keys.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check both halves of the claim: the average and the worst case."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 describes what makes the worst case slow."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Hash tables are O(1) on average under good hashing, but collisions can make a bucket long."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine a hash function that sends every key to the same bucket."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Average O(1), worst case O(n) when keys collide. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "'Hash tables are O(1)' is usually said without its conditions. This claim states both the average and the worst case, which is the complete answer. Worst cases are not just theory: hash-flooding attacks deliberately trigger collisions, which is why many languages randomise their hash functions.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-data-structures-algorithms-fundamentals-005",
+    "subject": "computer-science",
+    "topic": "Data Structures & Algorithms Fundamentals",
+    "subtopic": "Choosing between array and linked list",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is a linked list the faster choice for this app's notification list?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "request": "Should our app store its in-memory notification list as a dynamic array or a linked list?"
+    },
+    "ai_claim": "Yes. A linked list is faster, because notifications keep arriving and a linked list inserts in O(1).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "New notifications arrive continually."
+      },
+      {
+        "index": 2,
+        "text": "A linked list inserts at its head in O(1), while inserting at the front of an array is O(n)."
+      },
+      {
+        "index": 3,
+        "text": "The app mainly adds notifications at the front and rarely reads them by position."
+      },
+      {
+        "index": 4,
+        "text": "So the linked list is the faster choice."
+      }
+    ],
+    "ai_final_answer": "linked list",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The app's actual operation mix: whether notifications are added at the front or appended at the end, and how often the list is read by position or iterated. Each structure wins for a different mix.",
+    "resolving_scenarios": [
+      "New notifications are inserted at the front and never read by index: the linked list's O(1) head insertion beats the array's O(n) shifting.",
+      "Notifications are appended at the end and the screen reads items by position and scrolls through them often: the array's O(1) amortised append, O(1) index access and cache-friendly iteration win."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the operations, which are not given. Step 3 invents the workload. Linked lists win for frequent insertion at the front with no random access; arrays win for appending, index access and iteration (and are more cache-friendly).",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If items are appended at the end and read by index, the array is faster.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A feed that appends new items at the end and displays item i directly is faster with an array."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where step 3's description of the workload comes from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 describes how the app uses the list. Is that in the question?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Which structure is faster depends on the mix of operations performed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the two structures for front-insertion and for index access."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 invents the workload. With front insertion a linked list wins; with appends and index reads an array wins. It cannot be decided from what is given."
+      }
+    ],
+    "repair": "Ask which operations the app performs most (insert where, read how) before choosing.",
+    "debrief": "Performance questions have no answer without a workload. The reasoning quoted a true fact (O(1) head insertion) and then supplied the workload that makes it decisive. When a recommendation depends on usage, name the usage you need to know rather than assuming the convenient one.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

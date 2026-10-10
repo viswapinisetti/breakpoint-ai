@@ -1,0 +1,454 @@
+[
+  {
+    "id": "dl-optimization-regularization-001",
+    "subject": "deep-learning",
+    "topic": "Optimization & Regularization",
+    "subtopic": "Evaluating in training mode",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this compute the model's normal validation accuracy?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "model = Net()        # contains nn.Dropout(0.5) and nn.BatchNorm1d\n# ... training ...\nwith torch.no_grad():\n    preds = model(X_val)        # model.eval() was never called\nprint(accuracy(preds, y_val))"
+    },
+    "ai_claim": "Yes. torch.no_grad() switches the model to inference, so dropout and batch norm behave as they should during evaluation.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "torch.no_grad() is used."
+      },
+      {
+        "index": 2,
+        "text": "It puts the model into inference mode."
+      },
+      {
+        "index": 3,
+        "text": "Dropout is disabled and batch norm uses its running statistics."
+      },
+      {
+        "index": 4,
+        "text": "So the accuracy is the normal validation accuracy."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 2,
+      "misconception": "Confusing no_grad with eval mode",
+      "explanation": "torch.no_grad() only stops gradient tracking. Layer behaviour is controlled by model.train() / model.eval(). The model is still in training mode, so dropout randomly zeroes half the units and batch norm uses the validation batch's statistics. The accuracy is lower and varies between runs. Call model.eval() before evaluating.",
+      "why_convincing": "Both are part of 'inference' in most tutorials, so they are easily merged."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: no_grad does not change layer behaviour. Call model.eval() (and model.train() again before training).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Evaluating twice gives different accuracies (0.81 and 0.79); after model.eval() it is a stable 0.86.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.86"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "model.training is still True inside the no_grad block.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Two evaluations of the same model give different results."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check model.training during evaluation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes no_grad changes layer modes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "no_grad disables autograd; eval() switches dropout and batch norm."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate twice and compare."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the model is still in training mode. Call model.eval()."
+      }
+    ],
+    "repair": "Call `model.eval()` before validation and `model.train()` before resuming training.",
+    "debrief": "Two separate switches control inference in PyTorch: eval() for layer behaviour, no_grad() for memory and speed. Use both.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-optimization-regularization-002",
+    "subject": "deep-learning",
+    "topic": "Optimization & Regularization",
+    "subtopic": "What Dropout's p means",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does nn.Dropout(p=0.8) keep 80% of activations during training?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "self.drop = nn.Dropout(p=0.8)\n# AI note: \"p=0.8 keeps 80% of the activations, a light regularisation.\""
+    },
+    "ai_claim": "Yes. p is the keep probability, so 80% of activations are kept and 20% are dropped - light regularisation.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Dropout randomly removes activations during training."
+      },
+      {
+        "index": 2,
+        "text": "p = 0.8."
+      },
+      {
+        "index": 3,
+        "text": "p is the probability of keeping each activation."
+      },
+      {
+        "index": 4,
+        "text": "So 80% are kept."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Reading p as the keep probability",
+      "explanation": "In PyTorch (and Keras), p is the probability of zeroing an element. p = 0.8 drops 80% of activations and keeps 20%, scaling the survivors by 1 / 0.2 = 5. That is very heavy regularisation and often prevents learning. (Some older TensorFlow APIs used keep_prob, which is where the confusion comes from.)",
+      "why_convincing": "The original dropout paper and old TensorFlow used a keep probability."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: p = 0.8 drops 80% of activations. Use p = 0.2 to drop 20%.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "In training mode, about 80% of nn.Dropout(0.8)(torch.ones(10000)) are 0 and the rest are 5.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "Survivors are scaled by 1 / (1 - 0.8) = 5.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Only 1 in 5 activations survives."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check PyTorch's definition of p."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 interprets p as a keep probability."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In nn.Dropout, p is the probability of an element being zeroed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply the layer to a tensor of ones."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: p = 0.8 drops 80%. Use p = 0.2."
+      }
+    ],
+    "repair": "Use `nn.Dropout(p=0.2)` for light regularisation.",
+    "debrief": "Parameter conventions differ across frameworks and versions. Test a layer on a simple input when its behaviour matters.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-optimization-regularization-003",
+    "subject": "deep-learning",
+    "topic": "Optimization & Regularization",
+    "subtopic": "Restoring the best checkpoint",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this ends with the weights from the epoch with the lowest validation loss?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "best, patience = float(\"inf\"), 0\nfor epoch in range(100):\n    train_one_epoch(model)\n    val = evaluate(model)\n    if val < best:\n        best, patience = val, 0\n        torch.save(model.state_dict(), \"best.pt\")\n    else:\n        patience += 1\n        if patience == 5:\n            break\nmodel.load_state_dict(torch.load(\"best.pt\"))"
+    },
+    "ai_claim": "Yes. The weights are saved whenever validation loss improves, training stops after 5 epochs without improvement, and the saved best weights are reloaded at the end.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "After each epoch, validation loss is computed."
+      },
+      {
+        "index": 2,
+        "text": "A new best is saved to best.pt and patience resets."
+      },
+      {
+        "index": 3,
+        "text": "After 5 epochs without improvement, the loop stops."
+      },
+      {
+        "index": 4,
+        "text": "Loading best.pt restores the best epoch's weights, not the last epoch's."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Without the final load, the model would keep the weights from 5 epochs past the best. This loop implements early stopping with checkpoint restoration.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "val losses 0.52, 0.47, 0.45, 0.46, 0.47, 0.48, 0.49, 0.50 -> stop; reload epoch 3 (0.45)",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0.45"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow the loop through a run where validation loss rises."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 depends on the final load."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Early stopping should restore the best checkpoint, not keep the last weights."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace an example sequence of validation losses."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The best weights are restored. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Early stopping has two parts: deciding when to stop and restoring the best weights. Omitting the second keeps a model that has already started to overfit.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-optimization-regularization-004",
+    "subject": "deep-learning",
+    "topic": "Optimization & Regularization",
+    "subtopic": "Augmentation that preserves labels",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that these augmentations suit this task because they add variety without changing labels?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "train_tf = transforms.Compose([\n    transforms.RandomHorizontalFlip(),\n    transforms.RandomResizedCrop(224, scale=(0.8, 1.0)),\n    transforms.ToTensor(),\n])\n# Task: classify photos of cats vs dogs"
+    },
+    "ai_claim": "Yes. A mirrored or slightly cropped photo of a cat is still a cat, so these transforms create realistic new training examples and reduce overfitting.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Horizontal flips produce mirror images."
+      },
+      {
+        "index": 2,
+        "text": "A mirrored cat is still a cat."
+      },
+      {
+        "index": 3,
+        "text": "Crops of 80-100% of the image keep the animal visible."
+      },
+      {
+        "index": 4,
+        "text": "So labels are preserved while variety increases."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct for this task. (The same flip would be wrong for, say, reading digits or text, where mirroring changes meaning.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "For handwritten digit recognition, flipping could make some digits unreadable or change meaning - but not here.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether each transform can change the correct label."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 checks label preservation for flips."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Good augmentations are label-preserving for the specific task."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a flipped and cropped cat photo."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The transforms preserve labels. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Augmentation encodes assumptions about invariances. Flips suit animals; they do not suit text, digits or medical images with left-right meaning.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-optimization-regularization-005",
+    "subject": "deep-learning",
+    "topic": "Optimization & Regularization",
+    "subtopic": "More weight decay",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will increasing weight decay to 1e-3 reduce the validation loss?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "current": "weight_decay = 1e-4; training loss 0.30, validation loss 0.42 (last epoch).",
+      "proposal": "Increase weight_decay to 1e-3 to reduce validation loss.",
+      "missing": "The learning curves over epochs and results for other settings are not available."
+    },
+    "ai_claim": "Yes. The validation loss is higher than the training loss, so the model is overfitting, and stronger regularisation will reduce validation loss.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Validation loss (0.42) exceeds training loss (0.30)."
+      },
+      {
+        "index": 2,
+        "text": "That gap shows overfitting."
+      },
+      {
+        "index": 3,
+        "text": "Weight decay reduces overfitting."
+      },
+      {
+        "index": 4,
+        "text": "So validation loss will fall."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether the model is actually limited by overfitting. A train-validation gap is normal; if validation loss has plateaued while training loss keeps falling, more regularisation may help, but if both are still falling (or the model is under-capacity), stronger decay may increase validation loss. Learning curves or an experiment are needed.",
+    "resolving_scenarios": [
+      "Validation loss rose over the last 20 epochs while training loss fell: the model overfits, and 1e-3 lowers validation loss.",
+      "Both losses were still decreasing when training stopped: the model is under-trained, and stronger decay slows learning, raising validation loss."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "A single gap does not establish overfitting or predict the effect of more decay. Step 2 over-interprets the gap.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If both losses are still falling, the gap is not overfitting and more decay can hurt.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An under-trained model also shows a train-validation gap."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the learning curves look like."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats any gap as overfitting."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Overfitting shows as validation loss rising while training loss falls."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider both losses still decreasing."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 over-interprets the gap. With overfitting, decay helps; otherwise it may hurt. It cannot be decided."
+      }
+    ],
+    "repair": "Plot learning curves and run a small sweep over weight decay (e.g. 1e-5 to 1e-2).",
+    "debrief": "Regularisation fixes overfitting, not every gap. Learning curves tell you which regime you are in.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

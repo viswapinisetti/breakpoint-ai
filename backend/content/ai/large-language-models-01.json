@@ -1,0 +1,374 @@
+[
+  {
+    "id": "ai-large-language-models-001",
+    "subject": "ai",
+    "topic": "Large Language Models",
+    "subtopic": "LLM arithmetic",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the model's answer correct, supporting the claim that LLMs compute arithmetic exactly?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "User: What is 4,837 x 2,963?\nLLM (no tools): \"4,837 x 2,963 = 14,331,931.\"\nFollow-up claim in a report: \"LLMs compute arithmetic exactly, like a calculator.\""
+    },
+    "ai_claim": "Yes. The model computed the product precisely, which shows LLMs perform arithmetic like calculators.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model produced a specific 8-digit result."
+      },
+      {
+        "index": 2,
+        "text": "LLMs are trained on vast amounts of maths."
+      },
+      {
+        "index": 3,
+        "text": "They therefore compute products exactly."
+      },
+      {
+        "index": 4,
+        "text": "So 14,331,931 is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming token prediction performs exact computation",
+      "explanation": "LLMs generate digits token by token by pattern, not by executing multiplication, so long products are often slightly wrong. 4,837 x 2,963 = 14,332,031; the model's 14,331,931 is off by 100. Use a calculator or code-execution tool for exact arithmetic.",
+      "why_convincing": "The answer has the right magnitude and looks precise."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the correct product is 14,332,031. LLMs can err on exact arithmetic; use a tool.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "4,837 x 2,963 = 14,332,031, not 14,331,931.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "14332031"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "LLMs predict tokens; exact computation should be delegated to tools.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The model's answer is off by 100."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the multiplication with a calculator."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes exact computation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Language models approximate arithmetic by pattern."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 4,837 x 2,963."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the answer is 14,332,031. Use a calculator tool."
+      }
+    ],
+    "repair": "Route arithmetic to a calculator or code-execution tool.",
+    "debrief": "Plausible-looking numbers are the most dangerous LLM errors. Give models tools for exact work.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-large-language-models-002",
+    "subject": "ai",
+    "topic": "Large Language Models",
+    "subtopic": "A function that does not exist",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the user rely on the suggested pandas method?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "User: How do I merge two DataFrames on fuzzy-matched names?\nLLM: \"Use pandas' built-in df.smart_merge(other, on='name', fuzzy=True, threshold=0.8).\"\nThe pandas documentation has no smart_merge method."
+    },
+    "ai_claim": "Yes. The model gives the exact method name and parameters, so it is a real pandas feature.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model names df.smart_merge."
+      },
+      {
+        "index": 2,
+        "text": "It specifies parameters: on, fuzzy and threshold."
+      },
+      {
+        "index": 3,
+        "text": "Specific API details indicate a real method."
+      },
+      {
+        "index": 4,
+        "text": "So the user can rely on it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F14",
+      "location": 3,
+      "misconception": "Trusting a plausible but invented API",
+      "explanation": "Models often invent API names that fit the library's naming style. pandas has no smart_merge; calling it raises AttributeError. Fuzzy matching needs a library such as rapidfuzz, then a normal merge. Check documentation (or run the code) before relying on generated API calls.",
+      "why_convincing": "The name and parameters fit pandas conventions perfectly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: smart_merge does not exist. Use rapidfuzz to match names, then pd.merge.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The pandas API reference has no smart_merge method.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Running df.smart_merge(...) raises AttributeError: 'DataFrame' object has no attribute 'smart_merge'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The code fails on the first call."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look the method up in the documentation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats specificity as evidence."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models can hallucinate APIs that follow a library's style."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the suggested code."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the method does not exist."
+      }
+    ],
+    "repair": "Verify generated code against documentation and tests; use rapidfuzz plus pd.merge.",
+    "debrief": "Hallucinated APIs are a known failure of code assistants. Running code (and tests) is the fastest check.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-large-language-models-003",
+    "subject": "ai",
+    "topic": "Large Language Models",
+    "subtopic": "Content beyond the context window",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's explanation correct?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "A chat app keeps only the most recent 16,000 tokens of conversation in the model's context.\nAfter a 40,000-token session, the user asks about a detail mentioned in the first message.\nAI: \"The model may not recall it: the first message is no longer in its context, so it cannot see it unless the app re-inserts it.\""
+    },
+    "ai_claim": "Yes. The model only sees what is in its context window. The first message was dropped when the conversation exceeded 16,000 tokens, so the model cannot access it - it may guess or say it does not know.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The app sends only the latest 16,000 tokens."
+      },
+      {
+        "index": 2,
+        "text": "The session is 40,000 tokens long."
+      },
+      {
+        "index": 3,
+        "text": "The first message is outside what is sent."
+      },
+      {
+        "index": 4,
+        "text": "So the model cannot see it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Models have no memory beyond the context provided; long conversations need summarisation or retrieval of earlier content.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Only the last 16,000 of 40,000 tokens are sent.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "16,000"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the model receives on each request."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 locates the first message."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models only see what is in the context window."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the session length with the window."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The first message is outside the context. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Context is the model's only working memory. Applications decide what goes into it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-large-language-models-004",
+    "subject": "ai",
+    "topic": "Large Language Models",
+    "subtopic": "Stated confidence",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the stated 95% mean the answer has a 95% chance of being correct?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "explanation": "Prompt: \"Answer and state your confidence as a percentage.\"\nLLM: \"The defendant's appeal will be dismissed. Confidence: 95%.\"\nReport: \"The model is 95% likely to be right about this case.\""
+    },
+    "ai_claim": "Yes. The model assessed its own certainty and reported 95%, so its answer is 95% likely to be correct.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model was asked to state its confidence."
+      },
+      {
+        "index": 2,
+        "text": "It stated 95%."
+      },
+      {
+        "index": 3,
+        "text": "A stated confidence is a probability of being right."
+      },
+      {
+        "index": 4,
+        "text": "So the answer is 95% likely to be correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Treating verbalised confidence as a calibrated probability",
+      "explanation": "A percentage in generated text is itself generated text; it is not a measured probability. Verbalised confidence is often poorly calibrated, especially for questions outside the model's knowledge (like predicting a court outcome). Calibration must be measured: collect many answers with stated confidence and compare with actual accuracy.",
+      "why_convincing": "Asking for confidence feels like asking for a probability."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the 95% is generated text, not a calibrated probability. Measure calibration on labelled examples before relying on it.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "On 200 past cases where the model stated 95%, it was right 61% of the time.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "61"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Confidence estimates are meaningful only if calibration has been measured.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Stated confidence of 95% corresponds to 61% measured accuracy."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the 95% was produced."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats stated confidence as a probability."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Calibration is an empirical property that must be measured."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare stated confidence with actual accuracy over many cases."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: stated confidence is not calibrated by default."
+      }
+    ],
+    "repair": "Measure calibration on labelled data; use log-probabilities or evaluation, not self-reported confidence.",
+    "debrief": "Uncertainty is worth reporting only if it is calibrated. Measure it before showing it to users.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

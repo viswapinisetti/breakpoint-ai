@@ -1,0 +1,446 @@
+[
+  {
+    "id": "nc-forms-sheets-email-automation-001",
+    "subject": "no-code-automation",
+    "topic": "Forms, Sheets & Email Automation",
+    "subtopic": "Unvalidated email addresses",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will every applicant receive their joining link?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Form field 'Email' is a plain text box (no validation).\nWorkflow: New submission -> send confirmation email with the event joining link to {{email}}.\nAI: \"Every applicant receives their joining link.\""
+    },
+    "ai_claim": "Yes. The workflow emails the address each applicant entered, so everyone receives the link.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each applicant enters an email address."
+      },
+      {
+        "index": 2,
+        "text": "The workflow sends to that address."
+      },
+      {
+        "index": 3,
+        "text": "Email delivery reaches the applicant."
+      },
+      {
+        "index": 4,
+        "text": "So everyone receives the link."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Trusting free-text email input",
+      "explanation": "A plain text box accepts typos ('asha@gmial.com', 'asha@gmail', spaces), so some emails bounce or go to strangers, and those applicants never get the link - silently. Use an email-type field with validation, a confirmation field or double opt-in, and monitor bounces with a follow-up path.",
+      "why_convincing": "Most people type their email correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: typos and invalid addresses mean some applicants never receive the link. Validate emails and handle bounces.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Of 400 submissions, 17 addresses bounced (e.g. 'gmial.com').",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "17"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Validate user input at the source and monitor delivery failures.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An applicant with a typo never gets the link."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about what people type by mistake."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every address works."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Validate inputs and monitor bounces."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at bounce reports."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: invalid addresses bounce. Validate and follow up."
+      }
+    ],
+    "repair": "Use an email field with validation, and route bounces to a follow-up process.",
+    "debrief": "Garbage in the form becomes silent failure in the workflow. Validate at the source.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-forms-sheets-email-automation-002",
+    "subject": "no-code-automation",
+    "topic": "Forms, Sheets & Email Automation",
+    "subtopic": "A response sheet anyone can edit",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 'anyone with the link can edit' acceptable for this sheet?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Job-application form responses (name, phone, address, CV link) go to a Google Sheet.\nSharing: 'Anyone with the link can edit' so the hiring panel can open it easily.\nAI: \"Only people we send the link to will see it, so this is fine.\""
+    },
+    "ai_claim": "Yes. The link is only shared with the hiring panel, so only they can access the sheet.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The link is shared with the panel."
+      },
+      {
+        "index": 2,
+        "text": "Others do not have the link."
+      },
+      {
+        "index": 3,
+        "text": "Without the link, nobody can open it."
+      },
+      {
+        "index": 4,
+        "text": "So only the panel has access."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Protecting personal data with a shareable link",
+      "explanation": "Links are forwarded, pasted into chats and calendars, and saved in browser history; anyone who obtains it can read and edit applicants' personal data - with no record of who did. Edit access also lets anyone alter or delete responses. Share with named accounts only (viewers where possible), restrict to the organisation, and review access.",
+      "why_convincing": "Obscure links feel private."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: anyone with the link can view and edit applicants' personal data. Share with named people only.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A panel member pastes the link into a group chat with external recruiters, who can now edit the sheet.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Personal data should be shared with named, authenticated users on a least-privilege basis.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A forwarded link exposes every applicant's address and phone."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how links spread."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the link stays private."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Link sharing is not access control."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a forwarded link."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: links leak. Restrict to named users."
+      }
+    ],
+    "repair": "Restrict sharing to named accounts (view-only for most), within the organisation.",
+    "debrief": "Convenient sharing settings are a common source of personal-data leaks in no-code setups.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-forms-sheets-email-automation-003",
+    "subject": "no-code-automation",
+    "topic": "Forms, Sheets & Email Automation",
+    "subtopic": "Deduplicating by submission ID",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "The form platform assigns each submission a unique Submission ID.\nWorkflow: New submission -> search the sheet for this Submission ID -> if not found, add a row; if found, skip.\nAI: \"Re-sent or replayed webhook events won't create duplicate rows.\""
+    },
+    "ai_claim": "Yes. Each submission has one unique ID, and the workflow adds a row only if that ID is not already in the sheet, so replays of the same submission are skipped.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each submission has a unique ID."
+      },
+      {
+        "index": 2,
+        "text": "The workflow checks the sheet for that ID."
+      },
+      {
+        "index": 3,
+        "text": "Replays carry the same ID and are found."
+      },
+      {
+        "index": 4,
+        "text": "So duplicates are skipped."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Checking for a unique ID before inserting makes the workflow idempotent against duplicate deliveries (two truly simultaneous deliveries could still race, which is rare).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Replaying submission S-2291 twice leaves one row for S-2291.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2291"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow a replayed event."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on the ID being the same."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Unique keys make inserts idempotent."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Replay one submission."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Duplicates are skipped. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Every integration that can deliver twice should check a unique key before creating records.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-forms-sheets-email-automation-004",
+    "subject": "no-code-automation",
+    "topic": "Forms, Sheets & Email Automation",
+    "subtopic": "Mail merge with a test send",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this is a sound process for a bulk personalised email?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Mail merge from a sheet (columns: first_name, course, start_date) to 480 students.\nBefore sending, the workflow sends one test email to the organiser using the first row, checks placeholders render correctly, and then sends the rest in batches of 50."
+    },
+    "ai_claim": "Yes. The test send catches broken placeholders and formatting before 480 people see them, and batching reduces the risk of hitting sending limits or spreading a mistake.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A test email uses real data from the first row."
+      },
+      {
+        "index": 2,
+        "text": "The organiser checks every placeholder."
+      },
+      {
+        "index": 3,
+        "text": "Only then does the bulk send start."
+      },
+      {
+        "index": 4,
+        "text": "Batches limit the damage if something goes wrong."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Test-first and batched sending are standard safeguards for mail merges.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The test email shows 'Hi {{firstname}}' unrendered, revealing a column-name mismatch before any student receives it.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what could go wrong in a mail merge."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 catches placeholder errors."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Test with real data before bulk actions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a misnamed column."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The process catches errors early. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Bulk actions multiply mistakes. A single realistic test send is the cheapest safeguard.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-forms-sheets-email-automation-005",
+    "subject": "no-code-automation",
+    "topic": "Forms, Sheets & Email Automation",
+    "subtopic": "Will 1,200 emails go out today",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will all 1,200 applicants receive the email today?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Workflow sends the admit letter to 1,200 applicants through a connected Gmail account at 10:00 today.\nWhich kind of Gmail account is connected (a free consumer account or a Google Workspace account), and its sending history today, are not recorded."
+    },
+    "ai_claim": "Yes. The workflow sends to all 1,200 applicants, so everyone receives it today.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The list has 1,200 applicants."
+      },
+      {
+        "index": 2,
+        "text": "The workflow sends one email to each."
+      },
+      {
+        "index": 3,
+        "text": "Gmail delivers each email."
+      },
+      {
+        "index": 4,
+        "text": "So everyone receives it today."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The connected account's sending limits. Gmail enforces daily sending limits - roughly 500 recipients per day for a free account and around 2,000 messages per day for a Google Workspace account - and emails already sent today count too. Which account type is connected is not recorded.",
+    "resolving_scenarios": [
+      "A Google Workspace account with little prior sending today: all 1,200 emails can be sent.",
+      "A free consumer Gmail account: sending stops after about 500 recipients, and the remaining ~700 fail until the limit resets."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the account type and today's usage, which are unknown. Step 3 assumes no sending limits.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "On a free Gmail account, about 700 of the 1,200 sends would fail with a sending-limit error.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "700"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Sending halts partway through on a consumer account."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what limits the sending account has."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes unlimited sending."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Email providers enforce daily sending limits by account type."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare 1,200 with a 500-per-day limit."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes no limits. Workspace can send all; a free account cannot. It cannot be decided."
+      }
+    ],
+    "repair": "Check the account's limits; use a transactional email service for bulk sends.",
+    "debrief": "Bulk sending through a personal mailbox hits limits and deliverability problems. Use a service built for it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

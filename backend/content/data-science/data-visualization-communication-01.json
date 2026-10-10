@@ -1,0 +1,464 @@
+[
+  {
+    "id": "ds-data-visualization-communication-001",
+    "subject": "data-science",
+    "topic": "Data Visualization & Communication",
+    "subtopic": "Feature importance is not causation",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the feature importance chart justify increasing discounts to raise conversion?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "chart": "Bar chart: random forest feature importances for predicting conversion\n1. discount_pct 0.31\n2. pages_viewed 0.22\n3. device 0.12 ...",
+      "recommendation": "\"Discount is the strongest driver of conversion, so increase discounts across the board.\""
+    },
+    "ai_claim": "Yes. Discount has the highest importance, so it drives conversion most, and increasing it will raise conversion.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model ranks discount_pct as most important."
+      },
+      {
+        "index": 2,
+        "text": "Importance measures how much a feature drives the outcome."
+      },
+      {
+        "index": 3,
+        "text": "So discounts are the main driver of conversion."
+      },
+      {
+        "index": 4,
+        "text": "Increasing discounts will raise conversion."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 2,
+      "misconception": "Reading predictive importance as causal effect",
+      "explanation": "Feature importance measures how useful a feature is for prediction, not what happens if you change it. Discounts may be targeted at customers already likely to buy (e.g. those with items in their cart), so they predict conversion without causing it. Importances also say nothing about direction or diminishing returns. Estimate causal effects with an experiment (random discount assignment).",
+      "why_convincing": "'Importance' and 'driver' sound like the same thing."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: importance is predictive, not causal. Run an experiment that randomises discounts to measure their effect.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If discounts are shown mainly to users with full carts, discount_pct predicts conversion even if discounts change nothing.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "The importances come from a model trained on observational data.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Raising discounts for all users may just lower margins."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how discounts were assigned in the data."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 defines importance as causal influence."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Predictive importance can reflect confounding and targeting."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider who received discounts."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: importance is about prediction, not cause. Test discounts in an experiment."
+      }
+    ],
+    "repair": "Randomise discounts in an A/B test to estimate their causal effect.",
+    "debrief": "Explaining a model is not explaining the world. Feature importance tells you what the model uses; interventions need causal evidence.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-data-visualization-communication-002",
+    "subject": "data-science",
+    "topic": "Data Visualization & Communication",
+    "subtopic": "Overlapping confidence intervals",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the overlap prove there is no significant difference between A and B?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "chart": "Bar chart with 95% CI error bars\nVariant A: 12.0% [10.6%, 13.4%]\nVariant B: 14.2% [12.8%, 15.6%]\nThe error bars overlap between 12.8% and 13.4%."
+    },
+    "ai_claim": "Yes. The 95% confidence intervals overlap, which means the difference is not statistically significant.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each bar shows a 95% CI."
+      },
+      {
+        "index": 2,
+        "text": "A's interval reaches 13.4% and B's starts at 12.8%."
+      },
+      {
+        "index": 3,
+        "text": "The intervals overlap."
+      },
+      {
+        "index": 4,
+        "text": "Overlap means no significant difference."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 4,
+      "misconception": "Using CI overlap as a significance test",
+      "explanation": "Two 95% intervals can overlap while the difference is significant, because the uncertainty of a difference is smaller than the sum of the two half-widths. Here each half-width is 1.4 points; the difference's standard error is about 1.4 / 1.96 x sqrt(2) = 1.0 point, so the 2.2-point difference has a 95% CI of about [0.2, 4.2], excluding 0. Test the difference directly.",
+      "why_convincing": "Non-overlap does imply significance, so overlap feels like the reverse."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: overlapping 95% intervals do not imply non-significance. The difference's own CI (about 0.2 to 4.2 points) excludes zero.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "SE of each = 1.4 / 1.96 = 0.71; SE of difference = 0.71 x sqrt(2) = 1.01; 95% CI of 2.2 is 2.2 +- 1.98 = [0.2, 4.2]",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0.2",
+          "4.2"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The two intervals overlap only between 12.8% and 13.4%.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "12.8",
+          "13.4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A difference whose own CI excludes zero is significant despite the overlap."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what interval describes the difference itself."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 turns overlap into a test."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The SE of a difference is sqrt(SE_A^2 + SE_B^2), not SE_A + SE_B."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the CI for B - A."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: overlap does not mean non-significance. The difference's CI excludes 0."
+      }
+    ],
+    "repair": "Show the difference with its own confidence interval, or run a two-sample test.",
+    "debrief": "Error bars on separate groups answer 'how precise is each estimate?', not 'are they different?'. Plot the difference when the difference is the point.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-data-visualization-communication-003",
+    "subject": "data-science",
+    "topic": "Data Visualization & Communication",
+    "subtopic": "Reading a calibration plot",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that the model's probabilities can be read at face value - e.g. customers scored around 0.75 churn about 75% of the time?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "chart": "Calibration plot, churn model, 10 bins of predicted probability\nBin 0.7-0.8: mean predicted 0.75, observed churn rate 0.73 (n = 820)\nBin 0.8-0.9: mean predicted 0.85, observed 0.83 (n = 610)\nAll bins lie within 0.03 of the diagonal."
+    },
+    "ai_claim": "Yes. In every bin, the observed churn rate is within 0.03 of the average predicted probability, so the model is well calibrated and its probabilities can be used as stated.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A calibration plot compares predicted probabilities with observed frequencies."
+      },
+      {
+        "index": 2,
+        "text": "In the 0.7-0.8 bin, the model predicts 0.75 on average and 73% actually churn."
+      },
+      {
+        "index": 3,
+        "text": "Every bin is within 0.03 of the diagonal, with large bins."
+      },
+      {
+        "index": 4,
+        "text": "So the probabilities are well calibrated."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Close agreement with the diagonal, across bins with substantial counts, indicates good calibration, so probabilities can inform decisions such as expected churn counts.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Bin 0.7-0.8: predicted 0.75, observed 0.73, n = 820.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.75",
+          "0.73"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare predicted and observed values in each bin."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 checks all bins and their sizes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Calibration means predicted probabilities match observed frequencies."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the gap from the diagonal."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. All bins are close to the diagonal with large counts. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Good ranking (AUC) and good calibration are different properties. When decisions use the probability values themselves, check calibration.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-data-visualization-communication-004",
+    "subject": "data-science",
+    "topic": "Data Visualization & Communication",
+    "subtopic": "Confusion matrices for stakeholders",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this slide communicates the model's performance accurately and in terms stakeholders can act on?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "slide": "Out of 1,000 customers flagged 'likely to churn', 620 did churn (precision 62%).\nOf the 900 customers who churned, the model flagged 620 (recall 69%).\nThe remaining 380 flagged customers stayed; 280 churners were not flagged."
+    },
+    "ai_claim": "Yes. It states counts alongside precision and recall, and explains both kinds of error in plain language, so stakeholders can see what acting on the flags would mean.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "1,000 flagged, of whom 620 churned: precision 620 / 1,000 = 62%."
+      },
+      {
+        "index": 2,
+        "text": "900 churned, of whom 620 were flagged: recall 620 / 900 = 69%."
+      },
+      {
+        "index": 3,
+        "text": "The slide states both error types: 380 false alarms and 280 missed churners."
+      },
+      {
+        "index": 4,
+        "text": "Counts plus rates make the trade-offs concrete."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The numbers are internally consistent (620 + 380 = 1,000 flagged; 620 + 280 = 900 churners), and pairing counts with rates is good practice for non-technical audiences.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "620 / 1,000 = 62%; 620 / 900 = 68.9%, about 69%",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "62",
+          "69"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "620 + 280 = 900 churners; 620 + 380 = 1,000 flagged",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "900",
+          "1,000"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the numbers for consistency."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 compute precision and recall."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Precision uses flagged as the denominator; recall uses actual churners."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add up the counts on the slide."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The counts and rates are consistent and clearly explained. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Counts make metrics tangible: '380 false alarms' means more to a retention team than 'precision 62%'. Pair them, and check they reconcile.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-data-visualization-communication-005",
+    "subject": "data-science",
+    "topic": "Data Visualization & Communication",
+    "subtopic": "Is the new model better",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the new model more accurate than the old one?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "report": "Old model: 82% accuracy. New model: 85% accuracy.\nThe two figures come from different evaluation runs; the test sets and their sizes are not described."
+    },
+    "ai_claim": "Yes. 85% is higher than 82%, so the new model is 3 points more accurate.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The old model scored 82%."
+      },
+      {
+        "index": 2,
+        "text": "The new model scored 85%."
+      },
+      {
+        "index": 3,
+        "text": "85% is higher."
+      },
+      {
+        "index": 4,
+        "text": "So the new model is better."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether the two models were evaluated on the same test set, and how large it was. On different test sets, the 3-point gap may reflect easier data; on a small test set, it may be noise (with 200 examples, the standard error of an accuracy near 83% is about 2.7 points).",
+    "resolving_scenarios": [
+      "Both models scored on the same 20,000-example test set: a 3-point gain is real and substantial.",
+      "The new model was scored on a newer, easier test set of 200 examples: the difference may be entirely due to the data or chance."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The comparison is not established without a common test set and its size. Step 3 assumes the scores are comparable.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "SE of accuracy at 83% with n = 200: sqrt(0.83 x 0.17 / 200) = 0.027, about 2.7 points.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2.7"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Scoring the old model on the new test set could give 85% too."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the two scores are comparable."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 compares numbers from different runs."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Model comparisons need the same test data and an estimate of uncertainty."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the standard error for a small test set."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes comparable evaluations. On the same large test set, yes; on different small ones, unknown. It cannot be decided."
+      }
+    ],
+    "repair": "Score both models on the same held-out set and report confidence intervals (or a paired test).",
+    "debrief": "A number is only comparable with numbers measured the same way. Model comparisons need shared test data and uncertainty estimates.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

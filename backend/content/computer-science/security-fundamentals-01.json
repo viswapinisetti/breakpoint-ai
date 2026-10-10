@@ -1,0 +1,382 @@
+[
+  {
+    "id": "cs-security-fundamentals-001",
+    "subject": "computer-science",
+    "topic": "Security Fundamentals",
+    "subtopic": "What the padlock means",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A shopping site shows a padlock in the browser's address bar. Does that mean the site is trustworthy and safe to give card details to?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "Yes. The padlock means the site is verified as secure, so it is safe to enter card details.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The padlock appears when the site uses HTTPS."
+      },
+      {
+        "index": 2,
+        "text": "HTTPS requires a certificate issued by a trusted authority."
+      },
+      {
+        "index": 3,
+        "text": "Getting a certificate means the business was verified as legitimate."
+      },
+      {
+        "index": 4,
+        "text": "So the padlock shows the site is trustworthy."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Equating an encrypted connection with an honest site",
+      "explanation": "Most certificates (domain-validated) prove only that the requester controls the domain, and they are free and automatic to obtain. Phishing sites routinely use HTTPS. The padlock means the connection is encrypted and you are talking to that domain - not that the domain's owner is honest.",
+      "why_convincing": "Browsers present the padlock as a sign of security, and 'secure' is easily heard as 'trustworthy'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. HTTPS protects the data in transit and authenticates the domain; it says nothing about the operator's intentions. Check the domain name itself and the site's reputation.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Domain-validated certificates prove control of a domain, not the identity or honesty of a business.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "A phishing site at a look-alike domain can obtain a free certificate and show a padlock.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Phishing pages at look-alike domains commonly display a valid padlock."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what a certificate authority actually checks for a typical certificate."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims the business was verified."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "HTTPS secures the channel to a domain; it does not vouch for whoever owns the domain."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider whether a scammer could get a certificate for their own domain."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: most certificates only prove domain control, so phishing sites show padlocks too. The padlock means encryption, not trustworthiness."
+      }
+    ],
+    "repair": "Replace steps 3-4: the certificate proves control of the domain; the padlock means the connection is encrypted, not that the site is honest.",
+    "debrief": "Security signals answer narrow questions, and the padlock answers 'is this connection encrypted, to this domain?'. Treating it as a trust badge is exactly what phishing relies on. When interpreting a security indicator, state precisely what it proves, and check everything else separately.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-security-fundamentals-002",
+    "subject": "computer-science",
+    "topic": "Security Fundamentals",
+    "subtopic": "Encoding is not encryption",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does storing the API key in base64 protect it if someone reads the configuration file?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "config": "API_KEY = \"c2stbGl2ZS05ZjJhN2I=\"   # base64-encoded for security"
+    },
+    "ai_claim": "Yes. The key is stored encoded, so someone reading the file cannot see the real key.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The key is not stored in plain text."
+      },
+      {
+        "index": 2,
+        "text": "base64 transforms it into an unreadable string."
+      },
+      {
+        "index": 3,
+        "text": "Without the original key, a reader cannot turn the string back into the key."
+      },
+      {
+        "index": 4,
+        "text": "So encoding protects the key from anyone who reads the file."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Treating an encoding as encryption",
+      "explanation": "base64 is a reversible encoding with no key: anyone can decode it with one standard function (for example `echo c2st... | base64 -d`). It protects nothing. Secrets belong in a secrets manager or environment variables with restricted access, and real encryption requires a secret key.",
+      "why_convincing": "The encoded string looks random, which feels like protection."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. base64 decoding needs no secret, so the key is effectively in plain text. Use a secrets manager or restricted environment variables.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "base64-decoding c2stbGl2ZS05ZjJhN2I= immediately yields the original key.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Encoding is reversible by anyone; encryption requires a key to reverse.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Any online base64 decoder reveals the key in a second."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what someone needs in order to reverse base64."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims the string cannot be turned back."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Encoding changes representation; encryption requires a secret key to reverse."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Decode the string with a standard base64 tool."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: base64 can be decoded by anyone without a key, so it offers no protection."
+      }
+    ],
+    "repair": "Remove the key from the file and load it from a secrets manager or a restricted environment variable.",
+    "debrief": "Looking unreadable and being protected are different things. Encoding (base64, hex, URL encoding) is for transport and compatibility; encryption is for secrecy and needs a key; hashing is one-way. Naming which one is in use is the first step of any security review.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-security-fundamentals-003",
+    "subject": "computer-science",
+    "topic": "Security Fundamentals",
+    "subtopic": "HTTPS and cross-site scripting",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "The site is served only over HTTPS. Does that protect it from cross-site scripting (XSS) through the name parameter?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "code": "<p>Welcome back, {{ request.query.name }}!</p>   <!-- inserted without escaping -->"
+    },
+    "ai_claim": "Yes. HTTPS encrypts everything between the browser and the server, so attackers cannot inject scripts.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "HTTPS encrypts all traffic between the browser and the server."
+      },
+      {
+        "index": 2,
+        "text": "An attacker on the network cannot read or change the page in transit."
+      },
+      {
+        "index": 3,
+        "text": "Script injection needs the attacker to modify the page."
+      },
+      {
+        "index": 4,
+        "text": "So HTTPS prevents XSS here."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Confusing transport security with output encoding",
+      "explanation": "XSS does not require tampering with traffic. The attacker sends the victim a link such as ?name=<script>...</script>; the server itself inserts that script into the page, and HTTPS faithfully delivers it, encrypted. The fix is escaping (or using a template engine that auto-escapes) and a Content Security Policy.",
+      "why_convincing": "HTTPS is the security measure people know best, so it gets credited with protections it does not provide."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. The unescaped name is reflected into the page by the server itself; HTTPS only protects the connection. Escape the value (auto-escaping templates) and add a Content Security Policy.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A link with ?name=<script>alert(1)</script> runs the script in the victim's browser over HTTPS.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "XSS is prevented by escaping output and CSP, not by transport encryption.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Visiting https://site/welcome?name=<script>alert(1)</script> executes the script."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who inserts the malicious script into the page."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes injection requires modifying traffic."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In reflected XSS, the server itself includes attacker-supplied input in its response."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Construct a URL whose name parameter contains a script tag."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the server injects the script itself from the parameter; HTTPS just delivers it. Escape the output."
+      }
+    ],
+    "repair": "Escape the name when rendering (for example with an auto-escaping template) and add a Content Security Policy.",
+    "debrief": "Every security control protects against specific threats. HTTPS protects data in transit; it cannot help when the server itself produces a malicious page. Map each threat to the control that addresses it - for XSS that is output escaping, not encryption.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-security-fundamentals-004",
+    "subject": "computer-science",
+    "topic": "Security Fundamentals",
+    "subtopic": "Where the encryption key lives",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If an attacker fully compromises the application server, does this encryption keep the customer data confidential?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "setup": "The customer database is encrypted at rest. The encryption key is stored in config.yaml on the same application server, next to the database password."
+    },
+    "ai_claim": "Yes. The data is encrypted, so even with full access to the server the attacker sees only ciphertext.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The customer database is encrypted at rest."
+      },
+      {
+        "index": 2,
+        "text": "Encrypted data is unreadable without the key."
+      },
+      {
+        "index": 3,
+        "text": "An attacker who takes over the server sees only the encrypted files."
+      },
+      {
+        "index": 4,
+        "text": "So the customer data stays confidential."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Ignoring where the key is stored",
+      "explanation": "The key sits in config.yaml on the compromised server, so the attacker reads it along with the database password and decrypts everything. Encryption at rest protects against stolen disks or backups, not against a compromise of the machine that holds the key. Keys belong in a separate key management service with restricted, audited access.",
+      "why_convincing": "Step 2 is true in general, and 'encrypted' sounds like the end of the risk."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No. With the key on the same server, full server compromise exposes both the ciphertext and the key. Store keys in a separate KMS/HSM so that compromising the application server is not enough.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "attacker reads config.yaml -> obtains key -> decrypts database",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Encryption is only as strong as the protection of its key.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An attacker with shell access runs `cat config.yaml` and has the key."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the attacker can read once they control the server."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says the attacker sees only encrypted files."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Encryption protects data only from those who cannot obtain the key."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Locate the key in this setup."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the key is on the same compromised server, so the attacker can decrypt everything. Store keys in a separate KMS."
+      }
+    ],
+    "repair": "Move the key to a key management service with separate access controls, so that compromising the application server does not reveal it.",
+    "debrief": "Encryption relocates the problem from protecting data to protecting keys. A key stored beside the data defends against a stolen backup but not against the most likely attack, a compromised server. When someone says data is encrypted, the next question is always: where is the key, and who can reach it?",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

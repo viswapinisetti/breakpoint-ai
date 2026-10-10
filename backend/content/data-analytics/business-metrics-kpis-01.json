@@ -1,0 +1,496 @@
+[
+  {
+    "id": "da-business-metrics-kpis-001",
+    "subject": "data-analytics",
+    "topic": "Business Metrics & KPIs",
+    "subtopic": "Churn rate denominator",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What was September's monthly churn rate, in percent (share of starting subscribers who cancelled)?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Subscribers, September",
+        "columns": [
+          "Item",
+          "Count"
+        ],
+        "rows": [
+          [
+            "Subscribers on 1 Sept",
+            1000
+          ],
+          [
+            "Cancelled during Sept",
+            60
+          ],
+          [
+            "New sign-ups during Sept",
+            260
+          ],
+          [
+            "Subscribers on 30 Sept",
+            1200
+          ]
+        ]
+      }
+    },
+    "ai_claim": "5. 60 cancellations out of 1,200 subscribers is 5%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "60 subscribers cancelled in September."
+      },
+      {
+        "index": 2,
+        "text": "The subscriber base is 1,200."
+      },
+      {
+        "index": 3,
+        "text": "60 / 1,200 = 0.05."
+      },
+      {
+        "index": 4,
+        "text": "So churn was 5%."
+      }
+    ],
+    "ai_final_answer": "5",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Using the ending count as the denominator",
+      "explanation": "Churn as defined here is the share of subscribers at the start of the period who cancelled: 60 / 1,000 = 6%. The ending count of 1,200 includes 260 new sign-ups who could barely have churned yet, which understates churn - and the error grows with faster acquisition.",
+      "why_convincing": "1,200 is 'the subscriber base' at the time of reporting."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "60 / 1,000 = 6%.",
+    "canonical_answer": "6",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "60 / 1,000 x 100 = 6",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The 1,200 includes 260 subscribers who joined during September.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "260"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Signing up many new customers would lower this 'churn' even if cancellations rose."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which subscribers could have cancelled during the month."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 picks the ending subscriber count."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Churn is measured against the base at the start of the period."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide cancellations by starting subscribers."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the base is the 1,000 starting subscribers, so churn is 6%."
+      }
+    ],
+    "repair": "",
+    "debrief": "Rates need the right denominator: the population at risk. Using the end-of-period count lets growth hide churn.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 60 / 1000 * 100",
+      "flawed_solver": "answer = 60 / 1200 * 100"
+    }
+  },
+  {
+    "id": "da-business-metrics-kpis-002",
+    "subject": "data-analytics",
+    "topic": "Business Metrics & KPIs",
+    "subtopic": "Blended versus paid CAC",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What did it cost, in rupees, to acquire each customer through ads?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Acquisition, Q3",
+        "columns": [
+          "Item",
+          "Value"
+        ],
+        "rows": [
+          [
+            "Ad spend",
+            "Rs 6,00,000"
+          ],
+          [
+            "New customers (all channels)",
+            1000
+          ],
+          [
+            "New customers from ads",
+            600
+          ],
+          [
+            "Organic / referral customers",
+            400
+          ]
+        ]
+      }
+    },
+    "ai_claim": "600. Rs 6,00,000 of ad spend over 1,000 new customers is Rs 600 per customer.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Ad spend was Rs 6,00,000."
+      },
+      {
+        "index": 2,
+        "text": "There were 1,000 new customers."
+      },
+      {
+        "index": 3,
+        "text": "6,00,000 / 1,000 = 600."
+      },
+      {
+        "index": 4,
+        "text": "So acquiring a customer through ads cost Rs 600."
+      }
+    ],
+    "ai_final_answer": "600",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Dividing ad spend by customers who did not come from ads",
+      "explanation": "400 of the 1,000 customers arrived organically or by referral, at no ad cost. Paid CAC divides ad spend by customers acquired through ads: 6,00,000 / 600 = Rs 1,000. The blended figure (Rs 600) makes ads look 40% cheaper than they are.",
+      "why_convincing": "Blended CAC is a real metric, and the division is correct."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Paid CAC = 6,00,000 / 600 = Rs 1,000.",
+    "canonical_answer": "1000",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "600,000 / 600 = 1,000",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1000"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "400 customers came from organic and referral channels.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "400"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "More organic sign-ups would make the ads look cheaper without any change in ad performance."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which customers the ad spend actually acquired."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 uses all new customers."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Paid CAC divides paid spend by paid customers only."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide the spend by the 600 ad customers."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: only 600 customers came from ads, so paid CAC is Rs 1,000."
+      }
+    ],
+    "repair": "",
+    "debrief": "Match numerator and denominator: paid spend with paid customers. Blended metrics are useful for overall efficiency, but they misstate the cost of any single channel.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 600000 / 600",
+      "flawed_solver": "answer = 600000 / 1000"
+    }
+  },
+  {
+    "id": "da-business-metrics-kpis-003",
+    "subject": "data-analytics",
+    "topic": "Business Metrics & KPIs",
+    "subtopic": "Computing NPS",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the Net Promoter Score?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Survey: 'How likely are you to recommend us?' (0-10), 100 responses",
+        "columns": [
+          "Score band",
+          "Responses"
+        ],
+        "rows": [
+          [
+            "9-10",
+            50
+          ],
+          [
+            "7-8",
+            30
+          ],
+          [
+            "0-6",
+            20
+          ]
+        ]
+      }
+    },
+    "ai_claim": "60. Promoters are those who scored 7 to 10 (80%), detractors scored 0 to 6 (20%), so NPS = 80 - 20 = 60.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Responses scoring 7 to 10 are promoters: 50 + 30 = 80."
+      },
+      {
+        "index": 2,
+        "text": "Responses scoring 0 to 6 are detractors: 20."
+      },
+      {
+        "index": 3,
+        "text": "NPS = % promoters - % detractors."
+      },
+      {
+        "index": 4,
+        "text": "80 - 20 = 60."
+      }
+    ],
+    "ai_final_answer": "60",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 1,
+      "misconception": "Counting passives as promoters",
+      "explanation": "In NPS, promoters score 9 or 10; scores of 7 and 8 are passives, who count in the total but in neither group. Promoters are 50%, detractors 20%, so NPS = 50 - 20 = 30.",
+      "why_convincing": "7 and 8 sound like positive scores."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "NPS = 50% - 20% = 30.",
+    "canonical_answer": "30",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "50 - 20 = 30",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "30"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "NPS: promoters 9-10, passives 7-8, detractors 0-6.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Moving every 7-8 response to 9 would change the NPS, which shows passives are not promoters."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall the score bands NPS uses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 counts 7s and 8s as promoters."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Promoters are 9-10 only; 7-8 are passives."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Recompute with promoters = 50."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: 7-8 are passives. NPS is 50 - 20 = 30."
+      }
+    ],
+    "repair": "",
+    "debrief": "Named metrics have fixed definitions. Using a variant silently makes numbers incomparable with benchmarks and with past reports.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 50 - 20",
+      "flawed_solver": "answer = (50 + 30) - 20"
+    }
+  },
+  {
+    "id": "da-business-metrics-kpis-004",
+    "subject": "data-analytics",
+    "topic": "Business Metrics & KPIs",
+    "subtopic": "Page views as engagement",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the 40% rise in page views per session show that the redesign improved engagement?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "before_after": {
+        "title": "Website redesign, 4 weeks before vs after",
+        "columns": [
+          "Metric",
+          "Before",
+          "After"
+        ],
+        "rows": [
+          [
+            "Page views per session",
+            "4.0",
+            "5.6 (+40%)"
+          ],
+          [
+            "Checkout conversion",
+            "3.1%",
+            "2.4%"
+          ],
+          [
+            "Support tickets 'can't find'",
+            "120/week",
+            "310/week"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. Visitors now view 40% more pages per session, which means they are more engaged with the site.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Page views per session rose from 4.0 to 5.6."
+      },
+      {
+        "index": 2,
+        "text": "More page views means more time spent exploring content."
+      },
+      {
+        "index": 3,
+        "text": "Exploring more content means greater engagement."
+      },
+      {
+        "index": 4,
+        "text": "So the redesign improved engagement."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 2,
+      "misconception": "Treating a vanity metric as evidence of value",
+      "explanation": "More page views can mean people are lost. Conversion fell from 3.1% to 2.4%, and 'can't find' tickets more than doubled: users click through more pages because they cannot find what they want. Evaluate the redesign by outcome metrics (conversion, task success), with page views as a diagnostic at most.",
+      "why_convincing": "Page views are easy to count and usually move with interest."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: falling conversion and rising 'can't find' tickets suggest the extra page views reflect confusion, not engagement.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Conversion fell from 3.1% to 2.4%; 'can't find' tickets rose from 120 to 310 per week.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2.4",
+          "310"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Users hunting for a missing checkout link also generate extra page views.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Worse navigation increases page views."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the other two metrics."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes more page views means more interest."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Activity metrics can rise for bad reasons; outcome metrics show value."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare conversion and support tickets before and after."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the other metrics suggest users are lost. Judge by conversion and task success."
+      }
+    ],
+    "repair": "Evaluate with outcome metrics (conversion, task completion), and treat page views as a diagnostic.",
+    "debrief": "Vanity metrics go up for good and bad reasons alike. Pair every activity metric with an outcome metric before calling a change a success.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

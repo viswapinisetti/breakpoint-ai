@@ -1,0 +1,353 @@
+[
+  {
+    "id": "nc-triggers-actions-data-mapping-001",
+    "subject": "no-code-automation",
+    "topic": "Triggers, Actions & Data Mapping",
+    "subtopic": "Polling triggers are not instant",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the engineer be alerted within seconds?",
+    "artifact_type": "trigger_config",
+    "artifact": {
+      "workflow": "Trigger: New row in Google Sheets 'Urgent Requests' (a polling trigger; the plan checks every 15 minutes)\nAction: Send an SMS to the on-call engineer.\nAI: \"The engineer is alerted within seconds of a new urgent request.\""
+    },
+    "ai_claim": "Yes. The workflow triggers on each new row and sends the SMS immediately, so alerts arrive within seconds.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A new row is added."
+      },
+      {
+        "index": 2,
+        "text": "The trigger detects the new row."
+      },
+      {
+        "index": 3,
+        "text": "The SMS action runs immediately."
+      },
+      {
+        "index": 4,
+        "text": "So the alert arrives within seconds."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Assuming a polling trigger fires instantly",
+      "explanation": "A polling trigger checks for new data on a schedule - every 15 minutes on this plan - so a row added just after a check waits up to 15 minutes before the workflow even starts. For urgent alerts, use an instant (webhook-based) trigger or a source that pushes events, or a monitoring tool built for paging.",
+      "why_convincing": "Once triggered, the action really is immediate."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the trigger polls every 15 minutes, so alerts can be delayed up to 15 minutes. Use an instant trigger.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "row added 10:01 -> next poll 10:15 -> SMS 10:15",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "10:15"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Polling triggers run on an interval; instant triggers use push/webhooks.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "15"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An urgent request waits 14 minutes for its alert."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how the trigger learns about new rows."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes immediate detection."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Polling triggers check on a schedule."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add a row just after a poll."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: detection waits for the next poll. Use an instant trigger."
+      }
+    ],
+    "repair": "Use an instant/webhook trigger (or a dedicated alerting system) for urgent events.",
+    "debrief": "Trigger type decides latency. Match it to how urgent the event is.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-triggers-actions-data-mapping-002",
+    "subject": "no-code-automation",
+    "topic": "Triggers, Actions & Data Mapping",
+    "subtopic": "Mapped fields use each run's data",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "While building the workflow, the editor loaded a sample submission (email: sample@test.com).\nIn the 'Send email' action, the To field is mapped to {{1.email}} by selecting it from the sample.\nAI: \"Each run will send to that run's submitted email, not to sample@test.com.\""
+    },
+    "ai_claim": "Yes. Mapping inserts a reference to the trigger's email field, which is filled with each new submission's value at run time; the sample only shows what the field looks like.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The sample helps the builder see available fields."
+      },
+      {
+        "index": 2,
+        "text": "Selecting the field inserts a reference, {{1.email}}."
+      },
+      {
+        "index": 3,
+        "text": "At run time, the reference is replaced with the current submission's email."
+      },
+      {
+        "index": 4,
+        "text": "So each email goes to that run's submitter."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Mapped fields are references resolved per run, unlike a value typed in manually.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "A live submission from ravi@example.com produces an email to ravi@example.com.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Distinguish a reference from a typed value."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains resolution at run time."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Mapped fields are placeholders filled from each run's data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Submit a live test."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Mapped fields use each run's data. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Know whether a field holds a mapped reference or a fixed value; typing the sample value by mistake is a common bug.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-triggers-actions-data-mapping-003",
+    "subject": "no-code-automation",
+    "topic": "Triggers, Actions & Data Mapping",
+    "subtopic": "New-row versus updated-row triggers",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right?",
+    "artifact_type": "trigger_config",
+    "artifact": {
+      "workflow": "Trigger: 'New Spreadsheet Row' on the Orders sheet\nThe sales team changes the Status column of existing rows from 'Pending' to 'Shipped'.\nAI: \"This trigger will not fire when Status changes on an existing row; use a 'New or Updated Row' trigger (watching the Status column) to react to shipments.\""
+    },
+    "ai_claim": "Yes. A new-row trigger reacts only to rows being added. Editing a cell in an existing row is an update, which it does not detect; an updated-row trigger watching Status is needed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The trigger watches for new rows."
+      },
+      {
+        "index": 2,
+        "text": "Changing Status edits an existing row."
+      },
+      {
+        "index": 3,
+        "text": "An edit is not a new row, so the trigger does not fire."
+      },
+      {
+        "index": 4,
+        "text": "An updated-row trigger on Status detects the change."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Choose triggers by the event you care about: creation versus modification.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Changing row 14's Status to Shipped produces no run of the new-row workflow.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "14"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what counts as a 'new row'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 separates creation from editing."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Triggers fire for specific events; edits and additions are different events."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Edit a row and watch the run history."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Edits need an updated-row trigger. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Most 'the automation didn't fire' reports come from a trigger watching a different event than the one that happened.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-triggers-actions-data-mapping-004",
+    "subject": "no-code-automation",
+    "topic": "Triggers, Actions & Data Mapping",
+    "subtopic": "Rows added by another script",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the workflow fire for every lead the script writes?",
+    "artifact_type": "trigger_config",
+    "artifact": {
+      "workflow": "Trigger: 'New Spreadsheet Row' on sheet 'Leads'\nA separate script writes leads into the sheet via the Sheets API.\nHow the script writes (appending at the bottom vs inserting rows in the middle or overwriting blank rows) is not documented."
+    },
+    "ai_claim": "Yes. Every lead the script writes is a new row, so the trigger fires for each one.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The script writes one row per lead."
+      },
+      {
+        "index": 2,
+        "text": "Each written row is a new row."
+      },
+      {
+        "index": 3,
+        "text": "The trigger fires on new rows."
+      },
+      {
+        "index": 4,
+        "text": "So every lead triggers the workflow."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "How the script writes rows. New-row triggers in spreadsheet integrations typically detect rows appended after the last row they saw. If the script appends at the bottom, each lead is detected; if it inserts rows above existing data, overwrites previously blank rows, or writes many rows in a burst, some may be missed or detected late.",
+    "resolving_scenarios": [
+      "The script appends each lead at the bottom of the sheet: every lead triggers the workflow.",
+      "The script inserts new leads at row 2 (newest first): rows appear above the trigger's last-seen position and are missed."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on how the script writes rows, which is not documented. Step 2 assumes every write looks like an appended row to the trigger.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If the script inserts new leads at the top (row 2), a bottom-watching trigger does not see them.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Newest-first insertion can bypass the trigger."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the trigger detects new rows."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes all writes are detected the same way."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Spreadsheet triggers usually track the last row processed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a script that inserts at the top."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 assumes appending. Appends are detected; top insertions may not be. It cannot be decided."
+      }
+    ],
+    "repair": "Document the script's write method; append at the bottom or trigger the workflow directly via a webhook.",
+    "debrief": "Triggers have detection rules. When another system writes the data, check that its writes match those rules.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

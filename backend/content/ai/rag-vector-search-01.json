@@ -1,0 +1,312 @@
+[
+  {
+    "id": "ai-rag-vector-search-001",
+    "subject": "ai",
+    "topic": "RAG & Vector Search",
+    "subtopic": "An answer that goes beyond its sources",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the answer fully supported by the retrieved documents?",
+    "artifact_type": "retrieval_trace",
+    "artifact": {
+      "question": "What is the notice period for resigning employees?",
+      "retrieved": [
+        "[doc 12] 'Employees must give written notice of resignation to their manager.'",
+        "[doc 31] 'Probation lasts six months from the joining date.'"
+      ],
+      "answer": "Employees must give 60 days' written notice of resignation [doc 12]."
+    },
+    "ai_claim": "Yes. The answer cites doc 12, which is about resignation notice, so the answer is grounded in the retrieved sources.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The question is about resignation notice."
+      },
+      {
+        "index": 2,
+        "text": "Doc 12 discusses resignation notice."
+      },
+      {
+        "index": 3,
+        "text": "The answer cites doc 12."
+      },
+      {
+        "index": 4,
+        "text": "So the answer is grounded."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F14",
+      "location": 4,
+      "misconception": "Accepting a citation as proof of support",
+      "explanation": "Doc 12 requires written notice but states no period. '60 days' appears in no retrieved document: the model filled the gap from its prior knowledge and attached a citation that does not support the specific claim. Check each claim against the cited text; the correct answer is that the retrieved policy does not specify the period.",
+      "why_convincing": "The citation points to a relevant document, which makes the whole sentence look supported."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: '60 days' is not in the sources. The grounded answer is that written notice is required, with no period stated in the retrieved text.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Neither doc 12 nor doc 31 mentions 60 days.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "60"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A cited claim is grounded only if the cited passage states it.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The number in the answer appears in no retrieved text."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare each part of the answer with the cited passage."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 treats a relevant citation as support."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Grounding is checked claim by claim."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Search the retrieved text for '60'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: '60 days' is unsupported. The model hallucinated it."
+      }
+    ],
+    "repair": "Instruct the model to answer only from passages and say when information is missing; add claim-level citation checks.",
+    "debrief": "Citations make answers look grounded. Only claim-by-claim verification shows whether they are.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-rag-vector-search-002",
+    "subject": "ai",
+    "topic": "RAG & Vector Search",
+    "subtopic": "Chunks that separate a table from its header",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that 50-token chunks retrieve pricing information well for this page?",
+    "artifact_type": "retrieval_trace",
+    "artifact": {
+      "setup": "Documents are split into fixed 50-token chunks.",
+      "document": "A pricing page has a header row ('Plan | Monthly price | Users') followed by 12 rows of plans.",
+      "question": "How much does the Team plan cost per month?",
+      "retrieved": [
+        "[chunk 44] 'Team | 1,499 | 10'"
+      ],
+      "answer": "The retrieved chunk does not say what 1,499 refers to."
+    },
+    "ai_claim": "Yes. Small chunks make retrieval precise, so the Team plan's row is retrieved and the answer is easy to find.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Small chunks match queries precisely."
+      },
+      {
+        "index": 2,
+        "text": "The Team plan's row was retrieved."
+      },
+      {
+        "index": 3,
+        "text": "The row contains the price."
+      },
+      {
+        "index": 4,
+        "text": "So chunking works well here."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Chunking that separates data from its context",
+      "explanation": "Fixed 50-token chunks split the table: chunk 44 has 'Team | 1,499 | 10' but not the header saying which column is the monthly price and which is users. The model cannot tell whether 1,499 is a price, a limit or an id. Chunk by structure (keep tables whole, or repeat headers in every chunk) and add document titles to chunks.",
+      "why_convincing": "The right row was retrieved, which looks like retrieval success."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the chunk lacks the header, so '1,499' has no meaning. Chunk tables with their headers.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Chunk 44 contains the row but not the header row.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1,499"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "With the header repeated in the chunk, the answer 'Rs 1,499 per month for 10 users' is direct.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The model cannot tell which number is the price."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the retrieved chunk on its own."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the row is self-explanatory."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Chunks must carry enough context to be understood alone."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask which column 1,499 belongs to."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the header is missing. Chunk by structure."
+      }
+    ],
+    "repair": "Use structure-aware chunking: keep tables intact or repeat header rows; prepend titles and section names.",
+    "debrief": "Chunking decides what the model can see together. Evaluate retrieval by whether a chunk alone answers the question.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-rag-vector-search-003",
+    "subject": "ai",
+    "topic": "RAG & Vector Search",
+    "subtopic": "Old and new policies in the same results",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the answer correct, given that the model automatically uses the most recent information?",
+    "artifact_type": "retrieval_trace",
+    "artifact": {
+      "question": "How many days of work from home are allowed per week?",
+      "retrieved": [
+        "[doc 7, 'WFH Policy 2023'] 'Employees may work from home up to 3 days per week.'",
+        "[doc 19, 'WFH Policy 2025 (supersedes 2023)'] 'Employees may work from home up to 1 day per week.'",
+        "[doc 22, 'Office facilities'] 'Hot desks are available on all floors.'"
+      ],
+      "answer": "Employees may work from home up to 3 days per week [doc 7]."
+    },
+    "ai_claim": "Yes. The model received both policies and naturally answers with the current one; it cited doc 7, so 3 days is the current rule.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Both the 2023 and 2025 policies were retrieved."
+      },
+      {
+        "index": 2,
+        "text": "LLMs automatically prefer the most recent information."
+      },
+      {
+        "index": 3,
+        "text": "The model chose doc 7."
+      },
+      {
+        "index": 4,
+        "text": "So 3 days is the current rule."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming the model resolves conflicts by date",
+      "explanation": "Nothing makes a model prefer newer documents unless it is told to or the pipeline filters them; here it cited the 2023 policy, which doc 19 explicitly supersedes. The correct answer is 1 day. Add metadata filtering (current documents only), include dates in chunks and instruct the model how to resolve conflicts.",
+      "why_convincing": "People naturally resolve such conflicts by date, so it seems automatic."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the 2025 policy supersedes 2023, so the answer is 1 day. The pipeline must filter or rank by validity.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Doc 19 (2025) states it supersedes the 2023 policy and allows 1 day.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "The model cited the superseded policy.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The answer follows an outdated policy."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the two policies' dates and statements."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes models prefer recent information."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Conflict resolution must be designed into retrieval and prompts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check which document supersedes which."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the model used the superseded policy. The answer is 1 day."
+      }
+    ],
+    "repair": "Filter out superseded documents via metadata and instruct the model to prefer the latest effective policy.",
+    "debrief": "Knowledge bases accumulate versions. RAG systems need document lifecycle metadata, not just embeddings.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

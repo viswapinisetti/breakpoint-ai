@@ -1,0 +1,421 @@
+[
+  {
+    "id": "prg-functions-001",
+    "subject": "programming",
+    "topic": "Functions",
+    "subtopic": "A branch without return",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does discount(price, is_member) return the right price for both members and non-members?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def discount(price, is_member):\n    if is_member:\n        return price * 0.9\n    price * 1.0"
+    },
+    "ai_claim": "Yes. Members get 10% off, and non-members are charged the full price.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Members get 10% off: price * 0.9 is returned."
+      },
+      {
+        "index": 2,
+        "text": "Non-members skip the if block."
+      },
+      {
+        "index": 3,
+        "text": "The last line computes price * 1.0, the full price, so non-members are charged full price."
+      },
+      {
+        "index": 4,
+        "text": "discount returns the correct price for everyone."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Treating an evaluated expression as a returned value",
+      "explanation": "The last line computes price * 1.0 and throws the result away: there is no `return`. A function that ends without return gives None, so discount(100, False) returns None.",
+      "why_convincing": "The expression is exactly the right value, so the line reads like a return statement. The member path, which is the one usually tested, works."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Without `return`, the last line's value is discarded and the function returns None for non-members. Fix: `return price` (or `return price * 1.0`).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "discount(100, False) returns None instead of 100.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "100"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "return price",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "discount(100, False) returns None."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Call the function for a non-member and look at what comes back."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the last line produces the function's result."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A Python function returns None unless a return statement runs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate discount(100, False) and check its type."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the last line has no return, so non-members get None. Write `return price`."
+      }
+    ],
+    "repair": "Change the last line to `return price`.",
+    "debrief": "An expression on its own line is computed and discarded, which is invisible when you read for intent. Test every branch of a function, not just the common one, and check the type of what comes back - None is the signature of a missing return.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "discount",
+      "ai_code": "def discount(price, is_member):\n    if is_member:\n        return price * 0.9\n    price * 1.0",
+      "reference_code": "def discount(price, is_member):\n    if is_member:\n        return price * 0.9\n    return price * 1.0",
+      "test_inputs": [
+        "(100, True)",
+        "(100, False)",
+        "(0, False)"
+      ],
+      "counterexample_input": "(100, False)"
+    }
+  },
+  {
+    "id": "prg-functions-002",
+    "subject": "programming",
+    "topic": "Functions",
+    "subtopic": "Late binding in closures",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does apply_all(10) return [0, 10, 20]?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def make_multipliers():\n    return [lambda x: x * i for i in range(3)]\n\ndef apply_all(x):\n    return [f(x) for f in make_multipliers()]"
+    },
+    "ai_claim": "Yes. The three lambdas multiply by 0, 1 and 2, so apply_all(10) is [0, 10, 20].",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The comprehension creates three lambdas, one for each i in 0, 1, 2."
+      },
+      {
+        "index": 2,
+        "text": "Each lambda captures the value of i at the moment it is created."
+      },
+      {
+        "index": 3,
+        "text": "So the three functions compute x * 0, x * 1 and x * 2."
+      },
+      {
+        "index": 4,
+        "text": "apply_all(10) returns [0, 10, 20]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Believing closures capture values instead of variables",
+      "explanation": "Python closures capture the variable i, not its value at creation. The lambdas run after the comprehension has finished, when i is 2, so every one computes x * 2: apply_all(10) returns [20, 20, 20]. Binding the value with a default argument, `lambda x, i=i: x * i`, fixes it.",
+      "why_convincing": "Reading the code top to bottom suggests each lambda is 'made with' its own i, and in many other languages loop variables behave that way."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Closures look up i when they are called. By then the comprehension has ended with i = 2, so all three lambdas multiply by 2: [20, 20, 20]. Use `lambda x, i=i: x * i` to capture each value.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "apply_all(10) returns [20, 20, 20].",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "20"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "return [lambda x, i=i: x * i for i in range(3)]",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "apply_all(1) returns [2, 2, 2], not [0, 1, 2]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask when each lambda actually reads i."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 makes a claim about what a lambda captures."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Python closures capture variables by reference and look them up when the function runs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out the value of i at the moment apply_all calls the lambdas."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the lambdas all see the final i = 2, so apply_all(10) returns [20, 20, 20]. Bind the value with `i=i`."
+      }
+    ],
+    "repair": "Write `[lambda x, i=i: x * i for i in range(3)]` so each lambda keeps its own i.",
+    "debrief": "A closure remembers where a variable lives, not what it held at the time. Anywhere functions are created in a loop - callbacks, handlers, lazy tasks - late binding produces this bug. The fix is to bind the value explicitly, and the test is to call the functions after the loop has finished.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "apply_all",
+      "ai_code": "def make_multipliers():\n    return [lambda x: x * i for i in range(3)]\n\ndef apply_all(x):\n    return [f(x) for f in make_multipliers()]",
+      "reference_code": "def make_multipliers():\n    return [lambda x, i=i: x * i for i in range(3)]\n\ndef apply_all(x):\n    return [f(x) for f in make_multipliers()]",
+      "test_inputs": [
+        "(10,)",
+        "(1,)",
+        "(0,)"
+      ],
+      "counterexample_input": "(10,)"
+    }
+  },
+  {
+    "id": "prg-functions-003",
+    "subject": "programming",
+    "topic": "Functions",
+    "subtopic": "Keyword-only arguments after *args",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A developer calls total(100, 200, 0.05), intending a 5% tax. Does the call return 315.0?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def total(*amounts, tax=0.18):\n    return sum(amounts) * (1 + tax)\n\n# called as:\nbill = total(100, 200, 0.05)   # intended: 5% tax"
+    },
+    "ai_claim": "Yes. The amounts are 100 and 200 and the tax is 5%, so the total is 315.0.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "total accepts any number of amounts followed by a tax rate."
+      },
+      {
+        "index": 2,
+        "text": "In total(100, 200, 0.05), the 0.05 is taken as the tax rate."
+      },
+      {
+        "index": 3,
+        "text": "Subtotal 300 with 5% tax gives 300 x 1.05 = 315.0."
+      },
+      {
+        "index": 4,
+        "text": "The call returns 315.0."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Passing a keyword-only parameter positionally",
+      "explanation": "Every parameter after *amounts is keyword-only. The positional 0.05 is collected into amounts, so the subtotal is 300.05 and the default 18% tax applies: 300.05 x 1.18 = 354.059. The call must be total(100, 200, tax=0.05).",
+      "why_convincing": "The signature reads left to right like 'amounts, then tax', and passing values in that order looks natural. Nothing fails loudly: the call returns a plausible number."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "After *amounts, tax can only be set by keyword. total(100, 200, 0.05) treats 0.05 as an amount: (100 + 200 + 0.05) x 1.18 = 354.059. Call total(100, 200, tax=0.05) to get 315.0.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "total(100, 200, 0.05) returns (100 + 200 + 0.05) x 1.18 = 354.059.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "354.059"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "total(100, 200, tax=0.05)",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "total(100, 200, 0.05) returns about 354.06, not 315.0."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how Python assigns positional arguments when *args is present."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 decides which parameter receives 0.05."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Parameters listed after *args are keyword-only."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Work out what amounts contains for this call."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: 0.05 goes into amounts and the default 18% tax is applied, giving about 354.06. Use tax=0.05."
+      }
+    ],
+    "repair": "Call `total(100, 200, tax=0.05)`, which returns 315.0.",
+    "debrief": "Keyword-only parameters exist to prevent exactly this ambiguity, but only if callers use the keyword. The dangerous part is that nothing errors: a wrong positional value quietly becomes data. When reviewing calls to variadic functions, check which parameter each value actually lands in.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "call",
+      "ai_code": "def total(*amounts, tax=0.18):\n    return sum(amounts) * (1 + tax)\n\ndef call(a, b, c):\n    return round(total(a, b, c), 2)",
+      "reference_code": "def total(*amounts, tax=0.18):\n    return sum(amounts) * (1 + tax)\n\ndef call(a, b, c):\n    return round(total(a, b, tax=c), 2)",
+      "test_inputs": [
+        "(100, 200, 0.05)",
+        "(0, 0, 0.0)",
+        "(50, 50, 0.18)"
+      ],
+      "counterexample_input": "(100, 200, 0.05)"
+    }
+  },
+  {
+    "id": "prg-functions-004",
+    "subject": "programming",
+    "topic": "Functions",
+    "subtopic": "Memoisation without a shared default",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is fib(n) correct for every n from 0 to 90, and does each top-level call start with a fresh memo?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def fib(n, memo=None):\n    if memo is None:\n        memo = {}\n    if n < 2:\n        return n\n    if n not in memo:\n        memo[n] = fib(n - 1, memo) + fib(n - 2, memo)\n    return memo[n]"
+    },
+    "ai_claim": "Yes. The memo is created inside the function when none is passed, so each top-level call starts fresh, and the recursion is correct.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "fib uses memo=None as the default rather than memo={}."
+      },
+      {
+        "index": 2,
+        "text": "When called without a memo, the function creates a new empty dict, so top-level calls do not share state."
+      },
+      {
+        "index": 3,
+        "text": "The recursive calls pass the same memo down, so each value is computed once."
+      },
+      {
+        "index": 4,
+        "text": "The base cases fib(0) = 0 and fib(1) = 1 are correct, so fib is correct for 0 to 90."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The None default avoids the mutable-default pitfall: each top-level call creates its own dict, and the recursion shares it only within that call. Base cases and recurrence are right, and memoisation keeps the recursion depth and time small for n <= 90.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "fib(10) = 55 and fib(90) = 2880067194370816120.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "55"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "A memo dictionary in a function signature deserves a second look."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 is where shared state would appear, if there were any."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A mutable default is created once at definition; a None default with an `is None` check creates a new object on each call."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call fib(10) twice in a row and check the memo each call starts with."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The None default creates a fresh memo per top-level call, and the recursion is right. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Memoisation code often hides a mutable default argument, so this function invites a challenge. It uses the safe idiom instead: a None default and a fresh dict on each call. Recognising the correct version of a well-known pattern is as important as spotting the broken one.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "fib",
+      "ai_code": "def fib(n, memo=None):\n    if memo is None:\n        memo = {}\n    if n < 2:\n        return n\n    if n not in memo:\n        memo[n] = fib(n - 1, memo) + fib(n - 2, memo)\n    return memo[n]",
+      "reference_code": "def fib(n):\n    a, b = 0, 1\n    for _ in range(n):\n        a, b = b, a + b\n    return a",
+      "test_inputs": [
+        "(0,)",
+        "(1,)",
+        "(10,)",
+        "(30,)",
+        "(90,)"
+      ]
+    }
+  }
+]

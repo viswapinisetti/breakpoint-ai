@@ -1,0 +1,376 @@
+[
+  {
+    "id": "api-webhooks-001",
+    "subject": "api-integration",
+    "topic": "Webhooks",
+    "subtopic": "Duplicate deliveries",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is each successful payment credited to the wallet exactly once?",
+    "artifact_type": "webhook",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/webhooks/payments\")\ndef payment_webhook(event: dict = Body(...)):\n    verify_signature(...)\n    if event[\"type\"] == \"payment.succeeded\":\n        wallet.credit(event[\"data\"][\"customer_id\"], event[\"data\"][\"amount\"])\n    return {\"ok\": True}\n\n# Provider docs: \"Webhooks are delivered at least once. Your endpoint may receive the same event more than once.\""
+    },
+    "ai_claim": "Yes. The provider sends one payment.succeeded event per payment, and the handler credits the wallet once per event.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each successful payment produces one event."
+      },
+      {
+        "index": 2,
+        "text": "The provider delivers that event to the endpoint."
+      },
+      {
+        "index": 3,
+        "text": "The handler credits the wallet for each delivery."
+      },
+      {
+        "index": 4,
+        "text": "So each payment is credited exactly once."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Assuming one event means one delivery",
+      "explanation": "The provider guarantees at-least-once delivery: after a timeout, a network error or a slow response, it sends the same event again. The handler credits on every delivery, so a duplicate credits the wallet twice. Record processed event ids (a unique constraint on event.id) and skip repeats.",
+      "why_convincing": "In normal operation, each event does arrive once."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: redeliveries credit the wallet again. Store event ids and ignore events already processed.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The provider documents at-least-once delivery, so the same event can arrive more than once.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "event evt_91 delivered -> credit -> response slow -> provider retries evt_91 -> credit again",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A retried delivery doubles the credit."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the provider's delivery guarantee."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes one delivery per event."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "At-least-once delivery means handlers must be idempotent."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Deliver the same event twice."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: events can be delivered more than once. Deduplicate by event id."
+      }
+    ],
+    "repair": "Insert event.id into a processed_events table with a unique constraint; skip the event if it already exists.",
+    "debrief": "Webhook handlers must be idempotent, because every provider retries. Deduplicating on the event id is cheap and turns at-least-once delivery into exactly-once effects.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-webhooks-002",
+    "subject": "api-integration",
+    "topic": "Webhooks",
+    "subtopic": "Events arrive out of order",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the database always end up with each subscription's latest status?",
+    "artifact_type": "webhook",
+    "artifact": {
+      "language": "python",
+      "code": "def on_event(event):\n    sub = event[\"data\"]\n    if event[\"type\"] in (\"subscription.created\", \"subscription.updated\"):\n        db.upsert_subscription(id=sub[\"id\"], status=sub[\"status\"], plan=sub[\"plan\"])\n\n# Provider docs: \"Events are not guaranteed to be delivered in the order they were generated.\"\n# Each event includes a `created` timestamp."
+    },
+    "ai_claim": "Yes. Each event overwrites the subscription with the newest data received, so the database always reflects the latest state.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every event carries the subscription's full state at that moment."
+      },
+      {
+        "index": 2,
+        "text": "The handler writes that state to the database."
+      },
+      {
+        "index": 3,
+        "text": "The last event written is the latest event."
+      },
+      {
+        "index": 4,
+        "text": "So the stored status is always the latest."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on delivery order",
+      "explanation": "The last event received is not necessarily the last event generated. If 'updated: active' is delayed and arrives after 'updated: cancelled', the handler overwrites cancelled with active, and a cancelled customer keeps access. Compare the event's created timestamp (or a version) with what is stored and ignore older events, or fetch the current state from the API on each event.",
+      "why_convincing": "Retries and parallel delivery rarely reorder events in testing."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: out-of-order delivery lets an older event overwrite newer state. Ignore events older than the stored version, or re-fetch the subscription from the API.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "generated: active (t1), cancelled (t2); delivered: cancelled, active -> stored status: active",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "The provider states events may be delivered out of order.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A delayed 'active' event overwrites a later cancellation."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the provider's ordering guarantee."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates 'received last' with 'generated last'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Without ordering guarantees, handlers must compare versions or timestamps."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Deliver two events in reverse order."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: events can arrive out of order. Compare event timestamps or re-fetch the state."
+      }
+    ],
+    "repair": "Store the last applied event time and skip older events, or fetch the subscription from the provider's API on each event.",
+    "debrief": "Webhooks are notifications, not an ordered log. Treat each event as a hint that something changed, and apply it only if it is newer than what you already have.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-webhooks-003",
+    "subject": "api-integration",
+    "topic": "Webhooks",
+    "subtopic": "Acknowledge quickly, process later",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this design reduces duplicate deliveries caused by timeouts?",
+    "artifact_type": "webhook",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/webhooks/shipping\")\ndef shipping_webhook(request: Request, body: bytes = Body(...)):\n    verify_signature(request.headers, body)\n    queue.enqueue(process_shipping_event, body)   # heavy work: PDFs, emails, ERP sync\n    return Response(status_code=200)\n\n# Provider: waits up to 10 seconds for a 2xx, otherwise treats the delivery as failed and retries."
+    },
+    "ai_claim": "Yes. The endpoint verifies the event, queues the slow work and answers 200 immediately, well inside the 10-second limit, so the provider does not treat slow processing as a failure and retry.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The provider retries when it gets no 2xx within 10 seconds."
+      },
+      {
+        "index": 2,
+        "text": "Processing the event directly (PDFs, emails, ERP sync) could exceed that."
+      },
+      {
+        "index": 3,
+        "text": "Here the endpoint only verifies and enqueues, which takes milliseconds."
+      },
+      {
+        "index": 4,
+        "text": "It returns 200 quickly, so timeout-driven retries are avoided."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Acknowledging fast and processing asynchronously is the recommended webhook pattern. Handlers must still be idempotent, because retries can happen for other reasons.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "delivery -> verify (ms) -> enqueue (ms) -> 200 -> worker processes later",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "200"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The provider's timeout is 10 seconds.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the endpoint's response time with the provider's timeout."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 moves the slow work out of the request."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Slow webhook endpoints cause timeout retries; queues keep responses fast."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Estimate the endpoint's latency."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Fast acknowledgement avoids timeout retries. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Webhook endpoints should do the minimum synchronously: verify, persist or enqueue, acknowledge. Everything else belongs in a worker that can retry on its own terms.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-webhooks-004",
+    "subject": "api-integration",
+    "topic": "Webhooks",
+    "subtopic": "Events during an outage",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will all 240 events from the outage still be delivered once the endpoint is back?",
+    "artifact_type": "webhook",
+    "artifact": {
+      "language": "python",
+      "code": "# Our webhook endpoint was down from 09:00 to 12:00 (3 hours) during a failed deploy.\n# The provider sent 240 order.paid events in that window.\n# The provider's retry policy is not described in the material we have."
+    },
+    "ai_claim": "Yes. Webhook providers retry failed deliveries, so every event is redelivered after the endpoint recovers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Deliveries during the outage failed."
+      },
+      {
+        "index": 2,
+        "text": "Providers retry failed deliveries."
+      },
+      {
+        "index": 3,
+        "text": "Retries continue until the endpoint accepts them."
+      },
+      {
+        "index": 4,
+        "text": "So all 240 events are delivered."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The provider's retry policy: how many attempts, over what period, and whether a failing endpoint is disabled. Some providers retry with backoff for up to three days; others try a few times within an hour and then drop the event (or disable the endpoint).",
+    "resolving_scenarios": [
+      "Retries with backoff for 72 hours: all 240 events are delivered after 12:00.",
+      "Three retries within 30 minutes: events from before about 11:30 are dropped and must be recovered via the provider's API."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the provider's retry schedule, which is not given. Step 3 assumes unlimited retries. Reconcile by listing events or orders from the provider's API for the outage window.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A provider that stops after 3 attempts over 30 minutes drops events sent at 09:00.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3",
+          "30"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Events whose retries were exhausted during the 3 hours are lost."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how long the provider keeps retrying."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes retries continue indefinitely."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Retry policies are provider-specific and finite."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare a 3-day policy with a 30-minute policy."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes unlimited retries. With long retries all arrive; with short ones some are lost. It cannot be decided."
+      }
+    ],
+    "repair": "Check the provider's documented retry policy, and reconcile the outage window through the provider's list API.",
+    "debrief": "Webhooks are best-effort notifications with finite retries. Robust integrations periodically reconcile against the provider's API instead of assuming every event arrives.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

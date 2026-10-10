@@ -1,0 +1,478 @@
+[
+  {
+    "id": "api-openapi-swagger-001",
+    "subject": "api-integration",
+    "topic": "OpenAPI / Swagger",
+    "subtopic": "Where 'required' goes in a schema",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this OpenAPI 3 schema make email a required field?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "language": "yaml",
+      "spec": "components:\n  schemas:\n    SignupRequest:\n      type: object\n      properties:\n        email:\n          type: string\n          required: true\n        name:\n          type: string"
+    },
+    "ai_claim": "Yes. The email property is marked required: true, so requests without an email are invalid.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "SignupRequest is an object with email and name."
+      },
+      {
+        "index": 2,
+        "text": "email has required: true."
+      },
+      {
+        "index": 3,
+        "text": "So email must be present in every request."
+      },
+      {
+        "index": 4,
+        "text": "Validators and generated clients will enforce it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Using the parameter-style required flag inside a schema",
+      "explanation": "In OpenAPI 3 schemas (JSON Schema), required is an array on the object, listing property names: required: [email]. A boolean required: true inside a property is not valid there (it is the syntax for parameters), so validators either reject the spec or ignore it, and email stays optional.",
+      "why_convincing": "Parameters in the same spec do use required: true, so the syntax looks familiar."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: required must be an array at the object level. Write required: [email] under SignupRequest.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "In the Schema Object, required is a list of property names on the object, not a boolean on a property.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "A request body {\"name\": \"Asha\"} passes validation against this schema.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A signup request with no email is accepted by spec-based validation."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where JSON Schema expects the required keyword."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats a boolean on the property as making it required."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In schemas, required is an array of names on the parent object."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Validate a body without email."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: required: true inside a property does nothing in a schema. Use required: [email] on the object."
+      }
+    ],
+    "repair": "Add `required: [email]` at the SignupRequest level and remove the boolean.",
+    "debrief": "OpenAPI mixes two vocabularies: parameters use required: true, schemas use JSON Schema's required array. Lint specs with a validator, which catches exactly this kind of mistake.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-openapi-swagger-002",
+    "subject": "api-integration",
+    "topic": "OpenAPI / Swagger",
+    "subtopic": "The spec is not the implementation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Because the spec says price is a number, is it safe to multiply product.price by quantity?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "# Generated from the provider's openapi.yaml, where Product.price is `type: number`\nproduct = api.get_product(7)\ntotal = product.price * quantity\n\n# Actual API response: {\"id\": 7, \"price\": \"499.00\"}"
+    },
+    "ai_claim": "Yes. The client is generated from the spec, which declares price as a number, so price is always a number.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The spec declares price as type number."
+      },
+      {
+        "index": 2,
+        "text": "The client code is generated from the spec."
+      },
+      {
+        "index": 3,
+        "text": "The generated client guarantees the declared types."
+      },
+      {
+        "index": 4,
+        "text": "So multiplying price by quantity is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on the spec instead of the actual responses",
+      "explanation": "A spec documents intended behaviour; the running API may differ. Here the API sends price as the string \"499.00\". Many generated clients do not validate responses at runtime, so price holds a string: in Python, '499.00' * 3 repeats the string, and in JavaScript '499.00' * 3 happens to give 1497 while '499.00' + tax concatenates. Validate responses, report the drift to the provider, and convert explicitly.",
+      "why_convincing": "Generated clients look typed, which suggests they check the types."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the API returns a string despite the spec, and the client does not enforce the type. Validate or convert price (Decimal(product.price)).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The live response contains \"price\": \"499.00\" (a string).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "499.00"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "In Python, '499.00' * 3 evaluates to '499.00499.00499.00'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The total becomes a repeated string instead of 1,497."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the spec with the actual response."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the generated client checks types at runtime."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A spec describes the contract; nothing forces the server to follow it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the type of price in the live response."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the API sends a string, and the client does not validate. Convert or validate price."
+      }
+    ],
+    "repair": "Validate responses (or convert with Decimal) and add a contract test against the live API.",
+    "debrief": "Specs drift from implementations. Contract tests that compare live responses with the spec catch the drift before it reaches production code.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-openapi-swagger-003",
+    "subject": "api-integration",
+    "topic": "OpenAPI / Swagger",
+    "subtopic": "Unknown fields are allowed by default",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will validation against this schema reject the request with the misspelled field 'emial'?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "language": "yaml",
+      "spec": "UpdateProfile:\n  type: object\n  properties:\n    email: { type: string, format: email }\n    name:  { type: string }\n\n# Client sends: {\"emial\": \"asha@new.example\"}   (typo)"
+    },
+    "ai_claim": "Yes. The schema lists only email and name, so a field called emial is not part of the schema and fails validation.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The schema defines two properties: email and name."
+      },
+      {
+        "index": 2,
+        "text": "The request contains emial, which is not one of them."
+      },
+      {
+        "index": 3,
+        "text": "Fields not defined in the schema are invalid."
+      },
+      {
+        "index": 4,
+        "text": "So the request is rejected."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Assuming a list of properties forbids everything else",
+      "explanation": "JSON Schema allows additional properties unless additionalProperties: false is set, and neither email nor name is required. {\"emial\": ...} is therefore valid, the update silently changes nothing, and the client believes the email was updated. Add additionalProperties: false (and required fields where appropriate).",
+      "why_convincing": "Listing properties reads like a complete description of the object."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: additional properties are allowed by default and nothing is required, so the typo passes. Set additionalProperties: false.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "JSON Schema's additionalProperties defaults to allowing any extra property.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Validating {\"emial\": \"asha@new.example\"} against the schema succeeds.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The typo is accepted and the email never changes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the schema says about fields it does not list."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes unlisted fields are invalid."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In JSON Schema, extra properties are allowed unless additionalProperties is false."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Validate the request body with a JSON Schema validator."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: unlisted fields are allowed by default. Add additionalProperties: false."
+      }
+    ],
+    "repair": "Add `additionalProperties: false` to UpdateProfile.",
+    "debrief": "Permissive defaults turn typos into silent no-ops. Strict schemas for request bodies surface client mistakes as 400s instead of mysterious non-updates.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-openapi-swagger-004",
+    "subject": "api-integration",
+    "topic": "OpenAPI / Swagger",
+    "subtopic": "Defining a security scheme is not applying it",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this spec declare that GET /orders requires a bearer token?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "language": "yaml",
+      "spec": "components:\n  securitySchemes:\n    bearerAuth:\n      type: http\n      scheme: bearer\npaths:\n  /orders:\n    get:\n      summary: List orders\n      responses: { \"200\": { description: OK } }\n# No top-level `security:` and no `security:` on any operation."
+    },
+    "ai_claim": "Yes. The spec defines bearerAuth, so its operations are documented as requiring a bearer token.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The spec defines a bearer authentication scheme."
+      },
+      {
+        "index": 2,
+        "text": "Security schemes describe how the API is secured."
+      },
+      {
+        "index": 3,
+        "text": "So every operation requires a bearer token."
+      },
+      {
+        "index": 4,
+        "text": "GET /orders therefore requires one."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating a scheme definition as a requirement",
+      "explanation": "components.securitySchemes only defines schemes that can be referenced. Requirements are applied with a security field, globally or per operation. Without one, the spec documents GET /orders as needing no authentication: Swagger UI will not send a token, and generated clients will not attach one. Add security: [{bearerAuth: []}] at the top level.",
+      "why_convincing": "Seeing bearerAuth in the spec makes the API look secured."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the scheme is defined but never applied. Add a top-level security: - bearerAuth: [] (or per operation).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "No security requirement object appears at the root or on GET /orders.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Swagger UI's Try it out sends GET /orders without an Authorization header.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Generated clients call /orders without a token."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find where the spec says which operations need which scheme."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes defining a scheme applies it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "securitySchemes defines; the security field requires."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Search the spec for a security: field."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the scheme is never applied. Add security: [{bearerAuth: []}]."
+      }
+    ],
+    "repair": "Add `security: [{ bearerAuth: [] }]` at the root of the spec.",
+    "debrief": "OpenAPI separates definitions (components) from usage. A scheme that is defined but never referenced is documentation of nothing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-openapi-swagger-005",
+    "subject": "api-integration",
+    "topic": "OpenAPI / Swagger",
+    "subtopic": "readOnly properties",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that clients creating an order should not send id, even though id is listed as required, and that the 201 response will include it?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "language": "yaml",
+      "spec": "Order:\n  type: object\n  required: [id, product_id, qty]\n  properties:\n    id:         { type: integer, readOnly: true }\n    product_id: { type: integer }\n    qty:        { type: integer, minimum: 1 }\n\npaths:\n  /orders:\n    post:\n      requestBody: { content: { application/json: { schema: { $ref: '#/components/schemas/Order' } } } }\n      responses: { \"201\": { content: { application/json: { schema: { $ref: '#/components/schemas/Order' } } } } }"
+    },
+    "ai_claim": "Yes. readOnly means id appears only in responses; OpenAPI treats a required readOnly property as required in responses only. So the POST body is valid without id, and the created order in the 201 response includes it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "id is marked readOnly: true."
+      },
+      {
+        "index": 2,
+        "text": "readOnly properties are sent by the server and should not be sent in requests."
+      },
+      {
+        "index": 3,
+        "text": "OpenAPI 3.0 specifies that required applies to readOnly properties in responses only."
+      },
+      {
+        "index": 4,
+        "text": "So the request omits id, and the 201 response includes the generated id."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. readOnly lets one schema serve both request and response: server-generated fields are required in responses and excluded from requests.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "OpenAPI 3.0: if a readOnly property is in required, the requirement applies to the response only.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "POST /orders with {\"product_id\": 7, \"qty\": 2} validates; the 201 body contains an id.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "201"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what readOnly means for requests and responses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on how required interacts with readOnly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "readOnly properties are response-only, and so is their requiredness."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Validate a request body without id."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. id is required in responses only, so requests omit it. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "readOnly and writeOnly let a single schema describe both directions of an exchange. Knowing how they interact with required avoids duplicate 'create' and 'read' schemas.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

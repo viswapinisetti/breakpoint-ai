@@ -1,0 +1,386 @@
+[
+  {
+    "id": "da-tableau-visualization-principles-001",
+    "subject": "data-analytics",
+    "topic": "Tableau / Visualization Principles",
+    "subtopic": "Dual axes that are not synchronised",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the chart show that costs exceeded revenue from May?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Dual-axis line chart, Jan-Jun\nLeft axis (Revenue): Rs 40L to Rs 60L\nRight axis (Costs): Rs 10L to Rs 70L\nThe cost line crosses above the revenue line in May.",
+      "data": "May: Revenue Rs 52L, Costs Rs 48L"
+    },
+    "ai_claim": "Yes. The cost line rises above the revenue line in May, so costs overtook revenue.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Revenue and costs are plotted as two lines."
+      },
+      {
+        "index": 2,
+        "text": "In May the cost line is above the revenue line."
+      },
+      {
+        "index": 3,
+        "text": "A higher line means a larger value."
+      },
+      {
+        "index": 4,
+        "text": "So costs exceeded revenue from May."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Comparing lines drawn against different axes",
+      "explanation": "Each line uses its own axis with a different range, so their vertical positions cannot be compared. In May, revenue is Rs 52L and costs are Rs 48L: revenue is still higher. The crossing is an artefact of the axis ranges. Synchronise the axes (or use one axis) when comparing the two series.",
+      "why_convincing": "Lines crossing is a strong visual signal, and dual axes look like one chart."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the axes differ, so the crossing means nothing. May revenue (52L) still exceeds costs (48L).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "May: revenue Rs 52L, costs Rs 48L.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "52",
+          "48"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Series on unsynchronised dual axes cannot be compared by position.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Changing the right axis range moves the crossing to a different month."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which axis each line uses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 compares heights across two scales."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Positions on different axes are not comparable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Read May's actual values."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the axes differ, and revenue (52L) is still above costs (48L)."
+      }
+    ],
+    "repair": "Synchronise the axes (Tableau: Synchronize Axis) or plot both series on one axis.",
+    "debrief": "Dual axes are for showing two differently scaled measures together, not for comparing their magnitudes. If comparison matters, use one scale.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-tableau-visualization-principles-002",
+    "subject": "data-analytics",
+    "topic": "Tableau / Visualization Principles",
+    "subtopic": "Bubbles sized by radius",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many times larger are Region B's sales than Region A's?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Bubble chart: sales by region\nBubble radius is proportional to sales.\nRegion A: radius 1 cm   Region B: radius 2 cm\nRegion B's bubble covers four times the area of A's."
+    },
+    "ai_claim": "4. B's bubble covers four times the area of A's, so B's sales are four times A's.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Bubble size represents sales."
+      },
+      {
+        "index": 2,
+        "text": "B's bubble has four times the area of A's."
+      },
+      {
+        "index": 3,
+        "text": "Larger area means proportionally larger sales."
+      },
+      {
+        "index": 4,
+        "text": "So B's sales are 4 times A's."
+      }
+    ],
+    "ai_final_answer": "4",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 3,
+      "misconception": "Reading area when the encoding is radius",
+      "explanation": "The chart states that radius is proportional to sales. B's radius is twice A's, so its sales are twice A's; the area is four times larger only because area grows with the square of the radius. This is also why radius encoding misleads readers, who judge area: bubbles should be sized by area.",
+      "why_convincing": "People perceive bubble size as area, which is exactly what makes the chart misleading."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Sales are proportional to radius, so B's sales are 2 times A's. Size bubbles by area instead.",
+    "canonical_answer": "2",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Radius ratio 2 / 1 = 2; area ratio 2^2 = 4.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Readers judge bubble size by area, so sizes should be area-proportional.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A value three times larger would look nine times bigger."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which dimension of the bubble encodes sales."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 reads area as the encoding."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Area grows with the square of the radius."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the radii."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: radius encodes sales, so B is 2 times A. Size bubbles by area."
+      }
+    ],
+    "repair": "Map the value to bubble area, not radius (Tableau's size mark does this by default).",
+    "debrief": "Visual encodings must match perception. Radius-scaled bubbles exaggerate differences quadratically, which turns honest data into a misleading chart.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-tableau-visualization-principles-003",
+    "subject": "data-analytics",
+    "topic": "Tableau / Visualization Principles",
+    "subtopic": "Sorted bars for many categories",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that the bar chart will let viewers compare categories more accurately than the pie?",
+    "artifact_type": "chart",
+    "artifact": {
+      "proposal": "Replace a 12-slice pie chart of revenue by category with a horizontal bar chart sorted from largest to smallest, axis starting at zero, values labelled."
+    },
+    "ai_claim": "Yes. People compare lengths on a common baseline more accurately than angles or areas. Sorting shows the ranking at a glance, and a zero baseline keeps lengths proportional to values.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A pie chart encodes values as angles and areas."
+      },
+      {
+        "index": 2,
+        "text": "Bars encode values as lengths from a common baseline, which people judge more accurately."
+      },
+      {
+        "index": 3,
+        "text": "Sorting from largest to smallest makes the ranking immediately visible."
+      },
+      {
+        "index": 4,
+        "text": "A zero baseline keeps bar lengths proportional to values."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Perception research ranks position and length on a common scale above angle and area, and 12 slices are too many for a pie. Sorted, zero-based bars are the standard choice.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Cleveland and McGill: position and length along a common scale are judged more accurately than angle or area.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "With 12 slices, several categories take under 5% each and cannot be distinguished in a pie.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "12"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about how accurately people judge angles versus lengths."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 relies on perception research."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Length on a common baseline is one of the most accurately perceived encodings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try ranking the 7th and 8th largest pie slices by eye."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Sorted, zero-based bars make comparison easier than a 12-slice pie. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Chart choice is a perception decision. For comparing many categories, sorted bars on a zero baseline are hard to beat.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-tableau-visualization-principles-004",
+    "subject": "data-analytics",
+    "topic": "Tableau / Visualization Principles",
+    "subtopic": "Totals on a map",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the map support the claim that the app is most popular in Uttar Pradesh?",
+    "artifact_type": "chart",
+    "artifact": {
+      "chart": "Choropleth map of India: total app downloads by state, darker = more\nDarkest: Uttar Pradesh (4.0M), Maharashtra (3.6M)\nLightest: Goa (0.1M), Sikkim (0.02M)",
+      "headline": "\"Uttar Pradesh is where the app is most popular\""
+    },
+    "ai_claim": "Yes. Uttar Pradesh has the most downloads of any state, so that is where the app is most popular.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The map shades states by total downloads."
+      },
+      {
+        "index": 2,
+        "text": "Uttar Pradesh is the darkest state, with 4.0M downloads."
+      },
+      {
+        "index": 3,
+        "text": "More downloads means more popularity."
+      },
+      {
+        "index": 4,
+        "text": "So the app is most popular in Uttar Pradesh."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Treating totals as popularity without normalising",
+      "explanation": "Uttar Pradesh is India's most populous state (about 240 million people), so it tops almost any total. Popularity is adoption relative to population: 4.0M / 240M is under 2%, while Goa's 0.1M among about 1.6M residents is over 6%. Maps of totals mostly show population; normalise per capita (or per internet user) before comparing.",
+      "why_convincing": "The total is genuinely the largest, and the map looks decisive."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: totals track population. Per capita, Goa (about 6%) far exceeds Uttar Pradesh (under 2%). Map downloads per 1,000 residents.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "UP: 4.0M / 240M = 1.7%; Goa: 0.1M / 1.6M = 6.3%",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.7",
+          "6.3"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Choropleth maps should show normalised rates; raw totals mostly reflect population.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Per capita, Goa's adoption is more than three times Uttar Pradesh's."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what else differs between the states."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates total downloads with popularity."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Totals must be normalised by population to compare adoption."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Divide downloads by population for UP and Goa."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: totals follow population. Per capita, Goa leads."
+      }
+    ],
+    "repair": "Map downloads per 1,000 residents (or per internet user).",
+    "debrief": "Most maps of totals are population maps in disguise. Normalise first, and state the denominator in the legend.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

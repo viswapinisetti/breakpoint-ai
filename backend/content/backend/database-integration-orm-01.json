@@ -1,0 +1,489 @@
+[
+  {
+    "id": "be-database-integration-orm-001",
+    "subject": "backend",
+    "topic": "Database Integration & ORM",
+    "subtopic": "Building SQL with f-strings",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this query safe, given that the email comes from the login form's email field?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/login\")\ndef login(email: str, password: str):\n    row = db.execute(\n        f\"SELECT id, password_hash FROM users WHERE email = '{email}'\"\n    ).fetchone()\n    ..."
+    },
+    "ai_claim": "Yes. The value comes from an email field, so it is just an email address and cannot change the query.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The login form has an input of type email."
+      },
+      {
+        "index": 2,
+        "text": "Users type their email address into it."
+      },
+      {
+        "index": 3,
+        "text": "An email address cannot contain SQL."
+      },
+      {
+        "index": 4,
+        "text": "So the query is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Trusting input because of the form it usually comes from",
+      "explanation": "The server receives whatever the request contains, not what the form allows. An email value of ' OR '1'='1' -- (sent with curl, or even allowed by permissive email syntax) is pasted into the SQL and changes its meaning. This is SQL injection. Use a parameterised query: db.execute(text('... WHERE email = :email'), {'email': email}).",
+      "why_convincing": "Well-behaved users never type SQL, so the endpoint works in every normal test."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not safe: the value is interpolated into SQL, so crafted input changes the query. Use bound parameters.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "email = \"x' OR '1'='1' --\" makes the WHERE clause match every row.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Parameterised queries send values separately from SQL text, so values are never parsed as SQL.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An attacker logs in as the first user in the table."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the server actually receives, regardless of the form."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the value is a real email address."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "SQL injection happens when input is concatenated into SQL text."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Substitute x' OR '1'='1' -- into the query."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: any string can arrive, and it is pasted into SQL. Use parameterised queries."
+      }
+    ],
+    "repair": "Use bound parameters, e.g. `text(\"... WHERE email = :email\"), {\"email\": email}`.",
+    "debrief": "Never build SQL from input by string formatting, whatever the input's expected format. Parameterised queries remove the whole class of injection bugs, and ORMs use them by default.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-database-integration-orm-002",
+    "subject": "backend",
+    "topic": "Database Integration & ORM",
+    "subtopic": "N+1 queries through lazy loading",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this endpoint run 2 SQL queries - one for orders and one for customers?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.get(\"/orders\")\ndef list_orders(db: Session = Depends(get_db)):\n    orders = db.scalars(select(Order)).all()          # 50 orders\n    return [{\"id\": o.id, \"customer\": o.customer.name} for o in orders]\n\n# Order.customer = relationship(Customer)  (default lazy loading)"
+    },
+    "ai_claim": "Yes. One query loads the orders, and SQLAlchemy loads the related customers in a second query.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "select(Order) loads all 50 orders in one query."
+      },
+      {
+        "index": 2,
+        "text": "Accessing o.customer triggers loading of customers."
+      },
+      {
+        "index": 3,
+        "text": "SQLAlchemy loads all the needed customers together."
+      },
+      {
+        "index": 4,
+        "text": "So the endpoint runs 2 queries."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming lazy loads are batched",
+      "explanation": "With default lazy loading, each o.customer access runs its own SELECT for that order's customer (unless it is already in the session). 50 orders with different customers cause 1 + 50 = 51 queries - the N+1 problem. Use eager loading: select(Order).options(selectinload(Order.customer)) gives 2 queries.",
+      "why_convincing": "The code shows only one query, and the rest happens implicitly inside attribute access."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It runs 51 queries: one for orders plus one per customer. Add .options(selectinload(Order.customer)) (or joinedload).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "With SQL echo on, the endpoint logs 51 SELECT statements for 50 orders.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "51"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "SQL log: 1 SELECT for orders, then 50 SELECTs on customers, one per order.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "50"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The SQL log shows one customer query per order."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the SQL statements with echo enabled."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes lazy loads are grouped together."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Default lazy loading issues one query per relationship access."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count queries for 50 orders with 50 different customers."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: each access runs its own query, 51 in total. Use selectinload."
+      }
+    ],
+    "repair": "Eager-load the relationship with `selectinload(Order.customer)`.",
+    "debrief": "ORMs hide queries inside attribute access, which is how N+1 problems arise. They are invisible with small test data and severe in production. Watch the query count, not just the result.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-database-integration-orm-003",
+    "subject": "backend",
+    "topic": "Database Integration & ORM",
+    "subtopic": "Flush is not commit",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the new customer saved permanently in the database?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/customers\")\ndef create_customer(data: CustomerIn, db: Session = Depends(get_db)):\n    customer = Customer(name=data.name)\n    db.add(customer)\n    db.flush()                  # assigns customer.id\n    return {\"id\": customer.id}\n\n# get_db closes the session after the request; nothing else commits."
+    },
+    "ai_claim": "Yes. flush sends the INSERT to the database and assigns the id, so the customer is stored.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "db.add registers the new customer."
+      },
+      {
+        "index": 2,
+        "text": "db.flush executes the INSERT and the database assigns an id."
+      },
+      {
+        "index": 3,
+        "text": "Once the INSERT has run, the row is in the database."
+      },
+      {
+        "index": 4,
+        "text": "So the customer is saved."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Confusing flushing with committing",
+      "explanation": "flush sends the INSERT inside the session's open transaction; the row is visible only within that transaction. The session is closed without a commit, so the transaction is rolled back and the row disappears. The client receives an id for a customer that does not exist. Call db.commit().",
+      "why_convincing": "The id is real and the INSERT really ran, so it looks saved."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the transaction is never committed, so closing the session rolls the INSERT back. Call db.commit() before returning.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "After the request, a new session's db.get(Customer, returned_id) is None.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "BEGIN -> INSERT (flush) -> session.close() -> ROLLBACK",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The returned id refers to a row that was rolled back."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the transaction is ever committed."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats an executed INSERT as permanent."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "flush writes inside the current transaction; only commit makes it durable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look up the id from a new session after the request."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without a commit, the INSERT is rolled back when the session closes. Call db.commit()."
+      }
+    ],
+    "repair": "Call `db.commit()` (and `db.refresh(customer)` if needed) before returning.",
+    "debrief": "An ORM session wraps a transaction. flush synchronises pending changes into it; commit ends it durably. Returning data from uncommitted work produces responses that describe things that never happened.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-database-integration-orm-004",
+    "subject": "backend",
+    "topic": "Database Integration & ORM",
+    "subtopic": "first() can return None",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "For an email that is not registered, does the endpoint respond 404 Not Found?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.get(\"/users/by-email\")\ndef by_email(email: str, db: Session = Depends(get_db)):\n    user = db.scalars(select(User).where(User.email == email)).first()\n    return {\"name\": user.name}"
+    },
+    "ai_claim": "Yes. When no user matches, the lookup finds nothing, so the API reports that the user was not found.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The query looks for a user with the given email."
+      },
+      {
+        "index": 2,
+        "text": "For an unregistered email, no row matches."
+      },
+      {
+        "index": 3,
+        "text": "A lookup that finds nothing results in a not-found response."
+      },
+      {
+        "index": 4,
+        "text": "So the endpoint responds 404."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming a missing row becomes a 404 automatically",
+      "explanation": "first() returns None when nothing matches, and nothing converts that into a 404. user.name then raises AttributeError, which FastAPI turns into a 500 Internal Server Error. Check for None and raise HTTPException(404).",
+      "why_convincing": "Many frameworks have helpers (get_or_404) that do this, so it feels automatic."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: user is None, user.name raises AttributeError, and the client gets 500. Add if user is None: raise HTTPException(404).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "GET /users/by-email?email=nobody@example.com returns 500.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "500"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "first() returns None when no row matches; attribute access on None raises AttributeError, which FastAPI reports as 500.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "500"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An unknown email crashes the handler."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what first() returns when nothing matches."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a not-found response is produced automatically."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "first() returns None; attribute access on None raises AttributeError."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Request an unregistered email."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: None.name raises, producing a 500. Check for None and raise 404."
+      }
+    ],
+    "repair": "Check `if user is None` and raise HTTPException(404).",
+    "debrief": "Every lookup has a 'not found' path, and it must be written. Test endpoints with ids and keys that do not exist; a 500 there is a bug that clients will hit constantly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-database-integration-orm-005",
+    "subject": "backend",
+    "topic": "Database Integration & ORM",
+    "subtopic": "Connection pool arithmetic",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this deployment can never open more database connections than PostgreSQL allows?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "engine = create_engine(DATABASE_URL, pool_size=5, max_overflow=10)\n\n# Deployment: 4 Gunicorn worker processes, one engine per process\n# PostgreSQL: max_connections = 100, about 10 reserved for admin tools"
+    },
+    "ai_claim": "Yes. Each process can open at most pool_size + max_overflow = 15 connections, so 4 processes open at most 60, which is below the roughly 90 available.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each engine keeps up to 5 pooled connections and may open 10 more when busy."
+      },
+      {
+        "index": 2,
+        "text": "So one process opens at most 15 connections."
+      },
+      {
+        "index": 3,
+        "text": "4 processes open at most 4 x 15 = 60."
+      },
+      {
+        "index": 4,
+        "text": "60 is below the 90 or so connections available to the application."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The pool caps connections per engine at pool_size + max_overflow, and the total scales with the number of processes: 60 here, within the limit. (Scaling to 7 workers would reach 105 and exceed it.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "per process: 5 + 10 = 15; 4 processes: 60 < 90",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "15",
+          "60"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "With 7 workers the maximum becomes 105, above the limit.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "105"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Work out the maximum per process, then for the whole deployment."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 multiplies by the number of processes."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A SQLAlchemy engine opens at most pool_size + max_overflow connections, and each process has its own engine."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare 4 x 15 with the available connections."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. At most 60 connections, below the limit. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Connection limits must be budgeted across every process, replica and tool that connects. The per-process pool is only half of the calculation; the claim does the whole multiplication.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

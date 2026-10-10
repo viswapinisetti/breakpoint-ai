@@ -1,0 +1,445 @@
+[
+  {
+    "id": "mlo-model-registry-001",
+    "subject": "mlops",
+    "topic": "Model Registry",
+    "subtopic": "Overwriting a registered version",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the registry still give a reliable record of what is in production?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "To fix a bug, an engineer retrains the model and uploads it over the existing registry entry 'churn-model v5', which is in production.\nAI: \"Overwriting v5 keeps things simple, and the registry still shows what's in production.\""
+    },
+    "ai_claim": "Yes. Production uses v5, and v5 is in the registry, so the registry shows exactly what is in production.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Production is configured to use v5."
+      },
+      {
+        "index": 2,
+        "text": "The registry has an entry for v5."
+      },
+      {
+        "index": 3,
+        "text": "The entry holds the current model."
+      },
+      {
+        "index": 4,
+        "text": "So the registry shows what is in production."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Mutating a registered model version",
+      "explanation": "Registry versions should be immutable. After the overwrite, 'v5' refers to two different models over time: past predictions came from the old artifact, which no longer exists, and running pods may still have the old one loaded while new pods load the new one. Audit, rollback and debugging all break. Register the fix as v6 and promote it.",
+      "why_convincing": "Reusing the version number looks tidy."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: v5 now names two different models. Keep versions immutable; register the retrained model as v6.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "pods started before the overwrite serve the old v5; pods started after serve the new v5",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Registered versions must be immutable; changes create new versions.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A customer dispute cannot be investigated because the original v5 is gone."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 'v5' refers to before and after."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the entry is a stable record."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Immutable versions make audits and rollbacks possible."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider pods started before and after the overwrite."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: v5 now means two models. Register v6."
+      }
+    ],
+    "repair": "Make versions immutable; register fixes as new versions.",
+    "debrief": "A registry is a ledger. Ledgers are append-only.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-registry-002",
+    "subject": "mlops",
+    "topic": "Model Registry",
+    "subtopic": "Promoting on a different evaluation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do these numbers justify promoting v9 over v8?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "Candidate v9: offline AUC 0.87 (evaluated on its own training run's validation split).\nProduction v8: AUC 0.84 (evaluated six months ago on an older validation set).\nAI: \"v9 has higher AUC, so promote it.\""
+    },
+    "ai_claim": "Yes. v9's AUC is 0.87 versus v8's 0.84, a clear improvement, so v9 should be promoted.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "v9 scores 0.87."
+      },
+      {
+        "index": 2,
+        "text": "v8 scores 0.84."
+      },
+      {
+        "index": 3,
+        "text": "0.87 > 0.84."
+      },
+      {
+        "index": 4,
+        "text": "So promote v9."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Comparing champion and challenger on different data",
+      "explanation": "The scores come from different validation sets six months apart. Data difficulty and distribution may have changed, so 0.87 vs 0.84 says little. Evaluate both models on the same recent holdout (champion-challenger), ideally with a confidence interval, before promoting.",
+      "why_convincing": "The registry shows both numbers side by side."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the metrics come from different data. Score v8 and v9 on the same recent holdout.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "v8 was evaluated six months ago on an older validation set; v9 on its own split.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "On the same recent holdout, v8 scores 0.86 and v9 0.865.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.865"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The improvement nearly disappears on a common holdout."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the numbers are comparable."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 compares scores from different evaluations."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Champion-challenger comparisons use the same evaluation data."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Re-score both models on recent data."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: different data. Compare on a shared holdout."
+      }
+    ],
+    "repair": "Evaluate champion and challenger on the same recent holdout before promotion.",
+    "debrief": "Registry metrics are only comparable if the evaluation data are the same.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-registry-003",
+    "subject": "mlops",
+    "topic": "Model Registry",
+    "subtopic": "Stages, approvals and lineage",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this workflow gives safe, auditable promotions?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "Registry workflow: new versions enter 'Staging'; promotion to 'Production' requires passing automated checks (holdout metrics, latency, bias report) and approval from a second person; every version records its training run, data snapshot and code commit."
+    },
+    "ai_claim": "Yes. Automated checks catch regressions, two-person approval prevents unilateral mistakes, and recorded lineage lets anyone trace a production model back to its data and code.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every new version starts in Staging."
+      },
+      {
+        "index": 2,
+        "text": "Promotion needs automated checks to pass."
+      },
+      {
+        "index": 3,
+        "text": "A second person must approve."
+      },
+      {
+        "index": 4,
+        "text": "Lineage links each version to its run, data and code."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Gated, reviewed promotions with full lineage are the core of registry governance.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "v11 fails the latency check (p99 180 ms > 120 ms) and cannot be promoted",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "180",
+          "120"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what stops a bad model reaching production."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 adds human review."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Governance combines automated gates, review and lineage."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace a model that fails one check."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The workflow is safe and auditable. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Registries turn model deployment from a file copy into a controlled, recorded decision.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-registry-004",
+    "subject": "mlops",
+    "topic": "Model Registry",
+    "subtopic": "Storing the input signature",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that storing and enforcing the signature prevents silent input mismatches?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "Each registered model stores an input signature: feature names, types and order (e.g. age: int, income: float, city: string), plus an example input.\nThe serving layer validates requests against the signature before predicting."
+    },
+    "ai_claim": "Yes. Requests with missing, extra, misnamed or wrongly typed features are rejected instead of being fed to the model in the wrong shape.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The signature records the expected features and types."
+      },
+      {
+        "index": 2,
+        "text": "The serving layer checks each request against it."
+      },
+      {
+        "index": 3,
+        "text": "Mismatched requests are rejected with an error."
+      },
+      {
+        "index": 4,
+        "text": "So the model never receives silently misaligned inputs."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. An enforced schema turns silent garbage-in into explicit errors.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "request with income as '45,000' (string) -> rejected: expected float for 'income'",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider a client that renames a feature."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 makes errors explicit."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Schemas at the model boundary catch mismatches."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send a request with a wrong type."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The signature prevents silent mismatches. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Model inputs are an API. Give them a schema and enforce it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-model-registry-005",
+    "subject": "mlops",
+    "topic": "Model Registry",
+    "subtopic": "Is v12 safe to promote",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is v12 safe to promote to production?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "Candidate v12 vs production v11 on the same recent holdout: AUC 0.851 vs 0.842.\nNot yet assessed: latency under production load, performance for individual customer segments, and behaviour on the new region launched last month."
+    },
+    "ai_claim": "Yes. v12 beats v11 on the same holdout, so it is an improvement and safe to promote.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Both were evaluated on the same holdout."
+      },
+      {
+        "index": 2,
+        "text": "v12's AUC is higher."
+      },
+      {
+        "index": 3,
+        "text": "A higher AUC on the same data means a better model."
+      },
+      {
+        "index": 4,
+        "text": "So v12 is safe to promote."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Everything except overall AUC: whether v12 meets latency limits under load, whether it is worse for particular segments (an overall gain can hide a loss for a group), and how it behaves in the new region. None has been assessed.",
+    "resolving_scenarios": [
+      "v12 meets latency limits and performs at least as well for every segment and region: it is safe to promote.",
+      "v12's larger model exceeds the 100 ms p99 limit, or its AUC drops for new-region customers: promoting it would cause harm despite the overall gain."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Overall AUC alone cannot establish safety. Step 4 goes beyond the evidence available.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An overall AUC gain can coexist with a drop for the new-region segment.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "v12 could breach the latency SLO."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List what 'safe to promote' requires."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 generalises from one metric."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Promotion needs performance, latency and segment checks."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider latency and a new-region segment."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is unsupported. With all checks passed, yes; with a latency or segment problem, no. It cannot be decided yet."
+      }
+    ],
+    "repair": "Run latency tests, segment-level evaluation and a canary before promotion.",
+    "debrief": "One better metric is necessary, not sufficient. Promotion criteria should cover everything production cares about.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

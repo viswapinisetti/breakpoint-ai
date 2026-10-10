@@ -1,0 +1,473 @@
+[
+  {
+    "id": "mlo-llmops-rag-agent-monitoring-001",
+    "subject": "mlops",
+    "topic": "LLMOps, RAG & Agent Monitoring",
+    "subtopic": "Monitoring only latency and errors",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do green latency and error dashboards show the assistant is giving good answers?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "An LLM support assistant is monitored with: request rate, p95 latency, HTTP error rate. All dashboards are green.\nAI: \"Everything is green, so the assistant is working well.\""
+    },
+    "ai_claim": "Yes. Requests succeed quickly without errors, so the assistant is working well.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Latency is within target."
+      },
+      {
+        "index": 2,
+        "text": "HTTP errors are rare."
+      },
+      {
+        "index": 3,
+        "text": "The service is healthy."
+      },
+      {
+        "index": 4,
+        "text": "So the assistant is working well."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 4,
+      "misconception": "Measuring service health but not answer quality",
+      "explanation": "An LLM can return fast, successful HTTP responses that are wrong, ungrounded, off-policy or unhelpful. None of the dashboards measures quality. Add quality monitoring: sampled human or LLM-judge reviews against a rubric, groundedness checks for RAG, user feedback and escalation rates, and alerts on changes.",
+      "why_convincing": "For traditional services, health metrics are a good proxy for 'working'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: health metrics cannot detect wrong answers. Monitor answer quality (sampled evaluation, groundedness, feedback).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "After a prompt change, 18% of answers cite the wrong refund policy while all dashboards stay green.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "18"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "LLM applications need quality monitoring in addition to operational metrics.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Wrong answers are delivered quickly and successfully."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the dashboards measure."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 equates health with quality."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Quality must be measured directly for generative systems."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine a prompt change that breaks policy answers."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: nothing measures answer quality."
+      }
+    ],
+    "repair": "Add sampled quality reviews, groundedness metrics, feedback tracking and quality alerts.",
+    "debrief": "For LLM apps, 'up' and 'right' are different questions. Monitor both.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-llmops-rag-agent-monitoring-002",
+    "subject": "mlops",
+    "topic": "LLMOps, RAG & Agent Monitoring",
+    "subtopic": "Logging prompts with personal data",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is logging full prompts with customer details to a third-party tool the right setup?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "For debugging, the LLM gateway sends every full prompt and response - including customers' names, phone numbers and account details - to a third-party observability SaaS, retained for 1 year.\nAI: \"Full logs are essential for debugging LLM apps, so this is the right setup.\""
+    },
+    "ai_claim": "Yes. Complete prompts and responses are needed to debug LLM behaviour, so sending them all to the observability tool is right.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Debugging needs to see prompts and responses."
+      },
+      {
+        "index": 2,
+        "text": "Full logs give complete visibility."
+      },
+      {
+        "index": 3,
+        "text": "The observability tool stores them."
+      },
+      {
+        "index": 4,
+        "text": "So this is the right setup."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Copying personal data into a third-party log store",
+      "explanation": "The logs replicate customers' personal and account data to an external vendor for a year, expanding who can access it and creating privacy and compliance exposure (and breach risk). Redact or pseudonymise PII before logging, log metadata by default, restrict full-content logging to sampled, access-controlled storage with short retention, and review the vendor's data processing terms.",
+      "why_convincing": "Debuggability is a real need."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: raw PII flows to a third party for a year. Redact before logging, sample, restrict access and shorten retention.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Logs contain names, phone numbers and account details, retained 1 year by a third party.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Data minimisation: collect and retain only the personal data needed, for as short a time as needed.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A vendor breach exposes a year of customer conversations."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where the personal data ends up and for how long."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 values completeness over privacy."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Observability pipelines are data flows subject to privacy rules."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List who can access the vendor's logs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: raw PII goes to a third party. Redact and minimise."
+      }
+    ],
+    "repair": "Redact PII at the gateway, sample full-content logs into restricted storage with short retention.",
+    "debrief": "Every log is a copy of the data. Design LLM observability with privacy from the start.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-llmops-rag-agent-monitoring-003",
+    "subject": "mlops",
+    "topic": "LLMOps, RAG & Agent Monitoring",
+    "subtopic": "A floating model alias",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does using the floating alias safely give automatic improvements?",
+    "artifact_type": "deployment_manifest",
+    "artifact": {
+      "description": "The application calls the provider's model alias 'fast-latest', which the provider updates to newer model snapshots from time to time.\nThe team's evaluation suite was last run three months ago.\nAI: \"Using the latest alias means we always get improvements automatically.\""
+    },
+    "ai_claim": "Yes. Newer model snapshots are better, so the alias gives the application automatic improvements with no downside.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The alias points to the newest snapshot."
+      },
+      {
+        "index": 2,
+        "text": "Newer snapshots are improvements."
+      },
+      {
+        "index": 3,
+        "text": "The app gets them automatically."
+      },
+      {
+        "index": 4,
+        "text": "So there is no downside."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 2,
+      "misconception": "Depending on a model version that can change without testing",
+      "explanation": "A new snapshot can change output format, tone, refusal behaviour or accuracy on your specific task, even if it is better on average. With a floating alias, these changes reach production untested, and results become irreproducible. Pin a dated snapshot, and upgrade deliberately after running your evaluation suite.",
+      "why_convincing": "Model upgrades are usually improvements overall."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: behaviour can change unannounced for your task. Pin a snapshot and upgrade after evaluation.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "After an alias update, the model starts wrapping JSON in Markdown fences and the parser fails for 7% of requests.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "7"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Production dependencies, including model versions, should be pinned and upgraded deliberately.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An unannounced snapshot change breaks output parsing."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 'better on average' means for your task."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes every update helps this application."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Pin versions; upgrade after evaluation."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider an output-format change."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: updates can break your use case. Pin a snapshot."
+      }
+    ],
+    "repair": "Pin a specific model snapshot and run the eval suite before switching.",
+    "debrief": "Model versions are dependencies. Pin them like any other.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-llmops-rag-agent-monitoring-004",
+    "subject": "mlops",
+    "topic": "LLMOps, RAG & Agent Monitoring",
+    "subtopic": "No token or cost tracking",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is reviewing the monthly invoice sufficient cost monitoring?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "An LLM feature's usage and cost are not tracked per request.\nA prompt change added a 6,000-token policy document to every request; nobody noticed for three weeks.\nAI: \"Costs are fine: the provider invoice arrives monthly, and we can review it then.\""
+    },
+    "ai_claim": "Yes. The invoice shows total spend, so any cost problem will be visible when it arrives.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The provider bills monthly."
+      },
+      {
+        "index": 2,
+        "text": "The invoice shows total spend."
+      },
+      {
+        "index": 3,
+        "text": "Cost problems appear on the invoice."
+      },
+      {
+        "index": 4,
+        "text": "So monthly review is sufficient."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 3,
+      "misconception": "Discovering cost regressions weeks late",
+      "explanation": "A monthly invoice reveals a problem up to a month after it starts and cannot tell which feature, prompt version or customer caused it. The 6,000-token addition multiplied input tokens for three weeks unnoticed. Track tokens and cost per request, per feature and per prompt version in real time, with budgets and alerts on changes.",
+      "why_convincing": "The invoice does eventually show the total."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: monthly totals are too late and too coarse. Track per-request tokens and cost with alerts.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Average input tokens rose from 900 to 6,900 per request after the prompt change.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6,900"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Cost is an operational metric; monitor it at request granularity with alerts.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Three weeks of inflated cost pass before anyone notices."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how quickly the invoice would reveal the change."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on a monthly, aggregate signal."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Token usage should be monitored per request and per prompt version."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute tokens before and after the change."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the invoice is late and coarse. Track tokens in real time."
+      }
+    ],
+    "repair": "Log tokens and cost per request with dimensions (feature, prompt version) and set alerts.",
+    "debrief": "LLM costs scale with prompt design. Make token usage visible where prompts change.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-llmops-rag-agent-monitoring-005",
+    "subject": "mlops",
+    "topic": "LLMOps, RAG & Agent Monitoring",
+    "subtopic": "Monitoring a RAG system",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this plan covers the main ways a RAG assistant can fail?",
+    "artifact_type": "monitoring_config",
+    "artifact": {
+      "description": "RAG assistant monitoring:\n- retrieval: share of queries with at least one chunk above a relevance threshold; top-k sources per answer\n- answers: weekly sample of 200 graded for groundedness and correctness by trained reviewers\n- users: thumbs-down rate and 'contact human' rate by topic\n- documents: index freshness (hours since last successful ingestion)"
+    },
+    "ai_claim": "Yes. It watches retrieval quality, answer groundedness and correctness, user dissatisfaction by topic, and stale indexes - covering retrieval failures, generation failures and data freshness.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Retrieval metrics catch queries with no relevant context."
+      },
+      {
+        "index": 2,
+        "text": "Sampled grading measures groundedness and correctness."
+      },
+      {
+        "index": 3,
+        "text": "User signals reveal problems by topic."
+      },
+      {
+        "index": 4,
+        "text": "Index freshness catches stale documents."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. RAG failures arise in retrieval, generation and data; this plan monitors each.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "index freshness alert at 36 hours -> ingestion job failing -> answers citing outdated prices",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "36"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List the components of a RAG system."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 covers the data pipeline."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Monitor retrieval, generation and data freshness separately."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Map each metric to a failure."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The plan covers the main failure points. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Monitoring each stage separately makes RAG failures diagnosable, not just detectable.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

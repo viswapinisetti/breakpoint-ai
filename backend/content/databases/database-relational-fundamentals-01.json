@@ -1,0 +1,462 @@
+[
+  {
+    "id": "db-database-relational-fundamentals-001",
+    "subject": "databases",
+    "topic": "Database & Relational Fundamentals",
+    "subtopic": "Primary keys and NULL",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "In PostgreSQL, do both INSERT statements succeed, storing two users who have no email address?",
+    "artifact_type": "schema",
+    "artifact": {
+      "schema": "CREATE TABLE users (\n  email VARCHAR(255) PRIMARY KEY,\n  name  VARCHAR(100)\n);",
+      "query": "INSERT INTO users (email, name) VALUES (NULL, 'Asha');\nINSERT INTO users (email, name) VALUES (NULL, 'Ben');"
+    },
+    "ai_claim": "Yes. NULL is never equal to another NULL, so two NULL emails do not violate the uniqueness of the primary key.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A primary key must be unique."
+      },
+      {
+        "index": 2,
+        "text": "In SQL, NULL = NULL is not true: NULL means 'unknown'."
+      },
+      {
+        "index": 3,
+        "text": "So two NULL emails are not considered duplicates."
+      },
+      {
+        "index": 4,
+        "text": "Both rows are inserted."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Treating a primary key like a nullable UNIQUE column",
+      "explanation": "A PRIMARY KEY is UNIQUE and NOT NULL. The NULL-is-not-equal rule explains why a plain UNIQUE column can hold several NULLs, but a primary key rejects NULL outright: the first INSERT already fails with a not-null violation.",
+      "why_convincing": "Steps 1 and 2 are both true, and the UNIQUE-allows-many-NULLs behaviour is real - it just does not apply to primary keys."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Neither insert succeeds: PRIMARY KEY implies NOT NULL, so the first INSERT raises a not-null constraint violation. A primary key must identify every row, which a missing value cannot do.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "INSERT INTO users VALUES (NULL, 'Asha') fails: null value in column \"email\" violates not-null constraint.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The first INSERT is rejected before uniqueness is even considered."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check every constraint a PRIMARY KEY implies, not just uniqueness."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 applies a rule about UNIQUE columns to a primary key."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "PRIMARY KEY means UNIQUE plus NOT NULL."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try the first INSERT on its own."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong for primary keys: NOT NULL is implied, so the first INSERT already fails."
+      }
+    ],
+    "repair": "Use a surrogate key (id) as the primary key and make email a nullable UNIQUE column if users may lack one.",
+    "debrief": "A primary key is the row's identity, so it can never be unknown. The NULL-comparison rule is correct, but it explains UNIQUE, not PRIMARY KEY. When a claim reasons from one constraint, check which constraints are actually declared.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-database-relational-fundamentals-002",
+    "subject": "databases",
+    "topic": "Database & Relational Fundamentals",
+    "subtopic": "Rows have no inherent order",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A dashboard labels the result of this query 'the 10 oldest orders'. Is the label guaranteed to be correct?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "orders(id, customer_id, amount, created_at)",
+      "query": "SELECT * FROM orders\nLIMIT 10;"
+    },
+    "ai_claim": "Yes. Rows are stored in the order they were inserted, so the first 10 rows returned are the 10 oldest orders.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "New orders are appended to the table as they are created."
+      },
+      {
+        "index": 2,
+        "text": "The table therefore keeps its rows in insertion order."
+      },
+      {
+        "index": 3,
+        "text": "Without a sort, the database returns rows in stored order, oldest first."
+      },
+      {
+        "index": 4,
+        "text": "So LIMIT 10 returns the 10 oldest orders."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming an unordered result follows insertion order",
+      "explanation": "A table is a set of rows; without ORDER BY, the database may return rows in any order it finds convenient. Updates move rows, deleted space is reused, and the planner may read through an index or in parallel. The result often looks like insertion order on a small, fresh table, which is why the assumption survives until it silently breaks.",
+      "why_convincing": "On a new table with no updates, the output usually does come back in insertion order."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Not guaranteed. Without ORDER BY, row order is unspecified. Use SELECT * FROM orders ORDER BY created_at, id LIMIT 10.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "SELECT * FROM orders ORDER BY created_at, id LIMIT 10;",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "After an old order is updated, PostgreSQL may store its new version at the end of the table, so a plain scan returns it later.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An updated old row can move to the end of the physical table, changing the unsorted order."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look for what guarantees the order of the result."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a default order without ORDER BY."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In the relational model, a table has no row order; only ORDER BY defines one."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what an UPDATE or a reused gap from a DELETE does to physical storage."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without ORDER BY the order is unspecified. Add ORDER BY created_at."
+      }
+    ],
+    "repair": "Add ORDER BY created_at, id before LIMIT.",
+    "debrief": "Relations are sets, and 'the first N rows' is meaningless without ORDER BY. Queries that appear ordered in development often change order in production as data grows and plans change. Any query using LIMIT for a meaning like 'oldest' or 'top' needs an explicit sort.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-database-relational-fundamentals-003",
+    "subject": "databases",
+    "topic": "Database & Relational Fundamentals",
+    "subtopic": "Cascading deletes through two levels",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "With foreign keys enforced, does deleting customer 7 also delete the order items of customer 7's orders?",
+    "artifact_type": "schema",
+    "artifact": {
+      "schema": "CREATE TABLE orders (\n  id INT PRIMARY KEY,\n  customer_id INT REFERENCES customers(id) ON DELETE CASCADE\n);\nCREATE TABLE order_items (\n  id INT PRIMARY KEY,\n  order_id INT REFERENCES orders(id) ON DELETE CASCADE,\n  product VARCHAR(50)\n);",
+      "query": "DELETE FROM customers WHERE id = 7;"
+    },
+    "ai_claim": "Yes. The delete cascades to the customer's orders, and deleting those orders cascades again to their order items.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "orders.customer_id has ON DELETE CASCADE, so customer 7's orders are deleted with the customer."
+      },
+      {
+        "index": 2,
+        "text": "order_items.order_id has ON DELETE CASCADE too."
+      },
+      {
+        "index": 3,
+        "text": "Deleting those orders therefore deletes the items that reference them."
+      },
+      {
+        "index": 4,
+        "text": "Items belonging to other customers' orders are untouched."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Cascades chain: each delete triggered by a cascade applies the referencing table's own ON DELETE action. Customer 7's orders and their items are removed; other data is unaffected.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "DELETE customer 7 -> cascade deletes order 1 -> cascade deletes items 1 and 2; item 3 (order 2) remains",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow each foreign key's ON DELETE action in turn."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 relies on a cascade triggering another cascade."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A row deleted by a cascade is deleted like any other row, so its own referencing rows apply their ON DELETE actions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace the deletion from customers to orders to order_items."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The cascade chains through both levels, removing customer 7's orders and their items. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cascading actions compose, which is powerful and dangerous: one DELETE can remove data several tables away. The claim traced the chain correctly. Before deleting from a parent table, follow every ON DELETE CASCADE path to see what else goes.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-database-relational-fundamentals-004",
+    "subject": "databases",
+    "topic": "Database & Relational Fundamentals",
+    "subtopic": "Comparisons with NULL",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What does this query return?",
+    "artifact_type": "sql",
+    "artifact": {
+      "t": {
+        "title": "t",
+        "columns": [
+          "x"
+        ],
+        "rows": [
+          [
+            5
+          ],
+          [
+            3
+          ],
+          [
+            "NULL"
+          ],
+          [
+            7
+          ]
+        ]
+      },
+      "query": "SELECT COUNT(*) FROM t\nWHERE x <> 5;"
+    },
+    "ai_claim": "It returns 2: the rows with 3 and 7. The NULL row is not counted, because NULL <> 5 is unknown, not true.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "x = 5: 5 <> 5 is false, so the row is excluded."
+      },
+      {
+        "index": 2,
+        "text": "x = 3 and x = 7: both comparisons are true, so both rows are counted."
+      },
+      {
+        "index": 3,
+        "text": "x = NULL: NULL <> 5 evaluates to UNKNOWN."
+      },
+      {
+        "index": 4,
+        "text": "WHERE keeps only rows where the condition is TRUE, so the NULL row is excluded. The count is 2."
+      }
+    ],
+    "ai_final_answer": "2",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. SQL uses three-valued logic: any comparison with NULL yields UNKNOWN, and WHERE discards UNKNOWN rows. The count is 2.",
+    "canonical_answer": "2",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Only 3 and 7 satisfy x <> 5 with a TRUE result; the count is 2.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what NULL <> 5 evaluates to."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims a comparison with NULL is neither true nor false."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "SQL comparisons involving NULL return UNKNOWN, and WHERE keeps only TRUE rows."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate the condition row by row."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. NULL <> 5 is UNKNOWN, so only 3 and 7 are counted: 2. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Three-valued logic surprises people because 'not equal to 5' sounds like it should include a missing value. It does not: NULL <> 5 is UNKNOWN. To include NULLs, add OR x IS NULL (or use IS DISTINCT FROM).",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "db-database-relational-fundamentals-005",
+    "subject": "databases",
+    "topic": "Database & Relational Fundamentals",
+    "subtopic": "Will the foreign key accept the row",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Assuming order 1001 does not already exist, does this INSERT succeed?",
+    "artifact_type": "sql",
+    "artifact": {
+      "schema": "CREATE TABLE orders (\n  id INT PRIMARY KEY,\n  customer_id INT NOT NULL REFERENCES customers(id),\n  amount NUMERIC(10, 2)\n);",
+      "query": "INSERT INTO orders (id, customer_id, amount)\nVALUES (1001, 99, 450.00);"
+    },
+    "ai_claim": "Yes. The values match the column types, and customer 99 is a valid customer, so the insert succeeds.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "id 1001 is an unused integer, so the primary key is satisfied."
+      },
+      {
+        "index": 2,
+        "text": "amount 450.00 fits NUMERIC(10, 2)."
+      },
+      {
+        "index": 3,
+        "text": "Customer 99 exists in the customers table, so the foreign key is satisfied."
+      },
+      {
+        "index": 4,
+        "text": "The INSERT succeeds."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether a row with id 99 exists in customers. The foreign key accepts the insert only if it does; the customers table's contents are not shown.",
+    "resolving_scenarios": [
+      "customers contains id 99: every constraint holds and the insert succeeds.",
+      "customers has no id 99: the insert fails with a foreign key violation."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The outcome depends on data that is not given: whether customer 99 exists. Step 3 asserts it without evidence.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If customers has no row with id 99, the INSERT raises a foreign key violation.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "99"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An empty customers table makes the insert fail."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each constraint the INSERT must satisfy and what each depends on."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a fact about the customers table."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A foreign key is checked against the referenced table's current rows."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what the insert does if customers has no id 99."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes customer 99 exists. With it, the insert succeeds; without it, it fails. The question cannot be decided."
+      }
+    ],
+    "repair": "Check `SELECT 1 FROM customers WHERE id = 99` (or show the customers table) before deciding.",
+    "debrief": "Constraints make the outcome of a write depend on data, not just on the statement. The schema alone settles the primary key and type checks, but not the foreign key. When a claim asserts something about rows it has not seen, flag the missing data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

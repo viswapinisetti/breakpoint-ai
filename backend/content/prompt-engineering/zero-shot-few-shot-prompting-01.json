@@ -1,0 +1,398 @@
+[
+  {
+    "id": "pe-zero-shot-few-shot-prompting-001",
+    "subject": "prompt-engineering",
+    "topic": "Zero-Shot & Few-Shot Prompting",
+    "subtopic": "Examples teach more than format",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do these examples only show the format, leaving the model free to write 80-120 word descriptions?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Write a product description.\nExample 1: \"Steel bottle. Keeps drinks cold.\"\nExample 2: \"Cotton tee. Soft, breathable.\"\nExample 3: \"Desk lamp. Adjustable arm.\"\n\nProduct: {product_details}",
+      "goal": "Descriptions of 80-120 words with features and benefits."
+    },
+    "ai_claim": "Yes. Few-shot examples demonstrate the format; the model will still write full descriptions of appropriate length.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The examples show the format: product name, then features."
+      },
+      {
+        "index": 2,
+        "text": "Examples communicate structure."
+      },
+      {
+        "index": 3,
+        "text": "The model applies the structure to the new product."
+      },
+      {
+        "index": 4,
+        "text": "It writes descriptions of appropriate length."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 2,
+      "misconception": "Overlooking what else examples teach",
+      "explanation": "Models imitate every consistent feature of the examples: length, tone, vocabulary, punctuation. All three examples are 4-5 words, so outputs will be terse fragments, far from 80-120 words. Examples must match the desired output in every respect that matters, and the length requirement should be stated.",
+      "why_convincing": "Examples are often described as 'showing the format'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the model copies the examples' length, producing fragments. Use examples of the target length and state the requirement.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Outputs average 6 words, e.g. 'Yoga mat. Non-slip grip.'",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Replace the examples with two 80-120 word descriptions and add 'Write 80-120 words'.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "80"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The model writes six-word descriptions."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Measure the examples' length."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes examples only convey structure."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models imitate all consistent features of examples."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare example length with the goal."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the examples teach brevity. Match them to the target."
+      }
+    ],
+    "repair": "Use examples that match the target length and tone, and state the requirement.",
+    "debrief": "Few-shot examples are powerful and literal. Every pattern in them is a signal the model may follow.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-zero-shot-few-shot-prompting-002",
+    "subject": "prompt-engineering",
+    "topic": "Zero-Shot & Few-Shot Prompting",
+    "subtopic": "Testing on the examples themselves",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does 100% accuracy on these 8 examples show the prompt classifies new tickets well?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "prompt": "Few-shot prompt with 8 labelled examples of support tickets (billing, technical, account).",
+      "evaluation": "Accuracy was measured on the same 8 examples: 8/8 = 100%."
+    },
+    "ai_claim": "Yes. The prompt classified every example correctly, so it will classify new tickets accurately.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The prompt contains 8 labelled examples."
+      },
+      {
+        "index": 2,
+        "text": "Accuracy was measured on those 8 tickets."
+      },
+      {
+        "index": 3,
+        "text": "All 8 were correct."
+      },
+      {
+        "index": 4,
+        "text": "So new tickets will be classified accurately."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 2,
+      "misconception": "Evaluating on the examples included in the prompt",
+      "explanation": "The test tickets are inside the prompt with their labels, so the model can simply match them. 100% says nothing about new tickets. Evaluate on a separate, representative set of tickets that never appear in the prompt.",
+      "why_convincing": "Checking a prompt on its own examples is quick and feels like a test."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the test examples are in the prompt. Evaluate on held-out tickets.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "On 200 new tickets, accuracy is 83%.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "83"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "test ticket 3 is identical to example 3 in the prompt, label included",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Accuracy on unseen tickets is much lower."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where the test tickets came from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 evaluates on prompt content."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Evaluation data must be separate from few-shot examples."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test on new tickets."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the model has the answers in its prompt."
+      }
+    ],
+    "repair": "Build a held-out evaluation set of real tickets.",
+    "debrief": "Prompt examples are training data in miniature. Keep evaluation data separate.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-zero-shot-few-shot-prompting-003",
+    "subject": "prompt-engineering",
+    "topic": "Zero-Shot & Few-Shot Prompting",
+    "subtopic": "A wrong label in an example",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is one mislabelled example harmless because the model knows sentiment anyway?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Classify each review as POSITIVE or NEGATIVE.\n\"Arrived broken, useless.\" -> NEGATIVE\n\"Works perfectly, great value!\" -> POSITIVE\n\"Stopped working after two days.\" -> POSITIVE\n\"Love it, use it daily.\" -> POSITIVE\n\nReview: {review}",
+      "note": "The third example's label was a copy-paste mistake."
+    },
+    "ai_claim": "Yes. The model already understands sentiment, so a single wrong example will not affect its answers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model has strong prior knowledge of sentiment."
+      },
+      {
+        "index": 2,
+        "text": "Three of four examples are correct."
+      },
+      {
+        "index": 3,
+        "text": "One error is outweighed."
+      },
+      {
+        "index": 4,
+        "text": "So the mistake is harmless."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Leaving an incorrect label in the demonstrations",
+      "explanation": "Examples shape how the model maps inputs to labels. A complaint about a product breaking, labelled POSITIVE, can push reviews about failures or durability towards POSITIVE - exactly the reviews that matter. With only four examples, one is 25% of the demonstration. Fix the label and test the prompt on reviews about defects.",
+      "why_convincing": "Models do have strong sentiment priors, so the effect is sometimes small."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the mislabelled example can bias similar reviews. Correct it and re-test.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "'Battery died within a week' is classified POSITIVE in 6 of 10 runs; after fixing the label, 0 of 10.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "\"Stopped working after two days.\" -> NEGATIVE",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Reviews about products failing are labelled positive."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test reviews similar to the mislabelled example."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes priors override examples."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Few-shot labels influence classification, especially for similar inputs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try 'Battery died within a week'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the wrong label biases similar reviews. Fix it."
+      }
+    ],
+    "repair": "Correct the label and check every example.",
+    "debrief": "Proofread demonstrations like code. One bad example can steer an entire category.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-zero-shot-few-shot-prompting-004",
+    "subject": "prompt-engineering",
+    "topic": "Zero-Shot & Few-Shot Prompting",
+    "subtopic": "Examples that contradict the instruction",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the model reliably output the exact lowercase labels the downstream code expects?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Classify the ticket. Output one lowercase label: billing, technical or account.\n\nTicket: \"I was charged twice.\" -> Billing\nTicket: \"App crashes on login.\" -> Technical Issue\nTicket: \"Change my email address.\" -> ACCOUNT\n\nTicket: {ticket}",
+      "downstream": "The label is matched exactly against 'billing', 'technical' and 'account'."
+    },
+    "ai_claim": "Yes. The instruction explicitly says one lowercase label from the list, so the model will follow it and outputs will match exactly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The instruction specifies lowercase labels."
+      },
+      {
+        "index": 2,
+        "text": "It lists the three allowed values."
+      },
+      {
+        "index": 3,
+        "text": "Models follow explicit instructions."
+      },
+      {
+        "index": 4,
+        "text": "So outputs match exactly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F15",
+      "location": 3,
+      "misconception": "Instructions and examples that disagree",
+      "explanation": "The examples use 'Billing', 'Technical Issue' and 'ACCOUNT' - none matches the instruction. The model receives two conflicting specifications and may follow either, so outputs vary and the exact-match code fails. Make the examples match the instruction exactly, and validate outputs against the allowed set.",
+      "why_convincing": "The instruction is explicit, and it comes first."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the examples contradict the instruction, so outputs are inconsistent. Align the examples and validate.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Across 50 tickets, 18 outputs are 'Technical Issue' or capitalised labels that fail exact matching.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "18"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "\"App crashes on login.\" -> technical (and likewise lowercase for the others)",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'Technical Issue' does not match 'technical'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the examples' labels with the instruction."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the instruction wins."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Conflicting signals produce inconsistent outputs."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the examples' capitalisation and wording."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the examples contradict the instruction. Align them."
+      }
+    ],
+    "repair": "Make every example use the exact allowed labels; validate outputs in code.",
+    "debrief": "When instructions and examples disagree, models often follow the examples. Keep them consistent.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

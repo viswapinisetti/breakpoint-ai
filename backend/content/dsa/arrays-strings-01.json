@@ -1,0 +1,532 @@
+[
+  {
+    "id": "dsa-arrays-strings-001",
+    "subject": "dsa",
+    "topic": "Arrays & Strings",
+    "subtopic": "Palindromic phrases",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does is_palindrome correctly recognise palindromic phrases such as 'Never odd or even', ignoring spaces and capital letters?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def is_palindrome(s):\n    return s == s[::-1]"
+    },
+    "ai_claim": "Yes. It compares the string with its reverse, which is the definition of a palindrome.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A palindrome reads the same forwards and backwards."
+      },
+      {
+        "index": 2,
+        "text": "s[::-1] is the string reversed."
+      },
+      {
+        "index": 3,
+        "text": "Comparing s with s[::-1] checks exactly that, including for phrases."
+      },
+      {
+        "index": 4,
+        "text": "So is_palindrome('Never odd or even') returns True."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Ignoring the normalisation the requirement asks for",
+      "explanation": "The comparison is character by character, including spaces and case. 'Never odd or even' reversed is 'neve ro ddo reveN', which differs, so the function returns False. The requirement needs normalising first: keep letters and digits, lower-case them, then compare.",
+      "why_convincing": "For single words like 'level' it works perfectly, and 'reads the same backwards' sounds like a complete definition."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "is_palindrome('Never odd or even') returns False, because spaces and the capital N break the exact comparison. Normalise first: [c.lower() for c in s if c.isalnum()].",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "is_palindrome('Never odd or even') returns False.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "'Race car' is a palindromic phrase, but 'Race car' != 'rac ecaR'.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "is_palindrome('Race car') returns False."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the function on a phrase, not a single word."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 extends the word case to phrases."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The requirement ignores spaces and case; the comparison does not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Reverse 'Never odd or even' character by character and compare."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: spaces and capitals make the exact comparison fail. Normalise the string before comparing."
+      }
+    ],
+    "repair": "Normalise first: `t = [c.lower() for c in s if c.isalnum()]; return t == t[::-1]`.",
+    "debrief": "Code often implements the textbook definition while the requirement asks for something slightly different. Here the difference is normalisation, and single-word tests cannot reveal it. Write tests from the requirement's examples - the phrase - not from the simplest case.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "is_palindrome",
+      "ai_code": "def is_palindrome(s):\n    return s == s[::-1]",
+      "reference_code": "def is_palindrome(s):\n    t = [c.lower() for c in s if c.isalnum()]\n    return t == t[::-1]",
+      "test_inputs": [
+        "('level',)",
+        "('abc',)",
+        "('Never odd or even',)"
+      ],
+      "counterexample_input": "('Never odd or even',)"
+    }
+  },
+  {
+    "id": "dsa-arrays-strings-002",
+    "subject": "dsa",
+    "topic": "Arrays & Strings",
+    "subtopic": "Maximum subarray with all negatives",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does max_subarray(a) return the largest sum of a non-empty contiguous subarray for every non-empty list, including lists of negative numbers?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def max_subarray(a):\n    best = cur = 0\n    for x in a:\n        cur = max(0, cur + x)\n        best = max(best, cur)\n    return best"
+    },
+    "ai_claim": "Yes. It is Kadane's algorithm: it keeps the best running sum and resets when the sum drops below zero.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "cur tracks the best sum of a subarray ending at the current element."
+      },
+      {
+        "index": 2,
+        "text": "If cur + x falls below 0, starting afresh is better, so cur resets to 0."
+      },
+      {
+        "index": 3,
+        "text": "best records the largest cur seen."
+      },
+      {
+        "index": 4,
+        "text": "So max_subarray returns the maximum subarray sum for every list."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Allowing an empty subarray",
+      "explanation": "Resetting to 0 (and starting best at 0) treats the empty subarray, with sum 0, as a candidate. For a list of negatives such as [-3, -1, -2], the best non-empty subarray is [-1] with sum -1, but the function returns 0. Kadane's algorithm for non-empty subarrays uses cur = max(x, cur + x), starting from a[0].",
+      "why_convincing": "The code looks exactly like the common textbook version, which silently assumes at least one non-negative number."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "With best and cur starting at 0, the function never returns a negative value. max_subarray([-3, -1, -2]) returns 0 instead of -1. Initialise with a[0] and use cur = max(x, cur + x).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "max_subarray([-3, -1, -2]) returns 0; the answer is -1.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0",
+          "-1"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "cur: max(0, -3) = 0, max(0, -1) = 0, max(0, -2) = 0 -> best stays 0",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "max_subarray([-5]) returns 0, although the only subarray sums to -5."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the function on a list containing only negative numbers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 resets cur to 0. Ask what subarray a sum of 0 corresponds to."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A sum of 0 with no elements is the empty subarray, which the requirement excludes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace max_subarray([-3, -1, -2])."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong for non-empty subarrays: resetting to 0 lets the empty subarray win, so all-negative lists return 0. Use cur = max(x, cur + x) from a[0]."
+      }
+    ],
+    "repair": "Start with `best = cur = a[0]` and use `cur = max(x, cur + x)` for the rest.",
+    "debrief": "Many textbook algorithms carry an unstated convention - here, that the empty subarray is allowed. The all-negative list is the standard edge case that reveals which version you have. When an algorithm starts a running value at 0, ask what 0 represents.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "max_subarray",
+      "ai_code": "def max_subarray(a):\n    best = cur = 0\n    for x in a:\n        cur = max(0, cur + x)\n        best = max(best, cur)\n    return best",
+      "reference_code": "def max_subarray(a):\n    best = cur = a[0]\n    for x in a[1:]:\n        cur = max(x, cur + x)\n        best = max(best, cur)\n    return best",
+      "test_inputs": [
+        "([2, -1, 3],)",
+        "([1, 2, 3],)",
+        "([-3, -1, -2],)"
+      ],
+      "counterexample_input": "([-3, -1, -2],)"
+    }
+  },
+  {
+    "id": "dsa-arrays-strings-003",
+    "subject": "dsa",
+    "topic": "Arrays & Strings",
+    "subtopic": "Rotation by more than the length",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does rotate(a, k) rotate the list right by k places for every non-empty list and every k >= 0?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def rotate(a, k):\n    \"\"\"Rotate right by k places.\"\"\"\n    return a[-k:] + a[:-k]"
+    },
+    "ai_claim": "Yes. a[-k:] takes the last k elements and a[:-k] the rest, so their concatenation is the rotation.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Rotating right by k moves the last k elements to the front."
+      },
+      {
+        "index": 2,
+        "text": "a[-k:] is the last k elements."
+      },
+      {
+        "index": 3,
+        "text": "a[:-k] is everything before them."
+      },
+      {
+        "index": 4,
+        "text": "So a[-k:] + a[:-k] is the rotation for every k >= 0."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 4,
+      "misconception": "Forgetting that k can exceed the length",
+      "explanation": "Rotating by k is the same as rotating by k mod n. When k > n, a[-k:] is the whole list and a[:-k] is empty, so the list comes back unrotated: rotate([1, 2, 3], 4) returns [1, 2, 3] instead of [3, 1, 2]. Reduce k first with k %= len(a).",
+      "why_convincing": "For every k up to the length, the slices are exactly right, and those are the values people test."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The slicing is correct only for 0 <= k <= n. For k > n, rotate([1, 2, 3], 4) returns [1, 2, 3], but a rotation by 4 equals a rotation by 1: [3, 1, 2]. Use k %= len(a) first.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "rotate([1, 2, 3], 4) returns [1, 2, 3]; the correct result is [3, 1, 2].",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "a[-4:] is the whole list and a[:-4] is empty for a = [1, 2, 3]",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "rotate([1, 2, 3], 4) returns [1, 2, 3]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try a value of k larger than the list's length."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 generalises to every k >= 0."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Rotating by k is the same as rotating by k mod n."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate a[-4:] and a[:-4] for a = [1, 2, 3]."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: for k > n the slices return the list unchanged. Reduce k modulo the length first."
+      }
+    ],
+    "repair": "Add `k %= len(a)` before slicing.",
+    "debrief": "Parameters often have a natural range that the code silently assumes. Rotation is periodic, so k beyond the length is valid input that must be reduced. Boundary values - 0, n and n + 1 - are the fastest way to find the edge of an implementation's assumptions.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "rotate",
+      "ai_code": "def rotate(a, k):\n    \"\"\"Rotate right by k places.\"\"\"\n    return a[-k:] + a[:-k]",
+      "reference_code": "def rotate(a, k):\n    if not a:\n        return a\n    k %= len(a)\n    return a[len(a) - k:] + a[:len(a) - k]",
+      "test_inputs": [
+        "([1, 2, 3], 1)",
+        "([1, 2, 3], 0)",
+        "([1, 2, 3], 3)",
+        "([1, 2, 3], 4)"
+      ],
+      "counterexample_input": "([1, 2, 3], 4)"
+    }
+  },
+  {
+    "id": "dsa-arrays-strings-004",
+    "subject": "dsa",
+    "topic": "Arrays & Strings",
+    "subtopic": "Anagrams and repeated letters",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does is_anagram(a, b) return True exactly when a and b are anagrams of each other?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def is_anagram(a, b):\n    return set(a) == set(b)"
+    },
+    "ai_claim": "Yes. Two words are anagrams when they use the same letters, and comparing sets checks that.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Anagrams contain the same letters rearranged."
+      },
+      {
+        "index": 2,
+        "text": "set(a) is the collection of letters in a."
+      },
+      {
+        "index": 3,
+        "text": "If the two sets are equal, the words use the same letters."
+      },
+      {
+        "index": 4,
+        "text": "So is_anagram is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Ignoring how many times each letter appears",
+      "explanation": "A set records which letters appear, not how many times. 'aab' and 'abb' have the same set {a, b} but are not anagrams; nor are 'ab' and 'aabb'. Compare sorted strings or Counter(a) == Counter(b).",
+      "why_convincing": "For words with no repeated letters, sets work perfectly, and 'same letters' sounds like 'same set of letters'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Sets drop multiplicity, so is_anagram('aab', 'abb') returns True. Use sorted(a) == sorted(b) or Counter comparison.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "is_anagram('aab', 'abb') returns True, but they are not anagrams.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "'ab' and 'aabb' have equal sets but different lengths.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "is_anagram('ab', 'aabb') returns True."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test words where some letter appears more than once."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats equal sets as equal letter counts."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A set keeps each element once, discarding counts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare set('aab') with set('abb')."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: sets ignore letter counts, so 'aab' and 'abb' pass. Compare sorted letters or counts."
+      }
+    ],
+    "repair": "Return `sorted(a) == sorted(b)` (or Counter(a) == Counter(b)).",
+    "debrief": "Choosing a data structure also chooses what information you keep. Sets discard order and multiplicity, which is exactly the information anagrams depend on. When a check uses a set, ask whether duplicates matter to the question.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "is_anagram",
+      "ai_code": "def is_anagram(a, b):\n    return set(a) == set(b)",
+      "reference_code": "def is_anagram(a, b):\n    return sorted(a) == sorted(b)",
+      "test_inputs": [
+        "('listen', 'silent')",
+        "('abc', 'abd')",
+        "('aab', 'abb')"
+      ],
+      "counterexample_input": "('aab', 'abb')"
+    }
+  },
+  {
+    "id": "dsa-arrays-strings-005",
+    "subject": "dsa",
+    "topic": "Arrays & Strings",
+    "subtopic": "One-pass two-sum",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does two_sum return the indices of two different positions whose values add up to target whenever such a pair exists - including when both values are equal, as in [3, 3] with target 6 - and None otherwise?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def two_sum(nums, target):\n    seen = {}\n    for i, x in enumerate(nums):\n        if target - x in seen:\n            return [seen[target - x], i]\n        seen[x] = i\n    return None"
+    },
+    "ai_claim": "Yes. It checks each value's complement against the values seen so far, so the two indices are always different, and equal values work.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "seen maps each value already visited to its index."
+      },
+      {
+        "index": 2,
+        "text": "For x at index i, if target - x was seen earlier, those two positions sum to target."
+      },
+      {
+        "index": 3,
+        "text": "The complement is checked before x is added to seen, so an element is never paired with itself; for [3, 3], the second 3 finds the first and returns [0, 1]."
+      },
+      {
+        "index": 4,
+        "text": "If no pair exists, the loop ends and None is returned."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Checking before inserting guarantees two distinct indices, equal values pair correctly, and any existing pair is found when its second element is reached. It runs in O(n) time.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "two_sum([3, 3], 6) returns [0, 1]; two_sum([5], 10) returns None.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0",
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the equal-values case and the single-element case carefully."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on the order of 'check' and 'insert'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Checking the complement before inserting x prevents pairing an element with itself."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace two_sum([3, 3], 6) and two_sum([5], 10)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The check-then-insert order gives distinct indices and handles equal values. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The order of two lines - check, then insert - decides whether this algorithm can pair an element with itself. The explanation names that dependency explicitly and tests the equal-values edge case. Good reviews look for exactly this kind of ordering subtlety.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "check",
+      "ai_code": "def two_sum(nums, target):\n    seen = {}\n    for i, x in enumerate(nums):\n        if target - x in seen:\n            return [seen[target - x], i]\n        seen[x] = i\n    return None\n\ndef check(nums, target):\n    r = two_sum(nums, target)\n    return r is not None and r[0] != r[1] and nums[r[0]] + nums[r[1]] == target",
+      "reference_code": "def check(nums, target):\n    n = len(nums)\n    return any(nums[i] + nums[j] == target for i in range(n) for j in range(i + 1, n))",
+      "test_inputs": [
+        "([3, 3], 6)",
+        "([1, 2], 5)",
+        "([3, 4, 2, 3], 6)",
+        "([5], 10)",
+        "([2, 7, 11, 15], 9)"
+      ]
+    }
+  }
+]

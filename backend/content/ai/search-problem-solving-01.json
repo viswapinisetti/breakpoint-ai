@@ -1,0 +1,483 @@
+[
+  {
+    "id": "ai-search-problem-solving-001",
+    "subject": "ai",
+    "topic": "Search & Problem Solving",
+    "subtopic": "Depth-first search and shortest paths",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the path DFS returns guaranteed to be the shortest?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "Maze as an unweighted graph. DFS explores neighbours in the order N, E, S, W and stops at the first path it finds to the exit.\nAI: \"DFS returns the shortest path to the exit.\""
+    },
+    "ai_claim": "Yes. DFS explores the maze systematically and stops when it finds the exit, so the path it returns is the shortest.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "DFS explores paths systematically."
+      },
+      {
+        "index": 2,
+        "text": "It stops at the first path to the exit."
+      },
+      {
+        "index": 3,
+        "text": "The first path found is the shortest."
+      },
+      {
+        "index": 4,
+        "text": "So DFS returns the shortest path."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming the first path found is the shortest",
+      "explanation": "DFS follows one branch as deep as possible before backtracking, so the first path it finds depends on neighbour order and may be very long. If the exit is one step West but North leads into a long corridor that also reaches the exit, DFS returns the long route. BFS explores by distance and returns the fewest-steps path in an unweighted graph.",
+      "why_convincing": "Systematic exploration sounds like it should find the best path."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: DFS returns the first path in its exploration order, not the shortest. Use BFS for fewest steps.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Exit is 1 step West; a 15-step corridor North also reaches it. DFS (N first) returns the 15-step path.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "15"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "BFS, not DFS, finds shortest paths in unweighted graphs.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "With N explored first, DFS returns a 15-step path instead of 1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about the order in which DFS explores."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates 'first found' with 'shortest'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "BFS expands nodes in order of distance; DFS does not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Construct a maze where the long path is explored first."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: DFS can return a long path. Use BFS."
+      }
+    ],
+    "repair": "Use BFS for unweighted shortest paths (Dijkstra or A* for weighted).",
+    "debrief": "Each search strategy comes with guarantees - completeness, optimality - and DFS guarantees neither optimality nor, in infinite spaces, completeness.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-search-problem-solving-002",
+    "subject": "ai",
+    "topic": "Search & Problem Solving",
+    "subtopic": "Greedy best-first search",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does greedy best-first search guarantee the shortest route?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "Route finding with greedy best-first search: always expand the city with the smallest straight-line distance to the goal.\nAI: \"Because it always heads towards the goal, greedy best-first search finds the shortest route.\""
+    },
+    "ai_claim": "Yes. It always expands the city closest to the goal, so it takes the most direct route and finds the shortest path.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The heuristic is straight-line distance to the goal."
+      },
+      {
+        "index": 2,
+        "text": "The search always expands the city closest to the goal."
+      },
+      {
+        "index": 3,
+        "text": "Heading straight for the goal gives the most direct route."
+      },
+      {
+        "index": 4,
+        "text": "So the route found is the shortest."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Using a greedy strategy where optimality is required",
+      "explanation": "Greedy best-first ignores the cost already travelled (g) and ranks cities only by estimated remaining distance (h). A city close to the goal as the crow flies can be reached only by a long detour (a river with one bridge). A* ranks by g + h and, with an admissible heuristic like straight-line distance, is optimal.",
+      "why_convincing": "Heading towards the goal is often a good idea, which makes greedy search look right."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: greedy search ignores path cost so far. Use A* (f = g + h) for optimal routes.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "City X is 5 km from the goal by air but 60 km by road; greedy picks it over city Y (8 km by air, 10 km by road).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "60",
+          "10"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A* with an admissible heuristic is optimal; greedy best-first search is not.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A river with one bridge makes the 'closest' city a detour."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the search ignores."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes 'closest to the goal' means 'shortest route'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Optimal search must account for cost already incurred."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare greedy search with A*'s f = g + h."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: greedy ignores path cost. Use A*."
+      }
+    ],
+    "repair": "Use A* with straight-line distance as the heuristic.",
+    "debrief": "Greedy search is fast but short-sighted. A* adds the cost-so-far term that turns a good guess into a guarantee.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-search-problem-solving-003",
+    "subject": "ai",
+    "topic": "Search & Problem Solving",
+    "subtopic": "A* with an overestimating heuristic",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is A* still guaranteed to return the optimal path with this heuristic?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "A* on a road network. The heuristic h(n) = 2 x straight-line distance to the goal (to 'speed up' the search).\nAI: \"A* always returns the optimal path, so the faster heuristic keeps optimality.\""
+    },
+    "ai_claim": "Yes. A* is an optimal algorithm, so it returns the optimal path whatever heuristic it uses; a larger heuristic just makes it faster.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A* expands nodes by f = g + h."
+      },
+      {
+        "index": 2,
+        "text": "A* is known to be optimal."
+      },
+      {
+        "index": 3,
+        "text": "The heuristic only affects speed."
+      },
+      {
+        "index": 4,
+        "text": "So it still returns the optimal path."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Forgetting the admissibility condition",
+      "explanation": "A* is optimal only when h never overestimates the true remaining cost (admissible; consistent for graph search). Straight-line distance is admissible, but twice that can exceed the real road distance, so A* may settle on a suboptimal path before exploring the better one. Weighted A* trades optimality for speed: its path cost is at most w times optimal (here at most 2x).",
+      "why_convincing": "'A* is optimal' is often quoted without its condition."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 2 x straight-line distance can overestimate, so optimality is lost (paths up to 2x the optimal cost).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "A* is optimal if h is admissible: h(n) <= true cost from n to the goal.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Near the goal, a road of 10 km with straight-line distance 9 km gets h = 18 > 10.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "18",
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With an overestimating heuristic, A* can return a path 30% longer than optimal."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall the condition under which A* is optimal."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 drops that condition."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Admissible heuristics never overestimate."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare 2 x straight-line distance with road distance."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the heuristic overestimates, so optimality is lost."
+      }
+    ],
+    "repair": "Use the admissible straight-line distance, or accept bounded suboptimality with weighted A*.",
+    "debrief": "Heuristic search guarantees rest on heuristic properties. Inflate a heuristic and you trade proof for speed.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-search-problem-solving-004",
+    "subject": "ai",
+    "topic": "Search & Problem Solving",
+    "subtopic": "The horizon effect",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does a 4-ply search guarantee the move will not lose material?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "A chess engine searches 4 plies (2 moves each side) with minimax and evaluates positions by material.\nAI: \"The chosen move keeps material equal in every line within 4 plies, so it cannot lose material.\""
+    },
+    "ai_claim": "Yes. Minimax checked every reply up to 4 plies and material stays equal, so the move is safe from material loss.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Minimax considers every opponent reply."
+      },
+      {
+        "index": 2,
+        "text": "It searched 4 plies deep."
+      },
+      {
+        "index": 3,
+        "text": "Material stays equal in all lines."
+      },
+      {
+        "index": 4,
+        "text": "So the move cannot lose material."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Extending a depth-limited result beyond the search horizon",
+      "explanation": "The search proves only that material is equal after 4 plies. A capture on ply 5 or 6 is invisible - the horizon effect - and engines may even push an inevitable loss just past the horizon with delaying moves. Quiescence search (extending tactical lines until quiet) and deeper search reduce this.",
+      "why_convincing": "Every line within the searched depth really was checked."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the guarantee holds only within 4 plies; losses beyond the horizon are unseen.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "The move allows a forced capture on ply 6, which the 4-ply search never sees.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "6"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Depth-limited search results hold only up to the depth searched.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A queen is lost on the 6th ply."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how deep the guarantee reaches."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 extends the conclusion beyond the search."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Depth-limited search suffers from the horizon effect."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a capture on ply 6."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: losses beyond 4 plies are invisible."
+      }
+    ],
+    "repair": "Add quiescence search and search deeper in tactical positions.",
+    "debrief": "A search result is a statement about the searched tree. Beyond its horizon, nothing is guaranteed.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ai-search-problem-solving-005",
+    "subject": "ai",
+    "topic": "Search & Problem Solving",
+    "subtopic": "Manhattan distance on a grid",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "explanation": "A robot moves on a 4-connected grid (up, down, left, right), each step cost 1.\nA* uses h(n) = |x_n - x_goal| + |y_n - y_goal| (Manhattan distance).\nAI: \"This heuristic never overestimates, so A* returns an optimal path.\""
+    },
+    "ai_claim": "Yes. With only unit moves along the axes, any path needs at least |dx| + |dy| steps, even with no obstacles, so Manhattan distance never overestimates and A* is optimal.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each move changes x or y by exactly 1."
+      },
+      {
+        "index": 2,
+        "text": "Reaching the goal needs at least |dx| + |dy| moves."
+      },
+      {
+        "index": 3,
+        "text": "Obstacles can only make paths longer, never shorter."
+      },
+      {
+        "index": 4,
+        "text": "So h is admissible, and A* returns an optimal path."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Manhattan distance is admissible (and consistent) for 4-connected unit-cost grids, so A* is optimal. (With diagonal moves allowed, it could overestimate.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "An admissible heuristic makes A* optimal.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "From (0,0) to (3,4): h = 7, and no 4-connected path is shorter than 7 steps.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "7"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the shortest possible path is with no obstacles."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 gives a lower bound."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A heuristic is admissible if it never exceeds the true cost."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider diagonal moves: would h still be admissible?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Manhattan distance is admissible here. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Admissibility often comes from solving a relaxed problem - here, the grid with obstacles removed.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

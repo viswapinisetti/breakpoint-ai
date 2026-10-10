@@ -1,0 +1,446 @@
+[
+  {
+    "id": "prg-programming-projects-001",
+    "subject": "programming",
+    "topic": "Programming Projects",
+    "subtopic": "Unpinned dependencies",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this requirements.txt guarantee that everyone who runs `pip install -r requirements.txt` gets exactly the versions the author tested with?",
+    "artifact_type": "code",
+    "artifact": {
+      "requirements.txt": "flask\nrequests>=2.28\npandas"
+    },
+    "ai_claim": "Yes. Everyone installs the same packages from the same file, so the environment is reproducible.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The file lists every package the project needs."
+      },
+      {
+        "index": 2,
+        "text": "pip installs exactly the packages listed."
+      },
+      {
+        "index": 3,
+        "text": "Because everyone uses the same file, everyone gets the same versions."
+      },
+      {
+        "index": 4,
+        "text": "The project's environment is reproducible."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Treating a list of package names as a list of versions",
+      "explanation": "flask and pandas have no version constraint, and requests>=2.28 accepts any later release. pip installs the newest matching versions available at install time, so installs months apart get different versions. Reproducibility needs pinned versions (flask==3.0.3, ...) or a lock file generated with pip freeze or pip-tools.",
+      "why_convincing": "The same file produces the same set of packages, which feels like the same environment. Version drift only shows up later, on someone else's machine."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Unpinned and lower-bounded requirements resolve to whatever is newest at install time, so the versions differ over time. Pin exact versions (==) or maintain a lock file.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Installing a year later picks up newer major versions of flask and pandas.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "flask==3.0.3\nrequests==2.32.3\npandas==2.2.2   (versions from `pip freeze` on the tested machine)",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "`requests>=2.28` installs 2.28 today and a newer release next year."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the file says about versions."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 moves from 'same packages' to 'same versions'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An unpinned requirement means 'the latest version available when you install'."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Read each line and ask which versions it allows."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without pins, pip installs the newest versions at install time, so environments drift. Pin versions or use a lock file."
+      }
+    ],
+    "repair": "Pin exact versions (for example from `pip freeze` on the tested machine) or generate a lock file with pip-tools.",
+    "debrief": "Reproducibility means the same versions, not the same names. Unpinned dependencies make a project's behaviour depend on the date it was installed. The habit: record exactly what you tested with, and upgrade deliberately.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-programming-projects-002",
+    "subject": "programming",
+    "topic": "Programming Projects",
+    "subtopic": "Configuring logging after a library",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this program print 'INFO server started'?",
+    "artifact_type": "function",
+    "artifact": {
+      "language": "python",
+      "code": "import logging\nimport vendor_sdk   # its __init__ calls logging.basicConfig(level=logging.WARNING)\n\nlogging.basicConfig(level=logging.INFO, format=\"%(levelname)s %(message)s\")\nlogging.info(\"server started\")"
+    },
+    "ai_claim": "Yes. basicConfig sets the level to INFO, so the info message is printed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "vendor_sdk is imported first."
+      },
+      {
+        "index": 2,
+        "text": "logging.basicConfig(level=logging.INFO, ...) sets the root logger's level to INFO and the format."
+      },
+      {
+        "index": 3,
+        "text": "logging.info('server started') is at INFO level, so it passes the filter."
+      },
+      {
+        "index": 4,
+        "text": "The program prints 'INFO server started'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Assuming basicConfig always applies",
+      "explanation": "logging.basicConfig does nothing if the root logger already has handlers. vendor_sdk already called basicConfig at WARNING, so the second call is ignored: the level stays WARNING and the info message is dropped. Use basicConfig(..., force=True) (Python 3.8+) or configure logging before importing the library.",
+      "why_convincing": "basicConfig is usually the first logging call in a program, where it always works. The library's hidden call is out of sight, in another package."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The second basicConfig is a no-op because the root logger was already configured by vendor_sdk. Nothing is printed. Pass force=True, or set logging.getLogger().setLevel(logging.INFO).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "vendor_sdk configures root (WARNING) -> basicConfig(INFO) ignored -> logging.info dropped",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "logging.basicConfig(level=logging.INFO, format=\"%(levelname)s %(message)s\", force=True)",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Printing logging.getLogger().level after the second basicConfig shows 30 (WARNING), not 20 (INFO)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what basicConfig does when logging is already configured."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the call takes effect. Consider the import above it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "basicConfig only configures the root logger if it has no handlers yet."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print the root logger's level after the basicConfig call."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the library already configured logging, so this basicConfig is ignored and INFO messages are dropped. Use force=True."
+      }
+    ],
+    "repair": "Call `logging.basicConfig(..., force=True)`, or configure logging before importing vendor_sdk.",
+    "debrief": "Global configuration is order-dependent, and libraries that configure logging on import are a well-known nuisance. basicConfig's 'first call wins' rule turns the order of imports into a behaviour change. When configuration seems to be ignored, look for someone who configured it first.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-programming-projects-003",
+    "subject": "programming",
+    "topic": "Programming Projects",
+    "subtopic": "Keeping files out of the repository",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this .gitignore keep the virtual environment, compiled bytecode and the .env secrets file out of commits?",
+    "artifact_type": "code",
+    "artifact": {
+      ".gitignore": ".venv/\n__pycache__/\n*.pyc\n.env",
+      "note": "None of these files has been committed yet."
+    },
+    "ai_claim": "Yes. Each entry matches one of those, and since none is tracked yet, all of them are ignored.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": ".venv/ matches the virtual-environment folder."
+      },
+      {
+        "index": 2,
+        "text": "__pycache__/ and *.pyc match Python's compiled bytecode."
+      },
+      {
+        "index": 3,
+        "text": ".env matches the secrets file."
+      },
+      {
+        "index": 4,
+        "text": "Because none of these files is tracked yet, the ignore rules apply and they stay out of commits."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The patterns cover the virtual environment, bytecode caches and .env, and ignore rules apply to untracked files, which these are. (Had any been committed already, it would need `git rm --cached` first.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "git status after creating .venv/ and .env shows neither as untracked.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each pattern against the files it should cover."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 depends on the files not being tracked. Check the note."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Ignore rules apply to untracked files; a trailing slash matches directories."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Create a file in .venv/ and a .env, then run git status."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Every pattern matches, and because nothing is tracked yet the rules take effect. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The correct answer depends on a condition - that nothing has been committed yet - and the solution states and relies on it explicitly. That is the difference between a lucky answer and a verified one. When approving, check that the conditions a solution relies on are actually given.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-programming-projects-004",
+    "subject": "programming",
+    "topic": "Programming Projects",
+    "subtopic": "Semantic versioning for a bug fix",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Following semantic versioning, what should the next version number be?",
+    "artifact_type": "code",
+    "artifact": {
+      "current_version": "2.3.1",
+      "change": "Fixes a bug in date parsing. No public function, argument or return type changes."
+    },
+    "ai_claim": "The next version should be 2.3.2.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Semantic versioning uses MAJOR.MINOR.PATCH."
+      },
+      {
+        "index": 2,
+        "text": "MAJOR increases for incompatible API changes, and MINOR for backward-compatible new features."
+      },
+      {
+        "index": 3,
+        "text": "PATCH increases for backward-compatible bug fixes."
+      },
+      {
+        "index": 4,
+        "text": "This release is only a bug fix with no API change, so 2.3.1 becomes 2.3.2."
+      }
+    ],
+    "ai_final_answer": "2.3.2",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. A backward-compatible bug fix increments PATCH: 2.3.1 -> 2.3.2. A new feature would give 2.4.0, and a breaking change 3.0.0.",
+    "canonical_answer": "2.3.2",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "2.3.1 -> 2.3.2 (PATCH, backward-compatible fix)",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "2.3.2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Classify the change before choosing the number."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 depends on the release containing no API change. Check the description."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "SemVer: breaking change -> MAJOR, new compatible feature -> MINOR, compatible fix -> PATCH."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Decide which of the three categories this release falls into."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. A compatible bug fix increments PATCH, so 2.3.1 becomes 2.3.2. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Version numbers are promises to users about compatibility. The reasoning classifies the change first and only then picks the number, which is the right order. A reviewer's job is to confirm the classification: a bug fix that changes behaviour people rely on can still be a breaking change.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-programming-projects-005",
+    "subject": "programming",
+    "topic": "Programming Projects",
+    "subtopic": "Choosing a database for an app",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will SQLite comfortably handle this app's registrations?",
+    "artifact_type": "code",
+    "artifact": {
+      "project": "A college events app: students browse events and register through a web page.",
+      "proposal": "Use SQLite as the only database."
+    },
+    "ai_claim": "Yes. SQLite handles the app's traffic easily, since registrations arrive a few at a time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "SQLite is a full SQL database stored in a single file, with no server to run."
+      },
+      {
+        "index": 2,
+        "text": "It handles many concurrent readers well."
+      },
+      {
+        "index": 3,
+        "text": "The app will receive modest traffic, with registrations arriving a few at a time."
+      },
+      {
+        "index": 4,
+        "text": "So SQLite will comfortably handle the load."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The expected write load and deployment: how many registrations arrive at once, and whether the app runs on one server or several. SQLite serialises writes (one writer at a time) and lives in a local file, so it suits a single server with moderate writes, not bursts of concurrent writes from several servers.",
+    "resolving_scenarios": [
+      "A few hundred registrations spread over a day, on one server: SQLite handles this easily.",
+      "Registration for the annual fest opens at noon and thousands of students submit within minutes, with the app on several servers: the single-writer lock and local file make SQLite a poor fit, and a server database such as PostgreSQL is needed."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The answer depends on the write concurrency and the deployment, neither of which is given. Step 3 assumes modest traffic. SQLite is excellent for one server with moderate writes and poor for bursty concurrent writes across several servers.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A registration rush of thousands of concurrent writes hits SQLite's single-writer lock.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If registration opens at a fixed time for the whole college, writes arrive in a burst, not a few at a time."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check where step 3's traffic estimate comes from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states a fact about the load. Is it in the question?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "SQLite allows one writer at a time and is a local file; its fit depends on write concurrency and the number of servers."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a quiet day and a fest-registration rush separately."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 invents the load. For light, single-server traffic SQLite is fine; for a registration rush across servers it is not. It cannot be decided from what is given."
+      }
+    ],
+    "repair": "Ask for the expected peak registrations per minute and the deployment (one server or several) before choosing the database.",
+    "debrief": "Technology choices are only right relative to requirements, and the load estimate here was assumed, not given. The strengths quoted in steps 1 and 2 are real, but they describe reads, while the question is about writes. When a recommendation rests on a number nobody supplied, ask for the number.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

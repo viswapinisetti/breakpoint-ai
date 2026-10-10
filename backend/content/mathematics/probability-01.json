@@ -1,0 +1,406 @@
+[
+  {
+    "id": "mat-probability-001",
+    "subject": "mathematics",
+    "topic": "Probability",
+    "subtopic": "The gambler's fallacy",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the probability that the 6th flip is tails?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "A fair coin has landed heads 5 times in a row.\n1. Getting 6 heads in a row has probability (1/2)^6 = 1/64.\n2. So the chance that the next flip is tails is 1 - 1/64 = 63/64."
+    },
+    "ai_claim": "0.984375. Six heads in a row is very unlikely (1/64), so tails is almost certain: 63/64.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Six heads in a row has probability 1/64."
+      },
+      {
+        "index": 2,
+        "text": "Five heads have already happened."
+      },
+      {
+        "index": 3,
+        "text": "So the next flip is very likely to break the streak."
+      },
+      {
+        "index": 4,
+        "text": "P(tails) = 1 - 1/64 = 0.984375."
+      }
+    ],
+    "ai_final_answer": "0.984375",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Believing past flips change the next one",
+      "explanation": "The flips are independent. Given the first five results, the 6th flip is still heads or tails with probability 1/2 each. 1/64 is the probability, before any flips, of six heads; once five heads have happened, the conditional probability of the sixth being heads is 1/2.",
+      "why_convincing": "Long streaks feel like they must end, and 1/64 is the correct answer to a different question."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The flips are independent, so P(tails) = 0.5.",
+    "canonical_answer": "0.5",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "P(6th tails | 5 heads) = P(HHHHHT) / P(HHHHH) = (1/64) / (1/32) = 1/2",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.5"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Independent events: past outcomes do not change future probabilities.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The sequence HHHHHH and HHHHHT are equally likely: 1/64 each."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the coin remembers previous flips."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 lets past flips influence the next one."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Independent trials have the same probabilities regardless of history."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare P(HHHHHT) with P(HHHHHH)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the flips are independent, so P(tails) = 0.5."
+      }
+    ],
+    "repair": "",
+    "debrief": "Independence means streaks carry no information about the next outcome. Compare the two specific sequences to see it directly.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = Fraction(1, 64) / Fraction(1, 32)",
+      "flawed_solver": "answer = 1 - Fraction(1, 64)"
+    }
+  },
+  {
+    "id": "mat-probability-002",
+    "subject": "mathematics",
+    "topic": "Probability",
+    "subtopic": "Adding probabilities of overlapping events",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the probability of at least one six when two fair dice are rolled?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Two fair dice are rolled.\nP(at least one six) = P(first is six) + P(second is six) = 1/6 + 1/6 = 1/3"
+    },
+    "ai_claim": "1/3. Each die has a 1/6 chance of a six, and adding them gives 1/3.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "P(first die is six) = 1/6."
+      },
+      {
+        "index": 2,
+        "text": "P(second die is six) = 1/6."
+      },
+      {
+        "index": 3,
+        "text": "P(at least one six) = 1/6 + 1/6."
+      },
+      {
+        "index": 4,
+        "text": "= 1/3."
+      }
+    ],
+    "ai_final_answer": "1/3",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Adding probabilities of events that can occur together",
+      "explanation": "P(A or B) = P(A) + P(B) - P(A and B). Both dice can show six (probability 1/36), and simple addition counts that outcome twice. P = 1/6 + 1/6 - 1/36 = 11/36. Equivalently, 1 - (5/6)^2 = 11/36.",
+      "why_convincing": "Addition is correct for mutually exclusive events, and the two events look separate."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "1 - (5/6)^2 = 11/36, about 0.3056.",
+    "canonical_answer": "11/36",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "1/6 + 1/6 - 1/36 = 11/36",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "11/36"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "With 6 dice, the same method gives 6/6 = 1, but at least one six is not certain.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "6"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Adding would give probability 1 for six dice, which is impossible."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether both events can happen at once."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 adds without subtracting the overlap."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "P(A or B) = P(A) + P(B) - P(A and B)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the outcomes among 36 with at least one six."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the outcome (6, 6) is counted twice. The answer is 11/36."
+      }
+    ],
+    "repair": "",
+    "debrief": "'At least one' problems are usually easiest through the complement: 1 - P(none).",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 1 - Fraction(5, 6) ** 2",
+      "flawed_solver": "answer = Fraction(1, 6) + Fraction(1, 6)"
+    }
+  },
+  {
+    "id": "mat-probability-003",
+    "subject": "mathematics",
+    "topic": "Probability",
+    "subtopic": "Assuming independence",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the probability that both pumps fail within a year?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Two pumps come from the same production batch.\nP(pump A fails within a year) = 0.1\nP(pump B fails within a year, given that A fails) = 0.6\n\nAI working: P(both fail) = 0.1 x 0.1 = 0.01"
+    },
+    "ai_claim": "0.01. Each pump fails with probability 0.1, so both fail with probability 0.1 x 0.1 = 0.01.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "P(A fails) = 0.1."
+      },
+      {
+        "index": 2,
+        "text": "B has the same failure rate, 0.1."
+      },
+      {
+        "index": 3,
+        "text": "P(both) = P(A) x P(B)."
+      },
+      {
+        "index": 4,
+        "text": "= 0.01."
+      }
+    ],
+    "ai_final_answer": "0.01",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Multiplying probabilities of dependent events",
+      "explanation": "Multiplying marginal probabilities assumes independence. The data say that failures are strongly linked (same batch): P(B | A) = 0.6. So P(both) = P(A) x P(B | A) = 0.1 x 0.6 = 0.06, six times higher.",
+      "why_convincing": "Each pump's own failure rate is indeed 0.1."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "P(both) = P(A) x P(B | A) = 0.1 x 0.6 = 0.06.",
+    "canonical_answer": "0.06",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "0.1 x 0.6 = 0.06",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.06"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "P(A and B) = P(A) x P(B | A); it equals P(A) x P(B) only if the events are independent.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If failures were independent, P(B | A) would be 0.1, not 0.6."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the pumps' failures are independent."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 multiplies marginal probabilities."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The multiplication rule uses the conditional probability."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Use P(B | A) = 0.6."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the failures are dependent. P(both) = 0.06."
+      }
+    ],
+    "repair": "",
+    "debrief": "Assuming independence is the most common way to underestimate joint risks. Shared causes - same batch, same power supply - create dependence.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 0.1 * 0.6",
+      "flawed_solver": "answer = 0.1 * 0.1"
+    }
+  },
+  {
+    "id": "mat-probability-004",
+    "subject": "mathematics",
+    "topic": "Probability",
+    "subtopic": "The birthday problem",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the probability that at least two of the 23 people share a birthday (to 6 decimal places)?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "23 people are in a room (365 equally likely birthdays, no leap years).\nAI working: each person has a 1/365 chance of matching; with 23 people, P(shared birthday) = 23/365 = 0.063"
+    },
+    "ai_claim": "0.063014. There are 23 people, each with a 1/365 chance, so the probability is 23/365.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A match needs two people with the same birthday."
+      },
+      {
+        "index": 2,
+        "text": "Each person matches with probability 1/365."
+      },
+      {
+        "index": 3,
+        "text": "With 23 people, P = 23 x 1/365."
+      },
+      {
+        "index": 4,
+        "text": "= 0.063014."
+      }
+    ],
+    "ai_final_answer": "0.063014",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Counting people instead of pairs",
+      "explanation": "A match can occur between any pair, and 23 people form 253 pairs. The exact probability uses the complement: P(all different) = (365/365)(364/365)...(343/365) = 0.492703, so P(match) = 0.507297 - more than half.",
+      "why_convincing": "Thinking about one's own birthday matching someone makes 23/365 feel right."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "1 - (365 x 364 x ... x 343) / 365^23 = 0.507297.",
+    "canonical_answer": "0.507297",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Pairs: 23 x 22 / 2 = 253.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "253"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "1 - prod((365 - i) / 365 for i in 0..22) = 0.507297",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.507297"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With 366 people a match is certain, but 366/365 is more than 1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count the pairs that could share a birthday."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 multiplies by the number of people."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Compute the complement: the probability that all birthdays differ."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply 365/365 x 364/365 x ... for 23 people."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: matches can occur between any of 253 pairs. The probability is 0.507297."
+      }
+    ],
+    "repair": "",
+    "debrief": "Coincidences scale with the number of pairs, not the number of people. The complement method handles 'at least one' cleanly.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 1 - math.prod((365 - i) / 365 for i in range(23))",
+      "flawed_solver": "answer = 23 / 365"
+    }
+  }
+]

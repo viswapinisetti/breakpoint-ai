@@ -1,0 +1,496 @@
+[
+  {
+    "id": "mat-linear-algebra-001",
+    "subject": "mathematics",
+    "topic": "Linear Algebra",
+    "subtopic": "Determinants are not additive",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is det(A + B)?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "A = B = I (the 2 x 2 identity matrix)\nAI working: det(A + B) = det(A) + det(B) = 1 + 1 = 2"
+    },
+    "ai_claim": "2. The determinant of a sum is the sum of the determinants: 1 + 1 = 2.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "det(I) = 1."
+      },
+      {
+        "index": 2,
+        "text": "det(A + B) = det(A) + det(B)."
+      },
+      {
+        "index": 3,
+        "text": "= 1 + 1."
+      },
+      {
+        "index": 4,
+        "text": "= 2."
+      }
+    ],
+    "ai_final_answer": "2",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Treating the determinant as additive",
+      "explanation": "A + B = 2I = [[2, 0], [0, 2]], whose determinant is 2 x 2 = 4. The determinant is multiplicative (det(AB) = det A det B) but not additive; scaling an n x n matrix by c multiplies its determinant by c^n.",
+      "why_convincing": "Additivity holds for the trace, a closely related quantity."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "A + B = 2I, and det(2I) = 2^2 = 4.",
+    "canonical_answer": "4",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "det([[2, 0], [0, 2]]) = 2 x 2 - 0 x 0 = 4",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "det(cM) = c^n det(M) for an n x n matrix.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A = I and B = -I give det(A + B) = det(0) = 0, but det A + det B = 2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute A + B first."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 uses an additive rule."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Determinants multiply; they do not add."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Take the determinant of [[2, 0], [0, 2]]."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: det(A + B) = det(2I) = 4."
+      }
+    ],
+    "repair": "",
+    "debrief": "Check remembered identities on the simplest matrices (I, 0, -I). One case usually confirms or refutes them.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 2 * 2 - 0 * 0",
+      "flawed_solver": "answer = 1 + 1"
+    }
+  },
+  {
+    "id": "mat-linear-algebra-002",
+    "subject": "mathematics",
+    "topic": "Linear Algebra",
+    "subtopic": "Not every square matrix is invertible",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is M invertible?",
+    "artifact_type": "proof",
+    "artifact": {
+      "proof": "M = [[2, 4], [1, 2]]\nAI working: M is square, so it has an inverse. Using the 2 x 2 formula, M^-1 = (1 / det M) [[2, -4], [-1, 2]]."
+    },
+    "ai_claim": "Yes. M is a square matrix, so it has an inverse given by the 2 x 2 formula.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "M is 2 x 2, so it is square."
+      },
+      {
+        "index": 2,
+        "text": "Square matrices have inverses."
+      },
+      {
+        "index": 3,
+        "text": "The 2 x 2 formula gives M^-1 = (1 / det M) [[2, -4], [-1, 2]]."
+      },
+      {
+        "index": 4,
+        "text": "So M is invertible."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming square means invertible",
+      "explanation": "A square matrix is invertible only if its determinant is non-zero. det M = 2 x 2 - 4 x 1 = 0: the first row is twice the second, so the columns are dependent, and the formula divides by zero. M is singular.",
+      "why_convincing": "Being square is necessary for an inverse, so it feels sufficient."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: det M = 0 (row 1 = 2 x row 2), so M is singular.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "det M = 2 x 2 - 4 x 1 = 0",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "M maps (2, -1) to (0, 0), so it cannot be undone.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "M (2, -1) = (0, 0), and M (0, 0) = (0, 0): two inputs give the same output."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute the determinant."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 claims all square matrices are invertible."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A matrix is invertible exactly when its determinant is non-zero."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the two rows."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: det M = 0, so M has no inverse."
+      }
+    ],
+    "repair": "Check det(M) before inverting; here M is singular.",
+    "debrief": "Invertibility has many equivalent tests: non-zero determinant, independent columns, trivial null space. Squareness is only the entry ticket.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mat-linear-algebra-003",
+    "subject": "mathematics",
+    "topic": "Linear Algebra",
+    "subtopic": "Rank and dependent vectors",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the rank of the matrix with columns v1, v2, v3?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "v1 = (1, 0, 2),  v2 = (0, 1, 1),  v3 = (1, 1, 3)\nAI working: three non-zero vectors in R^3, none a multiple of another, so they are independent and the matrix [v1 v2 v3] has rank 3."
+    },
+    "ai_claim": "3. None of the vectors is a multiple of another, so they are linearly independent and the rank is 3.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "There are three non-zero vectors in R^3."
+      },
+      {
+        "index": 2,
+        "text": "No vector is a scalar multiple of another."
+      },
+      {
+        "index": 3,
+        "text": "So the vectors are linearly independent."
+      },
+      {
+        "index": 4,
+        "text": "The rank is 3."
+      }
+    ],
+    "ai_final_answer": "3",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Checking pairs instead of all combinations",
+      "explanation": "Independence requires that no vector is a linear combination of the others, not just that no two are multiples. v3 = v1 + v2: (1, 0, 2) + (0, 1, 1) = (1, 1, 3). The three vectors span only a plane, so the rank is 2.",
+      "why_convincing": "For two vectors, 'not multiples' is exactly independence."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "v3 = v1 + v2, so the vectors are dependent and the rank is 2.",
+    "canonical_answer": "2",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(1, 0, 2) + (0, 1, 1) = (1, 1, 3) = v3",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "det [v1 v2 v3] = 0",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "v3 lies in the plane spanned by v1 and v2."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try adding v1 and v2."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 concludes independence from pairwise checks."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Vectors are independent only if no one is a combination of the others."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the determinant of the 3 x 3 matrix."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: v3 = v1 + v2, so the rank is 2."
+      }
+    ],
+    "repair": "",
+    "debrief": "Pairwise non-parallel is not independence once there are three or more vectors. Row reduction or the determinant settles it.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "M = [[1, 0, 1], [0, 1, 1], [2, 1, 3]]\nd = (M[0][0] * (M[1][1] * M[2][2] - M[1][2] * M[2][1]) - M[0][1] * (M[1][0] * M[2][2] - M[1][2] * M[2][0]) + M[0][2] * (M[1][0] * M[2][1] - M[1][1] * M[2][0]))\nanswer = 3 if d != 0 else 2",
+      "flawed_solver": "answer = 3"
+    }
+  },
+  {
+    "id": "mat-linear-algebra-004",
+    "subject": "mathematics",
+    "topic": "Linear Algebra",
+    "subtopic": "Eigenvalues are not the diagonal",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the largest eigenvalue of A?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "A = [[2, 1], [1, 2]]\nAI working: the eigenvalues are the diagonal entries, 2 and 2, so the largest eigenvalue is 2."
+    },
+    "ai_claim": "2. The eigenvalues of a matrix are its diagonal entries, both 2.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A's diagonal entries are 2 and 2."
+      },
+      {
+        "index": 2,
+        "text": "Eigenvalues are the diagonal entries."
+      },
+      {
+        "index": 3,
+        "text": "So both eigenvalues are 2."
+      },
+      {
+        "index": 4,
+        "text": "The largest is 2."
+      }
+    ],
+    "ai_final_answer": "2",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Applying the triangular-matrix rule to a general matrix",
+      "explanation": "The diagonal entries are the eigenvalues only for triangular (or diagonal) matrices. A has off-diagonal 1s. Solve det(A - lambda I) = (2 - lambda)^2 - 1 = 0: lambda = 3 or 1. Check: A (1, 1) = (3, 3) = 3 (1, 1).",
+      "why_convincing": "The rule is true and often used for triangular matrices."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "(2 - lambda)^2 = 1 gives lambda = 3 or 1; the largest is 3.",
+    "canonical_answer": "3",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "A (1, 1) = (3, 3), so 3 is an eigenvalue.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Eigenvalues sum to the trace (4) and multiply to the determinant (3): 3 and 1.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "2 and 2 multiply to 4, but det A = 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether A is triangular."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 applies a rule that needs a condition."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In general, eigenvalues solve det(A - lambda I) = 0."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply A by (1, 1)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: A is not triangular. The eigenvalues are 3 and 1."
+      }
+    ],
+    "repair": "",
+    "debrief": "Trace and determinant give a quick check on 2 x 2 eigenvalues: they must sum to the trace and multiply to the determinant.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "t, d = 4, 3; answer = (t + math.sqrt(t * t - 4 * d)) / 2",
+      "flawed_solver": "answer = 2"
+    }
+  },
+  {
+    "id": "mat-linear-algebra-005",
+    "subject": "mathematics",
+    "topic": "Linear Algebra",
+    "subtopic": "Solving a 2 x 2 system",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is x?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "2x + 3y = 13\n x -  y = -1\nAI working (Cramer's rule): D = 2(-1) - 3(1) = -5; Dx = 13(-1) - 3(-1) = -10; x = Dx / D = 2."
+    },
+    "ai_claim": "2. By Cramer's rule, D = -5 and Dx = -10, so x = -10 / -5 = 2 (and y = 3).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "D = det [[2, 3], [1, -1]] = -2 - 3 = -5."
+      },
+      {
+        "index": 2,
+        "text": "Dx replaces the x column with the constants: det [[13, 3], [-1, -1]] = -13 + 3 = -10."
+      },
+      {
+        "index": 3,
+        "text": "x = Dx / D = -10 / -5 = 2."
+      },
+      {
+        "index": 4,
+        "text": "Check: 2(2) + 3(3) = 13 and 2 - 3 = -1, with y = 3."
+      }
+    ],
+    "ai_final_answer": "2",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: x = 2, y = 3, and both equations check.",
+    "canonical_answer": "2",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Dx / D = -10 / -5 = 2",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "2 x 2 + 3 x 3 = 13; 2 - 3 = -1",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "13"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recompute each determinant."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 replaces the x column with the constants."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Cramer's rule: x = det(A with column x replaced) / det(A)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Substitute x = 2, y = 3 into both equations."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. x = 2 and both equations check. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Substituting a solution back is the fastest check, and it is part of a complete solution.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "D = 2 * (-1) - 3 * 1; Dx = 13 * (-1) - 3 * (-1); answer = Dx / D"
+    }
+  }
+]

@@ -1,0 +1,409 @@
+[
+  {
+    "id": "da-statistics-for-analytics-001",
+    "subject": "data-analytics",
+    "topic": "Statistics for Analytics",
+    "subtopic": "A small difference in an A/B test",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this test show that variant B converts better than A?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "results": {
+        "title": "Sign-up page test (one week)",
+        "columns": [
+          "Variant",
+          "Visitors",
+          "Sign-ups",
+          "Rate"
+        ],
+        "rows": [
+          [
+            "A",
+            500,
+            25,
+            "5.0%"
+          ],
+          [
+            "B",
+            500,
+            26,
+            "5.2%"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. B's rate, 5.2%, is higher than A's 5.0%, so B converts better and should be rolled out.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A converted 25 of 500 visitors: 5.0%."
+      },
+      {
+        "index": 2,
+        "text": "B converted 26 of 500: 5.2%."
+      },
+      {
+        "index": 3,
+        "text": "5.2% is higher than 5.0%."
+      },
+      {
+        "index": 4,
+        "text": "So B is the better variant."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Treating a noisy difference as a real effect",
+      "explanation": "The difference is one sign-up. With 500 visitors per variant, random variation alone moves rates by about 2 percentage points (the standard error of each rate is about 1%), so a 0.2-point gap is well within noise; a significance test gives p far above 0.05. The test shows no detectable difference. Run it longer (with a pre-computed sample size) before deciding.",
+      "why_convincing": "The arithmetic is correct and B is numerically higher."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 25 vs 26 sign-ups is indistinguishable from chance. The result is inconclusive; more data is needed.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Standard error of a 5% rate with n = 500: sqrt(0.05 x 0.95 / 500) = about 0.0097, roughly 1 percentage point.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "500"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The variants differ by a single sign-up (25 vs 26).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "25",
+          "26"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Re-running the same test could easily give A 26 and B 25."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how much the rates would vary by chance alone."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 treats any difference as meaningful."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Differences must be compared with sampling variability."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the standard error of a 5% rate with 500 visitors."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: one sign-up's difference is within noise. The test is inconclusive."
+      }
+    ],
+    "repair": "Compute the sample size needed for the effect you care about, and run the test until you reach it.",
+    "debrief": "Every A/B result needs an uncertainty estimate. 'Higher' is not 'better' until the difference is larger than what chance produces.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-statistics-for-analytics-002",
+    "subject": "data-analytics",
+    "topic": "Statistics for Analytics",
+    "subtopic": "Weighted average",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the overall average delivery time across all deliveries, in minutes?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "table": {
+        "title": "Delivery time by city",
+        "columns": [
+          "City",
+          "Deliveries",
+          "Average time (min)"
+        ],
+        "rows": [
+          [
+            "Pune",
+            300,
+            30
+          ],
+          [
+            "Delhi",
+            100,
+            50
+          ]
+        ]
+      }
+    },
+    "ai_claim": "35. The average must be weighted by deliveries: (300 x 30 + 100 x 50) / 400 = 35.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Pune's 300 deliveries took 9,000 minutes in total."
+      },
+      {
+        "index": 2,
+        "text": "Delhi's 100 deliveries took 5,000 minutes."
+      },
+      {
+        "index": 3,
+        "text": "Together: 14,000 minutes over 400 deliveries."
+      },
+      {
+        "index": 4,
+        "text": "14,000 / 400 = 35."
+      }
+    ],
+    "ai_final_answer": "35",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 35 minutes. The simple average of the two city averages (40) would overweight Delhi.",
+    "canonical_answer": "35",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(300 x 30 + 100 x 50) / 400 = 35",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "35"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the cities should count equally."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 and 2 rebuild the totals."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "An overall average weights each group by its size."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute total minutes over total deliveries."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The weighted average is 35. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Averaging averages works only when the groups are the same size. Rebuilding totals, as the claim does, always gives the right overall mean.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (300 * 30 + 100 * 50) / 400"
+    }
+  },
+  {
+    "id": "da-statistics-for-analytics-003",
+    "subject": "data-analytics",
+    "topic": "Statistics for Analytics",
+    "subtopic": "Reading a percentile",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's reading of these numbers correct?",
+    "artifact_type": "kpi_definition",
+    "artifact": {
+      "metric": "API response time, last 24 hours\np50 = 120 ms\np90 = 800 ms\np99 = 2,400 ms"
+    },
+    "ai_claim": "Yes: half of requests took 120 ms or less, 10% of requests took longer than 800 ms, and 1% took longer than 2.4 seconds.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "p50 is the median: 50% of requests were at or below 120 ms."
+      },
+      {
+        "index": 2,
+        "text": "p90 = 800 ms means 90% were at or below 800 ms."
+      },
+      {
+        "index": 3,
+        "text": "So 10% of requests took longer than 800 ms."
+      },
+      {
+        "index": 4,
+        "text": "p99 = 2,400 ms means 1% took longer than 2.4 seconds."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Percentiles describe the distribution: 10% of requests are slower than p90 and 1% slower than p99, which is why tail percentiles matter more than the average for user experience.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "The pth percentile is the value below which p% of observations fall.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "90"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "100% - 90% = 10% of requests exceed 800 ms.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall what a percentile measures."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 derives the share above p90."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "p90 splits the distribution into the fastest 90% and the slowest 10%."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Apply the definition to p99."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The percentiles are read correctly. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Percentiles show the experience of the slowest users, which averages hide. A service with a fine median can still frustrate 1 in 10 users.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "da-statistics-for-analytics-004",
+    "subject": "data-analytics",
+    "topic": "Statistics for Analytics",
+    "subtopic": "Average delivery time",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this mean August orders took 3.2 days on average from purchase to delivery?",
+    "artifact_type": "dashboard",
+    "artifact": {
+      "kpi_card": "Average delivery time (August): 3.2 days",
+      "source": "Computed by the logistics team from the deliveries table. The filter logic is not documented."
+    },
+    "ai_claim": "Yes. The KPI is the average delivery time for August, so orders took 3.2 days on average from purchase to delivery.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The card shows the August average delivery time."
+      },
+      {
+        "index": 2,
+        "text": "Delivery time is measured from purchase to delivery."
+      },
+      {
+        "index": 3,
+        "text": "The average covers all August orders."
+      },
+      {
+        "index": 4,
+        "text": "So orders took 3.2 days on average."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The metric's definition: what the clock starts at (purchase, payment or dispatch), which orders are included (cancelled, returned, still undelivered), and whether 'August' means orders placed or orders delivered in August. None of this is documented.",
+    "resolving_scenarios": [
+      "Measured from purchase, over all orders placed in August and delivered: 3.2 days from purchase to delivery.",
+      "Measured from dispatch, excluding orders still in transit at month end: purchase-to-delivery time is longer than 3.2 days, and slow orders are left out."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Without the metric's definition, 3.2 days could describe different quantities. Steps 2 and 3 assume a definition that is not documented.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If the timer starts at dispatch and orders wait 1.5 days to be dispatched, purchase-to-delivery averages about 4.7 days.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1.5",
+          "4.7"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Excluding undelivered orders removes the slowest ones from the average."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask exactly what is being averaged."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 2 and 3 assume a definition."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A KPI's value depends on its start event, end event and inclusion rules."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a timer starting at dispatch rather than purchase."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Steps 2 and 3 assume the definition. Different definitions give different meanings to 3.2 days. It cannot be decided."
+      }
+    ],
+    "repair": "Document the metric: start and end events, inclusion rules and the date used for 'August'.",
+    "debrief": "A KPI without a written definition cannot be interpreted. Start event, end event, inclusion rules and time attribution all change the number.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

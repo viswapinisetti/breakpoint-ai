@@ -1,0 +1,390 @@
+[
+  {
+    "id": "mlo-ml-pipelines-001",
+    "subject": "mlops",
+    "topic": "ML Pipelines",
+    "subtopic": "Reading a table that changes mid-run",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are training and evaluation guaranteed to use consistent data?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Nightly pipeline: step 1 builds training features by reading analytics.customer_features; step 3 reads the same table again for evaluation 2 hours later.\nAnother team's job rewrites that table at 01:30.\nAI: \"Both steps read the same table, so training and evaluation data are consistent.\""
+    },
+    "ai_claim": "Yes. Both steps read the same table, so they see the same data.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Step 1 reads customer_features."
+      },
+      {
+        "index": 2,
+        "text": "Step 3 reads the same table."
+      },
+      {
+        "index": 3,
+        "text": "Same table means same data."
+      },
+      {
+        "index": 4,
+        "text": "So training and evaluation are consistent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Depending on a mutable shared table across steps",
+      "explanation": "The table is rewritten at 01:30 by another team, between step 1 and step 3. Evaluation may use new rows, changed definitions or even rows from the training period with updated values. Snapshot the inputs at the start of the run (or read a versioned/time-travel query) and pass the snapshot between steps.",
+      "why_convincing": "A table name looks like a stable input."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the table can change between steps. Snapshot inputs once per run and pass them along.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "01:00 step 1 reads v412 of the table; 01:30 rewrite -> v413; 03:00 step 3 reads v413",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "01:30"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Pipeline steps should consume immutable, versioned artifacts from earlier steps.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Evaluation uses rows that did not exist at training time."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what happens to the table during the run."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the table is stable."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Shared mutable inputs break consistency across steps."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the table versions each step read."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the table changes mid-run. Snapshot inputs."
+      }
+    ],
+    "repair": "Materialise a snapshot at the start of the run and pass it to later steps.",
+    "debrief": "Pipelines should pass artifacts, not table names. Artifacts do not change under you.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ml-pipelines-002",
+    "subject": "mlops",
+    "topic": "ML Pipelines",
+    "subtopic": "No checks on upstream data",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does a successful pipeline run show the deployed model is fine?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Daily retraining pipeline: load yesterday's events -> build features -> train -> deploy if the job succeeds.\nOn 12 August, an upstream outage delivered 0 events for the day; the pipeline succeeded and deployed.\nAI: \"The pipeline succeeded, so the deployed model is fine.\""
+    },
+    "ai_claim": "Yes. Every step completed without errors, so the model trained correctly and is fine to serve.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each step finished successfully."
+      },
+      {
+        "index": 2,
+        "text": "No errors were raised."
+      },
+      {
+        "index": 3,
+        "text": "A successful run means a correct model."
+      },
+      {
+        "index": 4,
+        "text": "So the deployed model is fine."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Treating job success as data validity",
+      "explanation": "Zero events is valid input to most code: the pipeline trains on missing or skewed data (e.g. only older rolling features) and deploys a degraded model without any error. Add data validation gates - row counts within expected ranges, schema, null rates, distribution checks - and an evaluation gate against the current model before deploying.",
+      "why_convincing": "Pipelines usually fail loudly on bad input, but not on empty input."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the pipeline processed an empty day without error. Add data-validation and evaluation gates before deployment.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "12 August: 0 events vs a typical 1.8 million.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Data validation (volume, schema, distributions) should gate training and deployment.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The deployed model's precision drops sharply on 13 August."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the pipeline checks about its input."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates no errors with correct data."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Empty or partial data rarely causes code errors."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the event count for 12 August."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the input was empty. Validate data before training."
+      }
+    ],
+    "repair": "Add data validation (e.g. Great Expectations/TFDV) and a champion-challenger evaluation gate.",
+    "debrief": "Pipelines fail silently on data problems. Make data quality a first-class gate.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ml-pipelines-003",
+    "subject": "mlops",
+    "topic": "ML Pipelines",
+    "subtopic": "Recomputing everything every day",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is full nightly recomputation's cost negligible?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "The feature pipeline recomputes 5 years of features for all 40 million customers every night (about 9 hours on a large cluster), although only yesterday's events are new.\nAI: \"Full recomputation is the simplest correct approach, and its cost is negligible.\""
+    },
+    "ai_claim": "Yes. Full recomputation guarantees correct features, and cloud compute is cheap, so the cost does not matter.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Recomputing everything guarantees consistency."
+      },
+      {
+        "index": 2,
+        "text": "Cloud compute is inexpensive."
+      },
+      {
+        "index": 3,
+        "text": "So the 9-hour job costs little."
+      },
+      {
+        "index": 4,
+        "text": "Its cost is negligible."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 3,
+      "misconception": "Ignoring the cost of redundant computation",
+      "explanation": "Each night reprocesses about 1,800 days of data to incorporate 1 new day: roughly 99.9% of the work repeats yesterday's results. Nine hours of a large cluster every night is a significant, growing bill, and the long runtime delays fresh features and leaves little time to recover from failures. Compute incrementally (process new partitions, update aggregates) with periodic full backfills for validation.",
+      "why_convincing": "Correctness is valued over cost, and 'cloud is cheap' is a common belief."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: nearly all the work is repeated. Use incremental processing with occasional full backfills.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "About 1,825 days are processed each night to add 1 new day.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1,825"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Incremental computation processes only new or changed data.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "When a nightly run fails at hour 8, there is no time to rerun before morning."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare new data with processed data."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes compute is negligible."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Incremental processing avoids recomputing unchanged results."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Estimate the fraction of repeated work."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: 99.9% of the work repeats. Go incremental."
+      }
+    ],
+    "repair": "Process new partitions incrementally; schedule periodic full recomputation for checks.",
+    "debrief": "Pipeline cost and latency grow with history unless processing is incremental.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mlo-ml-pipelines-004",
+    "subject": "mlops",
+    "topic": "ML Pipelines",
+    "subtopic": "Evaluating on the training window",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this evaluation measure the model's performance at forecasting next week?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "description": "Weekly pipeline: train on events from 1 Jan to 31 July; evaluate on a random 10% sample of events from 1 Jan to 31 July (held out from training); deploy if AUC beats the current model.\nThe model forecasts next week's demand.\nAI: \"The evaluation uses held-out data, so it measures forecasting performance.\""
+    },
+    "ai_claim": "Yes. The evaluation sample was held out from training, so it is unseen data and measures real performance.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "10% of events were held out."
+      },
+      {
+        "index": 2,
+        "text": "The model never trained on them."
+      },
+      {
+        "index": 3,
+        "text": "Unseen data measure real performance."
+      },
+      {
+        "index": 4,
+        "text": "So the evaluation reflects forecasting ability."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Evaluating a forecaster on data from within its training period",
+      "explanation": "The held-out events are interleaved in time with training events, so the model predicts days it has effectively seen around - interpolation, not forecasting. Next week lies after the training window, where trends and seasonality may shift. Evaluate on a later period (e.g. train to 30 June, evaluate on July) or use rolling-origin backtests.",
+      "why_convincing": "The sample really was held out from training."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the evaluation data come from the training period. Evaluate on a subsequent time window (backtesting).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "evaluation events are drawn from the same weeks as training events",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "On a true future window (August), AUC is 0.06 lower than on the in-window sample.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.06"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Performance on the following weeks is much worse than reported."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the evaluation period with the forecast period."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates 'unseen rows' with 'future data'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Forecast evaluation must use data after the training period."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate on August."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the evaluation is inside the training window."
+      }
+    ],
+    "repair": "Use a time-based holdout or rolling-origin backtests.",
+    "debrief": "The evaluation must mirror the deployment question. For forecasting, that means the future.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

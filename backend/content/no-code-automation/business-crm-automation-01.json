@@ -1,0 +1,467 @@
+[
+  {
+    "id": "nc-business-crm-automation-001",
+    "subject": "no-code-automation",
+    "topic": "Business & CRM Automation",
+    "subtopic": "A round-robin counter that resets",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are leads distributed evenly across the three reps?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Lead assignment workflow:\n  Step 1: Set variable counter = 0\n  Step 2: rep = reps[counter % 3]   (Asha, Ben, Chen)\n  Step 3: Assign lead to rep; counter = counter + 1\nAI: \"Leads are distributed evenly across the three reps.\""
+    },
+    "ai_claim": "Yes. The counter increases after each assignment and cycles through the three reps, so leads are spread evenly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "counter starts at 0."
+      },
+      {
+        "index": 2,
+        "text": "Each lead goes to reps[counter % 3]."
+      },
+      {
+        "index": 3,
+        "text": "counter increases after each lead."
+      },
+      {
+        "index": 4,
+        "text": "So assignments cycle Asha, Ben, Chen."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 1,
+      "misconception": "Keeping state in a variable that resets every run",
+      "explanation": "Each lead triggers a separate run, and step 1 sets counter = 0 at the start of every run. The increment is lost when the run ends, so counter % 3 is always 0 and every lead goes to Asha. Store the counter in persistent storage (a data store, sheet cell or CRM field) and increment it atomically.",
+      "why_convincing": "Within one run the logic is correct, which makes the cycle look right."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the counter resets each run, so every lead goes to Asha. Keep the counter in persistent storage.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "lead 1: counter 0 -> Asha; lead 2: new run, counter 0 -> Asha; lead 3: counter 0 -> Asha",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Run variables do not persist between runs; shared state needs a data store.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Asha receives every lead."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the counter survives between runs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 resets it each time."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Variables are scoped to a single run."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace three leads."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: the counter resets every run. Persist it."
+      }
+    ],
+    "repair": "Store the counter in a data store and read-increment-write it each run.",
+    "debrief": "Workflows are stateless between runs unless you add storage. Anything that must remember needs a place to live.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-business-crm-automation-002",
+    "subject": "no-code-automation",
+    "topic": "Business & CRM Automation",
+    "subtopic": "Creating contacts without searching",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the CRM have one record per prospect?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Trigger: new demo request (name, email, company)\nAction: Create contact in CRM.\nMany prospects request demos more than once.\nAI: \"The CRM will have one clean record per prospect.\""
+    },
+    "ai_claim": "Yes. Each prospect is a contact, and the workflow creates contacts, so each prospect has one record.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each prospect submits a demo request."
+      },
+      {
+        "index": 2,
+        "text": "The workflow creates a contact."
+      },
+      {
+        "index": 3,
+        "text": "Each prospect becomes a contact."
+      },
+      {
+        "index": 4,
+        "text": "So there is one record per prospect."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Creating records without checking for existing ones",
+      "explanation": "Each submission creates a new contact, so a prospect who requests twice gets two records, splitting their history and confusing sales. Search by email first and update the existing contact (or use the CRM's upsert/'create or update' action).",
+      "why_convincing": "With one test submission per person, duplicates never appear."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: repeat requests create duplicate contacts. Search by email and update, or use an upsert action.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Two demo requests from ravi@corp.example create two contacts.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Use search-before-create or upsert keyed on a unique field.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Sales reps call the same prospect twice from different records."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Submit twice with the same email."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 always creates."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Deduplicate on a unique key such as email."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the CRM after two submissions."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: repeats create duplicates. Upsert instead."
+      }
+    ],
+    "repair": "Use 'Find or create' / upsert by email.",
+    "debrief": "CRMs decay into duplicate chaos one automation at a time. Upserts keep them clean.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-business-crm-automation-003",
+    "subject": "no-code-automation",
+    "topic": "Business & CRM Automation",
+    "subtopic": "Admin tokens in shared workflows",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the admin token not a concern because team members only build sales workflows?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "The CRM connection used by the team's workflows was created with the CRM super-admin's API token.\nEleven team members can edit workflows in the automation workspace.\nAI: \"Team members only build sales workflows, so the admin token is not a concern.\""
+    },
+    "ai_claim": "Yes. The workflows only perform sales tasks, so the admin token is only used for those tasks.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The workflows handle sales tasks."
+      },
+      {
+        "index": 2,
+        "text": "They use the CRM connection."
+      },
+      {
+        "index": 3,
+        "text": "The token is used only for those tasks."
+      },
+      {
+        "index": 4,
+        "text": "So its admin rights do not matter."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Sharing an over-privileged connection",
+      "explanation": "Anyone who can edit a workflow can add a step using the connection - exporting every contact, deleting records, changing user permissions - with super-admin power and actions logged as the admin. A mistake or a compromised account has maximum impact. Create a dedicated integration user with only the permissions the workflows need, and restrict who can use the connection.",
+      "why_convincing": "Intended use is limited, so the power seems unused."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: every editor effectively holds super-admin rights. Use a least-privilege integration user.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "An editor adds a step 'Export all contacts to CSV' and emails it externally; the CRM logs it as the super-admin.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Integration credentials should have the minimum permissions required.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A workflow edit can delete the whole CRM."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what anyone with the connection could do."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 considers only intended use."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Permissions define possible actions, not intended ones."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine a new step using the connection."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: editors inherit admin power. Use least privilege."
+      }
+    ],
+    "repair": "Create a scoped integration user and limit connection access.",
+    "debrief": "Shared connections share their privileges. Scope them for what automations actually do.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-business-crm-automation-004",
+    "subject": "no-code-automation",
+    "topic": "Business & CRM Automation",
+    "subtopic": "Renamed pipeline stages",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the onboarding workflow still start for every won deal?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Filter: continue only if deal stage exactly equals 'Closed Won'\nLast week, sales ops renamed the stage to 'Won - Contract Signed'.\nAI: \"The onboarding workflow still starts for every won deal.\""
+    },
+    "ai_claim": "Yes. Won deals still reach the won stage, so the filter still lets them through.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Deals still move to the won stage."
+      },
+      {
+        "index": 2,
+        "text": "The filter checks for the won stage."
+      },
+      {
+        "index": 3,
+        "text": "So won deals pass the filter."
+      },
+      {
+        "index": 4,
+        "text": "Onboarding still starts."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 2,
+      "misconception": "Depending on a display name that can change",
+      "explanation": "The filter compares the text 'Closed Won', which no longer matches 'Won - Contract Signed'. Every won deal now fails the filter and onboarding silently stops. Filter on the stage's stable internal ID (or a boolean like is_won), and add monitoring for runs that stop unexpectedly.",
+      "why_convincing": "The concept of 'won' has not changed."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the text match fails after the rename. Filter on the stage ID or an is_won flag.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "deal moves to 'Won - Contract Signed' -> filter 'equals Closed Won' fails -> no onboarding",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Match on stable identifiers, not editable labels.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "New customers get no onboarding after the rename."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the filter text with the new stage name."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the name still matches."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Labels change; IDs do not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Move a test deal to the new stage."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the rename breaks the text match. Use the stage ID."
+      }
+    ],
+    "repair": "Filter on the stage ID or an is_won field; alert when daily runs drop to zero.",
+    "debrief": "Business users rename things. Automations should key on identifiers they cannot see.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-business-crm-automation-005",
+    "subject": "no-code-automation",
+    "topic": "Business & CRM Automation",
+    "subtopic": "Incremental sync with a cursor",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this sync picks up every change without re-copying everything or losing updates on failure?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Every 10 minutes: fetch CRM deals where updated_at > {{last_cursor}} (sorted by updated_at, paginated), write them to the warehouse (upsert by deal ID), then save the largest updated_at seen as the new last_cursor - only after all writes succeed."
+    },
+    "ai_claim": "Yes. Only deals changed since the cursor are fetched, upserts avoid duplicates, and because the cursor advances only after successful writes, a failed run re-fetches the same changes next time.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The query fetches only records updated after the cursor."
+      },
+      {
+        "index": 2,
+        "text": "Pagination retrieves all of them."
+      },
+      {
+        "index": 3,
+        "text": "Upserts by deal ID make re-processing harmless."
+      },
+      {
+        "index": 4,
+        "text": "Advancing the cursor after success means failures are retried."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Cursor-based incremental sync with idempotent writes and commit-after-success is robust. (Using >= with dedupe guards against records sharing the exact cursor timestamp.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "run fails after writing 40 of 90 deals -> cursor unchanged -> next run re-fetches all 90 -> upserts leave no duplicates",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "90"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Trace a run that fails halfway."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 is the key ordering."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Commit progress only after the work succeeds."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider records written twice."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The sync is incremental and recoverable. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Incremental syncs need three things: a cursor, idempotent writes, and moving the cursor only after success.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

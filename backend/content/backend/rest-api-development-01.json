@@ -1,0 +1,388 @@
+[
+  {
+    "id": "be-rest-api-development-001",
+    "subject": "backend",
+    "topic": "REST API Development",
+    "subtopic": "Idempotency is about state, not responses",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Since the second call returns 404 instead of 204, does this implementation break the rule that DELETE is idempotent?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.delete(\"/items/{item_id}\")\ndef delete_item(item_id: int):\n    if not items.exists(item_id):\n        raise HTTPException(404)\n    items.delete(item_id)\n    return Response(status_code=204)\n\n# First DELETE /items/5 -> 204. Second DELETE /items/5 -> 404."
+    },
+    "ai_claim": "Yes. Idempotent means repeating the request gives the same result, and the two calls return different status codes, so it is not idempotent.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "DELETE is supposed to be idempotent."
+      },
+      {
+        "index": 2,
+        "text": "The first call returns 204."
+      },
+      {
+        "index": 3,
+        "text": "Idempotent requests must return the same response each time."
+      },
+      {
+        "index": 4,
+        "text": "The second call returns 404, so the implementation is not idempotent."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Defining idempotency by the response instead of the effect",
+      "explanation": "Idempotency concerns the intended effect on server state: making the request twice leaves the server in the same state as making it once. After either call, item 5 does not exist. The status code may differ; 404 on a repeat DELETE is allowed. The implementation is idempotent.",
+      "why_convincing": "'Same result' is a common informal definition, and 'result' is easily read as 'response'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: after one or two DELETEs, item 5 is gone either way, so the effect is the same. Differing status codes do not break idempotency.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "RFC 9110: a method is idempotent if the intended effect on the server of multiple identical requests is the same as for a single request.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "state after call 1: no item 5; state after call 2: no item 5 -> same effect",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Server state is identical after one or two DELETEs."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the server's state after one call and after two."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 defines idempotency by the response."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Idempotency is defined by the effect on server state, not by the response returned."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check whether item 5 exists after each call."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the effect is the same (item 5 is gone), so DELETE here is idempotent even though the status differs."
+      }
+    ],
+    "repair": "No change needed; optionally return 204 for already-deleted items if clients prefer.",
+    "debrief": "Idempotency is what makes retries safe: repeating a request cannot do more damage. It is defined on state, which is why a repeat DELETE may say 404 and still be idempotent.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-rest-api-development-002",
+    "subject": "backend",
+    "topic": "REST API Development",
+    "subtopic": "Mass assignment",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can a user only change their own name and email through this endpoint?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.patch(\"/users/me\")\ndef update_me(body: dict, user=Depends(current_user), db=Depends(get_db)):\n    for field, value in body.items():\n        setattr(user, field, value)\n    db.commit()\n    return user\n\n# User model fields: id, name, email, is_admin, credit_balance"
+    },
+    "ai_claim": "Yes. The endpoint updates only the logged-in user and only the fields the client sends, which is what a profile update needs.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "current_user ensures users can only update themselves."
+      },
+      {
+        "index": 2,
+        "text": "Only the fields present in the body are changed."
+      },
+      {
+        "index": 3,
+        "text": "The profile form sends name and email."
+      },
+      {
+        "index": 4,
+        "text": "So users can only change their own name and email."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Trusting the client to send only the intended fields",
+      "explanation": "The client controls the body, not the form. Sending {\"is_admin\": true, \"credit_balance\": 100000} sets those attributes too, because every key is copied onto the model. Accept a schema with only the editable fields (UserUpdate with name and email) and copy those.",
+      "why_convincing": "Steps 1 and 2 are true, and the real frontend never sends other fields."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: any model attribute can be set, including is_admin and credit_balance. Use a Pydantic model with only name and email.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "PATCH /users/me with {\"is_admin\": true} makes the caller an admin.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Accept an allow-listed schema (e.g. UserUpdate with only name and email); never copy arbitrary client keys onto a model.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A crafted request sets credit_balance to 100000."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who decides which fields appear in the body."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the client sends only what the form sends."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Clients can send any JSON; copying all keys onto a model exposes every attribute."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Send is_admin in the PATCH body."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: anyone can send extra fields, such as is_admin. Allow-list the editable fields."
+      }
+    ],
+    "repair": "Accept a dedicated update schema and assign only its fields.",
+    "debrief": "Mass assignment turns every model attribute into an API input. Allow-list the fields a request may change with an explicit schema; never copy arbitrary client keys onto a model.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-rest-api-development-003",
+    "subject": "backend",
+    "topic": "REST API Development",
+    "subtopic": "PATCH and falsy values",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can a client use this endpoint to clear the nickname (\"\"), or switch the newsletter off (false)?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.patch(\"/profile\")\ndef patch_profile(body: dict):\n    for field in (\"nickname\", \"age\", \"newsletter\"):\n        if body.get(field):\n            profile[field] = body[field]\n    return profile"
+    },
+    "ai_claim": "Yes. PATCH updates whichever fields the client sends, so sending nickname: \"\" or newsletter: false updates them.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The loop checks each supported field."
+      },
+      {
+        "index": 2,
+        "text": "If the client sent the field, it is copied into the profile."
+      },
+      {
+        "index": 3,
+        "text": "Sending nickname: \"\" or newsletter: false includes those fields."
+      },
+      {
+        "index": 4,
+        "text": "So they are updated."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Testing presence with truthiness",
+      "explanation": "if body.get(field) is false for \"\", 0, False and None, so those values are skipped even though the client sent them. The nickname cannot be cleared, the newsletter cannot be turned off, and age cannot be set to 0. Test presence with if field in body.",
+      "why_convincing": "Typical updates send non-empty values, which work."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: falsy values are ignored. Use if field in body: to detect that a field was sent.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "PATCH {\"nickname\": \"\"} leaves the nickname unchanged.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Test key presence with `field in body`; a truthiness test also rejects '', 0 and False.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "{\"newsletter\": false} does not turn the newsletter off."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try sending an empty string or false."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says any sent field is copied. Check the condition used."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "body.get(field) is falsy for '', 0, False and None, not just for missing keys."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate the if condition for newsletter: false."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: falsy values fail the check and are skipped. Test with 'field in body'."
+      }
+    ],
+    "repair": "Check presence with `if field in body` (and validate types with a schema).",
+    "debrief": "Truthiness conflates 'missing' with 'empty', 'zero' and 'false'. For partial updates, the distinction between 'not sent' and 'sent as empty' is the whole point, so test for key presence.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-rest-api-development-004",
+    "subject": "backend",
+    "topic": "REST API Development",
+    "subtopic": "Renaming a response field",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this release backward compatible for existing v1 clients?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "# Response of GET /api/v1/users/{id}\n# before: {\"id\": 7, \"name\": \"Asha Rao\"}\n# after:  {\"id\": 7, \"full_name\": \"Asha Rao\"}\n\n# Release note: \"Added full_name to the user resource.\""
+    },
+    "ai_claim": "Yes. Adding a field is backward compatible: clients that do not know about full_name simply ignore it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The release adds full_name to the response."
+      },
+      {
+        "index": 2,
+        "text": "JSON clients ignore fields they do not recognise."
+      },
+      {
+        "index": 3,
+        "text": "Adding fields is a backward-compatible change."
+      },
+      {
+        "index": 4,
+        "text": "So existing clients are unaffected."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 1,
+      "misconception": "Seeing the addition and missing the removal",
+      "explanation": "The change does add full_name, but it also removes name. Every existing client that reads user.name now gets undefined (or a KeyError). That is a breaking change for v1. Keep name alongside full_name (and deprecate it), or ship the change as v2.",
+      "why_convincing": "Step 3's rule is correct, and the release note describes only the addition."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: name was removed, which breaks clients that read it. Return both fields during a deprecation period, or version the change.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A client rendering user.name shows 'undefined' after the release.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "A contract test asserting 'name' in the response fails.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Any client reading name breaks."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the before and after responses field by field."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 describes the change as an addition only."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Removing or renaming a field is breaking even when a new field is added."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check whether 'name' is still present."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: the change also removes name, breaking existing clients. Keep name or ship v2."
+      }
+    ],
+    "repair": "Keep `name` alongside `full_name` until clients migrate, then remove it in a new version.",
+    "debrief": "A rename is a removal plus an addition, and the removal is what breaks clients. Diff API responses mechanically (contract tests, schema diffs) rather than trusting the description of the change.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

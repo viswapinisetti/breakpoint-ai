@@ -1,0 +1,391 @@
+[
+  {
+    "id": "dl-cnn-computer-vision-001",
+    "subject": "deep-learning",
+    "topic": "CNN & Computer Vision",
+    "subtopic": "Convolution output size",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the output's height (and width)?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "conv = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=5, stride=1, padding=0)\nx = torch.randn(1, 3, 32, 32)\n# AI working: a convolution keeps the spatial size, so the output is (1, 16, 32, 32)"
+    },
+    "ai_claim": "32. Convolutions keep the spatial size of the input, so the output is 32 x 32.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The input is 32 x 32."
+      },
+      {
+        "index": 2,
+        "text": "The kernel slides over every position."
+      },
+      {
+        "index": 3,
+        "text": "Convolutions preserve height and width."
+      },
+      {
+        "index": 4,
+        "text": "So the output is 32 x 32."
+      }
+    ],
+    "ai_final_answer": "32",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming convolutions preserve size without padding",
+      "explanation": "Output size = (H + 2 x padding - kernel) / stride + 1 = (32 + 0 - 5) / 1 + 1 = 28. Without padding, a 5x5 kernel fits in only 28 positions along each axis. padding=2 would keep 32.",
+      "why_convincing": "'Same' padding is common, so preserved sizes are familiar."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "(32 - 5) / 1 + 1 = 28, so the output is (1, 16, 28, 28).",
+    "canonical_answer": "28",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(32 + 2 x 0 - 5) / 1 + 1 = 28",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "28"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "conv(x).shape is torch.Size([1, 16, 28, 28]).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "28"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A 5x5 kernel cannot be centred on the border pixels without padding."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Use the convolution output-size formula."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes size is preserved."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Output = (H + 2p - k) / s + 1."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Substitute H = 32, k = 5, p = 0, s = 1."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without padding the output is 28 x 28."
+      }
+    ],
+    "repair": "",
+    "debrief": "Compute shapes layer by layer (or print them) when designing CNNs; most shape errors come from padding and stride.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (32 + 2 * 0 - 5) // 1 + 1",
+      "flawed_solver": "answer = 32"
+    }
+  },
+  {
+    "id": "dl-cnn-computer-vision-002",
+    "subject": "deep-learning",
+    "topic": "CNN & Computer Vision",
+    "subtopic": "Parameters of a convolution",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many trainable parameters does this layer have?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "conv = nn.Conv2d(in_channels=3, out_channels=16, kernel_size=3)\n# AI working: 16 filters of 3 x 3 = 144 weights, plus 16 biases = 160 parameters"
+    },
+    "ai_claim": "160. There are 16 filters of size 3 x 3, which is 144 weights, plus 16 biases.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "There are 16 output channels, one filter each."
+      },
+      {
+        "index": 2,
+        "text": "Each filter is 3 x 3 = 9 weights."
+      },
+      {
+        "index": 3,
+        "text": "16 x 9 = 144 weights."
+      },
+      {
+        "index": 4,
+        "text": "Plus 16 biases: 160."
+      }
+    ],
+    "ai_final_answer": "160",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Forgetting that each filter spans all input channels",
+      "explanation": "Each filter has a 3 x 3 kernel for every input channel: 3 x 3 x 3 = 27 weights. So 16 x 27 = 432 weights, plus 16 biases = 448.",
+      "why_convincing": "Filters are usually drawn as 2D grids."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "16 x (3 x 3 x 3) + 16 = 448.",
+    "canonical_answer": "448",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "16 x 27 + 16 = 448",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "448"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "conv.weight.shape is (16, 3, 3, 3).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The weight tensor has a dimension for the 3 input channels."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the shape of the weight tensor."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats each filter as 2D."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A filter covers every input channel: in_channels x k x k."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Multiply 3 x 3 x 3."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: each filter has 27 weights. Total 448."
+      }
+    ],
+    "repair": "",
+    "debrief": "Convolution weights have shape (out_channels, in_channels, k, k). Parameter counts follow directly from that shape.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 16 * 3 * 3 * 3 + 16",
+      "flawed_solver": "answer = 16 * 3 * 3 + 16"
+    }
+  },
+  {
+    "id": "dl-cnn-computer-vision-003",
+    "subject": "deep-learning",
+    "topic": "CNN & Computer Vision",
+    "subtopic": "Max pooling halves the size",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this prints torch.Size([8, 16, 14, 14])?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "pool = nn.MaxPool2d(kernel_size=2, stride=2)\nx = torch.randn(8, 16, 28, 28)\nprint(pool(x).shape)"
+    },
+    "ai_claim": "Yes. A 2x2 window with stride 2 takes the maximum of each non-overlapping 2x2 block, halving height and width while keeping batch and channels.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Pooling acts on each channel separately, so batch (8) and channels (16) are unchanged."
+      },
+      {
+        "index": 2,
+        "text": "Output size = (28 - 2) / 2 + 1 = 14."
+      },
+      {
+        "index": 3,
+        "text": "Height and width both become 14."
+      },
+      {
+        "index": 4,
+        "text": "So the shape is (8, 16, 14, 14)."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: (8, 16, 14, 14).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(28 - 2) / 2 + 1 = 14",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "14"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Apply the output-size formula."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 separates channels from spatial dimensions."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Pooling reduces spatial size and leaves channels alone."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute (28 - 2) / 2 + 1."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The shape is (8, 16, 14, 14). The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Pooling layers downsample space, not channels; the same size formula as convolution applies.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-cnn-computer-vision-004",
+    "subject": "deep-learning",
+    "topic": "CNN & Computer Vision",
+    "subtopic": "Inputs a pretrained model expects",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are the model's predictions reliable with this input?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "model = torchvision.models.resnet50(weights=\"IMAGENET1K_V2\").eval()\nimg = torch.tensor(np.array(pil_image)).permute(2, 0, 1).float().unsqueeze(0)   # values 0-255\npred = model(img).argmax()\n# AI note: \"The image is in the right shape (1, 3, 224, 224), so the predictions are reliable.\""
+    },
+    "ai_claim": "Yes. The tensor has the shape the model expects, (1, 3, 224, 224), so the model processes it correctly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The image is converted to a tensor."
+      },
+      {
+        "index": 2,
+        "text": "It is permuted to channels-first and given a batch dimension."
+      },
+      {
+        "index": 3,
+        "text": "The shape (1, 3, 224, 224) matches the model."
+      },
+      {
+        "index": 4,
+        "text": "So predictions are reliable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Matching the shape but not the value scale",
+      "explanation": "The pretrained weights expect pixels scaled to [0, 1] and normalised with ImageNet's mean (0.485, 0.456, 0.406) and std (0.229, 0.224, 0.225). Raw 0-255 values are hundreds of times larger than the training inputs, so activations are far outside anything the model saw and predictions are unreliable. Use the weights' own transforms (weights.transforms()).",
+      "why_convincing": "Shape errors crash loudly; scale errors fail silently, so a correct shape feels like success."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the values are 0-255 instead of normalised. Apply ResNet50_Weights.IMAGENET1K_V2.transforms().",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "A pixel of 200 raw vs (200/255 - 0.485) / 0.229 = 1.31 normalised: about 150x larger.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.31"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "On 100 labelled images, top-1 accuracy is 12% with raw pixels and 80% with the proper transforms.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "12",
+          "80"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Correctly shaped but unnormalised images are misclassified."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the input values with what the model was trained on."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 checks only the shape."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Pretrained models expect the same preprocessing as in training."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look up the weights' transforms."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the values are not normalised. Use the weights' transforms."
+      }
+    ],
+    "repair": "Use `weights = ResNet50_Weights.IMAGENET1K_V2; preprocess = weights.transforms(); img = preprocess(pil_image).unsqueeze(0)`.",
+    "debrief": "A pretrained model's preprocessing is part of the model. Reuse it exactly: resize, scaling and normalisation.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

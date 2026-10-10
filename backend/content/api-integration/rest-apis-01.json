@@ -1,0 +1,382 @@
+[
+  {
+    "id": "api-rest-apis-001",
+    "subject": "api-integration",
+    "topic": "REST APIs",
+    "subtopic": "PUT replaces the whole resource",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "After this request, does user 7 still have their name and phone?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "before": "GET /users/7 -> {\"id\": 7, \"name\": \"Asha\", \"email\": \"a@old.example\", \"phone\": \"98450 11111\"}",
+      "request": "PUT /users/7\nContent-Type: application/json\n\n{\"email\": \"asha@new.example\"}",
+      "docs": "PUT /users/{id}: replaces the user with the representation in the body."
+    },
+    "ai_claim": "Yes. The request only includes email, so only the email changes; the other fields are left as they were.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The body contains only email."
+      },
+      {
+        "index": 2,
+        "text": "Fields that are not sent are not touched."
+      },
+      {
+        "index": 3,
+        "text": "So name and phone keep their values."
+      },
+      {
+        "index": 4,
+        "text": "Only the email changes."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Treating PUT as a partial update",
+      "explanation": "PUT replaces the target resource with the request's representation, and this API documents exactly that. Fields left out are removed or reset to defaults, so name and phone are lost. Partial updates use PATCH (or a PUT with the full representation).",
+      "why_convincing": "Many APIs implement PUT loosely as a merge, so the expectation is common."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: PUT replaces the resource, so name and phone are cleared. Send PATCH with just the email, or PUT the full object.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "After the PUT, GET /users/7 returns {\"id\": 7, \"email\": \"asha@new.example\"} with name and phone gone.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "7"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "PATCH /users/7 {\"email\": ...} changes only the email.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The user's name and phone are cleared."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Read the API's definition of PUT."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes omitted fields are untouched."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "PUT replaces the whole resource; PATCH modifies part of it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "GET the user after the PUT."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: PUT replaces the resource, dropping name and phone. Use PATCH."
+      }
+    ],
+    "repair": "Use `PATCH /users/7` with only the changed field.",
+    "debrief": "PUT means replace, PATCH means modify. Sending a partial body with PUT is a silent data-loss bug with any API that follows the semantics - as this one documents.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-rest-apis-002",
+    "subject": "api-integration",
+    "topic": "REST APIs",
+    "subtopic": "204 No Content has no body",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this code log the removed item's name after a successful delete?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "resp = client.delete(f\"/carts/{cart_id}/items/{item_id}\")\nresp.raise_for_status()\nremoved = resp.json()           # expected: the removed item\nlog.info(\"removed %s\", removed[\"name\"])\n\n# Docs: DELETE ... -> 204 No Content on success."
+    },
+    "ai_claim": "Yes. The delete succeeds, raise_for_status passes, and resp.json() returns the removed item, whose name is logged.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The DELETE request succeeds."
+      },
+      {
+        "index": 2,
+        "text": "raise_for_status does not raise for a 2xx status."
+      },
+      {
+        "index": 3,
+        "text": "resp.json() returns the item that was removed."
+      },
+      {
+        "index": 4,
+        "text": "The name is logged."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Parsing a body that a 204 response never has",
+      "explanation": "204 No Content means the response has no body. resp.json() on an empty body raises a JSON decode error, so the successful delete surfaces as an exception - and the caller may retry or report a failure. Check for 204 before parsing, and fetch the item before deleting if its name is needed.",
+      "why_convincing": "Some APIs return 200 with the deleted item, so the pattern works elsewhere."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a 204 has an empty body, so resp.json() raises. Handle 204 without parsing.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "resp.status_code is 204 and resp.json() raises JSONDecodeError.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "204"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The documentation states DELETE returns 204 No Content.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "204"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A successful delete raises a JSONDecodeError."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the documented status code for success."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the response has a body."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "204 No Content responses carry no body."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call resp.json() on an empty response."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 204 has no body, so resp.json() raises. Do not parse 204 responses."
+      }
+    ],
+    "repair": "If resp.status_code == 204, skip parsing; read the item's name before deleting if you need it.",
+    "debrief": "Code the response handling from the documented status codes, not from what a similar API returns. 204 is a success with nothing to parse.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-rest-apis-003",
+    "subject": "api-integration",
+    "topic": "REST APIs",
+    "subtopic": "Optimistic concurrency with If-Match",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that the PUT is rejected instead of overwriting the other editor's changes?",
+    "artifact_type": "api_request",
+    "artifact": {
+      "step1": "GET /docs/12 -> 200, ETag: \"v7\"",
+      "step2": "PUT /docs/12\nIf-Match: \"v7\"\nContent-Type: application/json\n\n{...edited document...}",
+      "note": "Meanwhile another editor saved the document, changing its ETag to \"v8\"."
+    },
+    "ai_claim": "Yes. If-Match makes the PUT conditional on the document still being version v7. It is now v8, so the server responds 412 Precondition Failed and nothing is overwritten.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The client read version v7."
+      },
+      {
+        "index": 2,
+        "text": "It sends the update only if the current ETag is still v7."
+      },
+      {
+        "index": 3,
+        "text": "Another save changed the ETag to v8, so the precondition is false."
+      },
+      {
+        "index": 4,
+        "text": "The server returns 412 and keeps the other editor's version."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. If-Match with an ETag implements optimistic concurrency control: a stale update fails with 412, and the client can re-fetch, merge and retry.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "read v7 -> other editor saves (v8) -> PUT If-Match v7 -> 412",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "412"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the ETag in If-Match with the current one."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on the server checking the precondition."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Conditional requests with If-Match prevent lost updates."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Follow both editors' requests in order."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The stale PUT fails with 412 and nothing is overwritten. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Without If-Match, the second save silently wins and the first editor's work is lost. ETags and 412 turn that race into an explicit conflict the client can handle.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-rest-apis-004",
+    "subject": "api-integration",
+    "topic": "REST APIs",
+    "subtopic": "Relying on an undocumented order",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this reliably send the receipt for the customer's most recent order?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "python",
+      "code": "orders = client.get(\"/customers/42/orders\").json()[\"items\"]\nlatest = orders[-1]            # the most recent order\nsend_receipt(latest[\"id\"])\n\n# API docs for this endpoint: returns the customer's orders. No sort order is specified,\n# and there is no sort parameter."
+    },
+    "ai_claim": "Yes. The endpoint returns orders in the order they were created, so the last item is always the most recent order.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Orders are created over time."
+      },
+      {
+        "index": 2,
+        "text": "The API lists them in creation order."
+      },
+      {
+        "index": 3,
+        "text": "The last item is therefore the newest."
+      },
+      {
+        "index": 4,
+        "text": "So the receipt is for the most recent order."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 2,
+      "misconception": "Depending on behaviour the API does not promise",
+      "explanation": "The documentation specifies no order. The observed creation order is an implementation detail - for example, the database's current plan - and can change with a new index, a migration or pagination. Then the code sends a receipt for the wrong order. Sort by created_at on the client, or use a documented sort parameter or a 'latest' endpoint.",
+      "why_convincing": "In every test the items did come back in creation order."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the order is unspecified, so orders[-1] may not be the newest. Choose the latest by created_at explicitly.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The API documentation specifies no sort order for this endpoint.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "After a database index change, the list comes back sorted by order id, and a back-dated order ends up last.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An order imported later with an earlier date is listed last."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the documentation guarantees."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states an ordering the API never promises."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Undocumented behaviour can change without notice."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for a sort parameter or sort order in the docs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the order is unspecified. Pick the latest by created_at yourself."
+      }
+    ],
+    "repair": "Use `max(orders, key=lambda o: o[\"created_at\"])`, or a documented sort parameter.",
+    "debrief": "Build integrations on the documented contract, not on observed behaviour. Order, field presence and default page sizes are common undocumented assumptions that break when the provider changes internals.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

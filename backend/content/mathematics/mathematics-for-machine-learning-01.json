@@ -1,0 +1,498 @@
+[
+  {
+    "id": "mat-mathematics-for-machine-learning-001",
+    "subject": "mathematics",
+    "topic": "Mathematics for Machine Learning",
+    "subtopic": "Softmax exponentiates",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the softmax probability of the third class (6 decimal places)?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Logits z = [1, 2, 3].\nAI working: softmax normalises the logits: p3 = 3 / (1 + 2 + 3) = 0.5"
+    },
+    "ai_claim": "0.5. Softmax divides each logit by the sum of the logits: 3 / 6 = 0.5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The logits are 1, 2 and 3."
+      },
+      {
+        "index": 2,
+        "text": "Softmax divides each value by the total."
+      },
+      {
+        "index": 3,
+        "text": "3 / (1 + 2 + 3) = 0.5."
+      },
+      {
+        "index": 4,
+        "text": "So p3 = 0.5."
+      }
+    ],
+    "ai_final_answer": "0.5",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 2,
+      "misconception": "Normalising logits without exponentiating",
+      "explanation": "Softmax is exp(z_i) / sum_j exp(z_j). Exponentiating makes all values positive and emphasises larger logits: p3 = e^3 / (e + e^2 + e^3) = 20.0855 / 30.1929 = 0.665241. Plain normalisation would also break for negative logits.",
+      "why_convincing": "'Softmax normalises the scores' is how it is often summarised."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "p3 = e^3 / (e^1 + e^2 + e^3) = 0.665241.",
+    "canonical_answer": "0.665241",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "20.0855 / (2.7183 + 7.3891 + 20.0855) = 0.665241",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.665241"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "For logits [-1, 1], plain normalisation divides by 0.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Negative logits would give negative 'probabilities'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall the softmax formula."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 omits the exponential."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Softmax = exp(z_i) / sum exp(z_j)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute e^1, e^2 and e^3."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: softmax exponentiates first. p3 = 0.665241."
+      }
+    ],
+    "repair": "",
+    "debrief": "The exponential is what makes softmax well-defined for any real logits and sharpens differences between them.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "e = [math.exp(z) for z in (1, 2, 3)]; answer = e[2] / sum(e)",
+      "flawed_solver": "answer = 3 / (1 + 2 + 3)"
+    }
+  },
+  {
+    "id": "mat-mathematics-for-machine-learning-002",
+    "subject": "mathematics",
+    "topic": "Mathematics for Machine Learning",
+    "subtopic": "Cross-entropy loss",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the cross-entropy (log) loss for this example, using natural logarithms (6 decimal places)?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "A classifier assigns probability 0.9 to the correct class.\nAI working: log loss = 1 - 0.9 = 0.1"
+    },
+    "ai_claim": "0.1. The loss is how far the predicted probability is from 1: 1 - 0.9 = 0.1.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The correct class received probability 0.9."
+      },
+      {
+        "index": 2,
+        "text": "Perfect prediction would be 1."
+      },
+      {
+        "index": 3,
+        "text": "Log loss measures the shortfall: 1 - 0.9."
+      },
+      {
+        "index": 4,
+        "text": "So the loss is 0.1."
+      }
+    ],
+    "ai_final_answer": "0.1",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Using the linear shortfall instead of the log",
+      "explanation": "Cross-entropy loss is -ln(p) for the correct class: -ln(0.9) = 0.105361. The logarithm is what makes confident mistakes very costly (-ln(0.01) = 4.6) instead of capped at 1.",
+      "why_convincing": "0.1 and 0.105 are close for confident correct predictions."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "-ln(0.9) = 0.105361.",
+    "canonical_answer": "0.105361",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "-ln(0.9) = 0.105361",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.105361"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "For p = 0.01, 1 - p = 0.99, but -ln(0.01) = 4.605.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4.605"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The linear version barely penalises confident wrong predictions."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall the formula for log loss."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 omits the logarithm."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Cross-entropy = -ln(probability of the correct class)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute -ln(0.9)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: log loss is -ln(0.9) = 0.105361."
+      }
+    ],
+    "repair": "",
+    "debrief": "The log in log loss is the point: it punishes confident errors severely, which drives calibrated probabilities.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = -math.log(0.9)",
+      "flawed_solver": "answer = 1 - 0.9"
+    }
+  },
+  {
+    "id": "mat-mathematics-for-machine-learning-003",
+    "subject": "mathematics",
+    "topic": "Mathematics for Machine Learning",
+    "subtopic": "The gradient of mean squared error",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is dL/dw at w = 1?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Model: y_hat = w x.  Data: x = [1, 2], y = [2, 4].  Current w = 1.\nLoss L(w) = (1/n) sum (w x_i - y_i)^2\nAI working: dL/dw = (1/n) sum x_i (w x_i - y_i) = (1/2)(1 x (-1) + 2 x (-2)) = -2.5"
+    },
+    "ai_claim": "-2.5. Differentiating the squared error gives (1/n) sum x_i (w x_i - y_i) = -2.5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Residuals at w = 1: 1 - 2 = -1 and 2 - 4 = -2."
+      },
+      {
+        "index": 2,
+        "text": "dL/dw = (1/n) sum x_i (w x_i - y_i)."
+      },
+      {
+        "index": 3,
+        "text": "= (1/2)(1 x (-1) + 2 x (-2)) = (1/2)(-5)."
+      },
+      {
+        "index": 4,
+        "text": "= -2.5."
+      }
+    ],
+    "ai_final_answer": "-2.5",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 2,
+      "misconception": "Dropping the factor 2 from the power rule",
+      "explanation": "d/dw (w x - y)^2 = 2 x (w x - y). The derivative is (2/n) sum x_i (w x_i - y_i) = (2/2)(-5) = -5. Missing constants do not change the direction, but they change step sizes and break gradient checks.",
+      "why_convincing": "Many texts define the loss with a 1/2 to cancel the 2, so the formula looks familiar."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "dL/dw = (2/n) sum x_i (w x_i - y_i) = -5.",
+    "canonical_answer": "-5",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(2/2)(1 x (-1) + 2 x (-2)) = -5",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "-5"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "Finite difference: (L(1.001) - L(0.999)) / 0.002 = -5.000",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "-5"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A numerical gradient check gives -5, not -2.5."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Differentiate (w x - y)^2 carefully."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states the derivative."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The power rule brings down a factor of 2."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check with a finite difference."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the factor 2 is missing. dL/dw = -5."
+      }
+    ],
+    "repair": "",
+    "debrief": "Numerical gradient checks - comparing with finite differences - catch missing constants and sign errors in hand-derived gradients.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "xs, ys, w = [1, 2], [2, 4], 1\nanswer = 2 / 2 * sum(x * (w * x - y) for x, y in zip(xs, ys))",
+      "flawed_solver": "xs, ys, w = [1, 2], [2, 4], 1\nanswer = 1 / 2 * sum(x * (w * x - y) for x, y in zip(xs, ys))"
+    }
+  },
+  {
+    "id": "mat-mathematics-for-machine-learning-004",
+    "subject": "mathematics",
+    "topic": "Mathematics for Machine Learning",
+    "subtopic": "L2 regularisation and sparsity",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the claim correct?",
+    "artifact_type": "proof",
+    "artifact": {
+      "proof": "Claim: adding an L2 penalty lambda x sum(w_i^2) to a linear model's loss drives unimportant weights exactly to zero, producing a sparse model.\nArgument: the penalty pushes every weight towards 0, and weights that do not help the fit are pushed all the way."
+    },
+    "ai_claim": "Yes. The L2 penalty pushes weights towards zero, and weights that do not help are pushed all the way to exactly zero.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The L2 penalty grows with the size of each weight."
+      },
+      {
+        "index": 2,
+        "text": "Minimising it pushes weights towards 0."
+      },
+      {
+        "index": 3,
+        "text": "Weights that do not help the fit are pushed to exactly 0."
+      },
+      {
+        "index": 4,
+        "text": "So L2 produces sparse models."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Confusing L2 shrinkage with L1 sparsity",
+      "explanation": "The L2 penalty's gradient, 2 lambda w, shrinks towards 0 as w does, so the push vanishes near zero: weights become small but almost never exactly 0. L1 (lasso) has a constant-size gradient, lambda sign(w), which can push weights exactly to 0 and produce sparsity.",
+      "why_convincing": "Both penalties 'shrink weights', and L1 and L2 are usually taught together."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: L2 shrinks weights but rarely makes them exactly zero; sparsity comes from L1.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "The gradient of lambda w^2 is 2 lambda w, which tends to 0 as w -> 0.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "L1 penalties produce exact zeros; L2 penalties shrink weights proportionally.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Ridge regression keeps all coefficients non-zero in general."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the gradients of w^2 and |w| near zero."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims weights reach exactly 0."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "L2's pull weakens as a weight shrinks; L1's does not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the gradient of lambda w^2 at w = 0.001."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: L2 shrinks but does not zero out weights. Use L1 for sparsity."
+      }
+    ],
+    "repair": "Use L1 (lasso) or elastic net when exact sparsity is the goal.",
+    "debrief": "The shape of the penalty near zero decides sparsity. That geometry is why lasso selects features and ridge only shrinks them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mat-mathematics-for-machine-learning-005",
+    "subject": "mathematics",
+    "topic": "Mathematics for Machine Learning",
+    "subtopic": "Variance of a sum of independent variables",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the standard deviation of X + Y (6 decimal places)?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "X and Y are independent; Var(X) = 4 and Var(Y) = 9.\nAI working: Var(X + Y) = Var(X) + Var(Y) = 13, so SD(X + Y) = sqrt(13) = 3.605551."
+    },
+    "ai_claim": "3.605551. For independent variables, variances add: Var(X + Y) = 13, so the SD is sqrt(13).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "X and Y are independent, so Cov(X, Y) = 0."
+      },
+      {
+        "index": 2,
+        "text": "Var(X + Y) = Var(X) + Var(Y) + 2 Cov(X, Y) = 4 + 9 = 13."
+      },
+      {
+        "index": 3,
+        "text": "SD = sqrt(Var)."
+      },
+      {
+        "index": 4,
+        "text": "sqrt(13) = 3.605551."
+      }
+    ],
+    "ai_final_answer": "3.605551",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: sqrt(13) = 3.605551. Variances (not standard deviations) add for independent variables; SDs would wrongly give 2 + 3 = 5.",
+    "canonical_answer": "3.605551",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "sqrt(4 + 9) = sqrt(13) = 3.605551",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "3.605551"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Adding SDs gives 2 + 3 = 5, which is wrong.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what adds for independent variables."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 uses independence to drop the covariance."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Variances add for independent variables; standard deviations do not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Take the square root of 13."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. SD = sqrt(13) = 3.605551. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Uncertainties combine in quadrature: this is why averaging n independent measurements reduces the SD by sqrt(n).",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = math.sqrt(4 + 9)"
+    }
+  }
+]

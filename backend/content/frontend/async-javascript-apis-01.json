@@ -1,0 +1,480 @@
+[
+  {
+    "id": "fe-async-javascript-apis-001",
+    "subject": "frontend",
+    "topic": "Async JavaScript & APIs",
+    "subtopic": "fetch and HTTP errors",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "When the API responds 404 Not Found, does the user see 'User not found'?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "async function loadUser(id) {\n  try {\n    const res = await fetch(`/api/users/${id}`);\n    return await res.json();\n  } catch (err) {\n    showMessage(\"User not found\");\n  }\n}"
+    },
+    "ai_claim": "Yes. A 404 is an error, so fetch throws and the catch block shows the message.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "fetch sends the request."
+      },
+      {
+        "index": 2,
+        "text": "The server responds 404."
+      },
+      {
+        "index": 3,
+        "text": "fetch rejects when the response is an error, so control jumps to catch."
+      },
+      {
+        "index": 4,
+        "text": "showMessage displays 'User not found'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Assuming fetch rejects on HTTP error statuses",
+      "explanation": "fetch rejects only on network failures. A 404 or 500 response resolves normally with res.ok === false. The code goes on to parse the error body and returns it as if it were a user, and the message never appears. Check res.ok (or res.status) and throw yourself.",
+      "why_convincing": "Libraries like axios do reject on 4xx and 5xx, so the expectation is common."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: fetch resolves on 404, so catch is not reached. Add if (!res.ok) throw new Error(res.status).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Against a server returning 404, fetch resolves with status 404 and ok false.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "404"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "if (!res.ok) { showMessage('User not found'); return null; }",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "loadUser returns the 404 error body instead of showing the message."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check when a fetch promise rejects."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes an HTTP error status makes fetch throw."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "fetch rejects only for network errors; HTTP errors resolve with ok set to false."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Log res.ok and res.status for the 404 response."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: fetch resolves on 404. Check res.ok and handle the error."
+      }
+    ],
+    "repair": "Check `res.ok` after fetch and handle non-2xx statuses explicitly.",
+    "debrief": "A response is not a success. fetch separates 'the request completed' from 'the server said yes', and code must check both. Test error paths against a real error status, not just an unplugged network.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-async-javascript-apis-002",
+    "subject": "frontend",
+    "topic": "Async JavaScript & APIs",
+    "subtopic": "async callbacks in forEach",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 'All items saved' logged only after every save has finished?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "async function saveAll(items) {\n  items.forEach(async (item) => {\n    await save(item);\n  });\n  console.log(\"All items saved\");\n}"
+    },
+    "ai_claim": "Yes. Each save is awaited inside the loop, so the log line runs once all of them have completed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "forEach calls the async callback for each item."
+      },
+      {
+        "index": 2,
+        "text": "Inside the callback, await save(item) waits for the save."
+      },
+      {
+        "index": 3,
+        "text": "forEach waits for each callback before moving on."
+      },
+      {
+        "index": 4,
+        "text": "So the log runs after all saves have finished."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming forEach awaits async callbacks",
+      "explanation": "forEach ignores its callback's return value, including the promise an async function returns. It starts every callback and returns immediately, so the log runs before any save completes. Use for...of with await, or await Promise.all(items.map(save)).",
+      "why_convincing": "The await keyword is right there in the code, which makes the waiting look guaranteed."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The log runs immediately, before any save completes. Use for (const item of items) await save(item); or await Promise.all(items.map(save)).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "With a save that takes 20 ms, the saved count is 0 when the log line runs.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "await Promise.all(items.map(item => save(item)));",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "'All items saved' prints while every save is still pending."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what forEach does with the promise each callback returns."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims forEach waits."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "forEach discards return values; only for...of with await or Promise.all waits."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Log how many saves have completed when the message prints."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: forEach does not wait, so the log runs first. Use for...of or Promise.all."
+      }
+    ],
+    "repair": "Use `await Promise.all(items.map(save))` or a for...of loop with await.",
+    "debrief": "await only pauses the function it is written in. Inside a forEach callback it pauses the callback, not the outer function. Array methods like forEach, map and filter are not async-aware.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-async-javascript-apis-003",
+    "subject": "frontend",
+    "topic": "Async JavaScript & APIs",
+    "subtopic": "Sequential awaits in a loop",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does loadDashboard finish in about 1 second?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// each request takes about 1 second; they do not depend on each other\nasync function loadDashboard() {\n  const results = [];\n  for (const url of [\"/api/sales\", \"/api/users\", \"/api/stock\"]) {\n    results.push(await fetch(url).then(r => r.json()));\n  }\n  return results;\n}"
+    },
+    "ai_claim": "Yes. fetch is asynchronous, so the three requests run in parallel, and the total time is about as long as the slowest one: 1 second.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "fetch does not block the page."
+      },
+      {
+        "index": 2,
+        "text": "The three requests are asynchronous."
+      },
+      {
+        "index": 3,
+        "text": "So they run at the same time."
+      },
+      {
+        "index": 4,
+        "text": "The total is about 1 second."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Awaiting independent requests one at a time",
+      "explanation": "Each loop iteration awaits its request before the next fetch starts, so the requests run in series: about 3 seconds in total. Being asynchronous means not blocking the thread, not running concurrently. Start all requests first and then await them together with Promise.all.",
+      "why_convincing": "The word 'asynchronous' suggests 'in parallel', and the page stays responsive throughout."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "About 3 seconds: each await finishes before the next request starts. Use await Promise.all(urls.map(u => fetch(u).then(r => r.json()))) for about 1 second.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "With three 1-second requests, the network panel shows them back to back, about 3 seconds in total.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "return Promise.all(urls.map(u => fetch(u).then(r => r.json())));",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The network waterfall shows each request starting when the previous one ends."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check when each fetch starts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes asynchronous means concurrent."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "await inside a loop waits before the next iteration begins."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Draw the timeline of the three requests."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the loop runs the requests one after another (about 3 s). Use Promise.all."
+      }
+    ],
+    "repair": "Start all requests, then `await Promise.all(...)`.",
+    "debrief": "Asynchronous code does not block, but it runs concurrently only if you start the operations before awaiting them. For independent requests, Promise.all turns the sum of latencies into the maximum.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-async-javascript-apis-004",
+    "subject": "frontend",
+    "topic": "Async JavaScript & APIs",
+    "subtopic": "Promise.all and partial failure",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If only the reviews request fails, does the page still get profile and orders?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "const [profile, orders, reviews] = await Promise.all([\n  fetchJson(\"/api/profile\"),\n  fetchJson(\"/api/orders\"),\n  fetchJson(\"/api/reviews\"),   // this endpoint is sometimes down\n]);"
+    },
+    "ai_claim": "Yes. Promise.all waits for all three; the successful ones return their data and the failed one is simply missing.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Promise.all runs the three requests together."
+      },
+      {
+        "index": 2,
+        "text": "profile and orders succeed."
+      },
+      {
+        "index": 3,
+        "text": "The failed reviews request leaves only its slot empty."
+      },
+      {
+        "index": 4,
+        "text": "So profile and orders are still available."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Assuming Promise.all tolerates individual failures",
+      "explanation": "Promise.all rejects as soon as any promise rejects, and the successful results are discarded. The await throws and neither profile nor orders is assigned. Promise.allSettled returns every outcome, so the page can render what succeeded.",
+      "why_convincing": "In testing, all three endpoints usually succeed, so the failure path is never exercised."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: one rejection makes Promise.all reject, losing all results. Use Promise.allSettled and handle each result's status.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Promise.all([resolve(1), reject(err), resolve(3)]) rejects; the 1 and 3 are not returned.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "const results = await Promise.allSettled([...]); results.map(r => r.status === 'fulfilled' ? r.value : null)",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "When reviews is down, the whole dashboard fails to load."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Test the case where exactly one request fails."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 describes what happens to the failed request's slot."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Promise.all is all-or-nothing; Promise.allSettled reports each outcome."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Make the reviews promise reject and see what the await does."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: Promise.all rejects entirely when one request fails. Use Promise.allSettled."
+      }
+    ],
+    "repair": "Use `Promise.allSettled` and render the fulfilled results.",
+    "debrief": "Choose the combinator by the failure behaviour you want: all (fail fast), allSettled (collect all outcomes), any (first success), race (first to settle). Optional sections of a page usually need allSettled.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-async-javascript-apis-005",
+    "subject": "frontend",
+    "topic": "Async JavaScript & APIs",
+    "subtopic": "Cancelling stale search requests",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "As the user types quickly, can an older, slower response overwrite the results for the latest term?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "let controller;\n\nasync function search(term) {\n  controller?.abort();                  // cancel the previous request\n  controller = new AbortController();\n  try {\n    const res = await fetch(`/api/search?q=${encodeURIComponent(term)}`,\n                            { signal: controller.signal });\n    render(await res.json());\n  } catch (err) {\n    if (err.name !== \"AbortError\") throw err;\n  }\n}"
+    },
+    "ai_claim": "No. Each new search aborts the previous request, so an older response can never reach render. The aborted fetch rejects with AbortError, which is ignored.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every call aborts the controller of the previous call."
+      },
+      {
+        "index": 2,
+        "text": "Aborting rejects the older fetch (or its body read) with an AbortError."
+      },
+      {
+        "index": 3,
+        "text": "The rejected call skips render and ignores the AbortError in catch."
+      },
+      {
+        "index": 4,
+        "text": "So only the latest term's response is rendered."
+      }
+    ],
+    "ai_final_answer": "no",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Aborting the previous request cancels its fetch and body parsing, so stale responses never reach render; only non-abort errors are rethrown.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Typing 'la', then 'lamp' with the 'la' response delayed: only the 'lamp' results render.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "An aborted fetch rejects with a DOMException named AbortError, including while reading the body.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow what happens to the first request when the second search starts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 depends on what abort does to a pending fetch."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "AbortController cancels the request and makes its promise reject with AbortError."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Delay the first response and trace both calls."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Each search aborts the previous one, so stale responses never render. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Out-of-order responses are a classic race in search-as-you-type interfaces. Cancelling the previous request is one correct fix; ignoring responses whose term is no longer current is another. The claim reasons through the abort path correctly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,185 @@
+[
+  {
+    "id": "eng-agr-001",
+    "subject": "english",
+    "topic": "Essential Grammar",
+    "subtopic": "Subject-verb agreement",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this sentence grammatically correct in formal written English? \"Neither of the students have completed their assignment.\"",
+    "artifact_type": "sentence",
+    "artifact": {
+      "sentence": "Neither of the students have completed their assignment."
+    },
+    "ai_claim": "The sentence is grammatically correct as written.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The complete subject of the sentence is \"Neither of the students\"."
+      },
+      {
+        "index": 2,
+        "text": "The noun nearest the verb is \"students\", which is plural."
+      },
+      {
+        "index": 3,
+        "text": "A plural subject takes the plural verb form, so \"have\" is correct."
+      },
+      {
+        "index": 4,
+        "text": "The sentence is therefore grammatically correct as written."
+      }
+    ],
+    "ai_final_answer": "correct",
+    "simulated_confidence": 91,
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Agreeing the verb with the nearest noun instead of the head of the subject",
+      "explanation": "The head of the subject is \"Neither\", which is singular. \"of the students\" is a prepositional phrase, and a noun inside a prepositional phrase can never govern the verb. The correct form is \"Neither of the students has completed his or her assignment.\"",
+      "why_convincing": "\"Students have\" sits next to each other and sounds natural, and this construction is so common in speech that it rarely registers as wrong. The reasoning also invokes a real rule - subject-verb agreement - just applied to the wrong word."
+    },
+    "canonical_solution": "Incorrect. \"Neither\" is a singular indefinite pronoun and is the head of the subject; the prepositional phrase \"of the students\" modifies it but cannot control the verb. Formal written English requires \"Neither of the students has completed his or her assignment.\" The same rule governs \"each\", \"either\", \"every one\" and \"none\" in careful usage.",
+    "canonical_answer": "incorrect",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "The verb agrees with the head of the subject, not a noun in an intervening prepositional phrase.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Neither of the students has completed his or her assignment.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Strip the prepositional phrase and the error is audible: \"Neither have completed\" is clearly wrong, while \"Neither has completed\" is right."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Identify which single word is the true head of the subject."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 selects a noun to agree with. Ask whether that noun is entitled to govern the verb."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A noun inside a prepositional phrase can never be the subject of the sentence."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Delete \"of the students\" and read the sentence aloud."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 agrees the verb with \"students\", but that noun sits inside the prepositional phrase \"of the students\". The head is \"Neither\", which is singular: \"Neither of the students has completed his or her assignment.\""
+      }
+    ],
+    "repair": "\"Neither of the students has completed his or her assignment.\" The verb agrees with the singular head \"Neither\", not with \"students\".",
+    "debrief": "Agreement errors survive review because the wrong pairing usually sounds better - the offending noun sits right beside the verb. The reliable test is to delete every prepositional phrase and read what remains: \"Neither has completed\". Whatever is left standing next to the verb is the real subject. Note that the AI cited a genuine rule here; it simply applied it to the wrong word, which is far harder to catch than an invented rule.",
+    "validation_payload": {},
+    "truth_state": "flawed"
+  },
+  {
+    "id": "eng-inf-002",
+    "subject": "english",
+    "topic": "Reading Comprehension",
+    "subtopic": "Inference versus stated fact",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Read the passage. Is the AI's conclusion supported by it?",
+    "artifact_type": "passage_analysis",
+    "artifact": {
+      "passage": "After the company introduced flexible working hours in March, employee satisfaction scores rose from 62% to 78% by September. Over the same period, the company also raised salaries by 8% and moved to a refurbished office.",
+      "question_asked": "What caused the rise in employee satisfaction?"
+    },
+    "ai_claim": "The passage shows that flexible working hours caused the rise in employee satisfaction.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The passage states that flexible working hours were introduced in March."
+      },
+      {
+        "index": 2,
+        "text": "It states that satisfaction rose from 62% to 78% by September, a 16-point increase."
+      },
+      {
+        "index": 3,
+        "text": "The flexible hours were introduced before the rise was measured, so the timing is consistent with cause and effect."
+      },
+      {
+        "index": 4,
+        "text": "The passage therefore shows that flexible working hours caused the rise in satisfaction."
+      }
+    ],
+    "ai_final_answer": "supported",
+    "simulated_confidence": 89,
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Reading a causal claim into a passage that reports only correlation and sequence",
+      "explanation": "The passage names three changes in the same window - flexible hours, an 8% salary rise, and a refurbished office - and attributes the increase to none of them. Temporal order permits a causal hypothesis but cannot establish it, and here two rival explanations are stated in the passage itself. The supported conclusion is that satisfaction rose after several simultaneous changes, of which flexible hours was one.",
+      "why_convincing": "Steps 1 to 3 report the passage accurately, and the conclusion matches the reader's expectation that flexible hours improve satisfaction. The question asked - 'what caused the rise' - also presupposes a single cause, nudging the reader toward picking one."
+    },
+    "canonical_solution": "Not supported. Three changes occurred in the same period: flexible hours, an 8% salary increase, and an office refurbishment. The passage reports the rise but attributes it to nothing. Any of the three, or a combination, or an unmentioned factor could be responsible. The passage supports only: satisfaction rose over a period in which several changes were made.",
+    "canonical_answer": "not supported",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "The passage names two other simultaneous changes.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Sequence and correlation do not establish causation.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "If the salary rise alone had driven the entire increase, every sentence of the passage would still be true - so the passage cannot distinguish that world from the AI's."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate what the passage states from what the conclusion asserts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Steps 1 to 3 are accurate reporting. Examine the move made in Step 4."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A passage supports a causal claim only if it rules out the alternatives it mentions."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List every change the passage says happened in that same period."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 turns sequence into causation. The passage names a salary rise and an office move in the same window and attributes the increase to none of them, so it cannot single out flexible hours."
+      }
+    ],
+    "repair": "Step 4 should conclude that the passage reports a rise in satisfaction alongside three simultaneous changes, and does not establish which of them was responsible.",
+    "debrief": "The hardest comprehension failures are the ones where every cited fact is accurate. Here the reasoning reports the passage faithfully for three steps and then adds a causal claim the text never makes. The test that catches it: ask whether a rival explanation stated in the passage would leave every sentence equally true. If it would, the passage does not support singling out your preferred cause - and note how the framing of the question itself invited the error.",
+    "validation_payload": {},
+    "truth_state": "flawed"
+  }
+]

@@ -1,0 +1,486 @@
+[
+  {
+    "id": "prg-modules-packages-001",
+    "subject": "programming",
+    "topic": "Modules & Packages",
+    "subtopic": "Import aliases",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does hypotenuse(3, 4) return 5.0?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "import math as m\n\ndef hypotenuse(a, b):\n    return math.sqrt(a * a + b * b)"
+    },
+    "ai_claim": "Yes. math.sqrt(9 + 16) is 5.0.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The math module is imported at the top of the file."
+      },
+      {
+        "index": 2,
+        "text": "hypotenuse computes a * a + b * b, which is 25 for (3, 4)."
+      },
+      {
+        "index": 3,
+        "text": "math.sqrt(25) is 5.0."
+      },
+      {
+        "index": 4,
+        "text": "hypotenuse(3, 4) returns 5.0."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 1,
+      "misconception": "Using the original module name after importing it under an alias",
+      "explanation": "`import math as m` binds only the name m. The name math is not defined in this module, so calling math.sqrt raises NameError. Use m.sqrt, or write `import math`.",
+      "why_convincing": "The word 'math' appears in the import line, so the module feels imported; the alias is easy to overlook."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "`import math as m` binds the module to m only. math.sqrt raises NameError: name 'math' is not defined. Call m.sqrt(a * a + b * b).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "hypotenuse(3, 4) raises NameError: name 'math' is not defined.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "return m.sqrt(a * a + b * b)",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "hypotenuse(3, 4) raises NameError."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which names the import line actually creates."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 says the math module is available. Under what name?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "`import x as y` binds y, not x."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Call hypotenuse(3, 4)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 overlooks the alias: only m is defined, so math.sqrt raises NameError. Use m.sqrt."
+      }
+    ],
+    "repair": "Use `return m.sqrt(a * a + b * b)` (or change the import to `import math`).",
+    "debrief": "An import statement is an assignment: it binds exactly the names it lists. Aliases are common (np, pd), so a mismatch between the alias and the name used later is an easy slip. Linters catch it instantly; so does running the function once.",
+    "transfer_check": null,
+    "validation_payload": {
+      "entry_point": "hypotenuse",
+      "ai_code": "import math as m\n\ndef hypotenuse(a, b):\n    return math.sqrt(a * a + b * b)",
+      "reference_code": "import math as m\n\ndef hypotenuse(a, b):\n    return m.sqrt(a * a + b * b)",
+      "test_inputs": [
+        "(3, 4)",
+        "(5, 12)"
+      ],
+      "counterexample_input": "(3, 4)"
+    }
+  },
+  {
+    "id": "prg-modules-packages-002",
+    "subject": "programming",
+    "topic": "Modules & Packages",
+    "subtopic": "Modules run once per process",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many times is 'loading helpers' printed when you run `python main.py`?",
+    "artifact_type": "code",
+    "artifact": {
+      "helpers.py": "print(\"loading helpers\")\nRATE = 0.18",
+      "billing.py": "import helpers\n\ndef tax(amount):\n    return amount * helpers.RATE",
+      "main.py": "import helpers\nimport billing\n\nprint(billing.tax(100))",
+      "command": "python main.py"
+    },
+    "ai_claim": "It is printed 2 times, because helpers is imported in two places.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "main.py imports helpers, which runs helpers.py and prints the message."
+      },
+      {
+        "index": 2,
+        "text": "main.py then imports billing, and billing.py imports helpers as well."
+      },
+      {
+        "index": 3,
+        "text": "Each import statement runs the module's code, so helpers.py runs a second time."
+      },
+      {
+        "index": 4,
+        "text": "'loading helpers' is printed 2 times."
+      }
+    ],
+    "ai_final_answer": "2",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Believing every import re-executes the module",
+      "explanation": "Python runs a module's code only on its first import in a process and caches the module in sys.modules. billing's `import helpers` finds the cached module and runs nothing. The message is printed 1 time.",
+      "why_convincing": "Seeing two import statements suggests two executions, and top-level print statements make modules look like scripts that run whenever they are mentioned."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The first `import helpers` executes helpers.py and stores the module in sys.modules; every later import in the same process reuses it. 'loading helpers' is printed once, followed by 18.0.",
+    "canonical_answer": "1",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "main imports helpers (prints once) -> billing's import helpers hits sys.modules -> output: 'loading helpers', 18.0",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Import caching: a module's top-level code runs once per process.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Adding a third `import helpers` anywhere still prints the message once."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what Python does the second time a module is imported."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims every import statement runs the module again."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Imported modules are cached in sys.modules, and later imports reuse the cached module."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace the imports and note which ones actually execute helpers.py."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: modules are executed once and cached, so the message is printed 1 time."
+      }
+    ],
+    "repair": "Replace step 3: billing's import finds helpers in sys.modules, so helpers.py does not run again; the message appears once.",
+    "debrief": "Module caching is why imports are cheap and why module-level state is effectively a singleton. It also means top-level side effects - prints, connections, configuration - happen once, at first import, in whatever order imports occur. When reasoning about imports, think 'first import executes, later imports look up'.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-modules-packages-003",
+    "subject": "programming",
+    "topic": "Modules & Packages",
+    "subtopic": "Relative imports and running scripts",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Run from the project folder with `python shop/app.py`, does the program print 'Rs 250'?",
+    "artifact_type": "code",
+    "artifact": {
+      "shop/__init__.py": "",
+      "shop/utils.py": "def fmt(x):\n    return f\"Rs {x}\"",
+      "shop/app.py": "from .utils import fmt\n\nprint(fmt(250))",
+      "command": "python shop/app.py   (run from the project folder)"
+    },
+    "ai_claim": "Yes. shop is a package, so the relative import finds utils and the program prints 'Rs 250'.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "shop is a package because it contains __init__.py."
+      },
+      {
+        "index": 2,
+        "text": "app.py uses a relative import, `from .utils import fmt`, to load a sibling module."
+      },
+      {
+        "index": 3,
+        "text": "Running `python shop/app.py` executes app.py as part of the shop package, so the relative import resolves to shop.utils."
+      },
+      {
+        "index": 4,
+        "text": "The program prints 'Rs 250'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Believing a file run as a script knows its package",
+      "explanation": "Running a file by path executes it as the top-level module __main__, with no parent package. Relative imports need a package context, so Python raises ImportError: attempted relative import with no known parent package. Run it as `python -m shop.app` from the project folder.",
+      "why_convincing": "The folder structure is correct and the import works when app is imported by other code, so the setup looks right. Only the way it is launched is wrong."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "`python shop/app.py` runs app.py as __main__ with no package, so the relative import fails with ImportError. `python -m shop.app` runs it as shop.app, and then it prints 'Rs 250'.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "python shop/app.py -> __name__ == '__main__', __package__ empty -> ImportError on `from .utils import fmt`",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "python -m shop.app",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Running `python shop/app.py` fails with ImportError: attempted relative import with no known parent package."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider how the file is launched, not only how it is written."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 says the script runs 'as part of the package'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A file run by path becomes __main__ and has no parent package; relative imports need one."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare `python shop/app.py` with `python -m shop.app`."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: run by path, app.py has no package context, so the relative import raises ImportError. Use python -m shop.app."
+      }
+    ],
+    "repair": "Run the program with `python -m shop.app` (or change the import to an absolute one and adjust the path).",
+    "debrief": "Whether code works can depend on how it is started. A relative import is relative to a package, and a file launched by path is not in one. When an import error appears only when running a file directly, check the launch command before rewriting the imports.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-modules-packages-004",
+    "subject": "programming",
+    "topic": "Modules & Packages",
+    "subtopic": "__all__ and star imports",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does main.py print 2 and then [1, 3]?",
+    "artifact_type": "code",
+    "artifact": {
+      "reports.py": "__all__ = [\"summary\"]\n\ndef summary(data):\n    return len(data)\n\ndef detail(data):\n    return sorted(data)",
+      "main.py": "from reports import *\n\nprint(summary([3, 1]))\nprint(detail([3, 1]))"
+    },
+    "ai_claim": "Yes. The star import brings in both public functions, so both calls work.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "`from reports import *` imports the public names from reports."
+      },
+      {
+        "index": 2,
+        "text": "summary and detail are both public, since neither name starts with an underscore."
+      },
+      {
+        "index": 3,
+        "text": "summary([3, 1]) prints 2 and detail([3, 1]) prints [1, 3]."
+      },
+      {
+        "index": 4,
+        "text": "main.py prints 2 and then [1, 3]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Ignoring __all__ when reasoning about star imports",
+      "explanation": "When a module defines __all__, `from module import *` imports exactly the names listed there. reports lists only summary, so detail is not imported and the second print raises NameError. The underscore rule applies only when __all__ is absent.",
+      "why_convincing": "The underscore convention is the rule most people know, and __all__ sits at the top of the file where it reads like documentation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "__all__ = ['summary'] restricts the star import to summary. main.py prints 2, then raises NameError: name 'detail' is not defined. Import detail explicitly or add it to __all__.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "__all__ lists only summary -> star import binds summary -> detail is undefined -> NameError",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "from reports import summary, detail",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The second print raises NameError: name 'detail' is not defined."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what decides which names a star import brings in."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 applies the underscore rule. Is that the rule in force here?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "If a module defines __all__, `import *` imports exactly those names."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Read reports.__all__ and list the names main.py receives."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: __all__ limits the star import to summary, so detail raises NameError. Import it explicitly."
+      }
+    ],
+    "repair": "Use `from reports import summary, detail`, or add 'detail' to __all__.",
+    "debrief": "Star imports hide where names come from, and __all__ silently controls what they bring in. This is one reason style guides discourage `import *`: the reader cannot see the list. Prefer explicit imports, and when you meet a star import, read the source module's __all__.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "prg-modules-packages-005",
+    "subject": "programming",
+    "topic": "Modules & Packages",
+    "subtopic": "Local files shadowing the standard library",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What happens when main.py runs?",
+    "artifact_type": "code",
+    "artifact": {
+      "project/json.py": "# formatting notes for the team\nNOTES = \"use two-space indentation\"",
+      "project/main.py": "import json\n\nprint(json.dumps({\"ok\": True}))",
+      "command": "cd project\npython main.py"
+    },
+    "ai_claim": "It raises AttributeError, because the local json.py shadows the standard library's json module and has no dumps.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "When Python runs a script, the script's own folder is placed first on the module search path."
+      },
+      {
+        "index": 2,
+        "text": "`import json` therefore finds project/json.py before the standard library's json."
+      },
+      {
+        "index": 3,
+        "text": "The local json.py defines only NOTES, not dumps."
+      },
+      {
+        "index": 4,
+        "text": "json.dumps raises AttributeError: module 'json' has no attribute 'dumps'."
+      }
+    ],
+    "ai_final_answer": "AttributeError",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. sys.path[0] is the script's directory, so the local json.py is imported instead of the standard library module. It has no dumps, so AttributeError is raised. Renaming the local file (and deleting any __pycache__ entry for it) fixes the problem.",
+    "canonical_answer": "AttributeError",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "sys.path[0] = project/ -> import json loads project/json.py -> json.dumps missing -> AttributeError",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where Python looks first when it imports a module."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 states the search order. Verify it."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The directory of the script being run comes first in sys.path, ahead of the standard library."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print json.__file__ inside main.py and see which file it names."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The script's folder is searched first, so the local json.py shadows the standard library and has no dumps. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Naming a file after a standard library module - json.py, random.py, email.py - is a surprisingly common way to break a project, and the error message points at the wrong place. The explanation here is exactly right. When a well-known module seems to be missing a function, print its __file__ before anything else.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,463 @@
+[
+  {
+    "id": "fe-javascript-fundamentals-001",
+    "subject": "frontend",
+    "topic": "JavaScript Fundamentals",
+    "subtopic": "Default sort order",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this log [1, 2, 10]?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "const scores = [10, 1, 2];\nscores.sort();\nconsole.log(scores);"
+    },
+    "ai_claim": "Yes. sort() puts the numbers in ascending order: 1, 2, 10.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "scores contains 10, 1 and 2."
+      },
+      {
+        "index": 2,
+        "text": "sort() orders the array in place."
+      },
+      {
+        "index": 3,
+        "text": "The default order is ascending numeric order."
+      },
+      {
+        "index": 4,
+        "text": "So it logs [1, 2, 10]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Assuming sort() compares numbers numerically",
+      "explanation": "Without a compare function, sort() converts elements to strings and compares them in UTF-16 order. '10' comes before '2' because '1' < '2', so the result is [1, 10, 2]. Use scores.sort((a, b) => a - b).",
+      "why_convincing": "With single-digit numbers the default sort happens to look numeric."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It logs [1, 10, 2]: the default sort compares strings. Pass (a, b) => a - b.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "[10, 1, 2].sort() returns [1, 10, 2].",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "scores.sort((a, b) => a - b);",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "[10, 1, 2].sort() gives [1, 10, 2]."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how sort() compares elements when no function is passed."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 states the default order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The default comparison converts values to strings."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare '10' and '2' as strings."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the default sort is by string, giving [1, 10, 2]. Pass (a, b) => a - b."
+      }
+    ],
+    "repair": "Use `scores.sort((a, b) => a - b)`.",
+    "debrief": "JavaScript's default sort is lexicographic for every type. Always pass a compare function when sorting numbers, and test with multi-digit values.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-javascript-fundamentals-002",
+    "subject": "frontend",
+    "topic": "JavaScript Fundamentals",
+    "subtopic": "var in loops with callbacks",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this log 0, 1 and 2?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "for (var i = 0; i < 3; i++) {\n  setTimeout(() => console.log(i), 0);\n}"
+    },
+    "ai_claim": "Yes. Each timeout captures the value of i from its iteration, so the callbacks log 0, 1, 2.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The loop runs three times with i = 0, 1, 2."
+      },
+      {
+        "index": 2,
+        "text": "Each iteration schedules a callback."
+      },
+      {
+        "index": 3,
+        "text": "Each callback remembers i from its own iteration."
+      },
+      {
+        "index": 4,
+        "text": "So it logs 0, 1, 2."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming var creates a new binding per iteration",
+      "explanation": "var is function-scoped, so all three callbacks close over the same variable i. The callbacks run after the loop finishes, when i is 3, so the output is 3, 3, 3. let creates a fresh binding for each iteration and would log 0, 1, 2.",
+      "why_convincing": "With let - the modern default - the claim would be exactly right."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It logs 3, 3, 3: all callbacks share one var-scoped i, which is 3 when they run. Use let.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Running the code logs 3, 3, 3.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "for (let i = 0; i < 3; i++) { setTimeout(() => console.log(i), 0); }",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The output is 3 three times."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check when the callbacks run and what i is at that moment."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims each callback has its own i."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "var is scoped to the function, not the loop body; closures capture variables, not values."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Find the value of i after the loop ends."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: all callbacks share one i, which is 3 when they run. Use let."
+      }
+    ],
+    "repair": "Declare the loop variable with `let`.",
+    "debrief": "Closures capture variables, not snapshots of values. With var there is one variable for the whole loop; with let there is one per iteration. Asynchronous callbacks make the difference visible.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-javascript-fundamentals-003",
+    "subject": "frontend",
+    "topic": "JavaScript Fundamentals",
+    "subtopic": "const and mutation",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this run without error and log 'Ben'?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "const user = { name: \"Asha\" };\nuser.name = \"Ben\";\nconsole.log(user.name);"
+    },
+    "ai_claim": "Yes. const prevents reassigning the variable user, not changing the object it refers to, so the property update works.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "const makes the binding user permanent."
+      },
+      {
+        "index": 2,
+        "text": "user.name = 'Ben' does not reassign user; it modifies the object."
+      },
+      {
+        "index": 3,
+        "text": "Objects referenced by const variables remain mutable."
+      },
+      {
+        "index": 4,
+        "text": "So it logs 'Ben'."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. const freezes the binding, not the value. Object.freeze(user) would be needed to prevent the property change.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Running the code logs Ben.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "user = {} would throw TypeError: Assignment to constant variable.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate reassigning the variable from changing the object."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 distinguishes the two operations."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "const protects the binding; it does not make the object immutable."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare user.name = 'Ben' with user = {}."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. const prevents reassignment, not mutation, so it logs 'Ben'. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "const is about bindings: the variable always points to the same object, but that object can change. Immutability needs Object.freeze or immutable update patterns, as React state requires.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-javascript-fundamentals-004",
+    "subject": "frontend",
+    "topic": "JavaScript Fundamentals",
+    "subtopic": "Loose equality with null",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it correct that isMissing returns true for null and undefined, and false for 0 and the empty string?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "function isMissing(value) {\n  return value == null;\n}\n\nisMissing(null);       // ?\nisMissing(undefined);  // ?\nisMissing(0);          // ?\nisMissing(\"\");         // ?"
+    },
+    "ai_claim": "Yes. With ==, null equals only null and undefined, so the check catches both missing values without catching 0 or ''.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "== performs type coercion for most comparisons."
+      },
+      {
+        "index": 2,
+        "text": "But null == x is true only when x is null or undefined."
+      },
+      {
+        "index": 3,
+        "text": "0 == null and '' == null are both false."
+      },
+      {
+        "index": 4,
+        "text": "So isMissing returns true, true, false, false."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. value == null is the one widely accepted use of loose equality: it matches exactly null and undefined. (value ?? fallback relies on the same pair.)",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "isMissing(null), isMissing(undefined), isMissing(0), isMissing('') return true, true, false, false.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "In the abstract equality algorithm, null and undefined are equal only to each other.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the special rule for null in loose equality."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 states which values equal null."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Loose equality treats null and undefined as equal to each other and to nothing else."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate each of the four calls."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. value == null matches only null and undefined. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Loose equality is usually avoided because its coercions surprise, but its null rule is simple and useful. Knowing exactly which values match is what makes it safe here.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-javascript-fundamentals-005",
+    "subject": "frontend",
+    "topic": "JavaScript Fundamentals",
+    "subtopic": "String or number addition",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this log 5?",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// readSetting(key) returns the stored value for key\nconst width = readSetting(\"width\");\nconst margin = readSetting(\"margin\");\nconsole.log(width + margin);   // width is 2, margin is 3"
+    },
+    "ai_claim": "Yes. width is 2 and margin is 3, so width + margin is 5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "readSetting returns the stored width, 2."
+      },
+      {
+        "index": 2,
+        "text": "It returns the stored margin, 3."
+      },
+      {
+        "index": 3,
+        "text": "The values are numbers, so + adds them."
+      },
+      {
+        "index": 4,
+        "text": "So it logs 5."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The type readSetting returns. If it reads from localStorage, a URL or a form field, values come back as strings and + concatenates them into '23'; if it reads a parsed config object, they may be numbers. Its implementation is not shown.",
+    "resolving_scenarios": [
+      "readSetting returns numbers (e.g. from a JSON config): 2 + 3 logs 5.",
+      "readSetting returns strings (e.g. localStorage.getItem): '2' + '3' logs 23."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The result depends on whether readSetting returns numbers or strings, which is not given. Step 3 assumes numbers.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If readSetting wraps localStorage.getItem, the values are '2' and '3', and the log is 23.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "23"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With string values, the output is 23."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what type the + operator receives."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the values' type."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "+ adds numbers but concatenates if either operand is a string."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider readSetting implemented with localStorage.getItem."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes numbers. With numbers it logs 5; with strings it logs 23. It cannot be decided."
+      }
+    ],
+    "repair": "Convert explicitly: `Number(width) + Number(margin)`, or show readSetting's return type.",
+    "debrief": "The + operator's behaviour depends on runtime types, and many browser APIs (localStorage, URLSearchParams, input.value) return strings. When types are not visible, name the missing information - or convert explicitly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

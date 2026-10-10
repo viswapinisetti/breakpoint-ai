@@ -1,0 +1,486 @@
+[
+  {
+    "id": "ds-numpy-pandas-001",
+    "subject": "data-science",
+    "topic": "NumPy & Pandas",
+    "subtopic": "sort_values returns a new frame",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does top3 contain the three products with the highest revenue?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "df.sort_values(\"revenue\", ascending=False)\ntop3 = df.head(3)\ntop3   # meant to be the three highest-revenue products"
+    },
+    "ai_claim": "Yes. The frame is sorted by revenue in descending order, and head(3) takes the first three rows, which are the top three.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "sort_values sorts by revenue, highest first."
+      },
+      {
+        "index": 2,
+        "text": "The frame is now in descending revenue order."
+      },
+      {
+        "index": 3,
+        "text": "head(3) returns its first three rows."
+      },
+      {
+        "index": 4,
+        "text": "So top3 is the three highest-revenue products."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming pandas methods modify the frame in place",
+      "explanation": "sort_values returns a new, sorted DataFrame and leaves df unchanged. The result is discarded, so head(3) returns the first three rows in the original order. Assign the result: top3 = df.sort_values('revenue', ascending=False).head(3) - or use df.nlargest(3, 'revenue').",
+      "why_convincing": "The method name reads like a command that changes df."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the sorted frame is discarded, so top3 is just the first three original rows. Use df.nlargest(3, 'revenue').",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "After the first line, df.index is unchanged; head(3) returns the original first three rows.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "If the highest-revenue product is in row 50, it is not in top3.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "top3 contains whichever products happened to be first in the file."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what sort_values returns."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes df itself was sorted."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Most pandas methods return new objects instead of modifying in place."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Print df.head() after the first line."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the sorted result is discarded. Assign it or use nlargest."
+      }
+    ],
+    "repair": "Use `top3 = df.nlargest(3, \"revenue\")`.",
+    "debrief": "pandas favours returning new objects. A method call whose result is not assigned is usually a bug.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-numpy-pandas-002",
+    "subject": "data-science",
+    "topic": "NumPy & Pandas",
+    "subtopic": "Comparing with NaN",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this print 1240, the number of rows with a missing discount?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "import numpy as np\n\nmissing = df[df[\"discount\"] == np.nan]\nprint(len(missing))    # 1,240 rows have no discount recorded"
+    },
+    "ai_claim": "Yes. Missing discounts are stored as NaN, and the filter selects rows where discount equals NaN, so it finds all 1,240.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Missing values are stored as NaN."
+      },
+      {
+        "index": 2,
+        "text": "The filter compares discount with np.nan."
+      },
+      {
+        "index": 3,
+        "text": "Rows whose discount is NaN match."
+      },
+      {
+        "index": 4,
+        "text": "So len(missing) is 1,240."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 3,
+      "misconception": "Testing for missing values with ==",
+      "explanation": "NaN is not equal to anything, including itself (np.nan == np.nan is False). The filter is False for every row and prints 0. Use df['discount'].isna().",
+      "why_convincing": "== works for every other value, and SQL users know this trap only under the name NULL."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It prints 0: NaN == NaN is False. Use df[df['discount'].isna()].",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "np.nan == np.nan evaluates to False, so the filter selects 0 rows.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "df['discount'].isna().sum() returns 1240.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1240"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The filter returns an empty DataFrame."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Evaluate np.nan == np.nan."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes NaN equals NaN."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "NaN compares unequal to everything; pandas provides isna()."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count df['discount'].isna()."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the comparison is always False, so it prints 0. Use isna()."
+      }
+    ],
+    "repair": "Use `df[df[\"discount\"].isna()]`.",
+    "debrief": "Missing-value markers need their own tests: IS NULL in SQL, isna() in pandas, math.isnan in Python. Equality never works for them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-numpy-pandas-003",
+    "subject": "data-science",
+    "topic": "NumPy & Pandas",
+    "subtopic": "Merging on a key that is not unique",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the printed total equal the orders' total, Rs 25,00,000?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "# orders: 1 row per order (5,000 rows, total amount Rs 25,00,000)\n# customers: meant to be 1 row per customer, but 300 customers appear twice (address changes)\nmerged = orders.merge(customers, on=\"customer_id\", how=\"left\")\nprint(merged[\"amount\"].sum())"
+    },
+    "ai_claim": "Yes. A left merge keeps every order and only adds customer columns, so the amounts are unchanged and the total is Rs 25,00,000.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A left merge keeps every row of orders."
+      },
+      {
+        "index": 2,
+        "text": "It adds the matching customer's columns to each order."
+      },
+      {
+        "index": 3,
+        "text": "Adding columns does not change amounts."
+      },
+      {
+        "index": 4,
+        "text": "So the total stays Rs 25,00,000."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 2,
+      "misconception": "Assuming the lookup table has one row per key",
+      "explanation": "When a key matches several rows, merge produces one output row per match. Orders from the 300 duplicated customers are each repeated twice, so their amounts are counted twice and the sum exceeds Rs 25,00,000. Deduplicate customers first, and use merge(..., validate='many_to_one') to make pandas raise an error on duplicate keys.",
+      "why_convincing": "Left merges usually preserve the left table's row count, when the right table's key is unique."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: orders of duplicated customers are doubled, inflating the total. Deduplicate customers and use validate='many_to_one'.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "len(merged) is greater than 5,000.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "5,000"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "orders.merge(customers, on='customer_id', validate='many_to_one') raises MergeError.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An order of a customer listed twice appears twice in merged."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether customer_id is unique in customers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes one matching customer per order."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Each key match creates an output row; duplicates multiply rows."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare len(merged) with len(orders)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: duplicated customers double their orders. Deduplicate and validate the merge."
+      }
+    ],
+    "repair": "Deduplicate customers and merge with `validate=\"many_to_one\"`.",
+    "debrief": "Every join assumes something about key uniqueness. pandas can check it for you with validate=; use it on every merge that should not multiply rows.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-numpy-pandas-004",
+    "subject": "data-science",
+    "topic": "NumPy & Pandas",
+    "subtopic": "Chained assignment",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this mark all 850 customers over 60 as 'senior' in df?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "df[df[\"age\"] > 60][\"segment\"] = \"senior\"\nprint((df[\"segment\"] == \"senior\").sum())   # 850 customers are over 60"
+    },
+    "ai_claim": "Yes. The code selects customers over 60 and sets their segment to 'senior', so all 850 are updated.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "df[df['age'] > 60] selects the 850 customers over 60."
+      },
+      {
+        "index": 2,
+        "text": "['segment'] picks their segment column."
+      },
+      {
+        "index": 3,
+        "text": "The assignment sets it to 'senior'."
+      },
+      {
+        "index": 4,
+        "text": "So df now has 850 seniors."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Assigning through a chained selection",
+      "explanation": "df[mask] creates a new object (a copy), and the assignment modifies that temporary copy, not df. pandas warns (SettingWithCopyWarning), and under copy-on-write it never changes df. The count stays unchanged. Use a single indexing call: df.loc[df['age'] > 60, 'segment'] = 'senior'.",
+      "why_convincing": "The chained expression reads naturally, and similar code works for reading values."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the assignment goes to a temporary copy. Use df.loc[df['age'] > 60, 'segment'] = 'senior'.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "After the line, (df['segment'] == 'senior').sum() is unchanged, and pandas emits a SettingWithCopyWarning (or ChainedAssignmentError under copy-on-write).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "df.loc[df['age'] > 60, 'segment'] = 'senior' updates 850 rows.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "850"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "df still has no 'senior' rows after the line runs."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which object the assignment modifies."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes it writes into df."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Chained indexing may operate on a copy; .loc with row and column in one call writes to df."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the count after running the line."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: it modifies a copy. Use df.loc[mask, 'segment'] = 'senior'."
+      }
+    ],
+    "repair": "Use `df.loc[df[\"age\"] > 60, \"segment\"] = \"senior\"`.",
+    "debrief": "Write to a DataFrame with one indexing operation (.loc[rows, cols]). Chained indexing is for reading only.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-numpy-pandas-005",
+    "subject": "data-science",
+    "topic": "NumPy & Pandas",
+    "subtopic": "Group shares with transform",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this gives each store's share of its region's total sales, aligned row by row?",
+    "artifact_type": "notebook",
+    "artifact": {
+      "language": "python",
+      "code": "df[\"share_of_region\"] = df[\"sales\"] / df.groupby(\"region\")[\"sales\"].transform(\"sum\")\n# df: one row per store, columns region and sales"
+    },
+    "ai_claim": "Yes. transform('sum') returns a Series with the same index as df, holding each row's region total, so dividing aligns row by row and gives each store's share.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "groupby('region')['sales'] groups the sales by region."
+      },
+      {
+        "index": 2,
+        "text": "transform('sum') computes each region's total and broadcasts it back to every row of that region."
+      },
+      {
+        "index": 3,
+        "text": "The result has df's index, so the division aligns by row."
+      },
+      {
+        "index": 4,
+        "text": "Each store's sales are divided by its own region's total."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Unlike .sum(), which returns one row per region, transform returns a same-length Series aligned to df, so the division is row-wise. Shares within each region sum to 1.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "df.groupby('region')['share_of_region'].sum() is 1.0 for every region.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "1.0"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "len(df.groupby('region')['sales'].transform('sum')) equals len(df).",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the shape of transform's output with sum's."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on index alignment."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "transform returns a result with the original index; aggregation returns one row per group."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check that shares within each region add up to 1."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. transform broadcasts region totals to each row, so the shares are right. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "transform is pandas' tool for 'compare each row with its group': shares, deviations from the group mean, ranks within groups.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

@@ -1,0 +1,473 @@
+[
+  {
+    "id": "pe-prompting-for-coding-data-research-001",
+    "subject": "prompt-engineering",
+    "topic": "Prompting for Coding, Data & Research",
+    "subtopic": "A vague coding request",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the generated function correctly handle the dates in the orders file?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Write a Python function that parses dates from our orders file.",
+      "context": "The file contains '03/04/2026', '2026-04-03T10:15:00Z', '3 Apr 2026' and empty cells. Times are in UTC; the business uses IST."
+    },
+    "ai_claim": "Yes. The model knows Python date parsing well, so it will write a function that parses the file's dates.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The request asks for a date-parsing function."
+      },
+      {
+        "index": 2,
+        "text": "The model is good at Python."
+      },
+      {
+        "index": 3,
+        "text": "Date parsing is a common task."
+      },
+      {
+        "index": 4,
+        "text": "So the function will handle the file's dates."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 1,
+      "misconception": "Leaving the requirements out of a coding prompt",
+      "explanation": "The prompt does not mention the formats present, the day-first convention for '03/04/2026', empty cells, or the UTC-to-IST requirement. The model will pick one format (often month-first) and ignore time zones and blanks. Include sample inputs, expected outputs and edge cases in the prompt, and ask for tests.",
+      "why_convincing": "The model's general skill seems to cover the task."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: formats, conventions, blanks and time zones are unspecified. Provide examples and expected outputs.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The generated function parses '03/04/2026' as 4 March and raises on empty cells.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Parse these examples: '03/04/2026' -> 2026-04-03 (day-first), '2026-04-03T10:15:00Z' -> IST, '' -> None. Include tests for each.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Empty cells crash the function."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the prompt with the data's actual formats."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 omits the requirements."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Coding prompts need inputs, expected outputs and edge cases."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try the function on '03/04/2026' and ''."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: the requirements are missing."
+      }
+    ],
+    "repair": "Include sample inputs, expected outputs, conventions and edge cases; ask for tests.",
+    "debrief": "A coding prompt is a specification. Examples of input and output are the most effective way to write it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-prompting-for-coding-data-research-002",
+    "subject": "prompt-engineering",
+    "topic": "Prompting for Coding, Data & Research",
+    "subtopic": "Arithmetic over pasted data",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this a reliable way to get exact totals and averages?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Here are 10,000 rows of sales data as CSV:\n{csv}\n\nCompute the total revenue and the average order value by region."
+    },
+    "ai_claim": "Yes. The model can see every row, so it can add up the revenue and compute the averages exactly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "All 10,000 rows are in the prompt."
+      },
+      {
+        "index": 2,
+        "text": "The model reads every row."
+      },
+      {
+        "index": 3,
+        "text": "It adds and divides the numbers."
+      },
+      {
+        "index": 4,
+        "text": "So totals and averages are exact."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Asking a language model to do bulk arithmetic in text",
+      "explanation": "Summing thousands of numbers token by token is error-prone, and the model may silently skip or misread rows (and the CSV may not even fit in context). Use code: have the model write pandas code (or use a code-execution tool) and run it on the file.",
+      "why_convincing": "Seeing the data seems enough to compute with it."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: exact aggregation over 10,000 rows should be done in code, not in generated text.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The model's total differs from pandas' df['revenue'].sum() by 3.2%.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "3.2"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Write pandas code that computes total revenue and average order value by region from sales.csv; run it and report the results.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Rows in the middle of the CSV are omitted from the total."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what tool is suited to exact aggregation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes exact arithmetic in text."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Use code for computation and the model for writing code."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare with a pandas result."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: bulk arithmetic in text is unreliable. Use code."
+      }
+    ],
+    "repair": "Ask for code and execute it on the data.",
+    "debrief": "The best data prompts ask the model to write analysis code, not to be the calculator.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-prompting-for-coding-data-research-003",
+    "subject": "prompt-engineering",
+    "topic": "Prompting for Coding, Data & Research",
+    "subtopic": "Tests written from the same misunderstanding",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do the passing tests show the function is correct?",
+    "artifact_type": "evaluation",
+    "artifact": {
+      "prompt": "Prompt: \"Write a function to compute GST for an invoice, and write unit tests for it.\"\nThe model's function and tests both apply 18% to the total including shipping; the company's rule exempts shipping.\nAll 6 generated tests pass."
+    },
+    "ai_claim": "Yes. The model wrote 6 tests and all of them pass, which shows the function computes GST correctly.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model wrote the function."
+      },
+      {
+        "index": 2,
+        "text": "It also wrote 6 unit tests."
+      },
+      {
+        "index": 3,
+        "text": "All 6 tests pass."
+      },
+      {
+        "index": 4,
+        "text": "So the function is correct."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Validating generated code with tests from the same source",
+      "explanation": "The tests encode the same misunderstanding as the function (GST on shipping), so they pass while both are wrong for the company's rule. Tests only verify correctness against an independent specification. Write (or review) tests from the real requirement, including a case with shipping.",
+      "why_convincing": "Passing tests usually mean working code."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the tests share the function's wrong assumption. Test against the actual rule (shipping exempt).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Invoice: items 1,000 + shipping 100. Expected GST 180; the function returns 198.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "180",
+          "198"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "function applies 18% to 1,100; tests also expect 18% of 1,100",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An invoice with shipping gets the wrong GST, and the tests agree with it."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where the tests' expected values came from."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats self-written tests as independent evidence."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tests must encode the real requirement independently."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write a test with shipping from the company rule."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the tests share the bug."
+      }
+    ],
+    "repair": "Derive tests from the requirement (ideally written or reviewed by a person).",
+    "debrief": "A model grading its own homework finds only the mistakes it did not make. Independent specifications make tests meaningful.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-prompting-for-coding-data-research-004",
+    "subject": "prompt-engineering",
+    "topic": "Prompting for Coding, Data & Research",
+    "subtopic": "'Find recent papers'",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this prompt produce a reliable list of recent papers?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Find recent papers on battery recycling and summarise them.",
+      "context": "The model has no search or browsing tool."
+    },
+    "ai_claim": "Yes. The model knows the research literature, so it will list and summarise recent papers on battery recycling.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model was trained on research papers."
+      },
+      {
+        "index": 2,
+        "text": "It knows the battery recycling literature."
+      },
+      {
+        "index": 3,
+        "text": "It will list recent papers."
+      },
+      {
+        "index": 4,
+        "text": "The summaries will be reliable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F15",
+      "location": 1,
+      "misconception": "An ambiguous request the model cannot fulfil without tools",
+      "explanation": "'Recent' is undefined (this year? five years?), and without search the model knows nothing after its training cutoff; it may also fabricate plausible citations. Define the time window, give the model a search tool or a set of papers to summarise, and require verifiable identifiers (DOIs).",
+      "why_convincing": "The model does know a lot about research topics."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 'recent' is undefined, the model cannot search, and it may invent papers. Provide sources or a search tool and a date range.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "2 of the 6 listed papers have no matching DOI or record in any database.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Using the search tool, find papers on lithium-ion battery recycling published 2024-2026; list title, authors, year and DOI; summarise each in 2 sentences.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Some listed papers do not exist."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 'recent' means and how the model would find papers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 assumes up-to-date, retrievable knowledge."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Research prompts need sources or tools, plus precise scope."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check the listed papers' DOIs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: without search and a defined window, results are unreliable."
+      }
+    ],
+    "repair": "Provide a search tool or the papers, a date range and a requirement for DOIs.",
+    "debrief": "Research tasks need grounding in real sources. Precise scope plus retrieval turns a guess into a literature summary.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-prompting-for-coding-data-research-005",
+    "subject": "prompt-engineering",
+    "topic": "Prompting for Coding, Data & Research",
+    "subtopic": "Code with tests and edge cases",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this prompt and workflow make correct code much more likely?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Write a Python function normalise_phone(s) for Indian mobile numbers.\nRequirements: accept inputs with spaces, dashes, '+91' or leading '0'; return '+91XXXXXXXXXX'; return None for invalid numbers.\nExamples: '98450 11111' -> '+919845011111'; '+91-98450-11111' -> '+919845011111'; '12345' -> None.\nAlso write pytest tests covering each example plus 3 edge cases you identify, and explain each edge case.",
+      "workflow": "The developer runs the tests before merging."
+    },
+    "ai_claim": "Yes. The requirements, explicit examples and invalid cases define the behaviour, the requested edge cases broaden coverage, and running the tests before merging catches errors.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Requirements state accepted formats and the output format."
+      },
+      {
+        "index": 2,
+        "text": "Examples pin down expected behaviour, including an invalid case."
+      },
+      {
+        "index": 3,
+        "text": "Edge-case tests with explanations extend coverage."
+      },
+      {
+        "index": 4,
+        "text": "Running the tests verifies the code against the specification."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Specification plus examples plus tests, verified by execution, is the most reliable way to use models for code.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "The given examples become tests that the generated code must pass.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what defines 'correct' here."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 adds verification."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Examples and executed tests anchor generated code to the requirement."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at the invalid example."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The prompt and workflow are sound. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The examples in this prompt come from the requirement, not from the model - which is what makes the tests independent.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

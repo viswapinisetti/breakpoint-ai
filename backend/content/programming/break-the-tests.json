@@ -1,0 +1,276 @@
+[
+  {
+    "id": "prg-bt-001",
+    "subject": "programming",
+    "topic": "Debugging & Testing",
+    "subtopic": "Test coverage",
+    "difficulty": "3",
+    "challenge_mode": "break_the_tests",
+    "question": "An AI wrote this median function and a test suite for it. Every test passes. Find one input the suite never asks about, on which the function is wrong.",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def median(numbers):\n    ordered = sorted(numbers)\n    return ordered[len(ordered) // 2]",
+      "tests": [
+        "assert median([1, 2, 3]) == 2",
+        "assert median([5, 3, 1]) == 3",
+        "assert median([7]) == 7",
+        "assert median([9, 2, 8, 1, 4]) == 4"
+      ],
+      "test_result": "4 passed, 0 failed"
+    },
+    "ai_claim": "median() is correct. I wrote four tests covering sorted input, unsorted input, a single element and a longer list. All four pass.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Sorting first means the elements are in order, so the middle position is meaningful."
+      },
+      {
+        "index": 2,
+        "text": "Integer division by 2 gives the index of the middle element."
+      },
+      {
+        "index": 3,
+        "text": "The four tests cover sorted, unsorted, single-element and longer inputs, and all four pass."
+      },
+      {
+        "index": 4,
+        "text": "Since every test passes and the tests cover the interesting cases, median() is correct."
+      }
+    ],
+    "ai_final_answer": "correct",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Treating a passing test suite as proof of correctness, when the suite shares the author's blind spot",
+      "explanation": "Every test list has an odd length. For an even-length list the median is the mean of the two middle values, but this implementation returns the upper of the two. median([1, 2]) returns 2 where the median is 1.5. The tests pass because the same assumption that produced the bug also chose the test cases.",
+      "why_convincing": "Four green tests, including an 'edge case' single-element list, reads as thorough coverage. The missing case is not an exotic input - it is half of all possible inputs - which is exactly why nobody notices its absence."
+    },
+    "test_gap": {
+      "entry_point": "median",
+      "signature": "median(numbers)",
+      "arity": 1,
+      "existing_tests": [
+        "[1, 2, 3]",
+        "[5, 3, 1]",
+        "[7]",
+        "[9, 2, 8, 1, 4]"
+      ],
+      "input_guidance": "One list of numbers, e.g. [1, 2, 3]"
+    },
+    "canonical_solution": "Every shipped test uses an odd-length list, where the median genuinely is the single middle element. For even-length input the median is the mean of the two middle values. median([1, 2]) returns 2, but the median of [1, 2] is 1.5. The fix is to average the two central elements when the length is even.",
+    "canonical_answer": "incorrect for even-length lists",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "An even-length list where the function returns the upper middle value instead of the mean.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.5"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "median([1, 2]) returns 2, expected 1.5.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "median([1, 2]) returns 2, but the median is 1.5.",
+      "median([1, 2, 3, 4]) returns 3, but the median is 2.5."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the four test inputs as a set, not one at a time. What do all four have in common?"
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Count the elements in each test list. Every count is odd."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The definition of the median splits into two cases by parity. Only one of them is exercised."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try a list with exactly two elements and work out by hand what the median should be."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "median([1, 2]) returns 2 because len//2 is 1. The median of [1, 2] is (1+2)/2 = 1.5."
+      }
+    ],
+    "repair": "Return ordered[middle] only when the length is odd; when it is even return (ordered[middle - 1] + ordered[middle]) / 2.",
+    "debrief": "A test suite written by whoever wrote the code inherits its blind spots. This suite is not weak because it is small - it is weak because all four cases sit on the same side of the one branch that matters. When you review tests, read them as a set and ask which input classes are absent, not whether the listed ones pass.",
+    "transfer_check": {
+      "question": "What does this implementation return for median([4, 10])?",
+      "answer": "10",
+      "explanation": "len//2 is 1, so it returns ordered[1] = 10. The median is 7."
+    },
+    "validation_payload": {
+      "entry_point": "median",
+      "ai_code": "def median(numbers):\n    ordered = sorted(numbers)\n    return ordered[len(ordered) // 2]\n",
+      "reference_code": "def median(numbers):\n    ordered = sorted(numbers)\n    n = len(ordered)\n    middle = n // 2\n    if n % 2 == 1:\n        return ordered[middle]\n    return (ordered[middle - 1] + ordered[middle]) / 2\n",
+      "test_inputs": [
+        "([1, 2, 3],)",
+        "([5, 3, 1],)",
+        "([7],)",
+        "([9, 2, 8, 1, 4],)",
+        "([1, 2],)"
+      ],
+      "counterexample_input": "([1, 2],)",
+      "breaking_inputs": [
+        "([1, 2],)",
+        "([1, 2, 3, 4],)",
+        "([10, 20],)"
+      ]
+    }
+  },
+  {
+    "id": "prg-bt-002",
+    "subject": "programming",
+    "topic": "Strings & Collections",
+    "subtopic": "String handling",
+    "difficulty": "2",
+    "challenge_mode": "break_the_tests",
+    "question": "An AI wrote this word counter with three passing tests. Find an input the suite misses on which the count is wrong.",
+    "artifact_type": "code",
+    "artifact": {
+      "language": "python",
+      "code": "def count_words(text):\n    return len(text.split(\" \"))",
+      "tests": [
+        "assert count_words(\"hello world\") == 2",
+        "assert count_words(\"one two three\") == 3",
+        "assert count_words(\"single\") == 1"
+      ],
+      "test_result": "3 passed, 0 failed"
+    },
+    "ai_claim": "count_words() is correct. Splitting on a space gives the words, and the three tests confirm counts of two, three and one.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Words in English text are separated by spaces, so splitting on a space yields the words."
+      },
+      {
+        "index": 2,
+        "text": "len() of that list is the number of words."
+      },
+      {
+        "index": 3,
+        "text": "The tests cover multi-word and single-word input and all pass."
+      },
+      {
+        "index": 4,
+        "text": "The implementation is therefore correct for ordinary text."
+      }
+    ],
+    "ai_final_answer": "correct",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 1,
+      "misconception": "Assuming a single-space separator, and choosing test inputs that are all single-spaced",
+      "explanation": "split(\" \") splits on each individual space, so consecutive spaces produce empty strings that are counted as words, and the empty string produces one empty word. count_words(\"\") returns 1 and count_words(\"a  b\") returns 3. split() with no argument collapses runs of whitespace and drops empties.",
+      "why_convincing": "Passing \" \" to split looks more explicit and deliberate than calling split() bare, and every hand-written test string is neatly single-spaced, so the difference never shows."
+    },
+    "test_gap": {
+      "entry_point": "count_words",
+      "signature": "count_words(text)",
+      "arity": 1,
+      "existing_tests": [
+        "\"hello world\"",
+        "\"one two three\"",
+        "\"single\""
+      ],
+      "input_guidance": "One string, e.g. \"hello world\""
+    },
+    "canonical_solution": "split(\" \") is not the same as split(). The explicit separator keeps empty fields: \"a  b\".split(\" \") is [\"a\", \"\", \"b\"] (3), and \"\".split(\" \") is [\"\"] (1). Bare split() treats any run of whitespace as one separator and discards empty fields, giving 2 and 0. The tests all use single-spaced, non-empty strings, so the two behaviours coincide.",
+    "canonical_answer": "incorrect for empty, repeated-space or tab-separated input",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "count_words(\"\") returns 1, expected 0.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "count_words(\"a  b\") returns 3, expected 2.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "count_words(\"\") returns 1, but an empty string has no words.",
+      "count_words(\"a  b\") returns 3 because the double space produces an empty field."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "All three test strings are formatted the same way. What formatting assumption do they share?"
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Compare \"a b\".split(\" \") with \"a  b\".split(\" \") in your head."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "str.split(sep) keeps empty fields; str.split() with no argument does not."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try the shortest input there is, and then one with two spaces in a row."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "count_words(\"\") returns 1 - the empty string splits to [\"\"] - and count_words(\"a  b\") returns 3."
+      }
+    ],
+    "repair": "Call text.split() with no argument, which collapses whitespace runs and drops empty fields.",
+    "debrief": "Three green tests over three near-identical inputs is one test repeated three times. The useful question about a test suite is never 'do these pass' - it is 'which classes of input are missing'. Empty, boundary and malformed inputs are the classes that authors skip, because they are the ones the author did not think of when writing the code either.",
+    "transfer_check": {
+      "question": "What does this implementation return for count_words(\"x  y  z\")?",
+      "answer": "5",
+      "explanation": "Two double spaces produce two empty fields: [\"x\", \"\", \"y\", \"\", \"z\"]."
+    },
+    "validation_payload": {
+      "entry_point": "count_words",
+      "ai_code": "def count_words(text):\n    return len(text.split(\" \"))\n",
+      "reference_code": "def count_words(text):\n    return len(text.split())\n",
+      "test_inputs": [
+        "(\"hello world\",)",
+        "(\"one two three\",)",
+        "(\"single\",)",
+        "(\"\",)",
+        "(\"a  b\",)"
+      ],
+      "counterexample_input": "(\"\",)",
+      "breaking_inputs": [
+        "(\"\",)",
+        "(\"a  b\",)",
+        "(\"x\\ty\",)"
+      ]
+    }
+  }
+]

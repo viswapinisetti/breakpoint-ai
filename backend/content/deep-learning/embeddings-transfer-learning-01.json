@@ -1,0 +1,370 @@
+[
+  {
+    "id": "dl-embeddings-transfer-learning-001",
+    "subject": "deep-learning",
+    "topic": "Embeddings & Transfer Learning",
+    "subtopic": "One vector per word type",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does word2vec give 'bank' different vectors in the two sentences?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "setup": "Pretrained word2vec vectors, one per vocabulary word.\nSentences: \"She sat on the river bank.\" / \"She paid the cheque at the bank.\"",
+      "claim_in_notebook": "\"The 'bank' vectors in the two sentences differ, capturing the two meanings.\""
+    },
+    "ai_claim": "Yes. word2vec learns from context, so 'bank' in a river context and 'bank' in a money context get different vectors.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "word2vec is trained on word contexts."
+      },
+      {
+        "index": 2,
+        "text": "The two sentences have different contexts."
+      },
+      {
+        "index": 3,
+        "text": "So 'bank' gets a different vector in each."
+      },
+      {
+        "index": 4,
+        "text": "The vectors capture the two meanings."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Treating static embeddings as contextual",
+      "explanation": "word2vec uses context during training but produces one fixed vector per word type. At lookup time, 'bank' maps to the same vector in both sentences - a blend of its senses. Contextual models (e.g. BERT-style encoders) produce different vectors depending on the sentence.",
+      "why_convincing": "Training on contexts makes it sound as if the vectors depend on context."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: word2vec is static; 'bank' has one vector regardless of the sentence. Use a contextual encoder to separate senses.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "wv['bank'] is the same array for both sentences; cosine similarity 1.0.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.0"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "A contextual encoder gives the two 'bank' tokens a cosine similarity of about 0.5.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Looking up 'bank' returns the identical vector every time."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether a lookup table can depend on the sentence."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes vectors change with context at use time."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Static embeddings have one vector per word; contextual embeddings vary per occurrence."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare wv['bank'] in both cases."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: word2vec gives one vector per word. Use contextual embeddings."
+      }
+    ],
+    "repair": "Use a contextual encoder (e.g. a sentence-transformer or BERT) when word sense matters.",
+    "debrief": "Know whether your embeddings are per word type or per occurrence. It decides whether ambiguity can be resolved at all.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-embeddings-transfer-learning-002",
+    "subject": "deep-learning",
+    "topic": "Embeddings & Transfer Learning",
+    "subtopic": "Fine-tuning with a large learning rate",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is lr = 0.1 on all layers a good way to fine-tune the pretrained model on 2,000 images?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "model = timm.create_model(\"resnet50\", pretrained=True, num_classes=5)\nopt = torch.optim.SGD(model.parameters(), lr=0.1)        # same as training from scratch\n# Dataset: 2,000 labelled flower photos; all layers are trainable."
+    },
+    "ai_claim": "Yes. 0.1 is a standard learning rate for training ResNets, and training all layers lets the model adapt fully to flowers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "ResNets are commonly trained with lr = 0.1."
+      },
+      {
+        "index": 2,
+        "text": "All layers are trainable."
+      },
+      {
+        "index": 3,
+        "text": "So the model adapts fully to the new task."
+      },
+      {
+        "index": 4,
+        "text": "This is a good fine-tuning setup."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 1,
+      "misconception": "Using a from-scratch learning rate for fine-tuning",
+      "explanation": "lr = 0.1 is chosen for random initialisation. Applied to pretrained weights, the large early updates (driven by the randomly initialised new head's gradients) overwrite the useful features - catastrophic forgetting - and with only 2,000 images the model then overfits. Use a much smaller learning rate (e.g. 1e-3 to 1e-4), lower rates for early layers, or freeze the backbone at first.",
+      "why_convincing": "It is a widely quoted, correct learning rate - for a different situation."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a from-scratch learning rate destroys pretrained features. Use a small learning rate or freeze the backbone first.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Validation accuracy after 5 epochs: 61% with lr 0.1, 93% with lr 1e-3.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "61",
+          "93"
+        ]
+      },
+      {
+        "type": "trace",
+        "summary": "The first updates with a random head produce large gradients through the backbone, altering pretrained filters.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Fine-tuned with lr 0.1, the model does worse than a frozen backbone with a new head."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the learning rate was originally chosen for."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 carries over a from-scratch setting."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Fine-tuning uses small learning rates to preserve pretrained features."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare lr 0.1 with 1e-3."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: lr 0.1 overwrites pretrained features. Use a small learning rate."
+      }
+    ],
+    "repair": "Freeze the backbone and train the head first, then unfreeze with lr around 1e-4 (discriminative learning rates).",
+    "debrief": "Transfer learning works by keeping what the pretrained model knows. Learning rate is the main dial controlling how much is kept.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-embeddings-transfer-learning-003",
+    "subject": "deep-learning",
+    "topic": "Embeddings & Transfer Learning",
+    "subtopic": "Feature extraction on a small dataset",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that freezing the backbone and training only a linear head is a sensible approach with 500 images?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "backbone = torchvision.models.resnet18(weights=\"IMAGENET1K_V1\")\nbackbone.fc = nn.Identity()\nfor p in backbone.parameters():\n    p.requires_grad = False\nbackbone.eval()\nhead = nn.Linear(512, 3)       # trained on 500 labelled photos of 3 kinds of leaves"
+    },
+    "ai_claim": "Yes. With only 500 images, fine-tuning 11 million parameters would overfit. Using the frozen backbone's 512-dimensional features and training a 1,539-parameter head uses the pretrained knowledge with little risk of overfitting.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "ResNet18 has about 11 million parameters; 500 images are too few to adapt them safely."
+      },
+      {
+        "index": 2,
+        "text": "The frozen backbone provides general visual features learned from ImageNet."
+      },
+      {
+        "index": 3,
+        "text": "The linear head has 512 x 3 + 3 = 1,539 parameters."
+      },
+      {
+        "index": 4,
+        "text": "Training only the head suits the small dataset."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. For small datasets similar to natural images, feature extraction with a frozen backbone is the standard first approach (with eval mode so batch norm uses its pretrained statistics).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "512 x 3 + 3 = 1,539 trainable parameters",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1539"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the number of images with the number of trainable parameters."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 counts the head's parameters."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "With little data, train few parameters on top of pretrained features."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the head's parameters."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. A frozen backbone with a linear head suits 500 images. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "How much of a pretrained model to fine-tune depends on how much data you have and how similar it is to the pretraining data.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-embeddings-transfer-learning-004",
+    "subject": "deep-learning",
+    "topic": "Embeddings & Transfer Learning",
+    "subtopic": "Transfer to X-rays",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will ImageNet pretraining give a clear improvement over training from scratch?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "plan": "Fine-tune an ImageNet-pretrained ResNet50 to detect pneumonia from chest X-rays.",
+      "unknown": "How many labelled X-rays are available, and whether a model pretrained on medical images is an option, are not stated."
+    },
+    "ai_claim": "Yes. Pretraining always helps, because the model already knows how to see, so ImageNet pretraining will clearly beat training from scratch.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "ImageNet models learn general visual features."
+      },
+      {
+        "index": 2,
+        "text": "X-rays are images."
+      },
+      {
+        "index": 3,
+        "text": "So those features transfer."
+      },
+      {
+        "index": 4,
+        "text": "Pretraining will clearly beat training from scratch."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The amount of labelled data and the domain gap. With a few thousand X-rays, ImageNet features (edges, textures) usually help substantially. With hundreds of thousands of labelled X-rays, training from scratch can match ImageNet initialisation, and grayscale medical images differ markedly from natural photos. Neither the dataset size nor alternative (medical) pretraining is given.",
+    "resolving_scenarios": [
+      "3,000 labelled X-rays: ImageNet initialisation converges faster and reaches clearly higher AUC than training from scratch.",
+      "300,000 labelled X-rays: from-scratch training reaches similar AUC, and the benefit of ImageNet pretraining is mainly faster convergence."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on data size and domain similarity, which are not given. Step 4 turns a common tendency into a guarantee.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "With very large medical datasets, studies have found ImageNet pretraining gives little accuracy gain over random initialisation.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "With abundant labelled X-rays, the gap can vanish."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how much labelled data is available."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes pretraining always helps clearly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Transfer benefit shrinks with more target data and a larger domain gap."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare 3,000 and 300,000 labelled images."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is overconfident. With little data it helps; with much data it may not. It cannot be decided."
+      }
+    ],
+    "repair": "Compare ImageNet initialisation, medical pretraining and training from scratch on a validation split.",
+    "debrief": "Transfer learning is a strong default, not a law. Its benefit depends on data size and domain similarity.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

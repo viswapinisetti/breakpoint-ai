@@ -1,0 +1,378 @@
+[
+  {
+    "id": "cs-operating-systems-001",
+    "subject": "computer-science",
+    "topic": "Operating Systems",
+    "subtopic": "Waiting time under SJF",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Three processes arrive at time 0 with CPU bursts P1 = 5 ms, P2 = 3 ms and P3 = 1 ms. Under non-preemptive Shortest Job First, what is the average waiting time in ms?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "The average waiting time is 14/3 ms, about 4.67 ms.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "SJF runs the shortest burst first, so the order is P3, P2, P1."
+      },
+      {
+        "index": 2,
+        "text": "P3 runs from 0 to 1, P2 from 1 to 4 and P1 from 4 to 9."
+      },
+      {
+        "index": 3,
+        "text": "The waiting times are therefore 1, 4 and 9 ms."
+      },
+      {
+        "index": 4,
+        "text": "Average waiting time = (1 + 4 + 9) / 3 = 14/3 ms."
+      }
+    ],
+    "ai_final_answer": "14/3",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Using completion times as waiting times",
+      "explanation": "Waiting time is the time a process spends ready but not running: its start time here, since all arrive at 0. P3 waits 0, P2 waits 1 and P1 waits 4, so the average is 5/3 ms (about 1.67). The values 1, 4 and 9 are completion (turnaround) times.",
+      "why_convincing": "Step 2's timeline is right, so step 3's numbers are read straight off it. Waiting and turnaround times sit on the same diagram."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Order P3, P2, P1. Waiting time = start time - arrival: P3 = 0, P2 = 1, P1 = 4. Average = 5/3 ms (about 1.67 ms). Turnaround times would be 1, 4 and 9 (average 14/3).",
+    "canonical_answer": "5/3",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Waiting times 0, 1, 4 -> average 5/3 ms (about 1.67).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "5/3"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Waiting time = turnaround time - burst time.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.67"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "P3 starts immediately at time 0, so its waiting time must be 0, not 1."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the definition of waiting time."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 reads numbers from the timeline. Which numbers?"
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Waiting time is the time spent ready but not running; turnaround time is completion minus arrival."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute each process's start time minus its arrival time."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 uses completion times. The waiting times are 0, 1 and 4, so the average is 5/3 ms."
+      }
+    ],
+    "repair": "Replace step 3: waiting times are 0, 1 and 4 ms, so the average is 5/3 ms.",
+    "debrief": "Scheduling metrics are easy to confuse because they come from the same timeline: waiting time, turnaround time and response time each measure something different. The quickest sanity check was P3, which runs immediately and so cannot have waited at all. State the definition before reading numbers off a chart.",
+    "transfer_check": {
+      "question": "Bursts 6, 2 and 4 ms all arrive at 0. Under non-preemptive SJF, what is the average waiting time in ms?",
+      "answer": "8/3",
+      "explanation": "Order 2, 4, 6: waits 0, 2, 6; average 8/3."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-operating-systems-002",
+    "subject": "computer-science",
+    "topic": "Operating Systems",
+    "subtopic": "Page table size",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "A system has 32-bit virtual addresses, 4 KiB pages and a single-level page table with 4-byte entries. How much memory does one process's page table occupy?",
+    "artifact_type": "explanation",
+    "artifact": {},
+    "ai_claim": "The page table occupies 4 KiB.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A 4 KiB page needs 12 offset bits, leaving 20 bits for the page number."
+      },
+      {
+        "index": 2,
+        "text": "So there are 2^20 pages, and the table needs 2^20 entries."
+      },
+      {
+        "index": 3,
+        "text": "2^20 entries x 4 bytes each = 4 KiB."
+      },
+      {
+        "index": 4,
+        "text": "The page table occupies 4 KiB."
+      }
+    ],
+    "ai_final_answer": "4 KiB",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Confusing 2^20 with 2^10",
+      "explanation": "2^20 is about a million (1,048,576), not a thousand. 2^20 x 4 bytes = 4,194,304 bytes = 4 MiB per process. This size is why multi-level page tables exist.",
+      "why_convincing": "Steps 1 and 2 are exactly right, and 'about a thousand' versus 'about a million' is one exponent apart."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "2^20 entries x 4 B = 2^22 B = 4,194,304 bytes = 4 MiB for each process's single-level page table.",
+    "canonical_answer": "4 MiB",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "2^20 x 4 = 4,194,304 bytes = 4 MiB",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4194304"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "4 KiB holds only 1,024 four-byte entries, not 2^20.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1024"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A 4 KiB table holds only 1,024 four-byte entries."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the size of the number in step 3."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 multiplies the entry count by the entry size."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "2^10 = 1,024 (kibi) and 2^20 = 1,048,576 (mebi)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 2^20 x 4 in bytes."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 2^20 entries x 4 B = 4 MiB, not 4 KiB."
+      }
+    ],
+    "repair": "Replace step 3: 2^20 x 4 B = 4 MiB.",
+    "debrief": "Powers of two with large exponents are easy to misjudge, and a factor of 1,024 separates a trivial table from a serious memory cost. Sanity-check by division: 4 KiB of 4-byte entries is only 1,024 entries. When sizes come from exponents, convert them to plain bytes at least once.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-operating-systems-003",
+    "subject": "computer-science",
+    "topic": "Operating Systems",
+    "subtopic": "Counting processes after fork",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many processes exist after this program has executed all three fork() calls, including the original process?",
+    "artifact_type": "trace",
+    "artifact": {
+      "language": "c",
+      "code": "int main(void) {\n    fork();\n    fork();\n    fork();\n    return 0;\n}"
+    },
+    "ai_claim": "4 processes exist: the original plus one child for each fork.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The original process runs the first fork, creating one child."
+      },
+      {
+        "index": 2,
+        "text": "The second fork creates another child."
+      },
+      {
+        "index": 3,
+        "text": "The third fork creates a third child."
+      },
+      {
+        "index": 4,
+        "text": "So there are 1 + 3 = 4 processes."
+      }
+    ],
+    "ai_final_answer": "4",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 2,
+      "misconception": "Forgetting that children also execute the later forks",
+      "explanation": "After a fork, both parent and child continue from the next line. After the first fork there are 2 processes; both run the second fork, giving 4; all 4 run the third, giving 8. The count doubles at each fork: 2^3 = 8.",
+      "why_convincing": "Reading the code top to bottom suggests one actor calling fork three times; the children are invisible in the source."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Every existing process executes each subsequent fork, so the count doubles: 1 -> 2 -> 4 -> 8. There are 8 processes.",
+    "canonical_answer": "8",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "after fork 1: 2 processes; fork 2: 4; fork 3: 8",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "8"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With just two forks in a row, printing the PID shows 4 processes, not 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where each child process continues executing."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says only one new process is created by the second fork."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A child begins executing at the instruction after the fork that created it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the processes after each fork, remembering that every process runs the next fork."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: both processes run the second fork, and all four run the third, so 2^3 = 8 processes exist."
+      }
+    ],
+    "repair": "Replace steps 2-4: each fork doubles the count, giving 8 processes.",
+    "debrief": "fork duplicates the whole process, including its position in the code, so every later line runs in every copy. The source shows one thread of control; reality has many. Draw the process tree when reasoning about fork: its branching makes the doubling obvious.",
+    "transfer_check": {
+      "question": "How many processes exist after four consecutive fork() calls, including the original?",
+      "answer": "16",
+      "explanation": "2^4 = 16."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "cs-operating-systems-004",
+    "subject": "computer-science",
+    "topic": "Operating Systems",
+    "subtopic": "Recognising thrashing",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's advice correct for this system?",
+    "artifact_type": "explanation",
+    "artifact": {
+      "observation": "CPU utilisation 12%; page-fault rate very high; disk constantly busy with paging.",
+      "ai_advice": "Do not start more processes. Reduce the number of running processes (or add RAM)."
+    },
+    "ai_claim": "Yes. The system is thrashing, so fewer processes (or more RAM) will raise utilisation; more processes would make it worse.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "High paging activity with low CPU utilisation is the signature of thrashing."
+      },
+      {
+        "index": 2,
+        "text": "The processes' combined working sets do not fit in physical memory, so they keep evicting each other's pages."
+      },
+      {
+        "index": 3,
+        "text": "Adding processes would shrink each process's share of memory further and increase the page-fault rate."
+      },
+      {
+        "index": 4,
+        "text": "Reducing the degree of multiprogramming (or adding RAM) lets working sets fit, so CPU utilisation recovers."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Low CPU use plus heavy paging indicates thrashing; the fix is to reduce the number of active processes or increase memory. Naively adding processes to 'use the idle CPU' makes thrashing worse.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "When total working sets exceed physical memory, more processes increase page faults and reduce useful CPU work.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Low CPU utilisation usually suggests adding work. Check whether that applies here."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 reasons about what more processes would do to memory."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Thrashing: processes spend more time paging than executing because their working sets do not fit in memory."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider what happens to each process's share of RAM if another process starts."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The symptoms are thrashing, and the remedy is fewer processes or more memory. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Low CPU utilisation normally means 'give it more work', and early OS schedulers did exactly that - which deepened thrashing. The advice here reads the symptoms together, not separately. A metric only means something alongside its cause: idle CPU plus a busy disk tells a different story from idle CPU alone.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

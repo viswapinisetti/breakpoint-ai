@@ -1,0 +1,375 @@
+[
+  {
+    "id": "dev-ci-cd-001",
+    "subject": "devops",
+    "topic": "CI/CD",
+    "subtopic": "Deploying from every branch",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this workflow deploy only the main branch to production?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "pipeline": "on: push\njobs:\n  deploy:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n      - run: ./scripts/deploy-production.sh\n# AI: \"Only main gets deployed, since that's our production branch.\""
+    },
+    "ai_claim": "Yes. Production is deployed from main, which is the production branch, so only main is deployed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The workflow runs the production deploy script."
+      },
+      {
+        "index": 2,
+        "text": "main is the production branch."
+      },
+      {
+        "index": 3,
+        "text": "So the deploy runs for main."
+      },
+      {
+        "index": 4,
+        "text": "Only main is deployed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Missing a branch filter on a production trigger",
+      "explanation": "on: push with no branch filter triggers on pushes to every branch. A developer pushing a work-in-progress feature branch deploys it straight to production. Restrict the trigger (on: push: branches: [main]) and protect the production environment with required reviewers.",
+      "why_convincing": "The team's convention is clear, but the workflow does not encode it."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: every push to any branch deploys to production. Add branches: [main] and environment protection.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "push to feature/login-wip -> workflow triggered -> deploy-production.sh runs",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "on:\n  push:\n    branches: [main]",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A feature branch push deploys unreviewed code."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the trigger's filters."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the workflow knows the convention."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Workflow triggers must encode which branches deploy."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Push to a feature branch."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: on: push runs for all branches. Filter to main."
+      }
+    ],
+    "repair": "Filter the trigger to main and require approval for the production environment.",
+    "debrief": "Conventions that are not encoded in automation are not enforced. Make the pipeline say what the team means.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-ci-cd-002",
+    "subject": "devops",
+    "topic": "CI/CD",
+    "subtopic": "Tests that depend on a live external API",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it acceptable to treat these failures as harmless flakiness?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "pipeline": "- run: pytest tests/\n# tests/test_payments.py calls the payment provider's live sandbox API over the internet.\n# The pipeline fails a few times a week with timeouts; developers re-run it until it passes.\n# AI: \"The tests are fine; the failures are just flakiness.\""
+    },
+    "ai_claim": "Yes. The failures are random timeouts, not code problems, so re-running until green is fine.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The failures are timeouts."
+      },
+      {
+        "index": 2,
+        "text": "Timeouts are not caused by our code."
+      },
+      {
+        "index": 3,
+        "text": "Re-running usually passes."
+      },
+      {
+        "index": 4,
+        "text": "So the failures are harmless."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 2,
+      "misconception": "Making unit tests depend on an external service",
+      "explanation": "The test suite depends on the provider's sandbox and the network, so its result reflects their availability, not the code. Developers learn to ignore red builds and re-run - which also hides real failures. Mock the provider in unit tests (or use recorded responses), and run a small, separate contract test against the sandbox on a schedule.",
+      "why_convincing": "The failures really are not caused by the code."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: external dependencies make the suite unreliable and train people to ignore failures. Mock the API; run contract tests separately.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "3 of the last 20 runs failed with ReadTimeout in test_payments.py; all passed on re-run",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "3",
+          "20"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Unit tests: mock the payment client (e.g. responses/respx). Nightly job: contract tests against the sandbox.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A real regression is dismissed as 'just flakiness' and re-run away."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the test outcome actually depends on."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats external failures as irrelevant."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Reliable CI tests depend only on the code under test."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider how people react to frequent false failures."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the dependency makes CI untrustworthy. Mock it."
+      }
+    ],
+    "repair": "Mock external services in CI tests; run live contract tests separately.",
+    "debrief": "A flaky pipeline is worse than a slow one: it teaches everyone to ignore it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-ci-cd-003",
+    "subject": "devops",
+    "topic": "CI/CD",
+    "subtopic": "Caching dependencies by lockfile hash",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this cache speeds up builds without serving outdated dependencies?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "pipeline": "- uses: actions/cache@v4\n  with:\n    path: ~/.npm\n    key: npm-${{ runner.os }}-${{ hashFiles('package-lock.json') }}\n- run: npm ci"
+    },
+    "ai_claim": "Yes. The key includes a hash of package-lock.json, so the cache is reused only when dependencies are unchanged; any change to the lockfile produces a new key and fresh downloads. npm ci still installs exactly what the lockfile specifies.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The cache stores npm's download cache."
+      },
+      {
+        "index": 2,
+        "text": "The key includes the lockfile's hash."
+      },
+      {
+        "index": 3,
+        "text": "Changing dependencies changes the hash, so a new cache entry is created."
+      },
+      {
+        "index": 4,
+        "text": "npm ci installs exactly the lockfile's versions."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Keying caches on the lockfile hash is the standard pattern; npm ci guarantees the installed versions match the lockfile.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "lockfile unchanged -> cache hit -> npm ci uses cached tarballs; lockfile changed -> cache miss -> fresh download",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask when the cache key changes."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains invalidation."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Cache keys should change exactly when the cached content should."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Change one dependency version and trace the key."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The cache is safe and effective. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Good caches are keyed on their inputs. Here, the lockfile is exactly that input.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-ci-cd-004",
+    "subject": "devops",
+    "topic": "CI/CD",
+    "subtopic": "pull_request_target with untrusted code",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this workflow safe for pull requests from forks?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "pipeline": "on: pull_request_target        # runs with the base repo's secrets\njobs:\n  test:\n    runs-on: ubuntu-latest\n    steps:\n      - uses: actions/checkout@v4\n        with:\n          ref: ${{ github.event.pull_request.head.sha }}   # the PR author's code\n      - run: npm ci && npm test\n        env:\n          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}\n# AI: \"pull_request_target is safe for forks because it runs in the base repository.\""
+    },
+    "ai_claim": "Yes. pull_request_target runs in the context of the base repository, not the fork, so the fork cannot misuse anything.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "pull_request_target runs in the base repository's context."
+      },
+      {
+        "index": 2,
+        "text": "The fork's author does not control that context."
+      },
+      {
+        "index": 3,
+        "text": "The workflow checks out and tests the PR."
+      },
+      {
+        "index": 4,
+        "text": "So forks cannot misuse secrets."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Running untrusted PR code with secrets",
+      "explanation": "pull_request_target grants the base repository's secrets and a write-capable token - which is why it is dangerous here: the workflow checks out the fork's code and runs npm ci and npm test, which execute scripts the attacker controls (install scripts, test files). They can read NPM_TOKEN and publish malicious packages. Use pull_request (no secrets) for untrusted code, and only use pull_request_target for steps that never execute PR code.",
+      "why_convincing": "'Runs in the base repository' sounds like safety rather than privilege."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: attacker code runs with the repository's secrets. Test fork PRs with pull_request (no secrets).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "fork PR adds a postinstall script -> npm ci runs it with NPM_TOKEN in the environment -> token exfiltrated",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "on: pull_request   # no secrets for forks\n# keep publishing jobs on push to main only",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A malicious fork PR steals the npm publishing token."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whose code runs and with what secrets."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 misreads what the base context grants."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "pull_request_target runs with secrets; running PR code there is dangerous."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a malicious postinstall script."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: untrusted code runs with secrets. Use pull_request."
+      }
+    ],
+    "repair": "Use pull_request for fork PR tests; never execute PR code under pull_request_target.",
+    "debrief": "CI systems run code from contributors. Decide exactly which code runs with which credentials.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

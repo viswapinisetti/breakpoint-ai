@@ -1,0 +1,389 @@
+[
+  {
+    "id": "dl-neural-network-fundamentals-001",
+    "subject": "deep-learning",
+    "topic": "Neural Network Fundamentals",
+    "subtopic": "Stacked linear layers stay linear",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can this three-layer network learn XOR?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "model = nn.Sequential(\n    nn.Linear(2, 16),\n    nn.Linear(16, 16),\n    nn.Linear(16, 1),\n)   # no activation functions\n# Task: learn XOR on inputs (0,0), (0,1), (1,0), (1,1)"
+    },
+    "ai_claim": "Yes. With three layers and 16 hidden units, the network is deep enough to learn the non-linear XOR pattern.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "XOR is not linearly separable, so depth is needed."
+      },
+      {
+        "index": 2,
+        "text": "The network has three layers."
+      },
+      {
+        "index": 3,
+        "text": "16 hidden units give plenty of capacity."
+      },
+      {
+        "index": 4,
+        "text": "So it can learn XOR."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming depth alone adds non-linearity",
+      "explanation": "A composition of linear maps is linear: W3(W2(W1 x + b1) + b2) + b3 = W x + b for a single W and b. Without activations, the three layers collapse into one linear model, which cannot represent XOR. Adding a non-linearity (e.g. nn.ReLU()) between layers is what gives depth its power.",
+      "why_convincing": "'Deep networks learn non-linear functions' is true - because of the activations."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without activations the network is a single linear map and cannot fit XOR. Insert ReLU between the layers.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "W3 (W2 (W1 x + b1) + b2) + b3 = (W3 W2 W1) x + (W3 W2 b1 + W3 b2 + b3)",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Training on XOR plateaus at 50% accuracy (MSE about 0.25).",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0.25"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The trained network behaves exactly like one nn.Linear(2, 1)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Multiply out the three linear layers."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats the number of layers as the source of non-linearity."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Compositions of linear functions are linear."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Write the network as a single matrix product."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: without activations the layers collapse into one linear map."
+      }
+    ],
+    "repair": "Insert nn.ReLU() between the Linear layers.",
+    "debrief": "Activations are what make neural networks non-linear. Check for them whenever a deep model behaves like a linear one.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-neural-network-fundamentals-002",
+    "subject": "deep-learning",
+    "topic": "Neural Network Fundamentals",
+    "subtopic": "Counting parameters",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many trainable parameters does nn.Linear(784, 128) have?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "layer = nn.Linear(784, 128)\n# AI working: parameters = 784 x 128 = 100,352"
+    },
+    "ai_claim": "100352. Each of the 128 outputs has one weight per input: 784 x 128 = 100,352.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "There are 784 inputs and 128 outputs."
+      },
+      {
+        "index": 2,
+        "text": "Each output has one weight per input."
+      },
+      {
+        "index": 3,
+        "text": "784 x 128 = 100,352."
+      },
+      {
+        "index": 4,
+        "text": "So the layer has 100,352 parameters."
+      }
+    ],
+    "ai_final_answer": "100352",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F01",
+      "location": 4,
+      "misconception": "Forgetting the bias terms",
+      "explanation": "nn.Linear includes a bias by default (bias=True): one extra parameter per output. Total = 784 x 128 + 128 = 100,480.",
+      "why_convincing": "The weight-matrix count is correct and makes up almost all of the total."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "784 x 128 weights + 128 biases = 100,480.",
+    "canonical_answer": "100480",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "100,352 + 128 = 100,480",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "100480"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "sum(p.numel() for p in layer.parameters()) returns 100480.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "100480"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "layer.bias has shape (128,)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List every parameter tensor in the layer."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 counts only the weight matrix."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "nn.Linear has a weight matrix and a bias vector."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add the 128 biases."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the biases add 128, for 100,480."
+      }
+    ],
+    "repair": "",
+    "debrief": "Count parameters by listing tensors: weight and bias here. PyTorch's p.numel() sum is the quick check.",
+    "transfer_check": {
+      "question": "How many parameters does nn.Linear(10, 5) have?",
+      "answer": "55",
+      "explanation": "10 x 5 weights + 5 biases = 55."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-neural-network-fundamentals-003",
+    "subject": "deep-learning",
+    "topic": "Neural Network Fundamentals",
+    "subtopic": "ReLU on a vector",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this prints tensor([0., 0., 3.])?",
+    "artifact_type": "architecture",
+    "artifact": {
+      "language": "python",
+      "code": "x = torch.tensor([-2.0, 0.0, 3.0])\nprint(torch.relu(x))"
+    },
+    "ai_claim": "Yes. ReLU returns max(0, x) element-wise: -2 becomes 0, 0 stays 0, and 3 stays 3.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "ReLU(x) = max(0, x)."
+      },
+      {
+        "index": 2,
+        "text": "max(0, -2) = 0."
+      },
+      {
+        "index": 3,
+        "text": "max(0, 0) = 0 and max(0, 3) = 3."
+      },
+      {
+        "index": 4,
+        "text": "So the output is [0, 0, 3]."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: tensor([0., 0., 3.]).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "max(0, -2) = 0; max(0, 0) = 0; max(0, 3) = 3",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0",
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Apply max(0, x) to each element."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 handles the negative value."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "ReLU zeroes negatives and passes positives unchanged."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate each element."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The output is [0, 0, 3]. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "ReLU's simplicity - zero for negatives, identity for positives - is why it trains well and why units can 'die' when all their inputs are negative.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dl-neural-network-fundamentals-004",
+    "subject": "deep-learning",
+    "topic": "Neural Network Fundamentals",
+    "subtopic": "Initialising every weight to zero",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will training from this initialisation produce 64 useful, different hidden units?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "model = nn.Sequential(nn.Linear(20, 64), nn.ReLU(), nn.Linear(64, 1))\nfor p in model.parameters():\n    nn.init.zeros_(p)\n# AI note: \"Starting from zero is neutral; training will move the weights to good values.\""
+    },
+    "ai_claim": "Yes. Zero is a neutral starting point, and gradient descent will push each weight to a good value during training.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "All weights and biases start at 0."
+      },
+      {
+        "index": 2,
+        "text": "Zero introduces no bias towards any solution."
+      },
+      {
+        "index": 3,
+        "text": "Gradients update each weight according to the data."
+      },
+      {
+        "index": 4,
+        "text": "So the hidden units learn useful, different features."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Initialising with symmetric (zero) weights",
+      "explanation": "With all weights zero, every hidden unit computes the same output, and the second layer's zero weights send zero gradient back to the first layer. Hidden units receive identical (here zero) updates, so they stay identical - the symmetry is never broken, and the network behaves like a single unit. Random initialisation (e.g. Kaiming for ReLU) breaks the symmetry.",
+      "why_convincing": "Zero feels neutral, and it works for linear regression."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: identical weights receive identical gradients (here zero for the first layer), so the units never differentiate. Use random initialisation.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "hidden activations all 0 -> output weights' gradients depend only on 0 activations -> first-layer gradients = 0 x ... = 0",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "After 100 steps, all 64 rows of the first layer's weight are identical.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "64"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The first layer's weights never change from zero."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the hidden units' outputs at initialisation."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes gradients will differ between units."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Identical units receive identical gradients - the symmetry problem."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute the gradient reaching the first layer."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: symmetric units get identical updates. Initialise randomly."
+      }
+    ],
+    "repair": "Use default (random) initialisation or nn.init.kaiming_normal_ for ReLU layers.",
+    "debrief": "Random initialisation exists to break symmetry. Scale matters too: Xavier and Kaiming schemes keep activations and gradients well-sized.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

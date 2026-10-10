@@ -1,0 +1,510 @@
+[
+  {
+    "id": "ml-dimensionality-reduction-001",
+    "subject": "machine-learning",
+    "topic": "Dimensionality Reduction",
+    "subtopic": "PCA without scaling",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does PC1 explaining 99.9% show that income is essentially the only important dimension in the data?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "data": "Features: annual_income (Rs, SD about 4,00,000), age (SD about 12), visits_per_month (SD about 3).",
+      "result": "PCA on raw features: PC1 explains 99.9% of variance and is almost exactly annual_income."
+    },
+    "ai_claim": "Yes. PCA finds the directions of greatest variation, and PC1, which is income, explains 99.9%, so the other features add almost nothing.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "PCA finds directions of maximum variance."
+      },
+      {
+        "index": 2,
+        "text": "PC1 explains 99.9% of the variance."
+      },
+      {
+        "index": 3,
+        "text": "PC1 is income."
+      },
+      {
+        "index": 4,
+        "text": "So income is the only important dimension."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 4,
+      "misconception": "Interpreting PCA on unscaled features",
+      "explanation": "Variance depends on units. Income's variance (about 1.6 x 10^11) dwarfs age's (144) and visits' (9), so PC1 is income purely because it is measured in rupees. This says nothing about importance. Standardise features before PCA so each contributes on a comparable scale.",
+      "why_convincing": "Steps 1-3 are true facts about this PCA."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: PC1 is income only because of its units. Standardise features first.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Variances: 400,000^2 = 1.6 x 10^11 vs 12^2 = 144 vs 3^2 = 9.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "144"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "After StandardScaler, PC1 explains about 45% of the variance and mixes all three features.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "45"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Measuring income in lakhs would change PC1 completely."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the features' variances."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 infers importance from raw variance."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "PCA on unscaled data is dominated by the largest-unit feature."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Standardise and rerun PCA."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: PC1 reflects units, not importance. Scale first."
+      }
+    ],
+    "repair": "Standardise features (or use the correlation matrix) before PCA.",
+    "debrief": "PCA maximises variance, and variance depends on units. Unless features share units, standardise first.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-dimensionality-reduction-002",
+    "subject": "machine-learning",
+    "topic": "Dimensionality Reduction",
+    "subtopic": "Distances in a t-SNE plot",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Do the distances between clusters in the t-SNE plot support this conclusion?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "plot": "t-SNE of product embeddings (perplexity 30): clusters A, B and C.\nA and B are close together; C is far from both.",
+      "conclusion": "\"C is the most different category; A and B are very similar.\""
+    },
+    "ai_claim": "Yes. t-SNE preserves the structure of the data, so clusters that are far apart in the plot are more different.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "t-SNE maps high-dimensional data to 2D."
+      },
+      {
+        "index": 2,
+        "text": "It preserves the data's structure."
+      },
+      {
+        "index": 3,
+        "text": "C is far from A and B in the plot."
+      },
+      {
+        "index": 4,
+        "text": "So C is the most different category."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 2,
+      "misconception": "Reading global distances from t-SNE",
+      "explanation": "t-SNE preserves local neighbourhoods, not global distances. The gaps between clusters, and cluster sizes, depend on perplexity and random initialisation and can change completely between runs. Compare categories with distances computed in the original space (e.g. between cluster centroids), or use methods designed to preserve global structure.",
+      "why_convincing": "Plots invite reading distance as difference."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: t-SNE does not preserve distances between clusters. Measure centroid distances in the original embedding space.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Rerunning with perplexity 50 places C between A and B.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "50"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Centroid distances in the original 128-dimensional space are A-B 0.8, A-C 0.9, B-C 0.85.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "0.8"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A different random seed changes which clusters look close."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what t-SNE is designed to preserve."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 overstates what is preserved."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "t-SNE keeps local neighbourhoods; global distances are not meaningful."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rerun with a different perplexity."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: t-SNE does not preserve global distances. Measure in the original space."
+      }
+    ],
+    "repair": "Compute distances between cluster centroids in the original space.",
+    "debrief": "t-SNE and UMAP plots are for seeing clusters, not for measuring between them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-dimensionality-reduction-003",
+    "subject": "machine-learning",
+    "topic": "Dimensionality Reduction",
+    "subtopic": "How much a 2D projection keeps",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the 2D plot capture most of the information in the customer data?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "pca": "Explained variance ratio of the first two principal components: 0.28 and 0.17 (total 0.45).",
+      "slide": "\"Our 2D PCA plot captures the essential information about customers.\""
+    },
+    "ai_claim": "Yes. The first two principal components are the most informative directions, so the 2D plot captures the essential information.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "PC1 and PC2 are the two directions of greatest variance."
+      },
+      {
+        "index": 2,
+        "text": "No other two directions capture more variance."
+      },
+      {
+        "index": 3,
+        "text": "So they contain the essential information."
+      },
+      {
+        "index": 4,
+        "text": "The 2D plot captures most of the data."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Ignoring how much variance the components actually explain",
+      "explanation": "PC1 and PC2 are the best two directions, but together they explain only 45% of the variance; 55% lies in other directions. Points that look close in the plot can be far apart in the full data. Report the explained variance with the plot, and do not infer 'most information' from 'best two directions'.",
+      "why_convincing": "'Best' is true, which makes 'enough' feel true."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the two components explain 45%, so most variation is not shown.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "0.28 + 0.17 = 0.45, leaving 0.55 unexplained.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.45",
+          "0.55"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Two customers overlapping in the plot can differ strongly along PC3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Add up the explained variance ratios."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates 'best two' with 'most'."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Explained variance quantifies what a projection keeps."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 0.28 + 0.17."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 45% is less than half the variance."
+      }
+    ],
+    "repair": "Show the cumulative explained variance, and treat the plot as a partial view.",
+    "debrief": "Every projection discards something. The explained variance ratio says how much, and belongs on the slide.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-dimensionality-reduction-004",
+    "subject": "machine-learning",
+    "topic": "Dimensionality Reduction",
+    "subtopic": "Low-variance directions can matter",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it safe to discard components that explain little variance before training the classifier?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "plan": "Before training a fraud classifier, keep only the top 10 of 60 principal components (95% of variance) and discard the rest.",
+      "finding": "The component that best separates fraud from normal transactions is PC47, which explains 0.3% of the variance."
+    },
+    "ai_claim": "Yes. Components with little variance carry little information, so dropping them loses nothing important for the classifier.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The top 10 components keep 95% of the variance."
+      },
+      {
+        "index": 2,
+        "text": "The remaining 50 carry only 5%."
+      },
+      {
+        "index": 3,
+        "text": "Low variance means little information."
+      },
+      {
+        "index": 4,
+        "text": "So dropping them is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Using unsupervised variance as a proxy for predictive value",
+      "explanation": "PCA ranks directions by variance, ignoring the label. A direction with tiny variance can separate the classes perfectly - as PC47 does here - while high-variance directions may be irrelevant to fraud. Select components by validated predictive performance, or use supervised reduction (e.g. LDA) or no reduction at all.",
+      "why_convincing": "Variance is often described as 'information'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: PC47 carries little variance but most of the fraud signal. Choose dimensionality by validation performance.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "PC47 explains 0.3% of variance but best separates fraud.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.3"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "Validation AUC drops from 0.93 with all components to 0.71 with the top 10.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.71"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Dropping PC47 removes the most useful signal."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether PCA knows which transactions are fraud."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates variance with usefulness."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "PCA is unsupervised; variance is not predictive power."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare validation AUC with and without the dropped components."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: a low-variance component carries the fraud signal."
+      }
+    ],
+    "repair": "Tune the number of components by validation AUC, or use supervised feature selection.",
+    "debrief": "Dimensionality reduction for prediction should be judged by prediction. Variance explained answers a different question.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-dimensionality-reduction-005",
+    "subject": "machine-learning",
+    "topic": "Dimensionality Reduction",
+    "subtopic": "Components for 95% of variance",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that 5 components are needed to keep at least 95% of the variance?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "pca": {
+        "title": "Explained variance ratio",
+        "columns": [
+          "component",
+          "ratio"
+        ],
+        "rows": [
+          [
+            "PC1",
+            0.52
+          ],
+          [
+            "PC2",
+            0.21
+          ],
+          [
+            "PC3",
+            0.11
+          ],
+          [
+            "PC4",
+            0.07
+          ],
+          [
+            "PC5",
+            0.05
+          ],
+          [
+            "PC6",
+            0.04
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. The cumulative ratios are 0.52, 0.73, 0.84, 0.91 and 0.96; 95% is first reached at PC5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Add the ratios cumulatively."
+      },
+      {
+        "index": 2,
+        "text": "0.52, 0.73, 0.84, 0.91, 0.96."
+      },
+      {
+        "index": 3,
+        "text": "After 4 components the total is 0.91, below 0.95."
+      },
+      {
+        "index": 4,
+        "text": "After 5 it is 0.96, so 5 are needed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 5 components (PCA(n_components=0.95) would choose the same).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "0.52 + 0.21 + 0.11 + 0.07 + 0.05 = 0.96",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.96"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Accumulate the ratios."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 checks four components."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The number of components is the first k whose cumulative ratio reaches the target."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add the first five ratios."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. 5 components reach 96%. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Cumulative explained variance is the standard way to pick k for compression - with the caveat that variance is not the same as predictive value.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

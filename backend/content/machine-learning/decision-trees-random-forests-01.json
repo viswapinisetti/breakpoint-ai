@@ -1,0 +1,495 @@
+[
+  {
+    "id": "ml-decision-trees-random-forests-001",
+    "subject": "machine-learning",
+    "topic": "Decision Trees & Random Forests",
+    "subtopic": "Trees do not need scaling",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is standardising necessary for the random forest's splits to be correct?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# AI suggestion before training a random forest:\n# \"Standardise all features first; otherwise the splits on large-valued features like income will be wrong.\"\nX_scaled = StandardScaler().fit_transform(X_train)\nrf = RandomForestClassifier().fit(X_scaled, y_train)"
+    },
+    "ai_claim": "Yes. Features with large values, like income, would dominate the splits, so standardising is required for correct trees.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Income is measured in lakhs; age in tens."
+      },
+      {
+        "index": 2,
+        "text": "Large-valued features dominate the model."
+      },
+      {
+        "index": 3,
+        "text": "Standardising puts them on the same scale."
+      },
+      {
+        "index": 4,
+        "text": "So the forest's splits are only correct after scaling."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Carrying the scaling rule over to tree models",
+      "explanation": "Trees split on thresholds of one feature at a time and compare impurity reductions, which depend only on the ordering of values. Any monotonic rescaling gives the same splits (at rescaled thresholds) and the same predictions. Scaling matters for distance- and gradient-based models, not for trees.",
+      "why_convincing": "Scaling is standard advice for many models."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: tree splits are invariant to monotonic transformations. Scaling changes nothing for a random forest.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "With the same random_state, predictions with and without scaling are identical.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "counterexample",
+        "summary": "Splitting income at 5,00,000 or at its scaled value 0.31 selects the same customers.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The fitted forests produce the same predictions."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about how a tree chooses a split."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes large values dominate trees."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tree splits depend on the order of values, not their scale."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Fit with and without scaling and compare predictions."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: trees are scale-invariant. Scaling is unnecessary."
+      }
+    ],
+    "repair": "Skip scaling for tree ensembles (keep it for linear, distance and neural models).",
+    "debrief": "Know which assumptions belong to which model family. Scale-invariance is one of the practical advantages of trees.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-decision-trees-random-forests-002",
+    "subject": "machine-learning",
+    "topic": "Decision Trees & Random Forests",
+    "subtopic": "Impurity importance and high cardinality",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the importance ranking show customer_id genuinely predicts churn?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "importances": {
+        "title": "Random forest feature_importances_ (impurity-based)",
+        "columns": [
+          "feature",
+          "importance"
+        ],
+        "rows": [
+          [
+            "customer_id",
+            "0.29"
+          ],
+          [
+            "tenure_months",
+            "0.21"
+          ],
+          [
+            "monthly_spend",
+            "0.18"
+          ]
+        ]
+      },
+      "conclusion": "\"customer_id is the most predictive feature of churn.\""
+    },
+    "ai_claim": "Yes. customer_id has the highest importance, so it carries the most information about churn.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The forest assigns each feature an importance."
+      },
+      {
+        "index": 2,
+        "text": "customer_id has the highest, 0.29."
+      },
+      {
+        "index": 3,
+        "text": "High importance means strong predictive power."
+      },
+      {
+        "index": 4,
+        "text": "So customer_id is the most predictive feature."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Trusting impurity importance for a high-cardinality feature",
+      "explanation": "Impurity-based importance is computed on training data and favours features with many unique values: a unique id lets trees split almost anywhere and memorise individuals. That reduces training impurity without generalising. Use permutation importance on held-out data (where customer_id will score about 0), and drop identifiers from features.",
+      "why_convincing": "The importance numbers are real outputs of the model."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: impurity importance is biased towards high-cardinality features. customer_id is an identifier; permutation importance on validation data would show it has no real signal.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Permutation importance of customer_id on the validation set is about 0.00.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.00"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "customer_id is unique per customer.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "New customers have ids the model has never seen."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what customer_id could possibly tell the model."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates impurity importance with predictive power."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Impurity importance is biased towards many-valued features."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute permutation importance on validation data."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the id's importance comes from memorisation. Drop it."
+      }
+    ],
+    "repair": "Remove identifiers; use permutation importance on held-out data.",
+    "debrief": "Impurity importance measures how a model used features in training, with known biases. Permutation importance on held-out data measures what actually generalises.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-decision-trees-random-forests-003",
+    "subject": "machine-learning",
+    "topic": "Decision Trees & Random Forests",
+    "subtopic": "Forests cannot extrapolate",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the forest predict a price near Rs 3 Cr for the penthouse?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "training": "Random forest regressor for flat prices; training prices range Rs 20L to Rs 90L.",
+      "query": "A new penthouse whose features (area, floor, amenities) exceed every training example; comparable penthouses sell for about Rs 3 Cr."
+    },
+    "ai_claim": "Yes. The penthouse's features are larger than any training flat, and the forest has learned that larger features mean higher prices, so it predicts around Rs 3 Cr.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Price rises with area, floor and amenities in the training data."
+      },
+      {
+        "index": 2,
+        "text": "The penthouse exceeds all training flats on these features."
+      },
+      {
+        "index": 3,
+        "text": "The forest extends the learned trend."
+      },
+      {
+        "index": 4,
+        "text": "So it predicts about Rs 3 Cr."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 3,
+      "misconception": "Expecting a tree ensemble to extrapolate",
+      "explanation": "Each tree predicts the average price of the training flats in a leaf. Beyond the training range, the penthouse lands in the leaves for the largest flats, so every tree predicts at most about Rs 90L, and so does their average. Trees cannot continue a trend. Use a model that extrapolates (e.g. linear terms on area), or collect training data for this segment.",
+      "why_convincing": "Forests model the training range very well, so they seem to 'understand' the trend."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: forest predictions are bounded by training targets, so it predicts at most about Rs 90L.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "The maximum training price is Rs 90L; leaf predictions are averages of training prices.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "90"
+        ]
+      },
+      {
+        "type": "counterexample",
+        "summary": "Doubling the penthouse's area leaves the prediction unchanged.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Any flat bigger than the largest training flat gets the same prediction."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what a leaf of a regression tree predicts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes trees extend trends."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tree predictions are averages of training targets."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "What is the highest price any leaf can predict?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the forest cannot predict above about Rs 90L."
+      }
+    ],
+    "repair": "Add training data for luxury flats, or use a model with extrapolating components for this range.",
+    "debrief": "Know each model's behaviour outside the training range. Trees stay flat, linear models extend lines - neither is right automatically.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-decision-trees-random-forests-004",
+    "subject": "machine-learning",
+    "topic": "Decision Trees & Random Forests",
+    "subtopic": "More trees do not overfit",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is it true that raising n_estimators from 100 to 1,000 would make the forest overfit?",
+    "artifact_type": "training_code",
+    "artifact": {
+      "language": "python",
+      "code": "# AI advice: \"Keep n_estimators at 100. Increasing it to 1,000 will make the forest overfit.\"\nrf = RandomForestClassifier(n_estimators=100, max_features=\"sqrt\")"
+    },
+    "ai_claim": "Yes. More trees add more complexity to the model, and more complexity leads to overfitting.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each tree adds parameters to the model."
+      },
+      {
+        "index": 2,
+        "text": "1,000 trees are far more complex than 100."
+      },
+      {
+        "index": 3,
+        "text": "More complex models overfit."
+      },
+      {
+        "index": 4,
+        "text": "So 1,000 trees would overfit."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Treating the number of averaged trees as model complexity",
+      "explanation": "A random forest averages independently trained trees. Adding trees reduces the variance of the average and makes predictions more stable; validation performance improves and then plateaus, it does not degrade. Overfitting in forests comes from individual tree complexity (depth, min_samples_leaf), not from the number of trees. The cost of more trees is only compute.",
+      "why_convincing": "For boosting, more rounds really can overfit, so the rules get mixed up."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: more trees reduce variance and do not cause overfitting; control overfitting with tree depth and leaf size.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Validation accuracy rises from 100 to 300 trees and stays flat to 1,000.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1,000"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Forest predictions are averages of independent trees.",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Out-of-bag error keeps decreasing slightly as trees are added."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about what averaging does to variance."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats more trees as more complexity."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Bagging averages trees; more members stabilise the average."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Plot validation accuracy against n_estimators."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: more trees do not overfit. Tune depth instead."
+      }
+    ],
+    "repair": "Use as many trees as compute allows; tune max_depth and min_samples_leaf for overfitting.",
+    "debrief": "Bagging and boosting behave differently with more estimators: bagging plateaus, boosting can overfit. Know which one you are tuning.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-decision-trees-random-forests-005",
+    "subject": "machine-learning",
+    "topic": "Decision Trees & Random Forests",
+    "subtopic": "Why random forests work",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's explanation of why random forests generalise better than a single deep tree correct?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "explanation": "Each tree is trained on a bootstrap sample and considers a random subset of features at each split (max_features).\nAveraging many such trees reduces variance; the feature subsampling decorrelates the trees, which makes averaging more effective."
+    },
+    "ai_claim": "Yes. A single deep tree has low bias but high variance. Averaging many trees reduces variance, and averaging works best when trees are less correlated, which bootstrap samples and random feature subsets achieve.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Deep trees fit training data closely: low bias, high variance."
+      },
+      {
+        "index": 2,
+        "text": "The variance of an average of B trees with pairwise correlation rho is rho sigma^2 + (1 - rho) sigma^2 / B."
+      },
+      {
+        "index": 3,
+        "text": "Bootstrapping and random feature subsets lower rho."
+      },
+      {
+        "index": 4,
+        "text": "Lower correlation and more trees reduce the ensemble's variance while keeping bias low."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The variance formula shows that averaging helps most when trees are decorrelated; that is the role of max_features.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "With rho = 0.3, sigma^2 = 1 and B = 100: 0.3 + 0.7 / 100 = 0.307, versus 1 for a single tree.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "0.307"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate bias from variance."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 gives the variance of a correlated average."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Decorrelating the trees makes averaging more effective."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate the formula for rho = 0.3."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Averaging decorrelated trees reduces variance. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "The variance formula explains both why forests work and their limit: the correlated part (rho sigma^2) remains however many trees are added.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

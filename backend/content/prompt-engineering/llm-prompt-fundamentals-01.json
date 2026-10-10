@@ -1,0 +1,454 @@
+[
+  {
+    "id": "pe-llm-prompt-fundamentals-001",
+    "subject": "prompt-engineering",
+    "topic": "LLM & Prompt Fundamentals",
+    "subtopic": "An underspecified summary request",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this prompt give the model what it needs to produce the summary the CFO wants?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Summarise this.\n\n{report}",
+      "context": "{report} is a 12-page quarterly operations report. The summary is for the CFO, who wants cost risks in under 100 words."
+    },
+    "ai_claim": "Yes. The instruction is clear - summarise - and the model has the full report, so it will produce a good summary.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The prompt asks for a summary."
+      },
+      {
+        "index": 2,
+        "text": "The full report is included."
+      },
+      {
+        "index": 3,
+        "text": "The model knows how to summarise."
+      },
+      {
+        "index": 4,
+        "text": "So it will produce the summary the CFO wants."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F15",
+      "location": 3,
+      "misconception": "Leaving audience, focus and length unspecified",
+      "explanation": "'Summarise this' leaves every key choice to the model: length, audience, focus and format. It may produce a 400-word general overview of operations, not a sub-100-word summary of cost risks for a CFO. State the audience, purpose, focus and limits.",
+      "why_convincing": "Summarising feels like a single, well-defined task."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the prompt omits the audience, focus (cost risks) and length (under 100 words).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "Summarise the report below for the CFO in under 100 words, focusing only on cost risks and their estimated impact. Use 3 bullet points.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "100"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "Running the original prompt yields a 380-word overview covering hiring and logistics.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "380"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The model writes a long general summary."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the prompt with the CFO's needs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes 'summarise' is fully specified."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Good prompts state audience, purpose, focus and format."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List what the model has to guess."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the model must guess length, focus and audience."
+      }
+    ],
+    "repair": "Specify audience, focus, length and format in the instruction.",
+    "debrief": "Every unstated requirement becomes the model's guess. Write down what 'good' looks like.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-llm-prompt-fundamentals-002",
+    "subject": "prompt-engineering",
+    "topic": "LLM & Prompt Fundamentals",
+    "subtopic": "Counting letters with a language model",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is prompting the model to count letters a reliable way to get exact counts?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "For each of these 500 product codes, count how many times the letter 'R' appears and return the count:\n{codes}"
+    },
+    "ai_claim": "Yes. Counting letters is simple, and the model can read every character, so it will return exact counts.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Counting letters is an elementary task."
+      },
+      {
+        "index": 2,
+        "text": "The model reads the codes character by character."
+      },
+      {
+        "index": 3,
+        "text": "So it can count each 'R' exactly."
+      },
+      {
+        "index": 4,
+        "text": "The counts will be reliable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F16",
+      "location": 2,
+      "misconception": "Using token prediction for character-level counting",
+      "explanation": "Models read text as tokens (chunks of characters), not individual letters, so character counts are frequently wrong, especially across 500 items. Exact, mechanical tasks belong in code: have the model write (or call a tool with) code such as code.upper().count('R').",
+      "why_convincing": "The task is trivial for a person, so it seems trivial for the model."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: tokenisation makes character counting unreliable. Use code (or a code tool) to count.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "On 50 codes checked by script, the model's counts are wrong for 9.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "9"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Write Python that returns {code: code.upper().count('R')} for each code, then run it.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A code like 'RRX-R2R' is split into tokens that hide individual letters."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the model perceives text."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes character-level reading."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models process tokens; exact counting suits code."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Check some counts with a script."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the model sees tokens, so counts are unreliable. Use code."
+      }
+    ],
+    "repair": "Delegate counting to code or a tool.",
+    "debrief": "Route deterministic work - counting, arithmetic, sorting - to code. Use the model for language.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-llm-prompt-fundamentals-003",
+    "subject": "prompt-engineering",
+    "topic": "LLM & Prompt Fundamentals",
+    "subtopic": "Giving the model a role and constraints",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this prompt is well structured for consistent, safe replies?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "You are drafting replies for a bank's customer support team.\nAudience: retail customers; write in plain English at about a Class 8 reading level.\nConstraints: do not promise refunds; if the question involves fraud, tell the customer to call 1800-XXX and stop.\nFormat: greeting, 2-4 short paragraphs, sign-off 'Team Support'.\n\nCustomer message:\n<message>{message}</message>"
+    },
+    "ai_claim": "Yes. It sets the role, audience, reading level, hard constraints (no refund promises, fraud escalation) and format, and it clearly separates the customer's message from the instructions.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The role and audience tell the model whom it writes for."
+      },
+      {
+        "index": 2,
+        "text": "Constraints state what must never happen and the fraud procedure."
+      },
+      {
+        "index": 3,
+        "text": "The format is specified."
+      },
+      {
+        "index": 4,
+        "text": "The customer message is delimited, separating data from instructions."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Role, audience, constraints, format and delimited input are the core elements of a robust instruction prompt.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "role -> audience -> constraints -> format -> delimited input",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check each element a support prompt needs."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 notes the delimiters."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Clear prompts specify role, audience, constraints, format and input boundaries."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for anything the model would have to guess."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The prompt is well structured. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "A prompt is a specification. This one states who, for whom, what never to do, what shape to produce and where the data are.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-llm-prompt-fundamentals-004",
+    "subject": "prompt-engineering",
+    "topic": "LLM & Prompt Fundamentals",
+    "subtopic": "Low temperature for extraction",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that temperature 0 is a sensible choice for this extraction task?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Extract the invoice number, date and total from the text below as JSON.\n<invoice>{text}</invoice>",
+      "settings": "temperature = 0"
+    },
+    "ai_claim": "Yes. Extraction has one correct answer, so the most likely tokens are wanted; temperature 0 minimises randomness and makes outputs more consistent across runs (though not perfectly deterministic).",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Extraction has a single correct output."
+      },
+      {
+        "index": 2,
+        "text": "Temperature controls sampling randomness."
+      },
+      {
+        "index": 3,
+        "text": "Temperature 0 picks the most likely token each time."
+      },
+      {
+        "index": 4,
+        "text": "This makes results more consistent, though not guaranteed identical."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Low temperature suits extraction and classification; the caveat about imperfect determinism is accurate.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "At temperature 0, 20 runs on the same invoice produce the same JSON; at 1.0, the date format varies.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "20"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether the task benefits from variety."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 includes a caveat."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Low temperature suits tasks with one right answer."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the prompt several times at each temperature."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Temperature 0 suits extraction. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Match sampling settings to the task: low for extraction and facts, higher for ideation.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "pe-llm-prompt-fundamentals-005",
+    "subject": "prompt-engineering",
+    "topic": "LLM & Prompt Fundamentals",
+    "subtopic": "Will 'be brief' keep answers short",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this prompt keep answers under 100 words?",
+    "artifact_type": "prompt",
+    "artifact": {
+      "prompt": "Answer the user's question. Be brief.\n\nQuestion: {question}",
+      "requirement": "Answers must be under 100 words to fit an SMS channel.",
+      "status": "The prompt has not been tested against real questions yet."
+    },
+    "ai_claim": "Yes. The prompt tells the model to be brief, so its answers will be under 100 words.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The prompt says 'be brief'."
+      },
+      {
+        "index": 2,
+        "text": "Models follow instructions."
+      },
+      {
+        "index": 3,
+        "text": "Brief answers are short."
+      },
+      {
+        "index": 4,
+        "text": "So answers will be under 100 words."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "How the model interprets 'brief' for these questions. 'Brief' is relative: for a simple question it may give 30 words; for a complex one, 'brief' may still be 150 words. No word limit is stated and no testing has been done.",
+    "resolving_scenarios": [
+      "Questions are simple FAQs: the model's brief answers are 25-60 words, all under the limit.",
+      "Questions involve multi-step procedures: 'brief' answers run to 120-180 words, breaking the SMS limit."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "It depends on the questions and the model's reading of 'brief', which have not been tested. Step 3 equates 'brief' with 'under 100 words'.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "For 'How do I transfer my account to another branch?', a 'brief' answer could list 8 steps in 140 words.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "140"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Complex questions produce 'brief' answers over 100 words."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 'brief' means in words."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes 'brief' implies the limit."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Relative instructions need testing or explicit limits."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a complex procedural question."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes an interpretation. Simple questions fit; complex ones may not. It cannot be decided without testing."
+      }
+    ],
+    "repair": "State the limit ('under 100 words') and enforce it in code (count and retry or truncate).",
+    "debrief": "Quantitative requirements need quantitative instructions - and a check in code, because instructions are followed probabilistically.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

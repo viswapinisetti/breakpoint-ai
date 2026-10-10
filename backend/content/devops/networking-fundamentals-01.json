@@ -1,0 +1,485 @@
+[
+  {
+    "id": "dev-networking-fundamentals-001",
+    "subject": "devops",
+    "topic": "Networking Fundamentals",
+    "subtopic": "Ping failing does not mean down",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does 100% ping loss show the API server is down?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "$ ping -c 3 api.shop.example\n3 packets transmitted, 0 received, 100% packet loss\n# AI: \"The API server is down.\""
+    },
+    "ai_claim": "Yes. The server did not reply to any ping, so it is not reachable and the API is down.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "ping sent 3 ICMP echo requests."
+      },
+      {
+        "index": 2,
+        "text": "None received a reply."
+      },
+      {
+        "index": 3,
+        "text": "A server that does not respond is down."
+      },
+      {
+        "index": 4,
+        "text": "So the API is down."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Equating ICMP reachability with service health",
+      "explanation": "Many servers, load balancers and cloud firewalls block ICMP by default, so ping fails while HTTPS on port 443 works fine. Test the actual service: curl -I https://api.shop.example/health, or nc -zv api.shop.example 443.",
+      "why_convincing": "Ping is the traditional first check."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: ICMP may be blocked. Test the service port directly (curl or nc on 443).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "curl -I https://api.shop.example/health returns HTTP/2 200 while ping fails.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "200"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "ICMP and TCP/443 are filtered independently; ping tests only ICMP.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "443"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The API responds normally over HTTPS."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what protocol ping uses."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates no ping reply with the service being down."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Firewalls often block ICMP while allowing application ports."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test port 443 directly."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: ICMP may be blocked. Test the service."
+      }
+    ],
+    "repair": "Check the service itself: curl the health endpoint or nc -zv host 443.",
+    "debrief": "Test the thing you care about. A service is up if it answers on its port, not if it answers pings.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-networking-fundamentals-002",
+    "subject": "devops",
+    "topic": "Networking Fundamentals",
+    "subtopic": "DNS TTLs",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will all users reach the new server from 10:00?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# Record before migration: shop.example A 203.0.113.10 TTL 86400\n# 10:00 - record changed to A 198.51.100.20; old server shut down at 10:05\n# AI: \"DNS updated, so all users reach the new server from 10:00.\""
+    },
+    "ai_claim": "Yes. The A record was updated at 10:00, so from then on DNS returns the new IP to everyone.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The A record now points to 198.51.100.20."
+      },
+      {
+        "index": 2,
+        "text": "DNS answers come from the updated record."
+      },
+      {
+        "index": 3,
+        "text": "Users resolve the new IP."
+      },
+      {
+        "index": 4,
+        "text": "So everyone reaches the new server from 10:00."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Ignoring cached DNS answers",
+      "explanation": "Resolvers and clients cache answers for the record's TTL - here 86,400 seconds, 24 hours. Users whose resolvers cached the old IP keep getting 203.0.113.10 for up to a day, and since the old server was shut down at 10:05, they get errors. Lower the TTL (e.g. to 300 s) a day before the migration and keep the old server running until the old TTL has expired.",
+      "why_convincing": "The record did change immediately at the authoritative server."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: cached answers persist for up to 24 hours (TTL 86400). Lower the TTL in advance and keep the old server up.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "resolver cached the old A record at 09:50 with TTL 86400 -> serves 203.0.113.10 until 09:50 next day",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "86400"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Day before: set TTL 300. Migration: change A record; keep the old server running 24 hours (the old TTL).",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "300"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Users behind a caching ISP resolver hit the shut-down server."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask where DNS answers are cached."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes every answer comes fresh from the record."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Resolvers cache records for their TTL."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Convert 86,400 seconds to hours."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: caches keep the old IP up to 24 hours."
+      }
+    ],
+    "repair": "Lower the TTL before migrating and keep the old endpoint alive for the old TTL.",
+    "debrief": "DNS changes propagate through caches, not instantly. Plan migrations around TTLs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-networking-fundamentals-003",
+    "subject": "devops",
+    "topic": "Networking Fundamentals",
+    "subtopic": "Subnet sizes",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does a /24 subnet fit 500 hosts?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# Plan: put 500 container hosts in subnet 10.20.5.0/24\n# AI: \"A /24 comfortably fits 500 hosts.\""
+    },
+    "ai_claim": "Yes. A /24 is a standard large subnet, which has room for 500 hosts.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The subnet is 10.20.5.0/24."
+      },
+      {
+        "index": 2,
+        "text": "/24 is a common, large subnet size."
+      },
+      {
+        "index": 3,
+        "text": "It has room for hundreds of hosts."
+      },
+      {
+        "index": 4,
+        "text": "So 500 hosts fit."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Misjudging the size of a CIDR block",
+      "explanation": "A /24 leaves 32 - 24 = 8 host bits: 2^8 = 256 addresses, of which 254 are usable (network and broadcast excluded; clouds often reserve more, e.g. AWS reserves 5). 500 hosts need at least a /23 (510 usable).",
+      "why_convincing": "/24 is the most familiar subnet size."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a /24 has 256 addresses (254 usable). Use a /23 or larger.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "2^(32 - 24) = 256 addresses; 256 - 2 = 254 usable",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "256",
+          "254"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Use 10.20.4.0/23: 2^9 = 512 addresses, 510 usable.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "510"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Host number 255 cannot be assigned an address."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute the number of addresses in a /24."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 estimates without calculating."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A /n block has 2^(32 - n) addresses."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 2^8."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: a /24 has 256 addresses. Use a /23."
+      }
+    ],
+    "repair": "Allocate a /23 (or larger, with growth room).",
+    "debrief": "Size subnets with arithmetic and headroom; resizing later usually means re-addressing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-networking-fundamentals-004",
+    "subject": "devops",
+    "topic": "Networking Fundamentals",
+    "subtopic": "SSH open to the world",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is exposing SSH to 0.0.0.0/0 safe because it needs a password?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# Security group for the bastion host\ninbound: tcp 22 from 0.0.0.0/0\n# AI: \"Fine - SSH requires a password, so opening port 22 to everyone is safe.\""
+    },
+    "ai_claim": "Yes. Anyone connecting still needs the password, so an open port does not let attackers in.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Port 22 is open to all IPv4 addresses."
+      },
+      {
+        "index": 2,
+        "text": "SSH requires authentication."
+      },
+      {
+        "index": 3,
+        "text": "Attackers do not know the password."
+      },
+      {
+        "index": 4,
+        "text": "So the exposure is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Relying on a password as the only barrier",
+      "explanation": "An internet-exposed SSH port receives constant automated brute-force attempts, and passwords can be weak, reused or leaked; SSH software vulnerabilities also exist. Restrict the source to known IPs or a VPN, disable password auth in favour of keys, and add rate limiting (fail2ban) - or use a managed session service instead of an open port.",
+      "why_convincing": "Authentication is a real control, so the port seems protected."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: open SSH attracts brute force and exploits. Restrict source IPs, use keys only, or use a session manager.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "auth.log shows thousands of failed logins per day from many countries within hours of opening the port.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "inbound: tcp 22 from 203.0.113.0/28 (office VPN); PasswordAuthentication no",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "22"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A reused password leaked elsewhere opens the server."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who can try to log in."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the password cannot be guessed or leaked."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Defence in depth: reduce exposure as well as authenticate."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at SSH logs for an open server."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: exposure invites brute force. Restrict sources and use keys."
+      }
+    ],
+    "repair": "Allow SSH only from known networks, disable passwords, or use a session manager.",
+    "debrief": "Network exposure is an attack surface in its own right. Authentication should be the second barrier, not the only one.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-networking-fundamentals-005",
+    "subject": "devops",
+    "topic": "Networking Fundamentals",
+    "subtopic": "UDP for real-time calls",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's reasoning about UDP for live media correct?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# Video-call service design note\n# Media streams: RTP over UDP.  Signalling: HTTPS/WebSocket over TCP.\n# AI: \"UDP suits live media: a lost packet is better skipped than waited for; TCP would stall the stream to retransmit.\""
+    },
+    "ai_claim": "Yes. TCP guarantees ordered delivery, so a lost packet blocks everything behind it until it is retransmitted, causing freezes. For live audio and video, a late packet is useless, so UDP (with RTP and concealment) gives lower, steadier latency; signalling, which must be reliable, stays on TCP.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "TCP retransmits lost packets and delivers bytes in order."
+      },
+      {
+        "index": 2,
+        "text": "A lost packet delays all later packets (head-of-line blocking)."
+      },
+      {
+        "index": 3,
+        "text": "In a live call, late media is worthless; skipping is better."
+      },
+      {
+        "index": 4,
+        "text": "So media uses UDP and reliable signalling uses TCP."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Real-time media favours timeliness over reliability, which is why RTP runs over UDP (as in WebRTC), while control messages use reliable transports.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "TCP: packet 5 lost -> packets 6-20 buffered until 5 is retransmitted (~1 RTT) -> audible freeze",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "5"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare what happens to a lost packet under TCP and UDP."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 describes head-of-line blocking."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Live media needs timeliness more than completeness."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Think about a 200 ms retransmission delay in a call."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. UDP suits live media; TCP suits signalling. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Protocol choice follows requirements: reliability and order (TCP) versus timeliness (UDP).",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

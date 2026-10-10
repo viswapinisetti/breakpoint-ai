@@ -1,0 +1,132 @@
+[
+  {
+    "id": "nc-dup-001",
+    "subject": "no-code-automation",
+    "topic": "Error Handling & Production Automation",
+    "subtopic": "Retries and duplicate execution",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this automation process each order exactly once?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Trigger:  Webhook — new order received\nStep 1:   Create record in Orders table\nStep 2:   Charge customer via payment provider\nStep 3:   Send confirmation email\nStep 4:   Return 200 to the webhook caller\n\nSettings: On error, retry the whole workflow up to 3 times."
+    },
+    "ai_claim": "Yes — each order triggers the workflow once, and retries only happen when the workflow errors, so a successful order is processed exactly once.",
+    "ai_solution": [
+      {"index": 1, "text": "The webhook fires once per new order, so there is one workflow run per order."},
+      {"index": 2, "text": "The steps run in sequence, so the charge cannot happen before the record exists."},
+      {"index": 3, "text": "Retries are configured to fire only on error, so a run that completes successfully is never repeated."},
+      {"index": 4, "text": "Each order is therefore processed exactly once."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming a retry re-runs only the failed step, and that partial success counts as failure",
+      "explanation": "The retry re-runs the *whole* workflow. If step 3 fails — a mail outage — the customer has already been charged in step 2, and the retry charges them again. Up to three retries means up to four charges. Sending the email is also not the only way to fail late: any error after step 2 has the same effect.",
+      "why_convincing": "Steps 1 and 2 are correct, and \"retry only on error\" sounds like a safety property. It is one — for the workflow as a unit — but the workflow is not atomic, so a late failure leaves earlier irreversible side effects in place."
+    },
+    "canonical_solution": "No. Whole-workflow retry after a partial success repeats the side effects that already succeeded. A failure at step 3 re-runs steps 1 and 2, charging the customer again — up to four times in total. Fixes: make the charge idempotent by passing the order id as an idempotency key, retry individual steps rather than the whole workflow, and check for an existing order record before creating one.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "trace", "summary": "Trace a failure at step 3 through the retry.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "counterexample", "summary": "A mail outage causes a second charge.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["The mail provider is down. Step 2 charged Rs 4,000, step 3 fails, the workflow retries from step 1 and charges Rs 4,000 again."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what exactly is repeated when a retry fires."},
+      {"level": 2, "kind": "direction", "text": "Steps 1 and 2 are correct. Step 3 assumes something about the granularity of the retry."},
+      {"level": 3, "kind": "concept", "text": "A workflow with irreversible steps is not atomic. A retry after partial success repeats what already happened."},
+      {"level": 4, "kind": "strong", "text": "Trace a run where steps 1 and 2 succeed and step 3 fails."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 assumes the retry resumes from the failure. It restarts the whole workflow, so a failure after the charge charges the customer again — up to four times."}
+    ],
+    "repair": "Pass the order id as an idempotency key on the charge so a repeat is rejected by the payment provider; check for an existing Orders record before creating one; and retry the failing step rather than the whole workflow.",
+    "debrief": "Retry configuration is a correctness decision, not an operational one. \"Retry on error\" is safe only when the unit being retried is atomic, and a workflow that charges a card is not. Whenever you see a retry, identify the irreversible steps and ask what happens if something after them fails — the answer is usually that they happen again.",
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-loop-002",
+    "subject": "no-code-automation",
+    "topic": "Triggers, Actions & Data Mapping",
+    "subtopic": "Trigger loops",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this automation run in a controlled way?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Trigger:  When a row in the Tasks table is updated\nStep 1:   If status is not \"reviewed\", set a \"last_checked\" timestamp on that row\nStep 2:   Notify the assignee"
+    },
+    "ai_claim": "Yes — the condition in step 1 limits which rows are touched, so the automation only affects unreviewed tasks and stops there.",
+    "ai_solution": [
+      {"index": 1, "text": "The trigger fires on updates to the Tasks table."},
+      {"index": 2, "text": "Step 1 applies a condition, so only rows whose status is not \"reviewed\" are modified."},
+      {"index": 3, "text": "The set of affected rows is therefore bounded, and the automation touches only what it should."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Bounding which rows are affected without noticing the trigger consumes its own output",
+      "explanation": "Step 1 writes to the same table the trigger watches, and the write does not change the status. So the update fires the trigger again, the condition passes again, another timestamp is written — an infinite loop, notifying the assignee on every pass. The condition bounds which rows, never how many times.",
+      "why_convincing": "Step 2 is true and reads as the safety check, because a condition on a trigger usually is one. The loop is not visible in any single step: it emerges from the trigger and the action referring to the same table, which are two lines apart."
+    },
+    "canonical_solution": "No. Step 1 updates the Tasks table, which is the trigger source, and leaves the condition still satisfied — so the automation retriggers itself indefinitely and notifies the assignee each time. Fixes: exclude automation-originated updates from the trigger, watch only the status field rather than any update, or have step 1 write to a separate table.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {"type": "trace", "summary": "The write in step 1 satisfies the trigger again.", "must_reference_step": 3, "must_contain_values": []},
+      {"type": "rule", "summary": "An action that writes to the table its own trigger watches re-fires the trigger unless the write makes the condition false.", "must_reference_step": 3, "must_contain_values": []}
+    ],
+    "counterexamples": ["Update task 7 once. Step 1 writes last_checked, which is an update to Tasks, which fires the trigger, which writes again — and the assignee is notified on every cycle."],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Compare what the trigger watches with what the actions write to."},
+      {"level": 2, "kind": "direction", "text": "Step 2 bounds which rows are touched. Ask whether it bounds how often."},
+      {"level": 3, "kind": "concept", "text": "An automation whose action satisfies its own trigger will retrigger itself."},
+      {"level": 4, "kind": "strong", "text": "Trace one manual update and ask what happens immediately after step 1 completes."},
+      {"level": 5, "kind": "reveal", "text": "Step 3 bounds the rows but not the repetitions. Step 1 writes to Tasks, which is the trigger source, and the status is unchanged — so it fires forever."}
+    ],
+    "repair": "Exclude automation-originated updates from the trigger, or narrow the trigger to fire only when the `status` field changes, or write `last_checked` to a separate table the trigger does not watch.",
+    "debrief": "Trigger loops are the characteristic failure of no-code automation, and they never appear in any single step — they emerge from the relationship between the trigger and an action several lines away. The check is mechanical: write down what the trigger watches, write down every table each action writes to, and look for an overlap where the trigger condition still holds afterwards.",
+    "validation_payload": {}
+  },
+  {
+    "id": "nc-guard-003",
+    "subject": "no-code-automation",
+    "topic": "AI-Powered Workflows",
+    "subtopic": "Bounded AI actions",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this AI-assisted workflow safely bounded?",
+    "artifact_type": "workflow",
+    "artifact": {
+      "workflow": "Trigger:  New support email\nStep 1:   AI classifies the email into exactly one of: refund | technical | other\n          (output constrained to that enumeration; anything else routes to \"other\")\nStep 2:   Route to the matching queue\nStep 3:   If \"refund\", create a draft refund for human approval — never issue one\nStep 4:   Log the classification and the email id"
+    },
+    "ai_claim": "Yes — the AI's output is constrained to a fixed set, and the only consequential action it can reach requires human approval.",
+    "ai_solution": [
+      {"index": 1, "text": "The classification output is restricted to three values, with an explicit fallback, so an unexpected output cannot propagate."},
+      {"index": 2, "text": "Routing acts only on that enumerated value, so the AI cannot select an arbitrary destination."},
+      {"index": 3, "text": "The most consequential path creates a draft only; issuing a refund requires a human, so no irreversible action is reachable by the AI alone."},
+      {"index": 4, "text": "Logging records the decision and the email id, so classifications can be audited after the fact."}
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "canonical_solution": "Sound. The design applies the right principle: constrain the model's output to a closed set, act only on that constrained value, keep irreversible actions behind human approval, and log for audit. A misclassification sends an email to the wrong queue — recoverable and visible — rather than moving money. The worst case is bounded by construction, not by the model behaving well.",
+    "canonical_answer": "yes",
+    "valid_evidence": [],
+    "counterexamples": [],
+    "hints": [
+      {"level": 1, "kind": "attention", "text": "Ask what the worst outcome is if the AI classifies every email wrongly."},
+      {"level": 2, "kind": "direction", "text": "Trace the most consequential path, step 3, to its end."},
+      {"level": 3, "kind": "concept", "text": "Safety comes from bounding what an action can do, not from expecting the model to be right."},
+      {"level": 4, "kind": "strong", "text": "Identify every irreversible action in the workflow and check what stands in front of each."},
+      {"level": 5, "kind": "reveal", "text": "This workflow is safely bounded: constrained output, action only on that value, human approval before any refund, and an audit log. Approving it was the right call."}
+    ],
+    "repair": "",
+    "debrief": "The right question for an AI-in-the-loop workflow is not \"will the model be right?\" but \"what is the worst thing that happens when it is wrong?\". Here the answer is a misrouted email — visible and recoverable — because the output is a closed set and the money-moving step needs a human. That is a structural guarantee rather than a hope, which is exactly what distinguishes a bounded design from a merely careful one.",
+    "validation_payload": {}
+  }
+]

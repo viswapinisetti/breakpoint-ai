@@ -1,0 +1,473 @@
+[
+  {
+    "id": "eng-professional-email-chat-communication-001",
+    "subject": "english",
+    "topic": "Professional Email & Chat Communication",
+    "subtopic": "A vague subject line",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 'Query' an effective subject line for this email?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Subject: Query\nBody (8 lines): background on a vendor invoice, and near the end: 'Could you approve the revised amount of Rs 48,000 by Thursday?'\nSent to a finance manager who receives about 150 emails a day."
+    },
+    "ai_claim": "Yes. The email contains a query, so 'Query' accurately describes it, and the manager will open it and find the request.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The email asks a question."
+      },
+      {
+        "index": 2,
+        "text": "'Query' describes the email accurately."
+      },
+      {
+        "index": 3,
+        "text": "The manager will open it."
+      },
+      {
+        "index": 4,
+        "text": "They will find the request."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Ignoring how busy readers triage email",
+      "explanation": "'Query' says nothing about topic, action or urgency, so a manager scanning 150 emails has no reason to open it promptly, and it cannot be found later by search. The actual request is buried at the end. A subject like 'Approval needed by Thu: revised vendor invoice Rs 48,000' tells the reader what, how much and when; put the request in the first line.",
+      "why_convincing": "The subject is not wrong, just uninformative."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the subject gives no topic, action or deadline. Use a specific subject and lead with the request.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rewrite",
+        "summary": "Subject: Approval needed by Thu - revised vendor invoice (Rs 48,000)\nFirst line: Could you please approve the revised invoice amount of Rs 48,000 by Thursday?",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "48,000"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "Effective subject lines state the topic and any action or deadline.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The email sits unopened until after Thursday."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Imagine scanning 150 subject lines."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the manager will open it promptly."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Subjects should tell the reader what is needed and when."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Where is the actual request?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 'Query' gives no reason to act. Be specific."
+      }
+    ],
+    "repair": "Write a specific subject with the action and deadline, and state the request first.",
+    "debrief": "Busy readers decide from the subject line and first sentence. Put the action there.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-professional-email-chat-communication-002",
+    "subject": "english",
+    "topic": "Professional Email & Chat Communication",
+    "subtopic": "All capitals for urgency",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this message convey urgency politely?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "passage": "Chat message to a colleague: \"PLEASE SEND THE REPORT TODAY. IT IS URGENT.\""
+    },
+    "ai_claim": "Yes. Capitals make the urgency clear, and 'please' keeps the message polite.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The message says 'please'."
+      },
+      {
+        "index": 2,
+        "text": "Capitals emphasise the importance."
+      },
+      {
+        "index": 3,
+        "text": "So urgency is clear."
+      },
+      {
+        "index": 4,
+        "text": "And the message remains polite."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Misjudging how capitals read in writing",
+      "explanation": "In digital communication, all capitals is read as shouting, which comes across as angry or aggressive regardless of 'please'. Urgency is better conveyed with a reason and a specific time: 'Could you please send the report by 4 pm today? The client review starts at 5.'",
+      "why_convincing": "The writer intends emphasis, not anger."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: all caps reads as shouting. State the deadline and the reason instead.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Writing in all capitals is widely perceived as shouting in digital messages.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Could you please send the report by 4 pm today? The client review starts at 5.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The colleague replies defensively: 'No need to shout.'"
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how capitals feel to the reader."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes capitals read as emphasis."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Tone in writing comes from wording and formatting."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Rewrite with a deadline and a reason."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: all caps reads as shouting."
+      }
+    ],
+    "repair": "Could you please send the report by 4 pm today? The client review starts at 5.",
+    "debrief": "Urgency is conveyed best by specifics - a time and a reason - not by volume.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-professional-email-chat-communication-003",
+    "subject": "english",
+    "topic": "Professional Email & Chat Communication",
+    "subtopic": "A missing ask",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this email get the approval the writer needs in time?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Email body: three paragraphs describing a delayed shipment, the vendor's explanation, and the history of similar delays last year. It ends: 'Let me know your thoughts.'\nThe writer needs the manager to approve air freight (Rs 60,000 extra) by tomorrow noon to meet the client deadline."
+    },
+    "ai_claim": "Yes. The email explains the situation thoroughly, so the manager understands the problem and will respond with approval.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The email gives full background."
+      },
+      {
+        "index": 2,
+        "text": "The manager understands the delay."
+      },
+      {
+        "index": 3,
+        "text": "They are invited to share their thoughts."
+      },
+      {
+        "index": 4,
+        "text": "So they will approve in time."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 3,
+      "misconception": "Leaving out the request and the deadline",
+      "explanation": "The email never asks for the decision or mentions the Rs 60,000 air-freight option or the noon deadline. 'Let me know your thoughts' invites discussion, not a decision. Lead with the ask: 'Please approve air freight (Rs 60,000 extra) by 12 pm tomorrow so we meet the client deadline', then give brief background.",
+      "why_convincing": "Thorough background feels helpful and complete."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the email contains no request or deadline. State the decision needed, the cost and the deadline first.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "contradiction",
+        "summary": "The writer needs approval by noon tomorrow, but the email only asks for 'thoughts'.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Decision needed by 12 pm tomorrow: approve air freight (Rs 60,000 extra) to meet the client's deadline? Background below.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "60,000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The manager replies with questions on Friday, after the deadline."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the request in the email."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes 'thoughts' will produce approval."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Action emails should state the ask, cost and deadline up front."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Search the email for 'approve'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: there is no explicit ask or deadline."
+      }
+    ],
+    "repair": "Put the decision, its cost and the deadline in the first line.",
+    "debrief": "Structure action emails as: ask, deadline, reason, details. Background comes last.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-professional-email-chat-communication-004",
+    "subject": "english",
+    "topic": "Professional Email & Chat Communication",
+    "subtopic": "Just 'Hi' in chat",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is sending only 'Hi' and waiting the most efficient way to start this chat?",
+    "artifact_type": "sentence",
+    "artifact": {
+      "passage": "Workplace chat (colleague in another office):\n10:02 You: \"Hi\"\n(no further message until they reply)\nAI: \"Sending just 'Hi' first and waiting is the most efficient and polite way to start.\""
+    },
+    "ai_claim": "Yes. Greeting first and waiting for a reply is polite and ensures the person is available before you ask your question.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Greeting first is polite."
+      },
+      {
+        "index": 2,
+        "text": "Waiting checks the colleague is available."
+      },
+      {
+        "index": 3,
+        "text": "Then the question can be asked."
+      },
+      {
+        "index": 4,
+        "text": "So this is most efficient."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 4,
+      "misconception": "Assuming a bare greeting is efficient in asynchronous chat",
+      "explanation": "Chat is asynchronous: the colleague may see 'Hi' an hour later, reply 'Hi', and only then learn what you need - costing a full round trip. Include the greeting and the question together: 'Hi Meera - could you share the Q3 vendor list? I need it for the 3 pm review.' That is equally polite and lets them answer in one go.",
+      "why_convincing": "Face-to-face conversations do start with a greeting and a pause."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a bare 'Hi' adds a round trip. Greet and ask in the same message.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "The colleague replies 'Hi?' at 11:15; the question is asked at 11:20 and answered at 12:40.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "11:15"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Hi Meera - could you share the Q3 vendor list? I need it for the 3 pm review.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "3"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The request waits hours because the question was never sent."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think about when the colleague reads each message."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes waiting saves time."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In asynchronous chat, context up front avoids round trips."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Count the messages needed before the question is answered."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: a bare greeting delays the request."
+      }
+    ],
+    "repair": "Hi Meera - could you share the Q3 vendor list? I need it for the 3 pm review.",
+    "debrief": "Politeness and efficiency can coexist: greet and ask in one message.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "eng-professional-email-chat-communication-005",
+    "subject": "english",
+    "topic": "Professional Email & Chat Communication",
+    "subtopic": "A well-structured escalation",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this escalation email is clear and effective?",
+    "artifact_type": "paragraph",
+    "artifact": {
+      "passage": "Subject: Action needed today: payment gateway errors affecting 8% of checkouts\n\"Hi Arjun,\nSince 11:40, about 8% of checkout payments are failing with gateway timeout errors (roughly Rs 2 lakh/hour in lost orders).\nWe've ruled out our servers; the gateway's status page shows no incident.\nCould you contact the gateway's account manager and escalate by 2 pm?\nI'll update this thread every 30 minutes. Logs and error samples are attached.\nThanks,\nNeha\""
+    },
+    "ai_claim": "Yes. The subject states the action and impact; the body gives when it started, the size of the problem, what has been checked, a specific ask with a deadline, and how updates will follow.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The subject shows urgency, action and impact."
+      },
+      {
+        "index": 2,
+        "text": "The first line gives start time, error rate and business impact."
+      },
+      {
+        "index": 3,
+        "text": "It states what has been ruled out."
+      },
+      {
+        "index": 4,
+        "text": "It makes a specific request with a deadline and promises updates."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. It follows the context-impact-ask-deadline structure and gives the reader everything needed to act.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Effective escalations state impact, evidence, the specific ask, the deadline and next communication.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the reader knows what to do and by when."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 contains the ask and deadline."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Good escalations are specific about impact and action."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for the business impact figure."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The email is clear and actionable. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Compare this with the 'Let me know your thoughts' email: same urgency, very different results.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

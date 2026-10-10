@@ -1,0 +1,470 @@
+[
+  {
+    "id": "dev-git-github-001",
+    "subject": "devops",
+    "topic": "Git & GitHub",
+    "subtopic": "git reset --hard",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Are the uncommitted edits preserved?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# Working tree has 2 hours of uncommitted edits to app.py\n$ git reset --hard origin/main\n# AI: \"This just moves your branch to match origin/main; your edits stay in the working directory.\""
+    },
+    "ai_claim": "Yes. reset --hard only moves the branch pointer to origin/main; the working directory keeps your uncommitted edits.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "reset moves the current branch to another commit."
+      },
+      {
+        "index": 2,
+        "text": "The target is origin/main."
+      },
+      {
+        "index": 3,
+        "text": "Uncommitted edits are in the working directory."
+      },
+      {
+        "index": 4,
+        "text": "So they stay."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Forgetting that --hard overwrites the working tree",
+      "explanation": "--hard resets the branch, the index and the working directory. Uncommitted changes to tracked files are discarded permanently (they were never committed, so the reflog cannot recover them). To keep work, commit or stash first; git reset --soft or --mixed would keep working-tree changes.",
+      "why_convincing": "Plain git reset (mixed) does keep working-tree changes, which is where the belief comes from."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: --hard discards uncommitted changes to tracked files. Stash or commit first.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "git reset --hard resets the index and working tree to the target commit.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "git stash push -m 'wip' && git reset --hard origin/main && git stash pop",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "app.py returns to origin/main's version; the 2 hours of edits are gone."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what --hard does to the working tree."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the working directory is untouched."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "--soft, --mixed and --hard differ in what they reset."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try it on a scratch repository."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: --hard overwrites uncommitted changes."
+      }
+    ],
+    "repair": "Stash or commit before a hard reset.",
+    "debrief": "Uncommitted work has no safety net in Git. Commit early, even on a scratch branch.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-git-github-002",
+    "subject": "devops",
+    "topic": "Git & GitHub",
+    "subtopic": "Deleting a committed secret",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the password now removed from the repository?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "$ git add .env && git commit -m 'config' && git push      # .env contains the production DB password\n$ git rm --cached .env && echo .env >> .gitignore\n$ git commit -m 'remove .env' && git push\n# AI: \"The password is removed from the repository.\""
+    },
+    "ai_claim": "Yes. .env was deleted from the repository and ignored, so the password is no longer in the repository.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The .env file was untracked with git rm --cached."
+      },
+      {
+        "index": 2,
+        "text": ".gitignore now prevents it from being added again."
+      },
+      {
+        "index": 3,
+        "text": "The latest commit has no .env."
+      },
+      {
+        "index": 4,
+        "text": "So the password is removed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Treating the latest commit as the whole repository",
+      "explanation": "Git keeps every commit. The first commit still contains .env, and anyone with the repository (and every fork or clone made meanwhile) can run git show <commit>:.env. Treat the password as compromised: rotate it immediately. Rewriting history (git filter-repo) helps only afterwards and cannot recall existing copies.",
+      "why_convincing": "The file has disappeared from the working tree and latest commit."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the password remains in history and in every clone. Rotate it now; optionally purge history with git filter-repo.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "git log --all -- .env shows the 'config' commit; git show <sha>:.env prints the password",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Any secret pushed to a shared repository must be considered leaked and rotated.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "git show HEAD~1:.env still prints the password."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether Git forgets old commits."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 looks only at the latest commit."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "History keeps every version of every file."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Show .env from the earlier commit."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the password is in history. Rotate it."
+      }
+    ],
+    "repair": "Rotate the password immediately; then purge history and add secret scanning.",
+    "debrief": "Secret removal is rotation, not deletion. Secret-scanning hooks prevent the commit in the first place.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-git-github-003",
+    "subject": "devops",
+    "topic": "Git & GitHub",
+    "subtopic": "Force-pushing a shared branch",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is force-pushing the rewritten main branch safe for the team?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# Five developers push to main.\n$ git rebase -i HEAD~10          # squash my messy commits\n$ git push --force origin main\n# AI: \"Force-push is fine; it just updates main with your cleaned-up history.\""
+    },
+    "ai_claim": "Yes. The rebase only cleaned up commit messages and squashed commits, so force-pushing replaces main with an equivalent, tidier history.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The rebase squashed the last 10 commits."
+      },
+      {
+        "index": 2,
+        "text": "The code is the same, just with fewer commits."
+      },
+      {
+        "index": 3,
+        "text": "Force-push updates main with this history."
+      },
+      {
+        "index": 4,
+        "text": "So it is safe for everyone."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Rewriting history others depend on",
+      "explanation": "The last 10 commits on main include colleagues' work, and everyone's clones and branches are based on the old commits. Force-push replaces them: commits pushed by others since your fetch are silently discarded, and teammates' next pull produces conflicts or duplicate commits. Never rewrite shared branches; squash on your feature branch before merging, and protect main against force-push.",
+      "why_convincing": "Rebasing one's own local branch is routine."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: it rewrites commits others have and can discard their pushes. Keep shared history immutable; protect main.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Colleague pushes C11 at 10:02; you force-push at 10:05 based on C10 -> C11 disappears from main",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "11"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "Squash on the feature branch, open a PR, merge; enable branch protection (no force-push) on main.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A colleague's commit vanishes from main."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask who else has these commits."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes nobody else depends on the old history."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Never rewrite published history on shared branches."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a push by a colleague after your last fetch."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: force-push breaks others' work. Protect main."
+      }
+    ],
+    "repair": "Rewrite only unpublished branches; use branch protection; prefer --force-with-lease on personal branches.",
+    "debrief": "Published history is shared infrastructure. Protect it with rules rather than relying on care.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-git-github-004",
+    "subject": "devops",
+    "topic": "Git & GitHub",
+    "subtopic": ".gitignore and tracked files",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will Git stop tracking changes to logs/app.log?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# logs/app.log has been committed and is updated on every run\n$ echo 'logs/' >> .gitignore\n$ git commit -am 'ignore logs'\n# AI: \"Git will now ignore changes to logs/app.log.\""
+    },
+    "ai_claim": "Yes. logs/ is now in .gitignore, so Git ignores that directory, including app.log.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": ".gitignore lists logs/."
+      },
+      {
+        "index": 2,
+        "text": "Files matching .gitignore are ignored."
+      },
+      {
+        "index": 3,
+        "text": "logs/app.log matches."
+      },
+      {
+        "index": 4,
+        "text": "So its changes are ignored."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming .gitignore applies to tracked files",
+      "explanation": ".gitignore only prevents untracked files from being added. logs/app.log is already tracked, so Git keeps tracking and reporting its changes. Remove it from the index (git rm --cached logs/app.log) and commit; then the ignore rule takes effect.",
+      "why_convincing": "The file matches the ignore pattern exactly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: tracked files are unaffected by .gitignore. Run git rm --cached logs/app.log and commit.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "After the next run, git status still shows 'modified: logs/app.log'.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "git rm --cached logs/app.log && git commit -m 'stop tracking logs'",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "git status keeps listing app.log as modified."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the file is already tracked."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 applies ignore rules to tracked files."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": ".gitignore affects only untracked files."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run git status after the next change."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: tracked files stay tracked. Untrack it first."
+      }
+    ],
+    "repair": "`git rm --cached logs/app.log`, then commit.",
+    "debrief": "Ignore rules prevent additions; they do not undo them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-git-github-005",
+    "subject": "devops",
+    "topic": "Git & GitHub",
+    "subtopic": "Reverting a pushed commit",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# Commit a1b2c3 on main (already pushed and pulled by the team) introduced a bug.\n$ git revert a1b2c3\n$ git push origin main\n# AI: \"revert creates a new commit that undoes a1b2c3, so history is not rewritten and teammates just pull normally.\""
+    },
+    "ai_claim": "Yes. git revert adds a new commit with the inverse changes of a1b2c3. Existing history is untouched, so it is safe on a shared branch and teammates' clones stay consistent.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "revert computes the inverse of a1b2c3's changes."
+      },
+      {
+        "index": 2,
+        "text": "It records them as a new commit."
+      },
+      {
+        "index": 3,
+        "text": "No existing commits are modified or removed."
+      },
+      {
+        "index": 4,
+        "text": "Teammates pull the new commit normally."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Revert is the safe way to undo published commits; reset and force-push would rewrite shared history.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "git log shows ... -> a1b2c3 -> Revert 'a1b2c3' ; earlier commits unchanged",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare revert with reset."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is the key property."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Revert undoes changes by adding history, not removing it."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at git log after the revert."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Revert is safe for shared branches. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "On shared branches, fix forward: revert or add commits. Rewriting is for private history.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

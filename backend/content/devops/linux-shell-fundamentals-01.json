@@ -1,0 +1,481 @@
+[
+  {
+    "id": "dev-linux-shell-fundamentals-001",
+    "subject": "devops",
+    "topic": "Linux & Shell Fundamentals",
+    "subtopic": "Unset variables in rm -rf",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is this cleanup script safe to run on a CI server?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "#!/bin/bash\n# cleanup.sh - removes the build output directory\nrm -rf \"$BUILD_DIR\"/"
+    },
+    "ai_claim": "Yes. It only deletes the build directory named in BUILD_DIR, and the path is quoted, so nothing else is affected.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The script removes $BUILD_DIR/."
+      },
+      {
+        "index": 2,
+        "text": "The variable is quoted, which handles spaces."
+      },
+      {
+        "index": 3,
+        "text": "BUILD_DIR points to the build output."
+      },
+      {
+        "index": 4,
+        "text": "So only the build directory is deleted."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Not handling an unset or empty variable",
+      "explanation": "If BUILD_DIR is unset or empty (a renamed variable, a different job), \"$BUILD_DIR\"/ expands to /, and the script runs rm -rf / - deleting everything the CI user can write. Quoting does not help. Use set -u, and ${BUILD_DIR:?BUILD_DIR not set} to abort when it is empty.",
+      "why_convincing": "Quoting looks like the safety measure, and in normal runs the variable is set."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: with BUILD_DIR unset, the command becomes rm -rf /. Use \"${BUILD_DIR:?}\" (and set -u).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "BUILD_DIR unset -> \"$BUILD_DIR\"/ -> \"\"/ -> rm -rf /",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "set -euo pipefail\nrm -rf \"${BUILD_DIR:?BUILD_DIR is not set}\"/",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A job that forgets to set BUILD_DIR runs rm -rf /."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the command becomes if the variable is empty."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes BUILD_DIR is always set."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Empty variables in paths can expand to dangerous values."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Echo the command with BUILD_DIR unset."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: unset BUILD_DIR turns this into rm -rf /. Guard the variable."
+      }
+    ],
+    "repair": "Use `rm -rf \"${BUILD_DIR:?}\"/` and `set -u`.",
+    "debrief": "Destructive commands built from variables need guards for the empty case. ${VAR:?} is the idiomatic one.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-linux-shell-fundamentals-002",
+    "subject": "devops",
+    "topic": "Linux & Shell Fundamentals",
+    "subtopic": "Filenames with spaces",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this loop compress both log files?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "for f in $(ls *.log); do\n  gzip \"$f\"\ndone\n# The directory contains: 'app 1.log', 'b.log'"
+    },
+    "ai_claim": "Yes. ls lists both files and the loop runs gzip on each, with the filename quoted inside the loop.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "ls *.log lists app 1.log and b.log."
+      },
+      {
+        "index": 2,
+        "text": "The loop iterates over the listed names."
+      },
+      {
+        "index": 3,
+        "text": "\"$f\" is quoted, so spaces are safe."
+      },
+      {
+        "index": 4,
+        "text": "Both files are compressed."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 2,
+      "misconception": "Word-splitting command output",
+      "explanation": "$(ls *.log) is unquoted, so its output is split on whitespace: the loop sees 'app', '1.log' and 'b.log'. gzip fails on 'app' and '1.log' (no such files) and 'app 1.log' is never compressed. Quoting \"$f\" later is too late. Iterate over the glob directly: for f in *.log; do gzip \"$f\"; done.",
+      "why_convincing": "The quotes inside the loop look like they handle spaces."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the list is split into 'app', '1.log', 'b.log'. Use for f in *.log.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "$(ls *.log) -> 'app 1.log b.log' -> words: app | 1.log | b.log",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "1"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "for f in *.log; do gzip \"$f\"; done",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "gzip reports 'app: No such file or directory'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Echo each loop value in brackets."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the loop sees whole filenames."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Unquoted command substitution undergoes word splitting."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Test with a filename that contains a space."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the names are split on spaces. Loop over the glob."
+      }
+    ],
+    "repair": "Iterate over the glob (`for f in *.log`), never over `ls` output.",
+    "debrief": "Parsing ls output is a classic shell bug. Globs and find -print0 handle arbitrary filenames.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-linux-shell-fundamentals-003",
+    "subject": "devops",
+    "topic": "Linux & Shell Fundamentals",
+    "subtopic": "chmod 777 as a fix",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is chmod -R 777 on the uploads folder a safe fix?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "# nginx cannot read /srv/app/uploads -> 'Permission denied'\nsudo chmod -R 777 /srv/app/uploads\n# AI: \"Fixed. It's only the uploads folder, so this is safe.\""
+    },
+    "ai_claim": "Yes. It gives nginx the access it needs, and it only affects the uploads folder, so the rest of the system is unaffected.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "nginx lacked permission to read uploads."
+      },
+      {
+        "index": 2,
+        "text": "777 gives read, write and execute to everyone."
+      },
+      {
+        "index": 3,
+        "text": "Only the uploads folder is changed."
+      },
+      {
+        "index": 4,
+        "text": "So the fix is safe."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Granting everyone write and execute to fix a read problem",
+      "explanation": "777 lets every user and process on the machine modify, replace and execute files in uploads - including a compromised service that could plant a web shell nginx then serves. nginx only needed read access. Fix ownership or group (e.g. chgrp -R www-data; chmod -R g+rX) or give the minimum mode (755 directories, 644 files).",
+      "why_convincing": "It works immediately, and 'only one folder' sounds contained."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: 777 grants write/execute to all users. Grant nginx's group read access only (g+rX, or 755/644).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Least privilege: grant the minimum permissions required (nginx needs read, plus execute on directories).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "sudo chgrp -R www-data /srv/app/uploads && sudo chmod -R g+rX,o-rwx /srv/app/uploads",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Any local user can now replace an uploaded file with a malicious one."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what 777 permits and to whom."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a folder-level change is contained."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Permissions should match the least access needed."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List what nginx actually needs."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: 777 lets everyone write and execute. Grant read access only."
+      }
+    ],
+    "repair": "Adjust ownership/group and grant read (and directory traverse) permissions only.",
+    "debrief": "Permission errors tempt broad fixes. Diagnose who needs what access, and grant exactly that.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-linux-shell-fundamentals-004",
+    "subject": "devops",
+    "topic": "Linux & Shell Fundamentals",
+    "subtopic": "Exit status of a pipeline",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the script deploy only when the tests pass?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "bash",
+      "command": "#!/bin/bash\nmake test | tee test.log\nif [ $? -eq 0 ]; then\n  echo \"Tests passed, deploying\"\n  ./deploy.sh\nfi"
+    },
+    "ai_claim": "Yes. $? holds the exit status of the test command, so deployment runs only if make test succeeded.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "make test runs the tests."
+      },
+      {
+        "index": 2,
+        "text": "tee copies the output to test.log."
+      },
+      {
+        "index": 3,
+        "text": "$? is the exit status of make test."
+      },
+      {
+        "index": 4,
+        "text": "So deployment runs only on success."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming a pipeline reports the first command's status",
+      "explanation": "A pipeline's exit status is that of its last command - tee - which succeeds whenever it can write the log. Failing tests still give $? = 0, and the script deploys broken code. Use set -o pipefail (so any failing stage fails the pipeline) or check ${PIPESTATUS[0]}.",
+      "why_convincing": "Without the tee, the check would be correct."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: $? is tee's status (0), so failing tests still deploy. Add set -o pipefail.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "false | tee /dev/null; echo $? -> 0; with set -o pipefail -> 1",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0",
+          "1"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "set -euo pipefail\nmake test | tee test.log\n./deploy.sh",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A failing test run triggers a deployment."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which command's status $? holds after a pipeline."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes it is make test's."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A pipeline returns the last command's exit status unless pipefail is set."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try false | tee /dev/null; echo $?."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: $? is tee's status. Use set -o pipefail."
+      }
+    ],
+    "repair": "Add `set -o pipefail` (and ideally `set -eu`).",
+    "debrief": "Pipelines hide failures by default. set -euo pipefail is the standard safety header for scripts.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-linux-shell-fundamentals-005",
+    "subject": "devops",
+    "topic": "Linux & Shell Fundamentals",
+    "subtopic": "Strict mode for scripts",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that set -euo pipefail makes this script fail safely?",
+    "artifact_type": "shell_command",
+    "artifact": {
+      "language": "bash",
+      "command": "#!/usr/bin/env bash\nset -euo pipefail\n\nrelease_dir=\"/srv/releases/${VERSION}\"\nmkdir -p \"$release_dir\"\ncurl -fsSL \"$ARTIFACT_URL\" | tar -xz -C \"$release_dir\""
+    },
+    "ai_claim": "Yes. -e stops on any failing command, -u makes an unset VERSION or ARTIFACT_URL an error instead of an empty string, and pipefail makes a failed download fail the pipeline even though tar is last. curl -f also turns HTTP errors into failures.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "set -e exits on the first failing command."
+      },
+      {
+        "index": 2,
+        "text": "set -u treats unset variables as errors."
+      },
+      {
+        "index": 3,
+        "text": "set -o pipefail fails the pipeline if curl fails."
+      },
+      {
+        "index": 4,
+        "text": "curl -f returns non-zero on HTTP errors such as 404."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Together these flags prevent silent failures: no empty paths, no half-extracted releases from failed downloads.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "VERSION unset -> 'VERSION: unbound variable' -> exit before mkdir",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "trace",
+        "summary": "ARTIFACT_URL returns 404 -> curl -f exits 22 -> pipefail fails the pipeline -> script exits",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "22"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider what happens if VERSION is unset or the download fails."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 explains pipefail's role."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Strict mode turns silent errors into immediate failures."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Trace a 404 from curl."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The script fails safely. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Scripts that stop at the first error are easier to trust and debug than scripts that continue in a broken state.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

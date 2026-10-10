@@ -1,0 +1,400 @@
+[
+  {
+    "id": "fe-css-responsive-design-001",
+    "subject": "frontend",
+    "topic": "CSS & Responsive Design",
+    "subtopic": "content-box sizing",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How wide is the .card on screen, in pixels, from outer border edge to outer border edge?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": ".card {\n  width: 300px;\n  padding: 20px;\n  border: 2px solid #ccc;\n}\n/* no box-sizing rule anywhere in the stylesheet */"
+    },
+    "ai_claim": "300px. The width property sets the card's width; padding and border fit inside it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "width is 300px."
+      },
+      {
+        "index": 2,
+        "text": "Padding of 20px sits inside the card."
+      },
+      {
+        "index": 3,
+        "text": "The 2px border is drawn within the card's width."
+      },
+      {
+        "index": 4,
+        "text": "So the card is 300px wide."
+      }
+    ],
+    "ai_final_answer": "300",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Assuming border-box sizing",
+      "explanation": "The default box-sizing is content-box: width sets only the content area, and padding and border are added outside it. The rendered width is 300 + 2 x 20 + 2 x 2 = 344px. With box-sizing: border-box, width would include padding and border, and the card would be 300px.",
+      "why_convincing": "Many projects set border-box globally, so 300px is what developers usually see."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "344px: content 300 + padding 40 + border 4 under the default content-box model. Add box-sizing: border-box for a 300px card.",
+    "canonical_answer": "344",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Under box-sizing: content-box (the default), width excludes padding and border.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "DevTools shows the element's rendered width as 300 + 40 + 4 = 344px.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "344"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Two 300px cards in a 600px container wrap, because each is actually 344px."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which box model applies when box-sizing is not set."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 places padding inside the width."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "content-box width covers only the content; padding and border are added outside."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Add up content, padding on both sides and border on both sides."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: with content-box, the width is 300 + 40 + 4 = 344px."
+      }
+    ],
+    "repair": "Add `*, *::before, *::after { box-sizing: border-box; }`.",
+    "debrief": "The box model is a default, not a law. Because many resets switch to border-box, it is easy to forget that plain CSS adds padding and border to width. Check box-sizing before doing layout arithmetic.",
+    "transfer_check": {
+      "question": "With content-box, width: 200px, padding: 10px and border: 1px, how wide is the element, in pixels?",
+      "answer": "222",
+      "explanation": "200 + 2 x 10 + 2 x 1 = 222."
+    },
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-css-responsive-design-002",
+    "subject": "frontend",
+    "topic": "CSS & Responsive Design",
+    "subtopic": "Media query order in the cascade",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "On a 500px-wide viewport, is the title 18px?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": ".title { font-size: 32px; }\n\n@media (max-width: 600px) {\n  .title { font-size: 18px; }\n}\n\n@media (max-width: 900px) {\n  .title { font-size: 24px; }\n}"
+    },
+    "ai_claim": "Yes. At 500px the max-width: 600px query applies, and it is the most specific match for small screens, so the title is 18px.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "At 500px, max-width: 600px matches."
+      },
+      {
+        "index": 2,
+        "text": "max-width: 900px also matches."
+      },
+      {
+        "index": 3,
+        "text": "The narrower query is more specific to small screens, so its rule wins."
+      },
+      {
+        "index": 4,
+        "text": "So the title is 18px."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Believing a narrower media query is more specific",
+      "explanation": "Media queries add no specificity. Both rules have the same selector (.title), so the one that comes later in the stylesheet wins. The 900px block is last, so the title is 24px at 500px. With max-width queries, order them from widest to narrowest.",
+      "why_convincing": "Steps 1 and 2 are correct, and 'more specific' sounds like the CSS rule that resolves conflicts."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Both queries match and the selectors are equal, so source order decides: the later 900px rule wins and the title is 24px. Put the 900px block before the 600px block.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "Media queries do not add specificity; with equal specificity, the later declaration wins.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rewrite",
+        "summary": "Place @media (max-width: 900px) before @media (max-width: 600px).",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "900",
+          "600"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "At 500px, DevTools shows font-size 24px, with the 18px rule crossed out."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Both queries match at 500px. What breaks the tie?"
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims a narrower query wins."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Media queries do not change specificity; equal selectors are resolved by source order."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at which @media block comes last."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the later 900px rule wins, so the title is 24px. Order max-width queries from widest to narrowest."
+      }
+    ],
+    "repair": "Order max-width queries from widest to narrowest (or write mobile-first min-width queries in increasing order).",
+    "debrief": "Media queries only decide whether a rule applies; the cascade then decides which applying rule wins. Overlapping ranges plus source order produce most 'my breakpoint doesn't work' bugs.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-css-responsive-design-003",
+    "subject": "frontend",
+    "topic": "CSS & Responsive Design",
+    "subtopic": "Media queries without a viewport meta tag",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "On a phone whose screen is 390 CSS pixels wide, is the sidebar hidden?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": "/* <head> has no <meta name=\"viewport\"> tag */\n\n.sidebar { width: 300px; }\n\n@media (max-width: 600px) {\n  .sidebar { display: none; }\n}"
+    },
+    "ai_claim": "Yes. The phone is 390px wide, which is less than 600px, so the media query applies and hides the sidebar.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The phone screen is 390px wide."
+      },
+      {
+        "index": 2,
+        "text": "max-width: 600px matches viewports up to 600px."
+      },
+      {
+        "index": 3,
+        "text": "390 is less than 600."
+      },
+      {
+        "index": 4,
+        "text": "So the sidebar is hidden."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 1,
+      "misconception": "Equating the phone's screen width with the layout viewport",
+      "explanation": "Without <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">, mobile browsers lay the page out on a virtual viewport about 980px wide and then zoom out. The media query sees roughly 980px, so it does not match and the sidebar stays visible (tiny). The viewport meta tag makes the layout viewport equal the device width.",
+      "why_convincing": "Desktop browser tools resized to 390px do apply the query, so the page seems to work."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without the viewport meta tag, the layout viewport is about 980px, so max-width: 600px does not match. Add <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "On a real phone, window.innerWidth reports about 980 without the meta tag and 390 with it.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "980",
+          "390"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">",
+        "must_reference_step": 1,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "On an actual phone, the sidebar is visible and the whole page is zoomed out."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what width the media query actually sees on a phone."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 assumes the viewport equals the phone's screen width."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Without a viewport meta tag, mobile browsers use a wide virtual viewport, typically 980px."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at what the page's <head> is missing."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 1 is wrong: without the meta tag the layout viewport is about 980px, so the query does not match. Add the viewport meta tag."
+      }
+    ],
+    "repair": "Add `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">` to the head.",
+    "debrief": "Responsive CSS depends on HTML: the viewport meta tag is what makes a phone report its real width to CSS. Desktop resizing does not reproduce this, so test on a device or in device emulation mode.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "fe-css-responsive-design-004",
+    "subject": "frontend",
+    "topic": "CSS & Responsive Design",
+    "subtopic": "Percentage heights need a definite parent",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is .panel 200px tall - half of the wrapper's 400px?",
+    "artifact_type": "stylesheet",
+    "artifact": {
+      "language": "css",
+      "css": ".wrapper {\n  /* no height set; contains 400px of content */\n}\n.panel {\n  height: 50%;\n}\n\n<div class=\"wrapper\">\n  <div class=\"panel\">...</div>\n  <p>... 400px of text ...</p>\n</div>"
+    },
+    "ai_claim": "Yes. The wrapper is 400px tall because of its content, and 50% of 400px is 200px.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The wrapper's content makes it 400px tall."
+      },
+      {
+        "index": 2,
+        "text": "A percentage height is relative to the parent's height."
+      },
+      {
+        "index": 3,
+        "text": "50% of 400px is 200px."
+      },
+      {
+        "index": 4,
+        "text": "So the panel is 200px tall."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 2,
+      "misconception": "Resolving a percentage height against an auto-height parent",
+      "explanation": "A percentage height resolves only against a containing block with a definite height. The wrapper's height is auto - it depends on its content, including the panel itself - so the percentage cannot be resolved and height: 50% behaves as auto. The panel is as tall as its own content. Give the wrapper an explicit height, or use flex/grid layout.",
+      "why_convincing": "The wrapper visibly is 400px tall, so resolving 50% against it seems natural."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the parent's height is not definite, so 50% computes to auto and the panel sizes to its content. Set a height on the wrapper or use a flex/grid layout.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "rule",
+        "summary": "CSS 2: if the containing block's height is not specified explicitly, a percentage height computes to auto.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "DevTools shows the panel's height equal to its content, not 200px.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "200"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An empty panel with height: 50% has zero height."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether the wrapper's height is set or computed from content."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes any parent height works for percentages."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Percentage heights need the containing block to have a definite height."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask what 50% would mean if the panel's height changed the wrapper's height."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the wrapper's auto height makes 50% compute to auto. Give the wrapper a height or use flex/grid."
+      }
+    ],
+    "repair": "Give .wrapper an explicit height, or make it a flex/grid container and size the panel there.",
+    "debrief": "Widths flow down from the viewport, but heights usually flow up from content, which is why percentage heights so often 'do nothing'. Percentages need a definite reference; check where the reference size comes from.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

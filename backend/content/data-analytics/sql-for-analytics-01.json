@@ -1,0 +1,666 @@
+[
+  {
+    "id": "da-sql-for-analytics-001",
+    "subject": "data-analytics",
+    "topic": "SQL for Analytics",
+    "subtopic": "Counting rows versus customers",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many customers placed an order in March?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "orders": {
+        "title": "orders",
+        "columns": [
+          "id",
+          "customer_id",
+          "amount",
+          "created_at"
+        ],
+        "rows": [
+          [
+            1,
+            1,
+            500,
+            "2026-03-02 10:00"
+          ],
+          [
+            2,
+            1,
+            300,
+            "2026-03-15 12:00"
+          ],
+          [
+            3,
+            2,
+            700,
+            "2026-03-20 09:30"
+          ],
+          [
+            4,
+            3,
+            200,
+            "2026-03-31 14:00"
+          ],
+          [
+            5,
+            4,
+            400,
+            "2026-03-10 18:00"
+          ],
+          [
+            6,
+            2,
+            100,
+            "2026-03-25 11:00"
+          ]
+        ]
+      },
+      "query": "SELECT COUNT(*) FROM orders;"
+    },
+    "ai_claim": "6. The query counts the orders table, which gives 6.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The orders table lists March orders."
+      },
+      {
+        "index": 2,
+        "text": "COUNT(*) counts the rows."
+      },
+      {
+        "index": 3,
+        "text": "It returns 6."
+      },
+      {
+        "index": 4,
+        "text": "So 6 customers placed an order."
+      }
+    ],
+    "ai_final_answer": "6",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 4,
+      "misconception": "Counting orders when asked for customers",
+      "explanation": "COUNT(*) counts orders. Customers 1 and 2 each ordered twice, so 6 orders came from 4 customers. Use COUNT(DISTINCT customer_id).",
+      "why_convincing": "Every row does belong to a customer, so counting rows sounds like counting customers."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "COUNT(DISTINCT customer_id) = 4 customers (6 orders).",
+    "canonical_answer": "4",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "distinct customer_ids: 1, 2, 3, 4 -> 4",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "4"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Customers 1 and 2 each have two orders.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Customer 1 is counted twice by COUNT(*)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether any customer appears more than once."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 equates rows with customers."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "COUNT(*) counts rows; COUNT(DISTINCT col) counts unique values."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "List the distinct customer_id values."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: 6 is the number of orders; there are 4 distinct customers."
+      }
+    ],
+    "repair": "Use `SELECT COUNT(DISTINCT customer_id) FROM orders`.",
+    "debrief": "Know the grain of the table: one row per order, not per customer. Counting entities at a different grain needs DISTINCT or a GROUP BY.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = len({1, 1, 2, 3, 4, 2})",
+      "flawed_solver": "answer = 6"
+    }
+  },
+  {
+    "id": "da-sql-for-analytics-002",
+    "subject": "data-analytics",
+    "topic": "SQL for Analytics",
+    "subtopic": "BETWEEN with timestamps",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is March's total order amount according to this query?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "orders": {
+        "title": "orders",
+        "columns": [
+          "id",
+          "customer_id",
+          "amount",
+          "created_at"
+        ],
+        "rows": [
+          [
+            1,
+            1,
+            500,
+            "2026-03-02 10:00"
+          ],
+          [
+            2,
+            1,
+            300,
+            "2026-03-15 12:00"
+          ],
+          [
+            3,
+            2,
+            700,
+            "2026-03-20 09:30"
+          ],
+          [
+            4,
+            3,
+            200,
+            "2026-03-31 14:00"
+          ],
+          [
+            5,
+            4,
+            400,
+            "2026-03-10 18:00"
+          ],
+          [
+            6,
+            2,
+            100,
+            "2026-03-25 11:00"
+          ]
+        ]
+      },
+      "query": "SELECT SUM(amount) FROM orders\nWHERE created_at BETWEEN '2026-03-01' AND '2026-03-31';"
+    },
+    "ai_claim": "2,200. The query covers every order from 1 March to 31 March, so it totals all six March orders.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "BETWEEN includes both endpoints."
+      },
+      {
+        "index": 2,
+        "text": "The range runs from 1 March to 31 March."
+      },
+      {
+        "index": 3,
+        "text": "All six orders were placed in March."
+      },
+      {
+        "index": 4,
+        "text": "Their total is 2,200."
+      }
+    ],
+    "ai_final_answer": "2200",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F05",
+      "location": 2,
+      "misconception": "Treating a date bound as covering the whole final day",
+      "explanation": "created_at includes a time. '2026-03-31' means the very start of 31 March, so '2026-03-31 14:00' is greater than the upper bound and order 4 (200) is excluded. The query returns 2,000. Use a half-open range: created_at >= '2026-03-01' AND created_at < '2026-04-01'.",
+      "why_convincing": "BETWEEN really is inclusive, which makes the last day look covered."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The query returns 2,000, missing the 31 March 14:00 order. Use >= '2026-03-01' AND < '2026-04-01' for 2,200.",
+    "canonical_answer": "2000",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Order 4 at 2026-03-31 14:00 is later than the bound '2026-03-31' (midnight).",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "200"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "500 + 300 + 700 + 400 + 100 = 2,000",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2000"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Any order on 31 March after midnight is excluded."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the times, not just the dates."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes the range includes all of 31 March."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A date literal compared with a timestamp means midnight at the start of that day."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare '2026-03-31 14:00' with '2026-03-31'."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the upper bound is midnight on the 31st, so order 4 is excluded. The query returns 2,000."
+      }
+    ],
+    "repair": "Use `created_at >= '2026-03-01' AND created_at < '2026-04-01'`.",
+    "debrief": "Timestamp ranges should be half-open: inclusive start, exclusive end. BETWEEN with dates silently drops almost the whole final day.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 500 + 300 + 700 + 400 + 100",
+      "flawed_solver": "answer = 500 + 300 + 700 + 200 + 400 + 100"
+    }
+  },
+  {
+    "id": "da-sql-for-analytics-003",
+    "subject": "data-analytics",
+    "topic": "SQL for Analytics",
+    "subtopic": "Conversion rate with a LEFT JOIN",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What conversion rate, in percent, does this query return?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "visits": {
+        "title": "visits",
+        "columns": [
+          "visitor_id"
+        ],
+        "rows": [
+          [
+            1
+          ],
+          [
+            2
+          ],
+          [
+            3
+          ],
+          [
+            4
+          ],
+          [
+            5
+          ],
+          [
+            6
+          ],
+          [
+            7
+          ],
+          [
+            8
+          ]
+        ]
+      },
+      "purchases": {
+        "title": "purchases",
+        "columns": [
+          "visitor_id",
+          "amount"
+        ],
+        "rows": [
+          [
+            2,
+            100
+          ],
+          [
+            2,
+            50
+          ],
+          [
+            5,
+            300
+          ]
+        ]
+      },
+      "query": "SELECT 100.0 * COUNT(DISTINCT p.visitor_id) / COUNT(DISTINCT v.visitor_id) AS conversion_pct\nFROM visits v\nLEFT JOIN purchases p ON p.visitor_id = v.visitor_id;"
+    },
+    "ai_claim": "25. The LEFT JOIN keeps all 8 visitors; 2 distinct visitors made purchases (visitor 2 twice), so 2 / 8 = 25%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The LEFT JOIN keeps every visitor, with NULL purchase columns for non-buyers."
+      },
+      {
+        "index": 2,
+        "text": "COUNT(DISTINCT p.visitor_id) ignores NULLs and counts buyers once: visitors 2 and 5."
+      },
+      {
+        "index": 3,
+        "text": "COUNT(DISTINCT v.visitor_id) is 8."
+      },
+      {
+        "index": 4,
+        "text": "100 x 2 / 8 = 25."
+      }
+    ],
+    "ai_final_answer": "25",
+    "simulated_confidence": 92,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: 25%. DISTINCT prevents visitor 2's two purchases from being counted twice, and the LEFT JOIN keeps non-buyers in the denominator.",
+    "canonical_answer": "25",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "100 x 2 / 8 = 25",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "25"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Only visitors 2 and 5 appear in purchases.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how visitor 2's two purchases are counted."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 depends on DISTINCT and on COUNT ignoring NULLs."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Counting distinct buyers over distinct visitors gives a conversion rate."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Evaluate each COUNT separately."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. 2 distinct buyers out of 8 visitors is 25%. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Conversion queries fail in two classic ways: an INNER JOIN drops non-buyers from the denominator, and COUNT without DISTINCT counts repeat purchases. This query avoids both.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 100 * len({2, 5}) / 8"
+    }
+  },
+  {
+    "id": "da-sql-for-analytics-004",
+    "subject": "data-analytics",
+    "topic": "SQL for Analytics",
+    "subtopic": "Month-over-month growth with LAG",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What growth_pct does the query report for August?",
+    "artifact_type": "data_table",
+    "artifact": {
+      "monthly": {
+        "title": "monthly",
+        "columns": [
+          "month",
+          "revenue"
+        ],
+        "rows": [
+          [
+            "2026-06",
+            80000
+          ],
+          [
+            "2026-07",
+            100000
+          ],
+          [
+            "2026-08",
+            90000
+          ]
+        ]
+      },
+      "query": "SELECT month, revenue,\n       100.0 * (revenue - LAG(revenue) OVER (ORDER BY month))\n             / LAG(revenue) OVER (ORDER BY month) AS growth_pct\nFROM monthly;"
+    },
+    "ai_claim": "-10. LAG gives July's revenue, 100,000, and (90,000 - 100,000) / 100,000 = -10%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Rows are ordered by month."
+      },
+      {
+        "index": 2,
+        "text": "For August, LAG(revenue) is July's 100,000."
+      },
+      {
+        "index": 3,
+        "text": "(90,000 - 100,000) / 100,000 x 100 = -10."
+      },
+      {
+        "index": 4,
+        "text": "August's growth_pct is -10."
+      }
+    ],
+    "ai_final_answer": "-10",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: -10%. (June's growth_pct is NULL, because it has no previous month.)",
+    "canonical_answer": "-10",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(90000 - 100000) / 100000 x 100 = -10",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-10"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find what LAG returns for August."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 identifies the previous row."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "LAG returns the previous row's value in the window order."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute (August - July) / July."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. August fell 10% from July. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "LAG makes period-over-period comparisons simple. Use July as the denominator (the earlier value), and expect NULL for the first period.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = (90000 - 100000) / 100000 * 100"
+    }
+  },
+  {
+    "id": "da-sql-for-analytics-005",
+    "subject": "data-analytics",
+    "topic": "SQL for Analytics",
+    "subtopic": "Which day is 1 March",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "How many orders were placed on 1 March, India time?",
+    "artifact_type": "kpi_definition",
+    "artifact": {
+      "orders": {
+        "title": "orders",
+        "columns": [
+          "id",
+          "created_at (column type TIMESTAMP, no time zone)"
+        ],
+        "rows": [
+          [
+            15,
+            "2026-02-28 19:00"
+          ],
+          [
+            11,
+            "2026-02-28 20:10"
+          ],
+          [
+            12,
+            "2026-03-01 02:15"
+          ],
+          [
+            13,
+            "2026-03-01 11:40"
+          ],
+          [
+            14,
+            "2026-03-01 21:05"
+          ]
+        ]
+      },
+      "query": "SELECT COUNT(*) FROM orders\nWHERE created_at >= '2026-03-01' AND created_at < '2026-03-02';",
+      "question_context": "The business reports days in India Standard Time (UTC+5:30)."
+    },
+    "ai_claim": "3. Orders 12, 13 and 14 have 1 March timestamps, so 3 orders were placed on 1 March.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The query selects timestamps on 1 March."
+      },
+      {
+        "index": 2,
+        "text": "Orders 12, 13 and 14 fall in that range."
+      },
+      {
+        "index": 3,
+        "text": "These timestamps are in India time."
+      },
+      {
+        "index": 4,
+        "text": "So 3 orders were placed on 1 March."
+      }
+    ],
+    "ai_final_answer": "3",
+    "simulated_confidence": 96,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The time zone the timestamps are stored in. The column has no time zone. If the application stores IST, the answer is 3; if it stores UTC, each timestamp must be shifted by 5:30 before assigning a day.",
+    "resolving_scenarios": [
+      "Stored in IST: orders 12, 13 and 14 are on 1 March: 3 orders.",
+      "Stored in UTC: orders 15 (00:30 IST) and 11 (01:40 IST) move into 1 March, and order 14 (02:35 IST on 2 March) moves out, so 1 March has orders 15, 11, 12 and 13: 4 orders."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The count depends on the storage time zone, which is not stated: 3 orders if timestamps are IST, 4 if they are UTC. Step 3 assumes IST.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If stored in UTC, orders 15 and 11 fall on 1 March IST and order 14 on 2 March, giving 4 orders.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "4"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "In UTC storage, 1 March IST has 4 orders, not 3."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what time zone the stored timestamps are in."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the storage time zone."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Timestamps without a time zone are ambiguous until you know the writer's convention."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Convert each timestamp from UTC to IST."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes IST storage, giving 3; under UTC storage, 1 March IST has 4 orders. It cannot be decided."
+      }
+    ],
+    "repair": "Store timestamps with time zones (TIMESTAMPTZ) or document the convention, and convert to IST before grouping by day.",
+    "debrief": "Daily metrics depend on where the day boundary falls. Timestamp columns without a time zone hide that choice; find the convention before trusting per-day numbers.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

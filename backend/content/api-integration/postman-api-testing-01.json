@@ -1,0 +1,482 @@
+[
+  {
+    "id": "api-postman-api-testing-001",
+    "subject": "api-integration",
+    "topic": "Postman & API Testing",
+    "subtopic": "A status check is not a content check",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this test verify that the endpoint returns product 7?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// Tests tab of GET {{baseUrl}}/products/7\npm.test(\"returns product 7\", function () {\n  pm.response.to.have.status(200);\n});"
+    },
+    "ai_claim": "Yes. The request is for product 7, and the test confirms it succeeded, so product 7 was returned.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The request asks for product 7."
+      },
+      {
+        "index": 2,
+        "text": "The test asserts a 200 status."
+      },
+      {
+        "index": 3,
+        "text": "A 200 means the request succeeded."
+      },
+      {
+        "index": 4,
+        "text": "So the response is product 7."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F06",
+      "location": 4,
+      "misconception": "Checking the status and assuming the content",
+      "explanation": "The test inspects only the status code. The endpoint could return product 8, an empty object, or an error message with status 200, and the test would still pass. Assert on the body: pm.expect(pm.response.json().id).to.eql(7), plus the fields that matter.",
+      "why_convincing": "The test's name says 'returns product 7', which makes it read as if it checks that."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: only the status is checked. Add assertions on the body, such as id === 7 and required fields.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A response of 200 with body {} passes the test.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "200"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "pm.expect(pm.response.json().id).to.eql(7) fails for the wrong product.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "7"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Returning product 8 still passes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List what the test actually asserts."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 concludes something about the body from the status."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A test only verifies what it asserts."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Imagine the endpoint returning the wrong product with 200."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: nothing checks the body. Assert on id and key fields."
+      }
+    ],
+    "repair": "Add `pm.expect(pm.response.json().id).to.eql(7)` and checks for required fields.",
+    "debrief": "Test names are promises; assertions are what is checked. Read the assertions and ask what wrong response would still pass.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-postman-api-testing-002",
+    "subject": "api-integration",
+    "topic": "Postman & API Testing",
+    "subtopic": "Requests that depend on earlier requests",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can request 2 be run on its own, at any time, and give a meaningful result?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// Request 1: POST {{baseUrl}}/orders  (Tests tab)\npm.collectionVariables.set(\"orderId\", pm.response.json().id);\n\n// Request 2: GET {{baseUrl}}/orders/{{orderId}}  (Tests tab)\npm.test(\"order is pending\", () => {\n  pm.expect(pm.response.json().status).to.eql(\"pending\");\n});"
+    },
+    "ai_claim": "Yes. Each request has its own URL and tests, so request 2 can be run independently.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Request 2 has its own URL."
+      },
+      {
+        "index": 2,
+        "text": "It has its own test."
+      },
+      {
+        "index": 3,
+        "text": "Nothing in request 2 depends on another request."
+      },
+      {
+        "index": 4,
+        "text": "So it can run independently."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 96,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 3,
+      "misconception": "Overlooking a variable set by another request",
+      "explanation": "{{orderId}} is set by request 1's test script. Run alone, request 2 uses whatever orderId was saved last - an old order that may no longer be pending - or an empty value if the variable was never set. The test then fails, or passes against the wrong order. Make the dependency explicit (run as a sequence) or have request 2 create its own order in a pre-request script.",
+      "why_convincing": "When the collection is run from the top, request 1 always runs first."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: request 2 depends on orderId from request 1. Run them as a sequence, or create the order in request 2's pre-request script.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "run request 2 alone -> {{orderId}} = value from last week's run -> GET an old, completed order -> test fails",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "Clear collection variables and send request 2: the URL becomes /orders/ and returns 404.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "404"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Running request 2 alone checks a stale order."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find where {{orderId}} gets its value."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 claims request 2 has no dependencies."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Variables set in one request's scripts are inputs to later requests."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Clear the collection variables and send request 2."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: request 2 depends on orderId set by request 1. Run them in order or set up data in request 2."
+      }
+    ],
+    "repair": "Create the order in request 2's pre-request script, or document and run the requests as an ordered flow.",
+    "debrief": "Chained requests are convenient but create hidden coupling. Make each test either self-contained or explicitly part of a sequence.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-postman-api-testing-003",
+    "subject": "api-integration",
+    "topic": "Postman & API Testing",
+    "subtopic": "Schemas without required fields",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this test fail if the response is missing id or price?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "javascript",
+      "code": "const schema = {\n  type: \"object\",\n  properties: {\n    id:    { type: \"integer\" },\n    price: { type: \"number\" }\n  }\n};\npm.test(\"matches the product schema\", () => {\n  pm.response.to.have.jsonSchema(schema);\n});"
+    },
+    "ai_claim": "Yes. The schema defines id as an integer and price as a number, so a response without them does not match.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The schema lists id and price under properties."
+      },
+      {
+        "index": 2,
+        "text": "Each property has a type."
+      },
+      {
+        "index": 3,
+        "text": "A response missing those fields does not match the schema."
+      },
+      {
+        "index": 4,
+        "text": "So the test fails when id or price is missing."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Assuming properties are required by default",
+      "explanation": "In JSON Schema, properties only constrains a field if it is present. Missing fields are allowed unless listed in required. An empty object {} passes this schema. Add required: [\"id\", \"price\"] (and consider additionalProperties).",
+      "why_convincing": "Listing a field in the schema feels like declaring that it must exist."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: without required, {} is valid. Add required: ['id', 'price'].",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "The response {} passes the schema test.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "data_point",
+        "summary": "JSON Schema: properties applies only to present keys; presence is enforced by required.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "An empty response body passes."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which keyword makes a property mandatory."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes listed properties must be present."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "In JSON Schema, only 'required' enforces presence."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Validate {} against the schema."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: without required, missing fields pass. Add required: ['id', 'price']."
+      }
+    ],
+    "repair": "Add `required: [\"id\", \"price\"]` to the schema.",
+    "debrief": "JSON Schema is permissive by default: unknown fields allowed, listed fields optional. A useful contract test states required fields explicitly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-postman-api-testing-004",
+    "subject": "api-integration",
+    "topic": "Postman & API Testing",
+    "subtopic": "Local response times",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "If this test passes, does that show customers get responses in under 200 ms in production?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// Run in Postman on a laptop, against the staging API in the same office network\npm.test(\"fast enough\", () => {\n  pm.expect(pm.response.responseTime).to.be.below(200);\n});"
+    },
+    "ai_claim": "Yes. The test measures the response time and it is below 200 ms, so the API is fast enough for customers.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Postman measures the time for the request."
+      },
+      {
+        "index": 2,
+        "text": "The measured time is under 200 ms."
+      },
+      {
+        "index": 3,
+        "text": "Response time is a property of the API."
+      },
+      {
+        "index": 4,
+        "text": "So customers also get responses under 200 ms."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Generalising one environment's latency to all users",
+      "explanation": "Response time depends on network distance, load, data volume and infrastructure, not just the API code. One request from the office network to staging - near, idle, with small data - says little about customers on mobile networks hitting production under load. Measure production latency (percentiles from real traffic or load tests from representative locations).",
+      "why_convincing": "The number is a real measurement, and it is below the target."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a single local measurement against staging does not represent production users. Use production monitoring or realistic load tests.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "A customer on a mobile network in another region adds 150 ms of network latency before the server does any work.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "150"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The test runs once, from the office network, against staging.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Under production load, the same endpoint's p95 can be several times higher."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "List what differs between this test and a customer's request."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats response time as fixed for the API."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Latency depends on network path, load and data, not only on code."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the office network with a mobile connection far from the server."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: latency depends on environment and load. Measure production percentiles."
+      }
+    ],
+    "repair": "Track production latency percentiles (p50, p95, p99) and run load tests from realistic locations.",
+    "debrief": "Performance claims are claims about an environment. State where and under what load a number was measured before generalising it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "api-postman-api-testing-005",
+    "subject": "api-integration",
+    "topic": "Postman & API Testing",
+    "subtopic": "Storing a login token for later requests",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that when the collection runs, every request after Login uses the fresh token?",
+    "artifact_type": "integration_code",
+    "artifact": {
+      "language": "javascript",
+      "code": "// Request 1 (first in the collection): POST {{baseUrl}}/auth/login  - Tests tab\npm.environment.set(\"token\", pm.response.json().access_token);\n\n// Collection-level auth for every other request:\n// Authorization: Bearer {{token}}\n// The collection is run with the Collection Runner from the top."
+    },
+    "ai_claim": "Yes. Login runs first and saves the new token in the environment; each later request resolves {{token}} when it is sent, so it uses the value Login just stored.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The Collection Runner executes requests in order, starting with Login."
+      },
+      {
+        "index": 2,
+        "text": "Login's test script stores the new access token in the environment."
+      },
+      {
+        "index": 3,
+        "text": "Variables in later requests are resolved when those requests are sent."
+      },
+      {
+        "index": 4,
+        "text": "So every later request sends the fresh token."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. The dependency is explicit and satisfied: Login runs first, and variable substitution happens per request at send time.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "Login -> set token -> request 2 resolves {{token}} -> Authorization: Bearer <new token>",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "The Postman console shows each later request with the token returned by Login.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check the run order and when variables are resolved."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 depends on resolution at send time."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Postman substitutes variables when each request is sent, using the current values."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Open the Postman console during a run."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Login runs first and later requests resolve the fresh token. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Chaining through variables is reliable when the order is guaranteed, as it is when the collection is run from the top. The earlier orderId challenge failed because the order was not guaranteed.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

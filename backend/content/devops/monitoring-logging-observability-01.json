@@ -1,0 +1,458 @@
+[
+  {
+    "id": "dev-monitoring-logging-observability-001",
+    "subject": "devops",
+    "topic": "Monitoring, Logging & Observability",
+    "subtopic": "Alerting only on CPU",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will this alert catch checkout failures?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "monitoring": "alerts:\n  - name: HighCPU\n    expr: avg(cpu_usage) > 0.9\n    for: 5m\n# This is the only alert for the checkout service.\n# AI: \"If checkout breaks, CPU will spike, so this alert will catch it.\""
+    },
+    "ai_claim": "Yes. Problems in the service show up as high CPU, so the CPU alert will fire when checkout breaks.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Service problems increase load."
+      },
+      {
+        "index": 2,
+        "text": "Increased load shows up as CPU usage."
+      },
+      {
+        "index": 3,
+        "text": "The alert fires above 90% CPU."
+      },
+      {
+        "index": 4,
+        "text": "So checkout failures trigger it."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 93,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 2,
+      "misconception": "Assuming failures always cause high CPU",
+      "explanation": "Many failures lower CPU: a broken payment dependency makes requests fail fast, a bad deploy returns 500s immediately, a lost database connection idles the service. Users are failing while CPU is at 20%. Alert on symptoms users feel - error rate, latency, successful checkouts per minute - with resource alerts as secondary signals.",
+      "why_convincing": "CPU spikes do accompany some incidents."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: many failures do not raise CPU. Alert on error rate, latency and checkout success.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "The payment provider returns errors; checkout fails instantly for every user while CPU sits at 15%.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "15"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "alert: CheckoutErrorRate  expr: rate(checkout_errors[5m]) / rate(checkout_requests[5m]) > 0.02  for: 5m",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.02"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "An outage with low CPU triggers no alert."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Think of failures that make a service do less work."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes problems raise CPU."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Alert on user-facing symptoms: errors, latency, throughput."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider a failing downstream dependency."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: many failures lower CPU. Alert on symptoms."
+      }
+    ],
+    "repair": "Add symptom-based alerts (error rate, latency, success rate).",
+    "debrief": "Monitor what users experience. Resource metrics explain problems; symptom metrics detect them.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-monitoring-logging-observability-002",
+    "subject": "devops",
+    "topic": "Monitoring, Logging & Observability",
+    "subtopic": "DEBUG logging in production",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is DEBUG-level logging in production harmless because logging is cheap?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "config": "LOG_LEVEL: DEBUG     # production\n# The API handles 3,000 requests/s; each request logs about 40 DEBUG lines (~6 KB).\n# AI: \"More logs are always better for debugging, and logging is cheap.\""
+    },
+    "ai_claim": "Yes. Logging is inexpensive, and more detail makes debugging easier, so DEBUG in production is harmless.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Logs help diagnose problems."
+      },
+      {
+        "index": 2,
+        "text": "DEBUG gives the most detail."
+      },
+      {
+        "index": 3,
+        "text": "Logging costs little."
+      },
+      {
+        "index": 4,
+        "text": "So DEBUG in production is harmless."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F10",
+      "location": 3,
+      "misconception": "Underestimating the cost of high-volume logging",
+      "explanation": "3,000 requests/s x 6 KB = 18 MB/s, about 1.5 TB per day to ship, index and store. Synchronous logging adds latency and CPU, log pipelines back up or drop data, and debug lines often include sensitive payloads. Log at INFO by default, sample verbose logs, and enable DEBUG dynamically for specific requests or short periods.",
+      "why_convincing": "A single log line is cheap."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: about 1.5 TB/day of logs costs money and performance. Use INFO by default and targeted, temporary DEBUG.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "3,000 x 6 KB = 18 MB/s x 86,400 s = about 1.56 TB/day",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.56"
+        ]
+      },
+      {
+        "type": "rewrite",
+        "summary": "LOG_LEVEL: INFO; enable DEBUG per request via a header or for 15 minutes via a feature flag.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "15"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "The log bill exceeds the compute bill."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Multiply volume by request rate."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes negligible cost."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Logging cost scales with volume: storage, indexing, network, CPU."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute daily log volume."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: ~1.5 TB/day is expensive. Use INFO and targeted DEBUG."
+      }
+    ],
+    "repair": "Default to INFO, sample, and enable DEBUG selectively.",
+    "debrief": "Observability has a budget. Spend it on signals that answer questions.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-monitoring-logging-observability-003",
+    "subject": "devops",
+    "topic": "Monitoring, Logging & Observability",
+    "subtopic": "Burn-rate alerts on an SLO",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that these alerts page for fast-burning incidents and file tickets for slow degradation, while ignoring brief blips?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "monitoring": "slo: 99.9% of checkout requests succeed over 30 days  (error budget: 0.1%)\nalerts:\n  - name: FastBurn   # page\n    expr: error_ratio_1h > 14.4 * 0.001 and error_ratio_5m > 14.4 * 0.001\n  - name: SlowBurn   # ticket\n    expr: error_ratio_6h > 6 * 0.001 and error_ratio_30m > 6 * 0.001"
+    },
+    "ai_claim": "Yes. A burn rate of 14.4 sustained for an hour consumes 2% of the monthly budget, which deserves a page; 6x over 6 hours is slower and gets a ticket. Requiring both a long and a short window avoids alerting on short spikes and stops alerting quickly once fixed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The error budget is 0.1% of requests over 30 days."
+      },
+      {
+        "index": 2,
+        "text": "Burn rate 14.4 for 1 hour spends 14.4 / 720 = 2% of the budget."
+      },
+      {
+        "index": 3,
+        "text": "Burn rate 6 over 6 hours spends 5%: slower, less urgent."
+      },
+      {
+        "index": 4,
+        "text": "Pairing long and short windows filters blips and resets quickly."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Multi-window, multi-burn-rate alerting is the recommended SRE practice for SLO-based alerting.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "30 days = 720 hours; 14.4 x 1 h / 720 h = 0.02 = 2% of budget",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "720",
+          "2"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Relate burn rate to budget consumption."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 computes the fast-burn cost."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Burn-rate alerts measure how fast the error budget is being spent."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 14.4 / 720."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The alerts match urgency to budget burn. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "SLO-based alerting ties pages to user impact and urgency, reducing noise while catching real incidents.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-monitoring-logging-observability-004",
+    "subject": "devops",
+    "topic": "Monitoring, Logging & Observability",
+    "subtopic": "Correlation IDs",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this lets engineers follow one user request across all services?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "design": "# The gateway assigns X-Request-ID to each incoming request (or keeps the client's).\n# Every service logs it and forwards it on outgoing calls; traces use it as an attribute."
+    },
+    "ai_claim": "Yes. Every log line and outgoing call carries the same request ID, so searching for it shows the full path of a request through all services, including where it failed.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The gateway assigns one ID per request."
+      },
+      {
+        "index": 2,
+        "text": "Each service logs it."
+      },
+      {
+        "index": 3,
+        "text": "Each service forwards it on downstream calls."
+      },
+      {
+        "index": 4,
+        "text": "So all logs for a request share the ID."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Propagated correlation IDs (or trace context) are essential for debugging distributed systems.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "search request_id=7f3a... -> gateway, orders, payments (error 502), notifications logs in sequence",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "502"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Follow one request through three services."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 is essential: the ID must be forwarded."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Correlation requires propagation across every hop."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Search logs by the ID."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The ID links a request across services. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Distributed debugging needs a shared identifier for each request, carried everywhere it goes.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "dev-monitoring-logging-observability-005",
+    "subject": "devops",
+    "topic": "Monitoring, Logging & Observability",
+    "subtopic": "Did the deploy cause the errors",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Did the 14:00 deploy cause the rise in errors?",
+    "artifact_type": "pipeline",
+    "artifact": {
+      "language": "yaml",
+      "timeline": "# 14:00 deploy of api v3.2\n# 14:03 error rate rises from 0.1% to 2%\n# Other events in that window (traffic changes, dependency incidents, config changes) have not been checked."
+    },
+    "ai_claim": "Yes. The errors started three minutes after the deploy, so the deploy caused them and should be rolled back.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The deploy happened at 14:00."
+      },
+      {
+        "index": 2,
+        "text": "Errors rose at 14:03."
+      },
+      {
+        "index": 3,
+        "text": "The timing points to the deploy."
+      },
+      {
+        "index": 4,
+        "text": "So the deploy caused the errors."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "Whether anything else changed around 14:00: a traffic spike, a dependency outage, a database incident or a config change. Timing is suggestive but not conclusive; the errors' types and which endpoints and versions they come from would show whether v3.2 is responsible.",
+    "resolving_scenarios": [
+      "Errors come only from pods running v3.2, on an endpoint changed in the release: the deploy caused them.",
+      "Errors come from all pods, old and new, and the payment provider reported an incident at 14:02: the deploy is a coincidence."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The timing alone cannot establish cause. Step 3 treats correlation in time as causation. (Rolling back may still be a sensible precaution while investigating.)",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "If pods still on v3.1 show the same error rate, the new version is not the cause.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A dependency outage at the same time produces the same graph."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what else might have changed at 14:00."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 infers cause from timing."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Compare error rates by version and check other events."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Split errors by pod version."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 infers cause from timing. If only v3.2 pods fail, yes; if all fail, likely not. It cannot be decided yet."
+      }
+    ],
+    "repair": "Break errors down by version and endpoint, and check dependency and traffic dashboards.",
+    "debrief": "Deploys are the most common cause of incidents, which makes them easy to blame. Evidence from version-level breakdowns settles it.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

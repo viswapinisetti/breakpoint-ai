@@ -1,0 +1,293 @@
+[
+  {
+    "id": "ml-model-evaluation-cross-validation-001",
+    "subject": "machine-learning",
+    "topic": "Model Evaluation & Cross-Validation",
+    "subtopic": "Folds with no positives",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does this cross-validation give a reliable recall estimate?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "setup": "Rare-disease data: 1,000 patients, 8 positives, sorted by hospital.\ncv = KFold(n_splits=10)   # no shuffling, not stratified\nPer-fold recall is averaged to report the model's recall."
+    },
+    "ai_claim": "Yes. 10-fold cross-validation uses every patient for validation once, so the average recall is reliable.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Each patient is in exactly one validation fold."
+      },
+      {
+        "index": 2,
+        "text": "Every fold is scored."
+      },
+      {
+        "index": 3,
+        "text": "Averaging over 10 folds reduces noise."
+      },
+      {
+        "index": 4,
+        "text": "So the average recall is reliable."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 2,
+      "misconception": "Using unstratified folds with a rare class",
+      "explanation": "With 8 positives in 10 folds, at least 2 folds contain no positives at all, and recall is undefined there (0/0); with sorted data, positives may cluster into one or two folds. Averages over such folds are meaningless or dominated by a handful of cases. Use StratifiedKFold (shuffled), fewer folds, repeated CV, and pool predictions across folds before computing recall.",
+      "why_convincing": "Cross-validation is the standard answer to 'how reliable is this estimate?'."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: some folds have no positives, making per-fold recall undefined. Stratify, shuffle, and pool predictions.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "8 positives in 10 folds: at least 10 - 8 = 2 folds have none.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "test_case",
+        "summary": "With the sorted data, 7 of the 8 positives fall into folds 3 and 4.",
+        "must_reference_step": 2,
+        "must_contain_values": [
+          "7"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "A fold with zero positives has undefined recall."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Count how many positives each fold can have."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 assumes every fold can be scored for recall."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Stratified folds keep the class ratio in each fold."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Distribute 8 positives across 10 folds."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: some folds have no positives. Use StratifiedKFold."
+      }
+    ],
+    "repair": "Use `StratifiedKFold(n_splits=4, shuffle=True)` (or repeated), and compute recall on pooled out-of-fold predictions.",
+    "debrief": "Cross-validation inherits the problems of its folds. With rare classes, stratification and pooling are essential.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-model-evaluation-cross-validation-002",
+    "subject": "machine-learning",
+    "topic": "Model Evaluation & Cross-Validation",
+    "subtopic": "Reading CV mean and spread",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's summary of these results correct?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "results": "5-fold CV AUC: 0.81, 0.84, 0.79, 0.86, 0.80\nmean 0.820, standard deviation 0.029"
+    },
+    "ai_claim": "Yes. The model's expected AUC is about 0.82, and the fold-to-fold spread (about 0.03) shows how much the estimate depends on which data it is tested on; a new model would need to beat 0.82 by more than this noise to be clearly better.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The mean of the five folds is 0.820."
+      },
+      {
+        "index": 2,
+        "text": "The standard deviation across folds is 0.029."
+      },
+      {
+        "index": 3,
+        "text": "The spread reflects variation due to the particular split."
+      },
+      {
+        "index": 4,
+        "text": "Differences between models smaller than this spread are not convincing on their own."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Reporting the mean with its spread (or a paired comparison across the same folds) is the honest summary of CV results.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "(0.81 + 0.84 + 0.79 + 0.86 + 0.80) / 5 = 0.82",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "0.82"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compute the mean of the five folds."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 uses the spread to judge differences."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "CV scores vary by fold; the spread shows estimate uncertainty."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the spread with a 0.005 improvement."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Mean and spread are read properly. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "A single CV number hides its uncertainty. Report the spread, and compare models on the same folds.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-model-evaluation-cross-validation-003",
+    "subject": "machine-learning",
+    "topic": "Model Evaluation & Cross-Validation",
+    "subtopic": "Which model is better",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is model B better than model A?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "results": {
+        "title": "5-fold CV AUC",
+        "columns": [
+          "model",
+          "mean",
+          "std across folds"
+        ],
+        "rows": [
+          [
+            "A",
+            "0.841",
+            "0.020"
+          ],
+          [
+            "B",
+            "0.846",
+            "0.021"
+          ]
+        ]
+      },
+      "note": "It is not recorded whether A and B were evaluated on the same fold splits."
+    },
+    "ai_claim": "Yes. B's mean AUC (0.846) is higher than A's (0.841), so B is the better model.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A averages 0.841."
+      },
+      {
+        "index": 2,
+        "text": "B averages 0.846."
+      },
+      {
+        "index": 3,
+        "text": "0.846 > 0.841."
+      },
+      {
+        "index": 4,
+        "text": "So B is better."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "A per-fold, paired comparison. The 0.005 difference is small relative to the 0.02 fold-to-fold spread. If both models used the same folds, the per-fold differences might show B winning consistently (a real, small gain); if B lost on some folds, or the folds differed, the difference is noise.",
+    "resolving_scenarios": [
+      "Same folds, and B beats A on all 5 folds by 0.004-0.006: the small improvement is consistent and likely real.",
+      "Different folds (or B wins 3 and loses 2): the 0.005 gap is within noise, and neither is shown to be better."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The summary statistics cannot settle it. Step 3 compares means without accounting for variation or pairing.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "The difference, 0.005, is a quarter of the fold standard deviation, 0.02.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.005",
+          "0.02"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "With different fold splits, the order of the means could reverse on rerun."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Compare the gap with the spread."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 compares means only."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Paired, per-fold comparisons reduce noise from the data split."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Ask whether the folds were the same."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 ignores variation. Consistent per-fold wins would support B; otherwise it is noise. It cannot be decided."
+      }
+    ],
+    "repair": "Evaluate both models on identical folds (repeated CV) and compare per-fold differences.",
+    "debrief": "Small differences need paired evidence. The same folds for every model turn a noisy comparison into a sensitive one.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

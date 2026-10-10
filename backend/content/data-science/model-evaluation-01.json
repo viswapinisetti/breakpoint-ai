@@ -1,0 +1,404 @@
+[
+  {
+    "id": "ds-model-evaluation-001",
+    "subject": "data-science",
+    "topic": "Model Evaluation",
+    "subtopic": "Tuning on the test set",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is 0.91 an unbiased estimate of the chosen model's accuracy on new data?",
+    "artifact_type": "experiment_design",
+    "artifact": {
+      "process": "1. Split data into train (80%) and test (20%).\n2. Try 200 hyperparameter settings; for each, train and score on the test set.\n3. Report the best test score, 0.91, as the model's expected accuracy."
+    },
+    "ai_claim": "Yes. The test set was never used for training, so the best test score is an unbiased estimate of accuracy on new data.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "No model was trained on the test set."
+      },
+      {
+        "index": 2,
+        "text": "Each setting was scored on the test set."
+      },
+      {
+        "index": 3,
+        "text": "The best setting scored 0.91."
+      },
+      {
+        "index": 4,
+        "text": "So 0.91 is an unbiased estimate."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 4,
+      "misconception": "Selecting on the test set and then reporting it",
+      "explanation": "Choosing the best of 200 settings by test score uses the test set for model selection. Some settings score well partly by luck on this particular test set, and picking the maximum selects that luck, so 0.91 is optimistic. Tune on a validation set (or cross-validation within the training data) and score the final model once on an untouched test set.",
+      "why_convincing": "Step 1 is true: no training happened on the test set."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the test set was used to select among 200 settings, so its best score is biased upward. Use a separate validation set or nested cross-validation.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Among 200 settings of equal true accuracy 0.88, the best test score will exceed 0.88 by chance.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "200",
+          "0.88"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The reported score is the maximum over 200 evaluations on the same test set.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "200"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "On fresh data, the selected model scores lower than 0.91."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask how the test set was used."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 ignores that the score was selected as a maximum."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Any data used to choose a model can no longer give an unbiased estimate."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Consider 200 equally good models scored on one test set."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the test set was used for selection, so 0.91 is optimistic."
+      }
+    ],
+    "repair": "Tune with cross-validation on the training data; evaluate the final model once on the held-out test set.",
+    "debrief": "A test set is spent once it influences a decision. Keep it locked away until the very end.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-model-evaluation-002",
+    "subject": "data-science",
+    "topic": "Model Evaluation",
+    "subtopic": "Precision without recall",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does the model catch most of the fraud?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "confusion": {
+        "title": "Fraud model, 1 month",
+        "columns": [
+          "",
+          "predicted fraud",
+          "predicted legit"
+        ],
+        "rows": [
+          [
+            "actual fraud",
+            50,
+            450
+          ],
+          [
+            "actual legit",
+            3,
+            99497
+          ]
+        ]
+      },
+      "summary": "Precision: 94.3%"
+    },
+    "ai_claim": "Yes. Its precision is 94.3%, so it identifies fraud correctly almost all the time, which means it catches most fraud.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model flagged 53 transactions."
+      },
+      {
+        "index": 2,
+        "text": "50 of them were fraud: precision 94.3%."
+      },
+      {
+        "index": 3,
+        "text": "High precision means the model catches most fraud."
+      },
+      {
+        "index": 4,
+        "text": "So it catches most of the fraud."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 92,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Confusing precision with recall",
+      "explanation": "Precision answers 'of the flags, how many were fraud?' (94.3%). Catching fraud is recall: 'of the fraud, how much was flagged?' The model caught 50 of 500 fraudulent transactions: recall 10%. It misses 90% of fraud.",
+      "why_convincing": "94.3% is impressive, and the metric is computed correctly."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: recall is 50 / 500 = 10%. The model misses 450 of 500 fraudulent transactions.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "Recall = 50 / (50 + 450) = 10%",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "450 fraudulent transactions were predicted legitimate.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "450"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Nine out of ten frauds go undetected."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Separate 'of the flags' from 'of the fraud'."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats precision as a detection rate."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Recall = TP / (TP + FN) measures how much of the positive class is caught."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 50 / (50 + 450)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: recall is only 10%. The model misses most fraud."
+      }
+    ],
+    "repair": "Report precision and recall (or a PR curve), and pick a threshold by the cost of missed fraud.",
+    "debrief": "Precision and recall answer different questions. Report both, and connect each to a business cost.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-model-evaluation-003",
+    "subject": "data-science",
+    "topic": "Model Evaluation",
+    "subtopic": "AUC of 0.5",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this model ranks positive cases above negative ones no better than chance?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "result": "ROC AUC on the test set: 0.50"
+    },
+    "ai_claim": "Yes. AUC is the probability that a random positive gets a higher score than a random negative; 0.5 means that happens only half the time, which is what random guessing achieves.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "AUC equals the probability that a randomly chosen positive is scored above a randomly chosen negative."
+      },
+      {
+        "index": 2,
+        "text": "Random scores do this 50% of the time."
+      },
+      {
+        "index": 3,
+        "text": "An AUC of 0.50 matches random guessing."
+      },
+      {
+        "index": 4,
+        "text": "So the model's ranking is no better than chance."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. AUC = 0.5 means no ranking ability (and AUC below 0.5 means the scores are inverted).",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "AUC 0.50 equals the expected AUC of random scores.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.50"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Recall the probabilistic interpretation of AUC."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 1 defines AUC."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "AUC is the chance a random positive outranks a random negative."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "What AUC do random scores produce?"
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. AUC 0.5 means chance-level ranking. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "AUC summarises ranking quality independent of any threshold. 0.5 is the floor for a useful model, and 1.0 is perfect separation.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ds-model-evaluation-004",
+    "subject": "data-science",
+    "topic": "Model Evaluation",
+    "subtopic": "Precision depends on prevalence",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the model's precision in production also be about 90%?",
+    "artifact_type": "statistical_claim",
+    "artifact": {
+      "validation": "Balanced validation set: 500 positives, 500 negatives. Recall 90%, false positive rate 10%, precision 90%.",
+      "production": "In production, 1% of cases are positive."
+    },
+    "ai_claim": "Yes. Precision was measured at 90% on validation, and the model is unchanged, so precision in production will be about 90%.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "On validation, precision was 90%."
+      },
+      {
+        "index": 2,
+        "text": "Recall and false positive rate are properties of the model."
+      },
+      {
+        "index": 3,
+        "text": "Precision is also a fixed property of the model."
+      },
+      {
+        "index": 4,
+        "text": "So production precision is about 90%."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Treating precision as independent of class balance",
+      "explanation": "Recall and false positive rate carry over, but precision depends on how common positives are. Per 100 production cases: 1 positive (0.9 caught) and 99 negatives (9.9 falsely flagged), so precision = 0.9 / (0.9 + 9.9) = 8.3%. Balanced validation sets hide this. Estimate production precision from the real prevalence, or validate on data with production class balance.",
+      "why_convincing": "It is the same model with the same threshold, so the same metrics feel guaranteed."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: at 1% prevalence, precision = 0.009 / (0.009 + 0.099) = 8.3%.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "0.9 x 0.01 / (0.9 x 0.01 + 0.1 x 0.99) = 0.083",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.083"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "Validation is 50% positive; production is 1% positive.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "About 11 of every 12 production alerts are false positives."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check which metrics depend on class balance."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 treats precision like recall."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Precision = TP / (TP + FP), and FP grows with the number of negatives."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute per 100 production cases."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: at 1% prevalence precision falls to about 8.3%."
+      }
+    ],
+    "repair": "Validate on data with production prevalence, or recompute precision using recall, FPR and the real base rate.",
+    "debrief": "Rebalancing data for training or evaluation changes precision. Always translate metrics to deployment conditions before promising results.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

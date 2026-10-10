@@ -1,0 +1,494 @@
+[
+  {
+    "id": "ml-explainability-responsible-ml-001",
+    "subject": "machine-learning",
+    "topic": "Explainability & Responsible ML",
+    "subtopic": "Removing a protected attribute",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does removing the gender column guarantee the model cannot treat applicants differently by gender?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "change": "The loan model no longer uses the gender column.",
+      "claim_in_review": "\"Without gender as an input, the model cannot discriminate by gender.\"",
+      "other_features": "first_name, occupation, shopping categories, years of continuous employment"
+    },
+    "ai_claim": "Yes. The model no longer sees gender, so its decisions cannot depend on it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Gender was removed from the inputs."
+      },
+      {
+        "index": 2,
+        "text": "The model can only use the features it receives."
+      },
+      {
+        "index": 3,
+        "text": "None of them is gender."
+      },
+      {
+        "index": 4,
+        "text": "So decisions cannot depend on gender."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 95,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F03",
+      "location": 3,
+      "misconception": "Assuming other features carry no gender information",
+      "explanation": "first_name, occupation, shopping categories and employment gaps (e.g. parental leave) correlate strongly with gender, so the model can reconstruct it and reproduce gendered patterns from historical data. 'Fairness through unawareness' fails when proxies exist. Measure outcomes by group (approval rates, error rates) and mitigate explicitly.",
+      "why_convincing": "Removing the column feels like removing the possibility."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: proxies such as first_name let the model infer gender. Audit outcomes by gender and remove or constrain proxies.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "A classifier predicts gender from the remaining features with 94% accuracy.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "94"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "first_name is still an input.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The model can learn gender from first names."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether other features reveal gender."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes no feature carries gender information."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Proxies can encode protected attributes."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try predicting gender from the remaining features."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: proxies remain. Audit outcomes by group."
+      }
+    ],
+    "repair": "Remove obvious proxies (first_name), and measure approval and error rates by gender.",
+    "debrief": "Fairness is a property of outcomes, not of the input list. Measure it directly.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-explainability-responsible-ml-002",
+    "subject": "machine-learning",
+    "topic": "Explainability & Responsible ML",
+    "subtopic": "Equal accuracy, unequal errors",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Since both groups have 90% accuracy, does the model treat them equally?",
+    "artifact_type": "metric_report",
+    "artifact": {
+      "results": {
+        "title": "Fraud model, by customer group (400 legitimate transactions sampled per group)",
+        "columns": [
+          "group",
+          "accuracy",
+          "false positives",
+          "false positive rate"
+        ],
+        "rows": [
+          [
+            "A",
+            "0.90",
+            "40",
+            "10%"
+          ],
+          [
+            "B",
+            "0.90",
+            "120",
+            "30%"
+          ]
+        ]
+      }
+    },
+    "ai_claim": "Yes. Accuracy is the same for both groups, so the model is equally good for everyone.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Group A accuracy is 0.90."
+      },
+      {
+        "index": 2,
+        "text": "Group B accuracy is 0.90."
+      },
+      {
+        "index": 3,
+        "text": "Equal accuracy means equal treatment."
+      },
+      {
+        "index": 4,
+        "text": "So the model is fair across groups."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F13",
+      "location": 3,
+      "misconception": "Judging fairness by overall accuracy",
+      "explanation": "Equal accuracy can hide different kinds of errors. Legitimate customers in group B are wrongly flagged 30% of the time versus 10% in A: three times as many blocked payments. Group B's accuracy is 'made up' by other correct predictions. Compare error rates by type (false positive and false negative rates) across groups.",
+      "why_convincing": "Accuracy is the most familiar summary."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: group B's false positive rate is three times group A's (30% vs 10%).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "FPR A = 40 / 400 = 10%; FPR B = 120 / 400 = 30%",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "10",
+          "30"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Legitimate customers in B are blocked three times as often."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Look at the kinds of errors, not just the total."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 equates equal accuracy with equal treatment."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Fairness metrics compare error rates by type across groups."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare false positive rates."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: B's legitimate customers are flagged 3x as often."
+      }
+    ],
+    "repair": "Report false positive and false negative rates by group, and adjust thresholds or retrain to reduce the gap.",
+    "debrief": "Who bears the errors matters. Break metrics down by group and by error type.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-explainability-responsible-ml-003",
+    "subject": "machine-learning",
+    "topic": "Explainability & Responsible ML",
+    "subtopic": "A local explanation is local",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can the explanation for applicant #2417 be used as the reason for every rejected applicant?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "explanation": "SHAP values for applicant #2417 (rejected): debt_to_income +0.42, recent_inquiries +0.18, age -0.05",
+      "policy_draft": "\"The model rejects applicants mainly because of debt-to-income, so we can tell every rejected applicant their DTI was the reason.\""
+    },
+    "ai_claim": "Yes. The explanation shows debt-to-income drives the model's rejections, so it is the reason for all rejected applicants.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "SHAP explains why the model rejected #2417."
+      },
+      {
+        "index": 2,
+        "text": "debt_to_income has the largest contribution."
+      },
+      {
+        "index": 3,
+        "text": "The model works the same way for every applicant."
+      },
+      {
+        "index": 4,
+        "text": "So DTI is the reason for every rejection."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F09",
+      "location": 3,
+      "misconception": "Generalising one local explanation to everyone",
+      "explanation": "SHAP values are local: they explain one prediction. In a non-linear model, other applicants are rejected for different reasons (thin credit history, recent defaults). Telling everyone 'DTI' would be wrong for many, and adverse-action rules usually require the actual principal reasons for each applicant. Compute explanations per applicant, and use global summaries only for overall behaviour.",
+      "why_convincing": "The model is the same for everyone, which makes its reasons feel the same too."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: each rejection needs its own explanation. Compute SHAP values per applicant.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Applicant #3106 was rejected with DTI contributing -0.10 and recent_defaults +0.61.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-0.10"
+        ]
+      },
+      {
+        "type": "data_point",
+        "summary": "The SHAP values shown are for applicant #2417 only.",
+        "must_reference_step": 1,
+        "must_contain_values": [
+          "2417"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Some rejected applicants have low DTI."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whose prediction the SHAP values explain."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the same reasons apply to everyone."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Local explanations differ between individuals in non-linear models."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look at another rejected applicant's explanation."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: explanations are per applicant."
+      }
+    ],
+    "repair": "Generate reasons per applicant from their own explanations.",
+    "debrief": "Local explanations answer 'why this prediction?'. Global questions need global tools, and individual reasons need individual explanations.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-explainability-responsible-ml-004",
+    "subject": "machine-learning",
+    "topic": "Explainability & Responsible ML",
+    "subtopic": "Learning from biased history",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does learning from real historical decisions make the model objective?",
+    "artifact_type": "model_evaluation",
+    "artifact": {
+      "data": "A CV-screening model is trained on 10 years of past hiring decisions (label: was hired).\nHistorically, few candidates from two universities were hired, although later performance data show they performed as well once hired.",
+      "claim_in_review": "\"The model is objective: it only learns patterns from real data.\""
+    },
+    "ai_claim": "Yes. The model learns from actual data rather than opinions, so its decisions are objective.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The model is trained on real past decisions."
+      },
+      {
+        "index": 2,
+        "text": "Data are facts, not opinions."
+      },
+      {
+        "index": 3,
+        "text": "A model learning from facts is objective."
+      },
+      {
+        "index": 4,
+        "text": "So its screening is objective."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F12",
+      "location": 2,
+      "misconception": "Treating historical decisions as ground truth",
+      "explanation": "The labels are past human decisions, not job performance. Where those decisions were biased - candidates from two universities rarely hired despite performing well - the model learns and automates the bias, at scale. Use outcome labels closer to what matters (performance) where possible, audit selection rates by group, and correct for historical bias.",
+      "why_convincing": "'Learned from data' sounds neutral."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the labels encode past human bias, which the model reproduces. Audit and correct the labels and outcomes.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Candidates from the two universities performed as well once hired but were rarely hired.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      },
+      {
+        "type": "test_case",
+        "summary": "The model's selection rate for those universities is a third of the rate for others with similar qualifications.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "The model rejects qualified candidates the old process also rejected."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask what the label actually records."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 treats decisions as facts about merit."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Models trained on biased decisions reproduce the bias."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare hiring rates with later performance."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 2 is wrong: the labels are biased decisions. Audit and correct."
+      }
+    ],
+    "repair": "Audit selection rates by group, use performance-based labels where possible, and apply bias mitigation.",
+    "debrief": "Data record what happened, including past unfairness. A model's labels define what it learns to repeat.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "ml-explainability-responsible-ml-005",
+    "subject": "machine-learning",
+    "topic": "Explainability & Responsible ML",
+    "subtopic": "Documenting a model",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI right that this model card gives users what they need to use the model responsibly?",
+    "artifact_type": "metric_report",
+    "artifact": {
+      "model_card": "Intended use: prioritise support tickets for review; not for automated refusal of service.\nTraining data: 2024-2025 tickets in English and Hindi.\nPerformance: macro F1 0.81 overall; 0.84 English, 0.73 Hindi.\nKnown limitations: lower accuracy for Hindi and code-mixed text; not evaluated on other languages.\nOwner and review date listed."
+    },
+    "ai_claim": "Yes. It states the intended and excluded uses, the training data, performance broken down by language, known limitations and an owner, so users can judge where the model is reliable.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Intended use and an explicit excluded use set boundaries."
+      },
+      {
+        "index": 2,
+        "text": "The training data description shows what the model has seen."
+      },
+      {
+        "index": 3,
+        "text": "Per-language performance reveals a weaker area (Hindi 0.73)."
+      },
+      {
+        "index": 4,
+        "text": "Limitations and ownership tell users what to be careful with and whom to ask."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. These are the core elements of a model card: intended use, data, disaggregated performance, limitations and accountability.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "data_point",
+        "summary": "Macro F1 is 0.84 for English and 0.73 for Hindi.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "0.73"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what a user would need before relying on the model."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 highlights disaggregated performance."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Model cards document use, data, performance by group and limitations."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Look for where the model performs worse."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The card covers the essential elements. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Documentation turns a model from a black box into a tool with known boundaries. Disaggregated performance is the part most often missing.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

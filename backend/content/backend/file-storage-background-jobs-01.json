@@ -1,0 +1,478 @@
+[
+  {
+    "id": "be-file-storage-background-jobs-001",
+    "subject": "backend",
+    "topic": "File Storage & Background Jobs",
+    "subtopic": "Path traversal in downloads",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can this endpoint only serve files from inside /srv/uploads?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "UPLOAD_DIR = \"/srv/uploads\"\n\n@app.get(\"/files/{name:path}\")\ndef download(name: str):\n    return FileResponse(os.path.join(UPLOAD_DIR, name))"
+    },
+    "ai_claim": "Yes. os.path.join puts the name inside UPLOAD_DIR, so every path it builds is under /srv/uploads.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "Every path starts with UPLOAD_DIR."
+      },
+      {
+        "index": 2,
+        "text": "os.path.join appends the requested name to it."
+      },
+      {
+        "index": 3,
+        "text": "So the resulting path is always inside /srv/uploads."
+      },
+      {
+        "index": 4,
+        "text": "Files outside the folder cannot be served."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F11",
+      "location": 3,
+      "misconception": "Assuming join keeps paths inside the base directory",
+      "explanation": "A name like ../../etc/passwd produces /srv/uploads/../../etc/passwd, which resolves to /etc/passwd. And if name is absolute (/etc/passwd), os.path.join discards UPLOAD_DIR entirely. Resolve the final path and check it is inside the base: Path(UPLOAD_DIR, name).resolve().is_relative_to(Path(UPLOAD_DIR).resolve()).",
+      "why_convincing": "Normal file names produce normal paths, so functional tests pass."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: '../' segments or an absolute name escape the folder. Resolve the path and verify it is inside UPLOAD_DIR (or look files up by id).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "GET /files/../../etc/passwd resolves to /etc/passwd.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "os.path.join discards earlier parts when a later part is absolute: join('/srv/uploads', '/etc/passwd') == '/etc/passwd'.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "os.path.join('/srv/uploads', '/etc/passwd') returns '/etc/passwd'."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Try a file name containing ../"
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the joined path stays inside the folder."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Joining does not normalise or confine paths; '..' and absolute names escape."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Resolve /srv/uploads/../../etc/passwd."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: '..' segments and absolute names escape UPLOAD_DIR. Resolve and check the path."
+      }
+    ],
+    "repair": "Resolve the path and reject it unless it is inside the resolved UPLOAD_DIR; better, serve files by stored id.",
+    "debrief": "Path handling functions are string operations, not security boundaries. Any file path built from user input must be resolved and checked against the allowed root.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-file-storage-background-jobs-002",
+    "subject": "backend",
+    "topic": "File Storage & Background Jobs",
+    "subtopic": "Reading whole uploads into memory",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Can this endpoint handle every allowed upload?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/videos\")\nasync def upload(file: UploadFile):\n    data = await file.read()\n    storage.put(file.filename, data)\n    return {\"size\": len(data)}\n\n# Server: 2 GB of RAM. Users upload videos up to 5 GB."
+    },
+    "ai_claim": "Yes. UploadFile handles large files by spooling them to disk, so reading and storing a 5 GB video works fine.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "FastAPI's UploadFile spools large uploads to a temporary file."
+      },
+      {
+        "index": 2,
+        "text": "So receiving a large upload does not exhaust memory."
+      },
+      {
+        "index": 3,
+        "text": "file.read() returns the contents for storage."
+      },
+      {
+        "index": 4,
+        "text": "So a 5 GB video is stored successfully."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 89,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F04",
+      "location": 3,
+      "misconception": "Undoing streaming by reading everything at once",
+      "explanation": "Spooling is true for receiving the upload, but await file.read() with no size loads the entire file into one bytes object. A 5 GB video needs 5 GB of RAM on a 2 GB server, so the process is killed (out of memory), and two concurrent uploads fail even at smaller sizes. Stream in chunks (file.read(1024 * 1024) in a loop) or upload directly to object storage.",
+      "why_convincing": "Steps 1 and 2 are accurate, and test uploads are usually small."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: file.read() loads all 5 GB into memory. Copy in chunks (shutil.copyfileobj or a read loop) or use presigned uploads.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Uploading a 3 GB file makes the worker's memory grow past 2 GB and it is killed.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "UploadFile.read() without a size argument reads the whole file into memory.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A 5 GB upload crashes the worker."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check how much of the file read() returns at once."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 reads the whole file in one call."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Spooling helps only if you also read in chunks."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare the file size with the server's RAM."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: read() loads the whole 5 GB file into memory. Stream it in chunks."
+      }
+    ],
+    "repair": "Stream in chunks to storage, or have clients upload directly to object storage with a presigned URL.",
+    "debrief": "Streaming must be preserved end to end: one read-all step anywhere turns a streaming pipeline into a memory bomb. Test with files larger than the server's memory.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-file-storage-background-jobs-003",
+    "subject": "backend",
+    "topic": "File Storage & Background Jobs",
+    "subtopic": "Retries without idempotency",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "With automatic retries, is each invoice email sent exactly once?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@worker.task(max_retries=5)\ndef send_invoice(invoice_id):\n    inv = db.get(Invoice, invoice_id)\n    email.send(inv.customer_email, render(inv))\n    inv.sent_at = now()\n    db.commit()            # may fail, e.g. database restarts"
+    },
+    "ai_claim": "Yes. Retries only happen when the task fails, and a failed task has not completed, so retrying sends the email exactly once.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The task sends the email and records sent_at."
+      },
+      {
+        "index": 2,
+        "text": "If anything fails, the task is retried."
+      },
+      {
+        "index": 3,
+        "text": "A failed task did not complete, so nothing was done."
+      },
+      {
+        "index": 4,
+        "text": "So each email is sent exactly once."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 90,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Assuming a failed task had no effects",
+      "explanation": "A task can fail after some of its side effects happened. If email.send succeeds and db.commit fails, the retry sends the email again - up to 6 emails for one invoice. Retries give at-least-once execution, so tasks must be idempotent: check sent_at first, use an idempotency key with the email provider, or record intent before sending.",
+      "why_convincing": "When failures happen before the email is sent, retries behave exactly as claimed."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: a failure after sending causes duplicate emails. Make the task idempotent (skip if sent_at is set, and pass an idempotency key to the email API).",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "attempt 1: email sent -> commit fails -> retry -> email sent again",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Retried jobs are executed at least once; exactly-once effects require idempotent handlers.",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A database blip after sending produces duplicate emails."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Consider a failure after the email is sent."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes a failed task has no side effects."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Retries provide at-least-once execution; partial side effects repeat."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Make db.commit fail on the first attempt."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: the email may already be sent when the task fails. Make the task idempotent."
+      }
+    ],
+    "repair": "Return early if inv.sent_at is set, and send with a provider idempotency key derived from invoice_id.",
+    "debrief": "Retries turn every non-idempotent side effect into a potential duplicate. Assume any job can run more than once, and design each step so repeating it is harmless.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-file-storage-background-jobs-004",
+    "subject": "backend",
+    "topic": "File Storage & Background Jobs",
+    "subtopic": "Enqueuing before committing",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Will the confirmation worker always find the order?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/orders\")\ndef create_order(data: OrderIn, db=Depends(get_db)):\n    order = Order(**data.model_dump())\n    db.add(order)\n    db.flush()                               # order.id assigned\n    queue.enqueue(send_confirmation, order.id)\n    db.commit()\n    return {\"id\": order.id}\n\n# The worker loads the order by id in a separate database session."
+    },
+    "ai_claim": "Yes. The order has an id before the job is enqueued, so the worker can always load it.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "flush inserts the order and assigns its id."
+      },
+      {
+        "index": 2,
+        "text": "The job is enqueued with that id."
+      },
+      {
+        "index": 3,
+        "text": "The worker loads the order by id."
+      },
+      {
+        "index": 4,
+        "text": "Since the order exists, it is always found."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 97,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F08",
+      "location": 4,
+      "misconception": "Depending on data that is not yet committed",
+      "explanation": "After flush the row exists only inside the request's uncommitted transaction. A fast worker can pick up the job before db.commit() runs, and its separate session cannot see the row, so the order is not found. If the commit then fails, the job refers to an order that never existed. Enqueue after the commit succeeds (or use a transactional outbox).",
+      "why_convincing": "Usually the commit finishes within milliseconds, before the worker starts, so it works in testing."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: the worker may run before the commit and not see the row. Enqueue after db.commit(), or write an outbox row in the same transaction.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "trace",
+        "summary": "flush -> enqueue -> worker starts -> SELECT order (not visible) -> commit",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      },
+      {
+        "type": "rule",
+        "summary": "Uncommitted rows are invisible to other transactions under READ COMMITTED and stricter isolation.",
+        "must_reference_step": 4,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "A worker that starts within a millisecond finds no order."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask which transaction can see the row before commit."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 assumes the order is visible to the worker."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Other sessions see a row only after the inserting transaction commits."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Let the worker run between enqueue and commit."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 4 is wrong: the worker can run before the commit and not see the order. Enqueue after committing."
+      }
+    ],
+    "repair": "Move `queue.enqueue(...)` after `db.commit()`, or use a transactional outbox.",
+    "debrief": "A job queue and a database are two systems without a shared transaction. Publish work only after the data it needs is durable, or record the work in the same transaction (the outbox pattern).",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "be-file-storage-background-jobs-005",
+    "subject": "backend",
+    "topic": "File Storage & Background Jobs",
+    "subtopic": "Presigned direct uploads",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Is the AI's description of this upload flow accurate?",
+    "artifact_type": "api_contract",
+    "artifact": {
+      "language": "python",
+      "code": "@app.post(\"/uploads/presign\")\ndef presign(filename: str, user=Depends(current_user)):\n    key = f\"users/{user.id}/{uuid4()}\"\n    url = s3.generate_presigned_url(\n        \"put_object\",\n        Params={\"Bucket\": BUCKET, \"Key\": key},\n        ExpiresIn=300,\n    )\n    return {\"url\": url, \"key\": key}\n\n# The browser then PUTs the file bytes directly to url."
+    },
+    "ai_claim": "Yes. The API server never handles the file bytes - the browser sends them straight to S3 - the URL allows only a PUT to that one key, and it stops working after 5 minutes.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "The API authenticates the user and generates a key under their prefix."
+      },
+      {
+        "index": 2,
+        "text": "The presigned URL authorises a single operation (put_object) on that bucket and key."
+      },
+      {
+        "index": 3,
+        "text": "The browser uploads directly to S3, so the file never passes through the API server."
+      },
+      {
+        "index": 4,
+        "text": "The signature expires after 300 seconds, after which S3 rejects the URL."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct. Presigned URLs delegate a narrowly scoped, time-limited permission. The server stays out of the data path, which removes its memory and bandwidth limits from the upload.",
+    "canonical_answer": "yes",
+    "valid_evidence": [
+      {
+        "type": "test_case",
+        "summary": "Using the URL after 5 minutes returns 403 with an 'Request has expired' error.",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "403"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A presigned URL grants only the signed operation, bucket and key, until its expiry time.",
+        "must_reference_step": 2,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check what the presigned URL permits and for how long."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 2 says the URL is limited to one operation and key."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "The signature covers the method, bucket, key and expiry."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Try the URL for a different key, or after 5 minutes."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. Uploads go directly to S3, limited to one key for 5 minutes. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Presigned uploads fix the memory problem of proxying files through the API and keep permissions tight. The remaining work is validating the uploaded object afterwards, since the client chose its contents.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]

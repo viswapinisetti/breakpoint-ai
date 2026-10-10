@@ -1,0 +1,473 @@
+[
+  {
+    "id": "mat-optimization-gradients-001",
+    "subject": "mathematics",
+    "topic": "Optimization & Gradients",
+    "subtopic": "A zero derivative is not always a minimum",
+    "difficulty": "2",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does f have a local minimum at x = 0?",
+    "artifact_type": "proof",
+    "artifact": {
+      "proof": "f(x) = x^3\nf'(x) = 3x^2, which is 0 at x = 0.\nClaim: f has a local minimum at x = 0."
+    },
+    "ai_claim": "Yes. The derivative is zero at x = 0, and points where the derivative is zero are minima.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "f'(x) = 3x^2."
+      },
+      {
+        "index": 2,
+        "text": "f'(0) = 0."
+      },
+      {
+        "index": 3,
+        "text": "A zero derivative indicates a minimum."
+      },
+      {
+        "index": 4,
+        "text": "So x = 0 is a local minimum."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 94,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F02",
+      "location": 3,
+      "misconception": "Treating every critical point as a minimum",
+      "explanation": "f'(x) = 0 marks a critical point, which may be a minimum, a maximum or neither. For x^3, f(-0.1) = -0.001 < 0 = f(0) < f(0.1) = 0.001: f increases through 0. It is an inflection point. The second derivative f''(0) = 0 is inconclusive; the sign change of f' decides.",
+      "why_convincing": "Minimisation problems usually begin by setting the derivative to zero."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "No: x^3 increases through 0 (f(-0.1) < f(0) < f(0.1)); x = 0 is an inflection point.",
+    "canonical_answer": "no",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "f(-0.1) = -0.001 is less than f(0) = 0.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-0.001"
+        ]
+      },
+      {
+        "type": "rule",
+        "summary": "A critical point is a minimum only if f' changes from negative to positive (or f'' > 0).",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [
+      "Values just left of 0 are smaller than f(0)."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Evaluate f just left and right of 0."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes every critical point is a minimum."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Critical points can be minima, maxima or inflection points."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compare f(-0.1), f(0) and f(0.1)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: x^3 has an inflection point at 0, not a minimum."
+      }
+    ],
+    "repair": "Classify critical points with the first- or second-derivative test.",
+    "debrief": "Setting the gradient to zero finds candidates, not answers. In high dimensions, most critical points of loss functions are saddle points.",
+    "transfer_check": null,
+    "validation_payload": {}
+  },
+  {
+    "id": "mat-optimization-gradients-002",
+    "subject": "mathematics",
+    "topic": "Optimization & Gradients",
+    "subtopic": "Gradient descent moves against the gradient",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is x after one gradient descent step?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "Minimise f(x) = x^2 with gradient descent, learning rate 0.1, starting at x = 3.\nAI working: gradient f'(3) = 6; x_new = 3 + 0.1 x 6 = 3.6"
+    },
+    "ai_claim": "3.6. The gradient is 6, and the update adds learning rate times gradient: 3 + 0.6 = 3.6.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "f'(x) = 2x, so f'(3) = 6."
+      },
+      {
+        "index": 2,
+        "text": "The step size is 0.1 x 6 = 0.6."
+      },
+      {
+        "index": 3,
+        "text": "The update adds the step: 3 + 0.6."
+      },
+      {
+        "index": 4,
+        "text": "x = 3.6."
+      }
+    ],
+    "ai_final_answer": "3.6",
+    "simulated_confidence": 91,
+    "truth_state": "flawed",
+    "failure": {
+      "category": "F07",
+      "location": 3,
+      "misconception": "Stepping along the gradient instead of against it",
+      "explanation": "The gradient points in the direction of steepest increase. To minimise, descent subtracts it: x_new = x - lr x f'(x) = 3 - 0.6 = 2.4. Adding moves uphill: f(3.6) = 12.96 is larger than f(3) = 9.",
+      "why_convincing": "Steps 1 and 2 are correct; only the sign is wrong."
+    },
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "x_new = 3 - 0.1 x 6 = 2.4.",
+    "canonical_answer": "2.4",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "3 - 0.1 x 6 = 2.4",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "2.4"
+        ]
+      },
+      {
+        "type": "contradiction",
+        "summary": "f(3.6) = 12.96 > f(3) = 9, so the step increased the function being minimised.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "12.96"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "Repeating the step drives x to infinity."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Check whether f decreased after the step."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 chooses the direction of the update."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Gradient descent subtracts the gradient."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute f(3.6) and f(3)."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 is wrong: descent subtracts the gradient, giving x = 2.4."
+      }
+    ],
+    "repair": "",
+    "debrief": "The sign of the update decides between ascent and descent. Checking that the loss decreases after a step catches it.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 3 - 0.1 * 6",
+      "flawed_solver": "answer = 3 + 0.1 * 6"
+    }
+  },
+  {
+    "id": "mat-optimization-gradients-003",
+    "subject": "mathematics",
+    "topic": "Optimization & Gradients",
+    "subtopic": "A learning rate that is too large",
+    "difficulty": "4",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is x after one step?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "f(x) = x^2, gradient descent with learning rate 1.1, starting at x = 1.\nAI working: x_new = x - 1.1 x 2x = -1.2x, so after one step x = -1.2. Each step multiplies x by -1.2, so the iterates oscillate and grow: gradient descent diverges."
+    },
+    "ai_claim": "-1.2. Each update multiplies x by 1 - 2.2 = -1.2, so x = -1.2 after one step, and because |-1.2| > 1 the iterates grow in magnitude: the method diverges.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "f'(x) = 2x."
+      },
+      {
+        "index": 2,
+        "text": "x_new = x - 1.1 x 2x = (1 - 2.2)x = -1.2x."
+      },
+      {
+        "index": 3,
+        "text": "From x = 1, x_new = -1.2."
+      },
+      {
+        "index": 4,
+        "text": "Since |-1.2| > 1, repeated steps grow without bound."
+      }
+    ],
+    "ai_final_answer": "-1.2",
+    "simulated_confidence": 89,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: -1.2, and the method diverges. For f = x^2, gradient descent converges only if |1 - 2 lr| < 1, i.e. 0 < lr < 1.",
+    "canonical_answer": "-1.2",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "1 - 1.1 x 2 x 1 = -1.2",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "-1.2"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "After three steps: (-1.2)^3 = -1.728",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "-1.728"
+        ]
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Write the update as a multiplication."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 4 depends on the size of the multiplier."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "For f = x^2, each step multiplies x by (1 - 2 lr)."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Compute 1 - 2 x 1.1."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. x = -1.2 and the iterates diverge. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Learning rates have stability limits. On a quadratic, the limit is exact: too large a step overshoots further each time.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = 1 - 1.1 * 2 * 1"
+    }
+  },
+  {
+    "id": "mat-optimization-gradients-004",
+    "subject": "mathematics",
+    "topic": "Optimization & Gradients",
+    "subtopic": "Maximising a quadratic",
+    "difficulty": "3",
+    "challenge_mode": "trust_or_challenge",
+    "question": "What is the maximum value of f?",
+    "artifact_type": "numeric_solution",
+    "artifact": {
+      "working": "f(x) = -x^2 + 4x + 1\nAI working: f'(x) = -2x + 4 = 0 gives x = 2; f''(x) = -2 < 0, so it is a maximum; f(2) = -4 + 8 + 1 = 5."
+    },
+    "ai_claim": "5. The derivative is zero at x = 2, the second derivative is negative so it is a maximum, and f(2) = 5.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "f'(x) = -2x + 4."
+      },
+      {
+        "index": 2,
+        "text": "f'(x) = 0 at x = 2."
+      },
+      {
+        "index": 3,
+        "text": "f''(x) = -2 < 0, so x = 2 is a maximum."
+      },
+      {
+        "index": 4,
+        "text": "f(2) = 5."
+      }
+    ],
+    "ai_final_answer": "5",
+    "simulated_confidence": 96,
+    "truth_state": "valid",
+    "failure": null,
+    "missing_information": "",
+    "resolving_scenarios": [],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "Correct: the maximum is 5, at x = 2. (Completing the square: f(x) = 5 - (x - 2)^2.)",
+    "canonical_answer": "5",
+    "valid_evidence": [
+      {
+        "type": "calculation",
+        "summary": "f(2) = -4 + 8 + 1 = 5",
+        "must_reference_step": 4,
+        "must_contain_values": [
+          "5"
+        ]
+      },
+      {
+        "type": "calculation",
+        "summary": "f(x) = 5 - (x - 2)^2 <= 5",
+        "must_reference_step": 3,
+        "must_contain_values": []
+      }
+    ],
+    "counterexamples": [],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Find the critical point and classify it."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 checks the second derivative."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "A negative second derivative at a critical point means a local maximum."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Complete the square."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "This solution is correct. The maximum is 5 at x = 2. The right judgment was to approve it."
+      }
+    ],
+    "repair": "",
+    "debrief": "Classifying the critical point (here with f'') is what turns 'derivative is zero' into a justified maximum.",
+    "transfer_check": null,
+    "validation_payload": {
+      "solver": "answer = -2 ** 2 + 4 * 2 + 1"
+    }
+  },
+  {
+    "id": "mat-optimization-gradients-005",
+    "subject": "mathematics",
+    "topic": "Optimization & Gradients",
+    "subtopic": "Local and global minima",
+    "difficulty": "5",
+    "challenge_mode": "trust_or_challenge",
+    "question": "Does gradient descent find the global minimum of f?",
+    "artifact_type": "derivation",
+    "artifact": {
+      "working": "f(x) = x^4 - 4x^2 + x has two local minima: near x = -1.47 (f = -5.44) and near x = 1.35 (f = -2.62).\nGradient descent is run with a small learning rate from a starting point x0 chosen by the training script (value not recorded)."
+    },
+    "ai_claim": "Yes. With a small learning rate, gradient descent steadily decreases f until it converges, so it reaches the global minimum at x = -1.47.",
+    "ai_solution": [
+      {
+        "index": 1,
+        "text": "A small learning rate makes each step decrease f."
+      },
+      {
+        "index": 2,
+        "text": "Gradient descent keeps decreasing f until the gradient is zero."
+      },
+      {
+        "index": 3,
+        "text": "It therefore converges to the lowest point of f."
+      },
+      {
+        "index": 4,
+        "text": "So it finds the global minimum near x = -1.47."
+      }
+    ],
+    "ai_final_answer": "yes",
+    "simulated_confidence": 88,
+    "truth_state": "insufficient_information",
+    "failure": null,
+    "missing_information": "The starting point x0. Gradient descent converges to the minimum whose basin contains x0: starting left of the local maximum near x = 0.13 leads to the global minimum at -1.47, starting to the right leads to the local minimum at 1.35. x0 was not recorded.",
+    "resolving_scenarios": [
+      "x0 = -2: descent converges to x = -1.47, the global minimum.",
+      "x0 = 2: descent converges to x = 1.35, a local minimum with a higher value (-2.62)."
+    ],
+    "answer_coincidentally_correct": false,
+    "canonical_solution": "The outcome depends on the unrecorded starting point. Step 3 assumes descent always reaches the lowest point, which holds only for convex functions.",
+    "canonical_answer": "insufficient information",
+    "valid_evidence": [
+      {
+        "type": "counterexample",
+        "summary": "Starting at x0 = 2, gradient descent converges to x = 1.35, where f = -2.62 > -5.44.",
+        "must_reference_step": 3,
+        "must_contain_values": [
+          "1.35"
+        ]
+      }
+    ],
+    "counterexamples": [
+      "From x0 = 2, descent stops at the local minimum."
+    ],
+    "hints": [
+      {
+        "level": 1,
+        "kind": "attention",
+        "text": "Ask whether f is convex."
+      },
+      {
+        "level": 2,
+        "kind": "direction",
+        "text": "Step 3 assumes the lowest point is always reached."
+      },
+      {
+        "level": 3,
+        "kind": "concept",
+        "text": "Gradient descent finds the minimum of the basin it starts in."
+      },
+      {
+        "level": 4,
+        "kind": "strong",
+        "text": "Run the method from x0 = 2 and from x0 = -2."
+      },
+      {
+        "level": 5,
+        "kind": "reveal",
+        "text": "Step 3 assumes convexity. From -2 it finds the global minimum; from 2 it does not. It cannot be decided without x0."
+      }
+    ],
+    "repair": "Record x0; for non-convex functions, use several random starts and keep the best.",
+    "debrief": "On non-convex problems, where you start determines where you finish. Reproducible optimisation records its initialisation.",
+    "transfer_check": null,
+    "validation_payload": {}
+  }
+]
