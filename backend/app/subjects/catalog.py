@@ -141,7 +141,10 @@ _CONFIGS: tuple[SubjectConfig, ...] = (
     _config(
         "databases",
         tagline="The query returns rows. The wrong ones.",
-        tier="B",
+        # SqlAdapter in engine/registry.py seeds the challenge's tables and
+        # runs the query, so SQL artifacts here are Tier A - schema, NoSQL and
+        # query-plan artifacts fall back to reasoning.
+        tier="A",
         artifact_types=("sql", "schema", "query_plan"),
         failure_categories=("F12", "F02", "F10", "F07", "F03"),
         evidence_types=(E.COUNTEREXAMPLE, E.DATA_POINT, E.REWRITE, E.TRACE),

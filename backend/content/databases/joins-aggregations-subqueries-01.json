@@ -161,7 +161,9 @@
     "repair": "Aggregate orders on their own: `SELECT customer_id, SUM(amount) FROM orders GROUP BY customer_id`.",
     "debrief": "Fan-out is the most common silent error in reporting SQL: a join to a child table multiplies the parent's rows, and every SUM or COUNT on the parent inflates. Before aggregating, ask what one row of the joined result represents.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT customer_id, SUM(amount) AS total_spent\nFROM orders\nGROUP BY customer_id;"
+    }
   },
   {
     "id": "db-joins-aggregations-subqueries-002",
@@ -207,7 +209,7 @@
           ],
           [
             11,
-            "NULL"
+            null
           ]
         ]
       },
@@ -280,7 +282,9 @@
     "repair": "",
     "debrief": "NOT EXISTS is the robust way to write anti-joins. The alternative, NOT IN over a column that can contain NULL, returns nothing at all, because 'x NOT IN (1, NULL)' is never TRUE. The claim chose the construct that handles NULLs correctly.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT c.name\nFROM customers c\nLEFT JOIN orders o ON o.customer_id = c.id\nWHERE o.id IS NULL;"
+    }
   },
   {
     "id": "db-joins-aggregations-subqueries-003",
@@ -395,7 +399,9 @@
     "repair": "",
     "debrief": "'Latest per group' has two variants: all rows at the latest time (this query) or exactly one row (ROW_NUMBER with a tie-breaker). The claim states which one it delivers, and that statement is correct.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT o.*\nFROM orders o\nJOIN (\n  SELECT customer_id, MAX(created_at) AS latest\n  FROM orders GROUP BY customer_id\n) m ON m.customer_id = o.customer_id AND m.latest = o.created_at;"
+    }
   },
   {
     "id": "db-joins-aggregations-subqueries-004",

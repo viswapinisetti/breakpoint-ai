@@ -342,7 +342,9 @@
     "repair": "Create departments(dept_id, name) and remove dept_name from employees.",
     "debrief": "The update anomaly is why 3NF exists: a fact stored in many rows must be updated in all of them, and partial updates leave contradictions. Store each fact once, in the table whose key determines it.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "UPDATE employees SET dept_name = 'Revenue' WHERE dept_id = 3;"
+    }
   },
   {
     "id": "db-normalization-schema-design-004",

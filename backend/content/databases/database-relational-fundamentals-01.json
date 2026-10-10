@@ -290,7 +290,7 @@
             3
           ],
           [
-            "NULL"
+            null
           ],
           [
             7
@@ -368,7 +368,9 @@
     "repair": "",
     "debrief": "Three-valued logic surprises people because 'not equal to 5' sounds like it should include a missing value. It does not: NULL <> 5 is UNKNOWN. To include NULLs, add OR x IS NULL (or use IS DISTINCT FROM).",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT COUNT(*) FROM t\nWHERE x IS NOT NULL AND x <> 5;"
+    }
   },
   {
     "id": "db-database-relational-fundamentals-005",

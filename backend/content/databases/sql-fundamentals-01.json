@@ -22,7 +22,7 @@
             "Atlas",
             "books",
             25,
-            "NULL"
+            null
           ],
           [
             "Primer",
@@ -34,7 +34,7 @@
             "Jazz LP",
             "music",
             30,
-            "NULL"
+            null
           ],
           [
             "Folk CD",
@@ -46,7 +46,7 @@
             "Lamp",
             "home",
             9,
-            "NULL"
+            null
           ]
         ]
       },
@@ -135,7 +135,9 @@
     "repair": "Use `WHERE discount IS NULL`.",
     "debrief": "NULL is not a value but a marker for 'unknown', so it cannot be tested with = or <>. Use IS NULL, IS NOT NULL, or IS DISTINCT FROM. A query that silently returns nothing is the typical sign.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT name FROM products\nWHERE discount IS NULL;"
+    }
   },
   {
     "id": "db-sql-fundamentals-002",
@@ -160,7 +162,7 @@
             "Atlas",
             "books",
             25,
-            "NULL"
+            null
           ],
           [
             "Primer",
@@ -172,7 +174,7 @@
             "Jazz LP",
             "music",
             30,
-            "NULL"
+            null
           ],
           [
             "Folk CD",
@@ -184,7 +186,7 @@
             "Lamp",
             "home",
             9,
-            "NULL"
+            null
           ]
         ]
       },
@@ -275,7 +277,9 @@
     "repair": "Use `WHERE category IN ('books', 'music') AND price < 10`.",
     "debrief": "Precedence bugs return plausible, extra rows rather than errors. Whenever AND and OR are mixed, add parentheses even if you know the rules; it documents the intent. Test with a row that fails only the condition you think applies to everything.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT name FROM products\nWHERE (category = 'books' OR category = 'music') AND price < 10;"
+    }
   },
   {
     "id": "db-sql-fundamentals-003",
@@ -397,7 +401,9 @@
     "repair": "Select only the city column: `SELECT DISTINCT city FROM customers;`.",
     "debrief": "DISTINCT is a row-level operation. Adding columns to a DISTINCT query changes what counts as a duplicate, and is a common cause of 'duplicate' reports that suddenly grow. Ask which columns define uniqueness, and select only those.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT DISTINCT city\nFROM customers;"
+    }
   },
   {
     "id": "db-sql-fundamentals-004",
@@ -515,7 +521,9 @@
       "answer": "3",
       "explanation": "Integer division truncates 3.5 to 3."
     },
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT subject, 100.0 * passed / total AS pass_pct\nFROM results;"
+    }
   },
   {
     "id": "db-sql-fundamentals-005",
@@ -634,6 +642,8 @@
     "repair": "",
     "debrief": "The logical order of a SELECT - FROM, WHERE, GROUP BY, HAVING, SELECT, ORDER BY - decides what each clause can see. Row conditions go in WHERE, aggregate conditions in HAVING. The claim placed each condition at the right stage.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT customer_id, total FROM (\n  SELECT customer_id,\n         SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS total\n  FROM orders GROUP BY customer_id\n) t\nWHERE total > 100;"
+    }
   }
 ]

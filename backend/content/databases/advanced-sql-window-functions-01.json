@@ -130,7 +130,9 @@
     "repair": "Use `RANK() OVER (ORDER BY salary DESC)` (or DENSE_RANK) and keep rank <= 3.",
     "debrief": "ROW_NUMBER, RANK and DENSE_RANK differ only on ties - which is exactly when the choice matters. Arbitrary tie-breaking also makes results non-deterministic. Decide what should happen to ties, then pick the function that does it.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT name, salary\nFROM (\n  SELECT name, salary, RANK() OVER (ORDER BY salary DESC) AS rnk\n  FROM employees\n) ranked\nWHERE rnk <= 3;"
+    }
   },
   {
     "id": "db-advanced-sql-window-functions-002",
@@ -350,7 +352,9 @@
     "repair": "Specify `ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW` and add a tie-breaker to ORDER BY.",
     "debrief": "Window frames have defaults, and the default is RANGE, not ROWS. The difference only appears with duplicate ORDER BY values - which real data always has eventually. State the frame explicitly for running totals.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT day, amount,\n       SUM(amount) OVER (ORDER BY day, rowid\n                         ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW)\n         AS running_total\nFROM sales;"
+    }
   },
   {
     "id": "db-advanced-sql-window-functions-004",
@@ -483,7 +487,9 @@
     "repair": "Use `GROUP BY dept` with AVG(salary).",
     "debrief": "GROUP BY collapses rows; a window function annotates them. That is the whole point of windows - comparing each row with its group average, for example - and exactly why they cannot replace GROUP BY for summary tables.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT dept, AVG(salary) AS avg_salary\nFROM employees\nGROUP BY dept;"
+    }
   },
   {
     "id": "db-advanced-sql-window-functions-005",
@@ -592,6 +598,8 @@
     "repair": "",
     "debrief": "Moving averages over a ROWS frame are correct but include partial windows at the start. The claim states that behaviour accurately. Whether partial windows belong in a report is a presentation decision; the computation itself is right.",
     "transfer_check": null,
-    "validation_payload": {}
+    "validation_payload": {
+      "reference_query": "SELECT v.day, v.n,\n       (SELECT AVG(v2.n) FROM visits v2\n         WHERE v2.day BETWEEN v.day - 2 AND v.day) AS avg_3day\nFROM visits v;"
+    }
   }
 ]

@@ -261,11 +261,19 @@ plan has to account for:
 - **Mode mix is lopsided.** 1,075 of the 1,080 are Trust-or-Challenge; Mode F
   has 2 and Mode G has 3. Both engines are complete and tested, but a student
   working through a subject will effectively only meet Mode B.
-- **Validation depth varies.** 236 challenges are machine-verified (150 by
-  canonical solver, 86 by code execution); the remaining 770 are Tier B,
-  curated and human-reviewed with no deterministic validator. The
-  flawed-solver reproduction check in §75 — the one that separates a
-  controlled failure from a hallucination — only runs on the Tier A subset.
+- **Validation depth varies.** 250 challenges are machine-verified (solver,
+  code execution or SQL execution); the remaining 830 are curated and
+  human-reviewed. The flawed-solver reproduction check in §75 — the one that
+  separates a controlled failure from a hallucination — only runs on that
+  verified subset.
+
+  **The ceiling is about 46%, not 100%.** Grouping the 830 by artifact type,
+  roughly 252 could be decided by execution given an authored payload; the
+  other 578 are `explanation`, `prompt`, `architecture`, `workflow`,
+  `chart`, `proof` and similar, where the question is a judgment and a
+  deterministic validator would be fake rigor. Mathematics and Data Analytics
+  are already close to exhausted (3 and 4 remaining respectively); the real
+  backlog is Backend, Data Science, Frontend, DevOps and MLOps.
 - **No difficulty-1 content.** The floor is 2, and 65% of the inventory sits
   at 3–4, so there is no gentle on-ramp for a first session.
 
@@ -289,8 +297,41 @@ undecidable and `apt-wg-003` has both rivals wrong.
 
 | Validation | Subjects |
 |---|---|
-| **Tier A** — answers computed, not asserted | Aptitude, Mathematics, Data Analytics (solvers executed); Programming, DSA (code executed against test inputs) |
-| **Tier B** — curated, reviewed | the other 14 |
+| **Tier A** — answers computed, not asserted | Aptitude, Mathematics, Data Analytics (solvers executed); Programming, DSA (code executed against test inputs); Databases (SQL executed against seeded tables) |
+| **Tier B** — curated, reviewed | the other 13 |
+
+### Databases: SQL executed, not asserted
+
+A SQL challenge carries its tables as data and the AI's query as the artifact,
+so the validator seeds a real database and runs both that query and an
+independent `validation_payload.reference_query`. A flawed challenge must
+produce a *different* result from the reference — otherwise there is no
+detectable failure, whatever the prose claims — and a valid one must match.
+Writes are judged on the table state they leave behind, which is what makes
+the update-anomaly challenges checkable.
+
+Three deliberate limits, all in `app/subjects/databases.py`:
+
+- **`insufficient_information` challenges are skipped.** They work *because*
+  the data needed to decide them is withheld. `db-joins-aggregations-subqueries-004`
+  asks whether 900 is one customer's total; the answer is that you cannot
+  tell, because `GROUP BY c.name` collapses two customers sharing a name.
+  Seeding rows would resolve the ambiguity and destroy the challenge.
+- **It is SQLite, not PostgreSQL.** The browser-side tools run PGlite (real
+  PostgreSQL in WebAssembly), but that cannot run server-side in Python.
+  Stdlib `sqlite3` covers the ANSI core the content uses — joins, aggregation,
+  subqueries, CTEs, window functions — and Postgres-only syntax fails loudly
+  rather than passing silently.
+- **It is not a security boundary.** Content SQL is authored and reviewed,
+  never student-supplied. The `ATTACH`/`DETACH` authorizer and step budget
+  stop an authoring mistake reaching the filesystem or hanging the validator,
+  not an attacker.
+
+This found two real defects on its first run: a challenge teaching
+three-valued logic that contained no actual `NULL` (the string `"NULL"` was
+stored instead, so its own data gave 3 where its canonical answer said 2), and
+a challenge whose artifact was entirely SQL comments and therefore "executed"
+without testing anything.
 
 The artifact types are deliberately unalike — arithmetic, Python, SQL, a
 Kubernetes manifest, a CI pipeline, an English sentence, a chart with a

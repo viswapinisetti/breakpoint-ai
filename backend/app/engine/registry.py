@@ -8,6 +8,7 @@ why all 19 subjects work on day one without 19 implementations.
 from __future__ import annotations
 
 from app.subjects.aptitude import AptitudeAdapter, NumericAdapter
+from app.subjects.databases import SqlAdapter
 from app.subjects.programming import ProgrammingAdapter
 from app.subjects.base import DefaultAdapter, SubjectAdapter, SubjectConfig
 from app.subjects.catalog import SUBJECTS, BY_KEY
@@ -24,6 +25,9 @@ _SPECIALISED: dict[str, type] = {
     # subject are judged on reasoning.
     "data-analytics": NumericAdapter,
     "mathematics": NumericAdapter,
+    # SQL artifacts are executed against their own seeded tables; schema,
+    # NoSQL and query-plan artifacts in the same subject fall back to review.
+    "databases": SqlAdapter,
 }
 
 _cache: dict[str, SubjectAdapter] = {}
